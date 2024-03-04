@@ -1,13 +1,13 @@
 #include <vector>
 #include <iostream>
-#include <thread>
 
 #include "random_init.hpp"
 
 class nabla4_unstructured
 {
 private:
-    std::vector<std::vector<double>> e2c2v;
+    std::vector<std::vector<std::size_t>> e2c2v;
+    std::vector<std::vector<std::size_t>> e2ecv;
     std::size_t CellDim;
     std::size_t EdgeDim;
     std::size_t VertexDim;
@@ -39,14 +39,25 @@ public:
 
     /// Constructor with all the necessary information for \c nabla4 compute
     /// kernel execution
-    nabla4_unstructured(std::vector<std::vector<double>>& e2c2v, std::size_t CellDim, std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim, std::size_t ECVDim) : e2c2v(e2c2v), CellDim(CellDim), VertexDim(VertexDim), EdgeDim(EdgeDim), KDim(KDim), ECVDim(ECVDim) {
+    nabla4_unstructured(std::vector<std::vector<std::size_t>>& e2c2v, std::vector<std::vector<std::size_t>>& e2ecv, std::size_t CellDim, std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim, std::size_t ECVDim) : e2c2v(e2c2v), e2ecv(e2ecv), CellDim(CellDim), VertexDim(VertexDim), EdgeDim(EdgeDim), KDim(KDim), ECVDim(ECVDim) {
         init();
     };
 
     /// Compute function timed for benchmarking
     void run() {
-        using namespace std::chrono_literals;
         std::cout << "Running nabla4_unstructured benchmark" << std::endl;
-        std::this_thread::sleep_for(2ms);
+        for (std::size_t k_index{}; k_index < KDim; ++k_index) {
+            for (std::size_t edge_index{}; edge_index < EdgeDim; ++edge_index) {
+                const auto E2C2V_0 = e2c2v[edge_index][0];
+                const auto E2C2V_1 = e2c2v[edge_index][1];
+                const auto E2C2V_2 = e2c2v[edge_index][2];
+                const auto E2C2V_3 = e2c2v[edge_index][3];
+                const auto E2ECV_0 = e2ecv[edge_index][0];
+                const auto E2ECV_1 = e2ecv[edge_index][1];
+                const auto E2ECV_2 = e2ecv[edge_index][2];
+                const auto E2ECV_3 = e2ecv[edge_index][3];
+                // float nabv_tang_vp = static_cast<double>(u_vert[E2C2V_0][k_index]) + primal_normal_vert_v1[E2ECV_0] + static_cast<double>(v_vert[E2C2V_0][k_index]) * primal_normal_vert_v2[E2C2V_0] + 
+            };
+        };
     };
 };
