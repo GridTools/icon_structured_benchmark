@@ -56,7 +56,10 @@ public:
                 const auto E2ECV_1 = e2ecv[edge_index][1];
                 const auto E2ECV_2 = e2ecv[edge_index][2];
                 const auto E2ECV_3 = e2ecv[edge_index][3];
-                // float nabv_tang_vp = static_cast<double>(u_vert[E2C2V_0][k_index]) + primal_normal_vert_v1[E2ECV_0] + static_cast<double>(v_vert[E2C2V_0][k_index]) * primal_normal_vert_v2[E2C2V_0] + 
+                float nabv_tang_vp = static_cast<double>(u_vert[E2C2V_0][k_index]) * primal_normal_vert_v1[E2ECV_0]
+            + static_cast<double>(v_vert[E2C2V_0][k_index]) * primal_normal_vert_v2[E2ECV_0]
+            + static_cast<double>(u_vert[E2C2V_1][k_index]) * primal_normal_vert_v1[E2ECV_1]
+            + static_cast<double>(v_vert[E2C2V_1][k_index]) * primal_normal_vert_v2[E2ECV_1];
             };
         };
     };
