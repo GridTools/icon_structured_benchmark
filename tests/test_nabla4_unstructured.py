@@ -11,6 +11,8 @@ import icon_benchmark
 
 import pytest
 
+from os import path
+
 
 def init_grid_manager(fname, num_levels=65, transformation=IndexTransformation()):
     grid_manager = GridManager(transformation, fname, VerticalGridSize(num_levels))
@@ -20,7 +22,9 @@ def init_grid_manager(fname, num_levels=65, transformation=IndexTransformation()
 
 @pytest.fixture
 def simple_grid():
-    grid_manager = init_grid_manager("data/simple_grid_gridfile.nc")
+    grid_manager = init_grid_manager(
+        path.dirname(__file__) + "/data/simple_grid_gridfile.nc"
+    )
     grid_manager()
     simple_grid = grid_manager.get_grid()
     yield simple_grid
