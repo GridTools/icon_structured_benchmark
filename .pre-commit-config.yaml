@@ -25,14 +25,6 @@ repos:
   - id: prettier
     types_or: [markdown, json]
 
-- repo: https://github.com/Lucas-C/pre-commit-hooks
-  rev: v1.1.9
-  hooks:
-  - id: insert-license
-    exclude: ^\..*$
-    types: [python]
-    args: [--comment-style, "|#|", --license-filepath, ./LICENSE_HEADER.txt, --fuzzy-match-generates-todo]
-
 - repo: https://github.com/pre-commit/pre-commit-hooks
   rev: v4.4.0
   hooks:

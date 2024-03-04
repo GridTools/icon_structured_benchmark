@@ -30,7 +30,7 @@ int main(void) {
                                         {8, 6, 5, 0},
                                         {8, 0, 6, 2},
                                         {8, 2, 7, 0}};
-    const auto nabla4_benchmark_runtimes = nabla4_benchmark(E2C2V, 18, 9, 18, 65, 4);
+    const auto nabla4_benchmark_runtimes = nabla4_benchmark(E2C2V, 18, 9, 18, 65, 4, 5);
     for (const auto& runtime : nabla4_benchmark_runtimes) {
         std::cout << runtime << std::endl;
     }
