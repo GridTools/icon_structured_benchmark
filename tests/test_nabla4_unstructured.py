@@ -67,7 +67,8 @@ if __name__ == "__main__":
     print("KDim: {}".format(simple_grid_inst.num_levels))
     print("E2C2VDim: {}".format(simple_grid_inst.size[E2C2VDim]))
 
-    repetitions = 3
+    repetitions = 101
+    dry_runs = 1
     runtimes = icon_benchmark.nabla4_benchmark_cpu_ifirst(
         simple_grid_inst.get_offset_provider("E2C2V").table,
         simple_grid_inst.get_offset_provider("E2ECV").table,
@@ -77,6 +78,7 @@ if __name__ == "__main__":
         simple_grid_inst.num_levels,
         simple_grid_inst.size[E2C2VDim],
         repetitions,
+        dry_runs,
     )
 
     print("cpu_ifirst mean runtime: {}".format(np.mean(runtimes)))
@@ -90,6 +92,7 @@ if __name__ == "__main__":
         simple_grid_inst.num_levels,
         simple_grid_inst.size[E2C2VDim],
         repetitions,
+        dry_runs,
     )
 
     print("cpu_kfirst mean runtime: {}".format(np.mean(runtimes)))

@@ -60,7 +60,7 @@ public:
     template<>
     /// Compute function timed for benchmarking
     void run<naive>() {
-        std::cout << "Running naive nabla4_unstructured benchmark" << std::endl;
+        // std::cout << "Running naive nabla4_unstructured benchmark" << std::endl;
         for (std::size_t k_index{}; k_index < KDim; ++k_index) {
             for (std::size_t edge_index{}; edge_index < EdgeDim; ++edge_index) {
                 const auto E2C2V_0 = e2c2v[edge_index][0];
@@ -90,7 +90,7 @@ public:
     template<>
     /// Compute function timed for benchmarking
     void run<cpu_ifirst>() {
-        std::cout << "Running cpu_ifirst nabla4_unstructured benchmark" << std::endl;
+        // std::cout << "Running cpu_ifirst nabla4_unstructured benchmark" << std::endl;
         for (std::size_t k_index{}; k_index < KDim; ++k_index) {
             for (std::size_t edge_index{}; edge_index < EdgeDim; ++edge_index) {
                 const auto E2C2V_0 = e2c2v[edge_index][0];
@@ -120,7 +120,7 @@ public:
     template<>
     /// Compute function timed for benchmarking
     void run<cpu_kfirst>() {
-        std::cout << "Running cpu_kfirst nabla4_unstructured benchmark" << std::endl;
+        // std::cout << "Running cpu_kfirst nabla4_unstructured benchmark" << std::endl;
         for (std::size_t edge_index{}; edge_index < EdgeDim; ++edge_index) {
             for (std::size_t k_index{}; k_index < KDim; ++k_index) {
                 const auto E2C2V_0 = e2c2v[edge_index][0];

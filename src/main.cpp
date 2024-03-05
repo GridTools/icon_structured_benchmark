@@ -57,7 +57,7 @@ int main(void) {
                                         { 96,  97,  98,  99},
                                         {100, 101, 102, 103},
                                         {104, 105, 106, 107}};
-    const auto nabla4_benchmark_runtimes = nabla4_benchmark<naive>(E2C2V, E2ECV, 18, 9, 27, 65, 4);
+    const auto nabla4_benchmark_runtimes = nabla4_benchmark_naive(E2C2V, E2ECV, 18, 9, 27, 65, 4);
     for (const auto& runtime : nabla4_benchmark_runtimes) {
         std::cout << runtime << std::endl;
     }
