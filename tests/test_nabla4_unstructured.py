@@ -1,3 +1,7 @@
+import numpy as np
+from os import path
+import pytest
+
 from icon4py.model.common.grid.grid_manager import (
     GridManager,
     IndexTransformation,
@@ -8,10 +12,6 @@ from icon4py.model.common.grid.vertical import VerticalGridSize
 from icon4py.model.common.dimension import E2C2VDim
 
 import icon_benchmark
-
-import pytest
-
-from os import path
 
 SIMPLE_GRID_FILE = path.dirname(__file__) + "/data/simple_grid_gridfile.nc"
 
@@ -66,3 +66,30 @@ if __name__ == "__main__":
     print("EdgeDim: {}".format(simple_grid_inst.num_edges))
     print("KDim: {}".format(simple_grid_inst.num_levels))
     print("E2C2VDim: {}".format(simple_grid_inst.size[E2C2VDim]))
+
+    repetitions = 3
+    runtimes = icon_benchmark.nabla4_benchmark_cpu_ifirst(
+        simple_grid_inst.get_offset_provider("E2C2V").table,
+        simple_grid_inst.get_offset_provider("E2ECV").table,
+        simple_grid_inst.num_cells,
+        simple_grid_inst.num_vertices,
+        simple_grid_inst.num_edges,
+        simple_grid_inst.num_levels,
+        simple_grid_inst.size[E2C2VDim],
+        repetitions,
+    )
+
+    print("cpu_ifirst mean runtime: {}".format(np.mean(runtimes)))
+
+    runtimes = icon_benchmark.nabla4_benchmark_cpu_kfirst(
+        simple_grid_inst.get_offset_provider("E2C2V").table,
+        simple_grid_inst.get_offset_provider("E2ECV").table,
+        simple_grid_inst.num_cells,
+        simple_grid_inst.num_vertices,
+        simple_grid_inst.num_edges,
+        simple_grid_inst.num_levels,
+        simple_grid_inst.size[E2C2VDim],
+        repetitions,
+    )
+
+    print("cpu_kfirst mean runtime: {}".format(np.mean(runtimes)))

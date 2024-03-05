@@ -1,8 +1,10 @@
+#pragma once
 #include <vector>
 #include <iostream>
 
 #include "random_init.hpp"
 
+enum backend_impl {naive = 0, cpu_ifirst, cpu_kfirst, gpu};
 class nabla4_unstructured
 {
 private:
@@ -49,11 +51,78 @@ public:
         init();
     };
 
+    template<backend_impl I>
     /// Compute function timed for benchmarking
     void run() {
-        std::cout << "Running nabla4_unstructured benchmark" << std::endl;
+        throw std::runtime_error("Undefined backend implementation");
+    };
+
+    template<>
+    /// Compute function timed for benchmarking
+    void run<naive>() {
+        std::cout << "Running naive nabla4_unstructured benchmark" << std::endl;
         for (std::size_t k_index{}; k_index < KDim; ++k_index) {
             for (std::size_t edge_index{}; edge_index < EdgeDim; ++edge_index) {
+                const auto E2C2V_0 = e2c2v[edge_index][0];
+                const auto E2C2V_1 = e2c2v[edge_index][1];
+                const auto E2C2V_2 = e2c2v[edge_index][2];
+                const auto E2C2V_3 = e2c2v[edge_index][3];
+                const auto E2ECV_0 = e2ecv[edge_index][0];
+                const auto E2ECV_1 = e2ecv[edge_index][1];
+                const auto E2ECV_2 = e2ecv[edge_index][2];
+                const auto E2ECV_3 = e2ecv[edge_index][3];
+                double nabv_tang_wp = static_cast<double>(u_vert[E2C2V_0][k_index]) * primal_normal_vert_v1[E2ECV_0]
+                                    + static_cast<double>(v_vert[E2C2V_0][k_index]) * primal_normal_vert_v2[E2ECV_0]
+                                    + static_cast<double>(u_vert[E2C2V_1][k_index]) * primal_normal_vert_v1[E2ECV_1]
+                                    + static_cast<double>(v_vert[E2C2V_1][k_index]) * primal_normal_vert_v2[E2ECV_1];
+                double nabv_norm_wp = static_cast<double>(u_vert[E2C2V_2][k_index]) * primal_normal_vert_v1[E2ECV_2]
+                                    + static_cast<double>(v_vert[E2C2V_2][k_index]) * primal_normal_vert_v2[E2ECV_2]
+                                    + static_cast<double>(u_vert[E2C2V_3][k_index]) * primal_normal_vert_v1[E2ECV_3]
+                                    + static_cast<double>(v_vert[E2C2V_3][k_index]) * primal_normal_vert_v2[E2ECV_3];
+                z_nabla4_e2_wp[edge_index][k_index] = 4.0 * (
+                    (nabv_norm_wp - 2.0 * z_nabla2_e[edge_index][k_index]) * (inv_vert_vert_length[edge_index] * inv_vert_vert_length[edge_index])
+                    + (nabv_tang_wp - 2.0 * z_nabla2_e[edge_index][k_index]) * (inv_primal_edge_length[edge_index] * inv_primal_edge_length[edge_index])
+                    );
+            };
+        };
+    };
+
+    template<>
+    /// Compute function timed for benchmarking
+    void run<cpu_ifirst>() {
+        std::cout << "Running cpu_ifirst nabla4_unstructured benchmark" << std::endl;
+        for (std::size_t k_index{}; k_index < KDim; ++k_index) {
+            for (std::size_t edge_index{}; edge_index < EdgeDim; ++edge_index) {
+                const auto E2C2V_0 = e2c2v[edge_index][0];
+                const auto E2C2V_1 = e2c2v[edge_index][1];
+                const auto E2C2V_2 = e2c2v[edge_index][2];
+                const auto E2C2V_3 = e2c2v[edge_index][3];
+                const auto E2ECV_0 = e2ecv[edge_index][0];
+                const auto E2ECV_1 = e2ecv[edge_index][1];
+                const auto E2ECV_2 = e2ecv[edge_index][2];
+                const auto E2ECV_3 = e2ecv[edge_index][3];
+                double nabv_tang_wp = static_cast<double>(u_vert[E2C2V_0][k_index]) * primal_normal_vert_v1[E2ECV_0]
+                                    + static_cast<double>(v_vert[E2C2V_0][k_index]) * primal_normal_vert_v2[E2ECV_0]
+                                    + static_cast<double>(u_vert[E2C2V_1][k_index]) * primal_normal_vert_v1[E2ECV_1]
+                                    + static_cast<double>(v_vert[E2C2V_1][k_index]) * primal_normal_vert_v2[E2ECV_1];
+                double nabv_norm_wp = static_cast<double>(u_vert[E2C2V_2][k_index]) * primal_normal_vert_v1[E2ECV_2]
+                                    + static_cast<double>(v_vert[E2C2V_2][k_index]) * primal_normal_vert_v2[E2ECV_2]
+                                    + static_cast<double>(u_vert[E2C2V_3][k_index]) * primal_normal_vert_v1[E2ECV_3]
+                                    + static_cast<double>(v_vert[E2C2V_3][k_index]) * primal_normal_vert_v2[E2ECV_3];
+                z_nabla4_e2_wp[edge_index][k_index] = 4.0 * (
+                    (nabv_norm_wp - 2.0 * z_nabla2_e[edge_index][k_index]) * (inv_vert_vert_length[edge_index] * inv_vert_vert_length[edge_index])
+                    + (nabv_tang_wp - 2.0 * z_nabla2_e[edge_index][k_index]) * (inv_primal_edge_length[edge_index] * inv_primal_edge_length[edge_index])
+                    );
+            };
+        };
+    };
+
+    template<>
+    /// Compute function timed for benchmarking
+    void run<cpu_kfirst>() {
+        std::cout << "Running cpu_kfirst nabla4_unstructured benchmark" << std::endl;
+        for (std::size_t edge_index{}; edge_index < EdgeDim; ++edge_index) {
+            for (std::size_t k_index{}; k_index < KDim; ++k_index) {
                 const auto E2C2V_0 = e2c2v[edge_index][0];
                 const auto E2C2V_1 = e2c2v[edge_index][1];
                 const auto E2C2V_2 = e2c2v[edge_index][2];
