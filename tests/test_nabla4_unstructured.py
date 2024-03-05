@@ -39,7 +39,8 @@ def get_simple_grid():
 
 def test_gridtools(simple_grid):
     repetitions = 3
-    runtimes = icon_benchmark.nabla4_benchmark(
+    dry_runs = 0
+    runtimes = icon_benchmark.nabla4_benchmark_naive(
         simple_grid.get_offset_provider("E2C2V").table,
         simple_grid.get_offset_provider("E2ECV").table,
         simple_grid.num_cells,
@@ -48,6 +49,7 @@ def test_gridtools(simple_grid):
         simple_grid.num_levels,
         simple_grid.size[E2C2VDim],
         repetitions,
+        dry_runs,
     )
 
     assert simple_grid.num_cells == 18
