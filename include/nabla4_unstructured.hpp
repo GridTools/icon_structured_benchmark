@@ -25,12 +25,6 @@ private:
     /// Random number utilities
     RandomUniformUtils rand_utils{-2.0, 2.0};
 
-public:
-
-    /// Constructor with all the necessary information for \c nabla4 compute
-    /// kernel execution
-    nabla4_unstructured(std::vector<std::vector<std::size_t>>& e2c2v, std::vector<std::vector<std::size_t>>& e2ecv, std::size_t CellDim, std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim, std::size_t ECVDim) : e2c2v(e2c2v), e2ecv(e2ecv), CellDim(CellDim), VertexDim(VertexDim), EdgeDim(EdgeDim), KDim(KDim), ECVDim(ECVDim) {};
-
     /// Initialize vectors needed to execute kernel with random numbers
     void init() {
         std::cout << "Initializing vectors" << std::endl;
@@ -46,6 +40,14 @@ public:
             z_nabla4_e2_wp[i].resize(KDim);
         }
     }
+
+public:
+
+    /// Constructor with all the necessary information for \c nabla4 compute
+    /// kernel execution
+    nabla4_unstructured(std::vector<std::vector<std::size_t>>& e2c2v, std::vector<std::vector<std::size_t>>& e2ecv, std::size_t CellDim, std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim, std::size_t ECVDim) : e2c2v(e2c2v), e2ecv(e2ecv), CellDim(CellDim), VertexDim(VertexDim), EdgeDim(EdgeDim), KDim(KDim), ECVDim(ECVDim) {
+        init();
+    };
 
     /// Compute function timed for benchmarking
     void run() {
