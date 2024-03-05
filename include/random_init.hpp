@@ -22,8 +22,8 @@ public:
     template<typename T = double>
     std::vector<T> random_init_vec_1d(std::size_t domain_size) {
         std::vector<T> vec;
-        vec.reserve(domain_size);
-        for (std::size_t i; i < domain_size; ++i) {
+        vec.resize(domain_size);
+        for (std::size_t i{}; i < domain_size; ++i) {
             vec[i] = get<T>();
         }
         return vec;
@@ -32,12 +32,13 @@ public:
     template<typename T = double>
     std::vector<std::vector<T>> random_init_vec_2d(std::size_t domain_i_size, std::size_t domain_j_size) {
         std::vector<std::vector<T>> vec;
-        vec.reserve(domain_i_size);
+        vec.resize(domain_i_size);
         for (auto& jvec : vec) {
-            jvec.reserve(domain_j_size);
+            jvec.resize(domain_j_size);
         }
-        for (std::size_t i; i < domain_i_size; ++i) {
-            for (std::size_t j; j < domain_j_size; ++j) {
+        for (std::size_t i{}; i < domain_i_size; ++i) {
+            for (std::size_t j{}; j < domain_j_size; ++j) {
+                // std::cout << "Initilazing v[" << i << "][" << j << "] with " << vec[i][j] << std::endl;
                 vec[i][j] = get<T>();
             }
         }
