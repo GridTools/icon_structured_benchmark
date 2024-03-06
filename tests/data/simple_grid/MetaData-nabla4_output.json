@@ -1,0 +1,32 @@
+{
+  "field_map": {
+    "z_nabla4_e2": {
+      "dims": [27, 10],
+      "meta_info": null,
+      "type_id": 5
+    }
+  },
+  "global_meta_info": null,
+  "prefix": "nabla4_output",
+  "savepoint_vector": {
+    "fields_per_savepoint": [
+      {
+        "OutputValidationTest": {
+          "z_nabla4_e2": 0
+        }
+      }
+    ],
+    "savepoints": [
+      {
+        "meta_info": {
+          "time": {
+            "type_id": 2,
+            "value": 1
+          }
+        },
+        "name": "OutputValidationTest"
+      }
+    ]
+  },
+  "serialbox_version": 261
+}

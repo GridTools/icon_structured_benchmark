@@ -5,7 +5,6 @@ from pathlib import Path
 
 from icon4py.model.common.grid.grid_manager import (  # type: ignore [import-not-found]
     GridManager,
-    IndexTransformation,
     ToGt4PyTransformation,
 )
 

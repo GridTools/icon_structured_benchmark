@@ -1,0 +1,35 @@
+{
+  "archive_name": "Binary",
+  "archive_version": 0,
+  "fields_table": {
+    "inv_primal_edge_length": [
+      [0, "7A4F18EB8570787B508CE266F7FB3DDD2CFD3F67E671E1317398215F8A28F874"]
+    ],
+    "inv_vert_vert_length": [
+      [0, "FF53F3C4AAEA8B7C461E7AB845C714BD15D521547618386D6FE9E4BCDF6D1D99"]
+    ],
+    "primal_normal_vert_v1": [
+      [0, "5CCA982FC06AE62A251CADD5E125E0F33832762A898E4B9C7118149C375198"]
+    ],
+    "primal_normal_vert_v1_new": [
+      [0, "B57DF755663D155B5770473E53B92FEF737D5B3F26A8FBFF2CA8C3877A9348C"]
+    ],
+    "primal_normal_vert_v2": [
+      [0, "804EAAA85FE0746FB6E3C4415CA4C18DE3560D24FB4F29A201466EE8B5A7CCE"]
+    ],
+    "primal_normal_vert_v2_new": [
+      [0, "7921E02422B9826313D7557ABD15FBA69F8E2F963F046BAD7E1DD376ACF2B81"]
+    ],
+    "u_vert": [
+      [0, "2465711A596FD3A9CE9F7F2B9E6C5219894EC6F7EF126B8A5FA7F3F9E7E2F4C0"]
+    ],
+    "v_vert": [
+      [0, "8E9BE9D81C21D6B82D29134A9339BA5DF738AE32E4CA6BECC898CB6971D43"]
+    ],
+    "z_nabla2_e": [
+      [0, "B014BE1846EF1C426BB9F3DF24A9D4A9CDAC31CB182A6DF42B7353213906"]
+    ]
+  },
+  "hash_algorithm": "SHA256",
+  "serialbox_version": 261
+}

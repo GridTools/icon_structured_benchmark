@@ -2,6 +2,8 @@ import numpy as np
 from os import path
 import pytest
 
+import serialbox as ser  # type: ignore [import-not-found]
+
 from icon4py.model.common.grid.grid_manager import (  # type: ignore [import-not-found]
     GridManager,
     IndexTransformation,
@@ -13,7 +15,7 @@ from icon4py.model.common.dimension import E2C2VDim  # type: ignore [import-not-
 
 import icon_benchmark  # type: ignore [import-not-found]
 
-SIMPLE_GRID_FILE = path.dirname(__file__) + "/data/simple_grid_gridfile.nc"
+SIMPLE_GRID_FILE = path.dirname(__file__) + "/data/simple_grid/simple_grid_gridfile.nc"
 
 
 def init_grid_manager(fname, num_levels=65, transformation=IndexTransformation()):
@@ -37,7 +39,7 @@ def get_simple_grid():
     return simple_grid
 
 
-def test_gridtools(simple_grid):
+def test_grid(simple_grid):
     repetitions = 3
     dry_runs = 0
     runtimes = icon_benchmark.nabla4_benchmark_naive(
@@ -57,6 +59,50 @@ def test_gridtools(simple_grid):
     assert simple_grid.num_edges == 27
     assert simple_grid.num_levels == 65
     assert len(runtimes) == repetitions
+
+
+def test_validate_nabla4_unstructured_naive(simple_grid):
+    serializer = ser.Serializer(
+        ser.OpenModeKind.Read,
+        path.dirname(__file__) + "/data/simple_grid",
+        "nabla4_fields",
+    )
+    savepoint = serializer.savepoint["ValidationTest"].time[1]
+    u_vert = serializer.read("u_vert", savepoint)
+    v_vert = serializer.read("v_vert", savepoint)
+    primal_normal_vert_v1 = serializer.read("primal_normal_vert_v1", savepoint)
+    primal_normal_vert_v2 = serializer.read("primal_normal_vert_v2", savepoint)
+    z_nabla2_e = serializer.read("z_nabla2_e", savepoint)
+    inv_vert_vert_length = serializer.read("inv_vert_vert_length", savepoint)
+    inv_primal_edge_length = serializer.read("inv_primal_edge_length", savepoint)
+
+    serializer = ser.Serializer(
+        ser.OpenModeKind.Read,
+        path.dirname(__file__) + "/data/simple_grid",
+        "nabla4_output",
+    )
+    z_nabla4_e2 = serializer.read(
+        "z_nabla4_e2", ser.Savepoint("OutputValidationTest", {"time": 1})
+    )
+
+    z_nabla4_e2_comp = icon_benchmark.nabla4_validate_naive(
+        simple_grid.get_offset_provider("E2C2V").table,
+        simple_grid.get_offset_provider("E2ECV").table,
+        simple_grid.num_cells,
+        simple_grid.num_vertices,
+        simple_grid.num_edges,
+        simple_grid.num_levels,
+        simple_grid.size[E2C2VDim],
+        u_vert,
+        v_vert,
+        primal_normal_vert_v1,
+        primal_normal_vert_v2,
+        z_nabla2_e,
+        inv_vert_vert_length,
+        inv_primal_edge_length,
+    )
+
+    np.allclose(z_nabla4_e2_comp, z_nabla4_e2)
 
 
 if __name__ == "__main__":
