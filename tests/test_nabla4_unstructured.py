@@ -2,16 +2,16 @@ import numpy as np
 from os import path
 import pytest
 
-from icon4py.model.common.grid.grid_manager import (
+from icon4py.model.common.grid.grid_manager import (  # type: ignore [import-not-found]
     GridManager,
     IndexTransformation,
 )
 
-from icon4py.model.common.grid.vertical import VerticalGridSize
+from icon4py.model.common.grid.vertical import VerticalGridSize  # type: ignore [import-not-found]
 
-from icon4py.model.common.dimension import E2C2VDim
+from icon4py.model.common.dimension import E2C2VDim  # type: ignore [import-not-found]
 
-import icon_benchmark
+import icon_benchmark  # type: ignore [import-not-found]
 
 SIMPLE_GRID_FILE = path.dirname(__file__) + "/data/simple_grid_gridfile.nc"
 
