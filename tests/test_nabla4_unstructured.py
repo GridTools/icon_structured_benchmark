@@ -18,7 +18,7 @@ import icon_benchmark  # type: ignore [import-not-found]
 SIMPLE_GRID_FILE = path.dirname(__file__) + "/data/simple_grid/simple_grid_gridfile.nc"
 
 
-def init_grid_manager(fname, num_levels=65, transformation=IndexTransformation()):
+def init_grid_manager(fname, num_levels=10, transformation=IndexTransformation()):
     grid_manager = GridManager(transformation, fname, VerticalGridSize(num_levels))
     grid_manager()
     return grid_manager
@@ -70,8 +70,8 @@ def test_validate_nabla4_unstructured_naive(simple_grid):
     savepoint = serializer.savepoint["ValidationTest"].time[1]
     u_vert = serializer.read("u_vert", savepoint)
     v_vert = serializer.read("v_vert", savepoint)
-    primal_normal_vert_v1 = serializer.read("primal_normal_vert_v1", savepoint)
-    primal_normal_vert_v2 = serializer.read("primal_normal_vert_v2", savepoint)
+    primal_normal_vert_v1 = serializer.read("primal_normal_vert_v1_new", savepoint)
+    primal_normal_vert_v2 = serializer.read("primal_normal_vert_v2_new", savepoint)
     z_nabla2_e = serializer.read("z_nabla2_e", savepoint)
     inv_vert_vert_length = serializer.read("inv_vert_vert_length", savepoint)
     inv_primal_edge_length = serializer.read("inv_primal_edge_length", savepoint)
@@ -81,9 +81,8 @@ def test_validate_nabla4_unstructured_naive(simple_grid):
         path.dirname(__file__) + "/data/simple_grid",
         "nabla4_output",
     )
-    z_nabla4_e2 = serializer.read(
-        "z_nabla4_e2", ser.Savepoint("OutputValidationTest", {"time": 1})
-    )
+    out_savepoint = serializer.savepoint["OutputValidationTest"].time[1]
+    z_nabla4_e2 = serializer.read("z_nabla4_e2", out_savepoint)
 
     z_nabla4_e2_comp = icon_benchmark.nabla4_validate_naive(
         simple_grid.get_offset_provider("E2C2V").table,
@@ -102,7 +101,9 @@ def test_validate_nabla4_unstructured_naive(simple_grid):
         inv_primal_edge_length,
     )
 
-    np.allclose(z_nabla4_e2_comp, z_nabla4_e2)
+    assert np.allclose(
+        z_nabla4_e2_comp, z_nabla4_e2, equal_nan=True, atol=1e-8, rtol=1e-4
+    )
 
 
 if __name__ == "__main__":
@@ -144,3 +145,5 @@ if __name__ == "__main__":
     )
 
     print("cpu_kfirst mean runtime: {}".format(np.mean(runtimes)))
+
+    test_validate_nabla4_unstructured_naive(simple_grid_inst)
