@@ -40,6 +40,12 @@ def parse_arguments():
         help="Use either ToGt4PyTransformation or IndexTransformation",
     )
     parser.add_argument("--klevels", type=int, default=65, help="Number of k levels")
+    parser.add_argument(
+        "--repetitions", type=int, default=101, help="Number of repetitions"
+    )
+    parser.add_argument(
+        "--dry-run", default=True, help="Do a dry run or not", action="store_true"
+    )
 
     return parser.parse_args()
 
@@ -55,8 +61,8 @@ def run_benchmarks():
 
     torus_grid = get_torus_grid(args.grid, args.klevels, transformation)
 
-    repetitions = 11
-    dry_runs = 1
+    repetitions = args.repetitions
+    dry_runs = 1 if args.dry_run else 0
 
     print(
         "CellsDim: {} VertexDim: {} EdgeDim: {} KDim: {} E2C2VDim: {}".format(
