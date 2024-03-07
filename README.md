@@ -1,5 +1,46 @@
 # icon-structured
 
+## Installation
+
+For running the benchmarking framework with its tests there are the following dependencies:
+
+1. [serialbox](https://github.com/GridTools/serialbox)
+2. [icon4py](https://github.com/C2SM/icon4py)
+
+To install `serialbox` you can do the following:
+
+```
+git clone https://github.com/GridTools/serialbox.git
+cd serialbox
+mkdir build
+pushd build
+cmake .. -DCMAKE_INSTALL_PREFIX=./install -DSERIALBOX_ENABLE_PYTHON=ON
+cmake --build . --target install
+export PYTHONPATH=$(pwd)/install/python:$PYTHONPATH
+popd
+```
+
+To install `icon4py`:
+
+```
+git submodule update --init --recursive -f
+pushd tests/ext/icon4py
+pip install -r requirements.txt # ideally in a venv (tested with Python 3.11)
+popd
+```
+
+To install `icon-structured`:
+
+```
+mkdir build
+pushd build
+cmake ..
+cmake --build . # all executables at the moment are build inside the `build` folder
+                # take into account what C++ compiler flags are needed to get best performance
+                # add them with -DCMAKE_BUILD_TYPE=Custom -DCMAKE_CXX_FLAGS=<cpp_compielr_flags>
+popd
+```
+
 ## Pseudo-code structure for benchmarks
 
 ```
