@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import numpy as np
 from os import path
 import pytest
@@ -57,24 +58,62 @@ def test_grid(simple_grid):
     assert simple_grid.num_cells == 18
     assert simple_grid.num_vertices == 9
     assert simple_grid.num_edges == 27
-    assert simple_grid.num_levels == 65
+    assert simple_grid.num_levels == 10
     assert len(runtimes) == repetitions
 
 
-def test_validate_nabla4_unstructured_naive(simple_grid):
+@dataclass
+class Nabla4KernelValidationData:
+    e2c2v: np.ndarray
+    e2ecv: np.ndarray
+    num_cells: int
+    num_vertices: int
+    num_edges: int
+    num_levels: int
+    E2C2VDim: int
+    u_vert: np.ndarray
+    v_vert: np.ndarray
+    primal_normal_vert_v1: np.array
+    primal_normal_vert_v2: np.array
+    z_nabla2_e: np.ndarray
+    inv_vert_vert_length: np.array
+    inv_primal_edge_length: np.array
+    ref_z_nabla4_e2: np.ndarray
+
+
+@pytest.fixture
+def kernel_input(simple_grid):
+    nabla4_kernel_validation_data = Nabla4KernelValidationData
+
+    nabla4_kernel_validation_data.e2c2v = simple_grid.get_offset_provider("E2C2V").table
+    nabla4_kernel_validation_data.e2ecv = simple_grid.get_offset_provider("E2ECV").table
+    nabla4_kernel_validation_data.num_cells = simple_grid.num_cells
+    nabla4_kernel_validation_data.num_vertices = simple_grid.num_vertices
+    nabla4_kernel_validation_data.num_edges = simple_grid.num_edges
+    nabla4_kernel_validation_data.num_levels = simple_grid.num_levels
+    nabla4_kernel_validation_data.E2C2VDim = simple_grid.size[E2C2VDim]
+
     serializer = ser.Serializer(
         ser.OpenModeKind.Read,
         path.dirname(__file__) + "/data/simple_grid",
         "nabla4_fields",
     )
     savepoint = serializer.savepoint["ValidationTest"].time[1]
-    u_vert = serializer.read("u_vert", savepoint)
-    v_vert = serializer.read("v_vert", savepoint)
-    primal_normal_vert_v1 = serializer.read("primal_normal_vert_v1_new", savepoint)
-    primal_normal_vert_v2 = serializer.read("primal_normal_vert_v2_new", savepoint)
-    z_nabla2_e = serializer.read("z_nabla2_e", savepoint)
-    inv_vert_vert_length = serializer.read("inv_vert_vert_length", savepoint)
-    inv_primal_edge_length = serializer.read("inv_primal_edge_length", savepoint)
+    nabla4_kernel_validation_data.u_vert = serializer.read("u_vert", savepoint)
+    nabla4_kernel_validation_data.v_vert = serializer.read("v_vert", savepoint)
+    nabla4_kernel_validation_data.primal_normal_vert_v1 = serializer.read(
+        "primal_normal_vert_v1_new", savepoint
+    )
+    nabla4_kernel_validation_data.primal_normal_vert_v2 = serializer.read(
+        "primal_normal_vert_v2_new", savepoint
+    )
+    nabla4_kernel_validation_data.z_nabla2_e = serializer.read("z_nabla2_e", savepoint)
+    nabla4_kernel_validation_data.inv_vert_vert_length = serializer.read(
+        "inv_vert_vert_length", savepoint
+    )
+    nabla4_kernel_validation_data.inv_primal_edge_length = serializer.read(
+        "inv_primal_edge_length", savepoint
+    )
 
     serializer = ser.Serializer(
         ser.OpenModeKind.Read,
@@ -82,27 +121,91 @@ def test_validate_nabla4_unstructured_naive(simple_grid):
         "nabla4_output",
     )
     out_savepoint = serializer.savepoint["OutputValidationTest"].time[1]
-    z_nabla4_e2 = serializer.read("z_nabla4_e2", out_savepoint)
+    nabla4_kernel_validation_data.ref_z_nabla4_e2 = serializer.read(
+        "z_nabla4_e2", out_savepoint
+    )
 
+    yield nabla4_kernel_validation_data
+
+
+def test_validate_nabla4_unstructured_naive(kernel_input):
     z_nabla4_e2_comp = icon_benchmark.nabla4_validate_naive(
-        simple_grid.get_offset_provider("E2C2V").table,
-        simple_grid.get_offset_provider("E2ECV").table,
-        simple_grid.num_cells,
-        simple_grid.num_vertices,
-        simple_grid.num_edges,
-        simple_grid.num_levels,
-        simple_grid.size[E2C2VDim],
-        u_vert,
-        v_vert,
-        primal_normal_vert_v1,
-        primal_normal_vert_v2,
-        z_nabla2_e,
-        inv_vert_vert_length,
-        inv_primal_edge_length,
+        kernel_input.e2c2v,
+        kernel_input.e2ecv,
+        kernel_input.num_cells,
+        kernel_input.num_vertices,
+        kernel_input.num_edges,
+        kernel_input.num_levels,
+        kernel_input.E2C2VDim,
+        kernel_input.u_vert,
+        kernel_input.v_vert,
+        kernel_input.primal_normal_vert_v1,
+        kernel_input.primal_normal_vert_v2,
+        kernel_input.z_nabla2_e,
+        kernel_input.inv_vert_vert_length,
+        kernel_input.inv_primal_edge_length,
     )
 
     assert np.allclose(
-        z_nabla4_e2_comp, z_nabla4_e2, equal_nan=True, atol=1e-8, rtol=1e-4
+        z_nabla4_e2_comp,
+        kernel_input.ref_z_nabla4_e2,
+        equal_nan=True,
+        atol=1e-8,
+        rtol=1e-4,
+    )
+
+
+def test_validate_nabla4_unstructured_cpu_ifirst(kernel_input):
+    z_nabla4_e2_comp = icon_benchmark.nabla4_validate_cpu_ifirst(
+        kernel_input.e2c2v,
+        kernel_input.e2ecv,
+        kernel_input.num_cells,
+        kernel_input.num_vertices,
+        kernel_input.num_edges,
+        kernel_input.num_levels,
+        kernel_input.E2C2VDim,
+        kernel_input.u_vert,
+        kernel_input.v_vert,
+        kernel_input.primal_normal_vert_v1,
+        kernel_input.primal_normal_vert_v2,
+        kernel_input.z_nabla2_e,
+        kernel_input.inv_vert_vert_length,
+        kernel_input.inv_primal_edge_length,
+    )
+
+    assert np.allclose(
+        z_nabla4_e2_comp,
+        kernel_input.ref_z_nabla4_e2,
+        equal_nan=True,
+        atol=1e-8,
+        rtol=1e-4,
+    )
+
+
+def test_validate_nabla4_unstructured_cpu_kfirst(kernel_input):
+    z_nabla4_e2_comp = icon_benchmark.nabla4_validate_cpu_kfirst(
+        kernel_input.e2c2v,
+        kernel_input.e2ecv,
+        kernel_input.num_cells,
+        kernel_input.num_vertices,
+        kernel_input.num_edges,
+        kernel_input.num_levels,
+        kernel_input.E2C2VDim,
+        kernel_input.u_vert,
+        kernel_input.v_vert,
+        kernel_input.primal_normal_vert_v1,
+        kernel_input.primal_normal_vert_v2,
+        kernel_input.z_nabla2_e,
+        kernel_input.inv_vert_vert_length,
+        kernel_input.inv_primal_edge_length,
+    )
+
+    assert np.allclose(
+        z_nabla4_e2_comp,
+        kernel_input.ref_z_nabla4_e2,
+        equal_nan=True,
+        atol=1e-8,
+        rtol=1e-4,
     )
 
 
@@ -145,5 +248,3 @@ if __name__ == "__main__":
     )
 
     print("cpu_kfirst mean runtime: {}".format(np.mean(runtimes)))
-
-    test_validate_nabla4_unstructured_naive(simple_grid_inst)
