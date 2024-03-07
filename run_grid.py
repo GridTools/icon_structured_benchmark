@@ -5,8 +5,8 @@ from pathlib import Path
 
 from icon4py.model.common.grid.grid_manager import (  # type: ignore [import-not-found]
     GridManager,
-    ToGt4PyTransformation,
     IndexTransformation,
+    ToGt4PyTransformation,
 )
 
 from icon4py.model.common.grid.vertical import VerticalGridSize  # type: ignore [import-not-found]
