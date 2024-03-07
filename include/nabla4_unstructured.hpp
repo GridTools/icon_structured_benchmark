@@ -29,7 +29,7 @@ private:
 
     /// Initialize vectors needed to execute kernel with random numbers
     void init() {
-        std::cout << "Initializing vectors" << std::endl;
+        // std::cout << "Initializing vectors" << std::endl;
         u_vert = rand_utils.random_init_vec_2d<float>(VertexDim, KDim);
         v_vert = rand_utils.random_init_vec_2d<float>(VertexDim, KDim);
         primal_normal_vert_v1 = rand_utils.random_init_vec_1d(ECVDim);
