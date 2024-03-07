@@ -1,0 +1,11 @@
+{
+  "archive_name": "Binary",
+  "archive_version": 0,
+  "fields_table": {
+    "z_nabla4_e2": [
+      [0, "298DEB2864C8568298CEC122429F1A66338B330501C27D18B6839A79A16E3"]
+    ]
+  },
+  "hash_algorithm": "SHA256",
+  "serialbox_version": 261
+}

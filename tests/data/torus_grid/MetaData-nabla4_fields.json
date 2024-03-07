@@ -1,0 +1,80 @@
+{
+  "field_map": {
+    "inv_primal_edge_length": {
+      "dims": [36],
+      "meta_info": null,
+      "type_id": 5
+    },
+    "inv_vert_vert_length": {
+      "dims": [36],
+      "meta_info": null,
+      "type_id": 5
+    },
+    "primal_normal_vert_v1": {
+      "dims": [36, 4],
+      "meta_info": null,
+      "type_id": 5
+    },
+    "primal_normal_vert_v1_new": {
+      "dims": [144],
+      "meta_info": null,
+      "type_id": 5
+    },
+    "primal_normal_vert_v2": {
+      "dims": [36, 4],
+      "meta_info": null,
+      "type_id": 5
+    },
+    "primal_normal_vert_v2_new": {
+      "dims": [144],
+      "meta_info": null,
+      "type_id": 5
+    },
+    "u_vert": {
+      "dims": [12, 65],
+      "meta_info": null,
+      "type_id": 5
+    },
+    "v_vert": {
+      "dims": [12, 65],
+      "meta_info": null,
+      "type_id": 5
+    },
+    "z_nabla2_e": {
+      "dims": [36, 65],
+      "meta_info": null,
+      "type_id": 5
+    }
+  },
+  "global_meta_info": null,
+  "prefix": "nabla4_fields",
+  "savepoint_vector": {
+    "fields_per_savepoint": [
+      {
+        "ValidationTest": {
+          "inv_primal_edge_length": 0,
+          "inv_vert_vert_length": 0,
+          "primal_normal_vert_v1": 0,
+          "primal_normal_vert_v1_new": 0,
+          "primal_normal_vert_v2": 0,
+          "primal_normal_vert_v2_new": 0,
+          "u_vert": 0,
+          "v_vert": 0,
+          "z_nabla2_e": 0
+        }
+      }
+    ],
+    "savepoints": [
+      {
+        "meta_info": {
+          "time": {
+            "type_id": 2,
+            "value": 1
+          }
+        },
+        "name": "ValidationTest"
+      }
+    ]
+  },
+  "serialbox_version": 261
+}
