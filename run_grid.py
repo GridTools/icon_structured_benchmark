@@ -6,6 +6,7 @@ from pathlib import Path
 from icon4py.model.common.grid.grid_manager import (  # type: ignore [import-not-found]
     GridManager,
     ToGt4PyTransformation,
+    IndexTransformation,
 )
 
 from icon4py.model.common.grid.vertical import VerticalGridSize  # type: ignore [import-not-found]
@@ -21,8 +22,8 @@ def init_grid_manager(fname, num_levels=65, transformation=ToGt4PyTransformation
     return grid_manager
 
 
-def get_torus_grid(filename):
-    grid_manager = init_grid_manager(filename)
+def get_torus_grid(filename, num_levels, transformation):
+    grid_manager = init_grid_manager(filename, num_levels, transformation)
     grid_manager()
     simple_grid = grid_manager.get_grid()
     return simple_grid
@@ -32,6 +33,13 @@ def parse_arguments():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("grid")
+    parser.add_argument(
+        "--transformation",
+        choices=["gt4py", "index"],
+        default="gt4py",
+        help="Use either ToGt4PyTransformation or IndexTransformation",
+    )
+    parser.add_argument("--klevels", type=int, default=65, help="Number of k levels")
 
     return parser.parse_args()
 
@@ -39,7 +47,13 @@ def parse_arguments():
 def run_benchmarks():
     args = parse_arguments()
 
-    torus_grid = get_torus_grid(args.grid)
+    transformation = (
+        ToGt4PyTransformation()
+        if args.transformation == "gt4py"
+        else IndexTransformation()
+    )
+
+    torus_grid = get_torus_grid(args.grid, args.klevels, transformation)
 
     repetitions = 11
     dry_runs = 1
