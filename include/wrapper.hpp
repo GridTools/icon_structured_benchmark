@@ -1,33 +1,201 @@
 #include "benchmark.hpp"
 
-std::vector<double> nabla4_benchmark_unstructured_naive(std::vector<std::vector<std::size_t>>& e2c2v, std::vector<std::vector<std::size_t>>& e2ecv, std::size_t CellDim, std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim, std::size_t ECVDim, int repetitions = 101, int dry_runs = 1);
+std::vector<double> nabla4_benchmark_unstructured_naive(std::vector<std::vector<std::size_t>> &e2c2v,
+    std::vector<std::vector<std::size_t>> &e2ecv,
+    std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    int repetitions = 101,
+    int dry_runs = 1);
 
-std::vector<double> nabla4_benchmark_unstructured_cpu_ifirst(std::vector<std::vector<std::size_t>>& e2c2v, std::vector<std::vector<std::size_t>>& e2ecv, std::size_t CellDim, std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim, std::size_t ECVDim, int repetitions = 101, int dry_runs = 1);
+std::vector<double> nabla4_benchmark_unstructured_cpu_ifirst(std::vector<std::vector<std::size_t>> &e2c2v,
+    std::vector<std::vector<std::size_t>> &e2ecv,
+    std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    int repetitions = 101,
+    int dry_runs = 1);
 
-std::vector<double> nabla4_benchmark_unstructured_cpu_kfirst(std::vector<std::vector<std::size_t>>& e2c2v, std::vector<std::vector<std::size_t>>& e2ecv, std::size_t CellDim, std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim, std::size_t ECVDim, int repetitions = 101, int dry_runs = 1);
+std::vector<double> nabla4_benchmark_unstructured_cpu_kfirst(std::vector<std::vector<std::size_t>> &e2c2v,
+    std::vector<std::vector<std::size_t>> &e2ecv,
+    std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    int repetitions = 101,
+    int dry_runs = 1);
 
-std::vector<double> nabla4_benchmark_unstructured_gpu(std::vector<std::vector<std::size_t>>& e2c2v, std::vector<std::vector<std::size_t>>& e2ecv, std::size_t CellDim, std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim, std::size_t ECVDim, int repetitions = 101, int dry_runs = 1);
+std::vector<double> nabla4_benchmark_unstructured_gpu(std::vector<std::vector<std::size_t>> &e2c2v,
+    std::vector<std::vector<std::size_t>> &e2ecv,
+    std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    int repetitions = 101,
+    int dry_runs = 1);
 
-std::vector<std::vector<float>> nabla4_validate_unstructured_naive(std::vector<std::vector<std::size_t>>& e2c2v, std::vector<std::vector<std::size_t>>& e2ecv, std::size_t CellDim, std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim, std::size_t ECVDim, std::vector<std::vector<float>>& u_vert, std::vector<std::vector<float>>& v_vert, std::vector<double>& primal_normal_vert_v1, std::vector<double>& primal_normal_vert_v2, std::vector<std::vector<double>>& z_nabla2_e, std::vector<double>& inv_vert_vert_length, std::vector<double>& inv_primal_edge_length);
+std::vector<std::vector<float>> nabla4_validate_unstructured_naive(std::vector<std::vector<std::size_t>> &e2c2v,
+    std::vector<std::vector<std::size_t>> &e2ecv,
+    std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::vector<std::vector<float>> &u_vert,
+    std::vector<std::vector<float>> &v_vert,
+    std::vector<double> &primal_normal_vert_v1,
+    std::vector<double> &primal_normal_vert_v2,
+    std::vector<std::vector<double>> &z_nabla2_e,
+    std::vector<double> &inv_vert_vert_length,
+    std::vector<double> &inv_primal_edge_length);
 
-std::vector<std::vector<float>> nabla4_validate_unstructured_cpu_ifirst(std::vector<std::vector<std::size_t>>& e2c2v, std::vector<std::vector<std::size_t>>& e2ecv, std::size_t CellDim, std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim, std::size_t ECVDim, std::vector<std::vector<float>>& u_vert, std::vector<std::vector<float>>& v_vert, std::vector<double>& primal_normal_vert_v1, std::vector<double>& primal_normal_vert_v2, std::vector<std::vector<double>>& z_nabla2_e, std::vector<double>& inv_vert_vert_length, std::vector<double>& inv_primal_edge_length);
+std::vector<std::vector<float>> nabla4_validate_unstructured_cpu_ifirst(std::vector<std::vector<std::size_t>> &e2c2v,
+    std::vector<std::vector<std::size_t>> &e2ecv,
+    std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::vector<std::vector<float>> &u_vert,
+    std::vector<std::vector<float>> &v_vert,
+    std::vector<double> &primal_normal_vert_v1,
+    std::vector<double> &primal_normal_vert_v2,
+    std::vector<std::vector<double>> &z_nabla2_e,
+    std::vector<double> &inv_vert_vert_length,
+    std::vector<double> &inv_primal_edge_length);
 
-std::vector<std::vector<float>> nabla4_validate_unstructured_cpu_kfirst(std::vector<std::vector<std::size_t>>& e2c2v, std::vector<std::vector<std::size_t>>& e2ecv, std::size_t CellDim, std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim, std::size_t ECVDim, std::vector<std::vector<float>>& u_vert, std::vector<std::vector<float>>& v_vert, std::vector<double>& primal_normal_vert_v1, std::vector<double>& primal_normal_vert_v2, std::vector<std::vector<double>>& z_nabla2_e, std::vector<double>& inv_vert_vert_length, std::vector<double>& inv_primal_edge_length);
+std::vector<std::vector<float>> nabla4_validate_unstructured_cpu_kfirst(std::vector<std::vector<std::size_t>> &e2c2v,
+    std::vector<std::vector<std::size_t>> &e2ecv,
+    std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::vector<std::vector<float>> &u_vert,
+    std::vector<std::vector<float>> &v_vert,
+    std::vector<double> &primal_normal_vert_v1,
+    std::vector<double> &primal_normal_vert_v2,
+    std::vector<std::vector<double>> &z_nabla2_e,
+    std::vector<double> &inv_vert_vert_length,
+    std::vector<double> &inv_primal_edge_length);
 
-std::vector<std::vector<float>> nabla4_validate_unstructured_gpu(std::vector<std::vector<std::size_t>>& e2c2v, std::vector<std::vector<std::size_t>>& e2ecv, std::size_t CellDim, std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim, std::size_t ECVDim, std::vector<std::vector<float>>& u_vert, std::vector<std::vector<float>>& v_vert, std::vector<double>& primal_normal_vert_v1, std::vector<double>& primal_normal_vert_v2, std::vector<std::vector<double>>& z_nabla2_e, std::vector<double>& inv_vert_vert_length, std::vector<double>& inv_primal_edge_length);
+std::vector<std::vector<float>> nabla4_validate_unstructured_gpu(std::vector<std::vector<std::size_t>> &e2c2v,
+    std::vector<std::vector<std::size_t>> &e2ecv,
+    std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::vector<std::vector<float>> &u_vert,
+    std::vector<std::vector<float>> &v_vert,
+    std::vector<double> &primal_normal_vert_v1,
+    std::vector<double> &primal_normal_vert_v2,
+    std::vector<std::vector<double>> &z_nabla2_e,
+    std::vector<double> &inv_vert_vert_length,
+    std::vector<double> &inv_primal_edge_length);
 
-std::vector<double> nabla4_benchmark_structured_naive(std::vector<std::vector<std::size_t>>& e2c2v, std::vector<std::vector<std::size_t>>& e2ecv, std::size_t CellDim, std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim, std::size_t ECVDim, int repetitions = 101, int dry_runs = 1);
+std::vector<double> nabla4_benchmark_structured_naive(std::vector<std::vector<std::size_t>> &e2c2v,
+    std::vector<std::vector<std::size_t>> &e2ecv,
+    std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    int repetitions = 101,
+    int dry_runs = 1);
 
-std::vector<double> nabla4_benchmark_structured_cpu_ifirst(std::vector<std::vector<std::size_t>>& e2c2v, std::vector<std::vector<std::size_t>>& e2ecv, std::size_t CellDim, std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim, std::size_t ECVDim, int repetitions = 101, int dry_runs = 1);
+std::vector<double> nabla4_benchmark_structured_cpu_ifirst(std::vector<std::vector<std::size_t>> &e2c2v,
+    std::vector<std::vector<std::size_t>> &e2ecv,
+    std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    int repetitions = 101,
+    int dry_runs = 1);
 
-std::vector<double> nabla4_benchmark_structured_cpu_kfirst(std::vector<std::vector<std::size_t>>& e2c2v, std::vector<std::vector<std::size_t>>& e2ecv, std::size_t CellDim, std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim, std::size_t ECVDim, int repetitions = 101, int dry_runs = 1);
+std::vector<double> nabla4_benchmark_structured_cpu_kfirst(std::vector<std::vector<std::size_t>> &e2c2v,
+    std::vector<std::vector<std::size_t>> &e2ecv,
+    std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    int repetitions = 101,
+    int dry_runs = 1);
 
-std::vector<double> nabla4_benchmark_structured_gpu(std::vector<std::vector<std::size_t>>& e2c2v, std::vector<std::vector<std::size_t>>& e2ecv, std::size_t CellDim, std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim, std::size_t ECVDim, int repetitions = 101, int dry_runs = 1);
+std::vector<double> nabla4_benchmark_structured_gpu(std::vector<std::vector<std::size_t>> &e2c2v,
+    std::vector<std::vector<std::size_t>> &e2ecv,
+    std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    int repetitions = 101,
+    int dry_runs = 1);
 
-std::vector<std::vector<float>> nabla4_validate_structured_naive(std::vector<std::vector<std::size_t>>& e2c2v, std::vector<std::vector<std::size_t>>& e2ecv, std::size_t CellDim, std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim, std::size_t ECVDim, std::vector<std::vector<float>>& u_vert, std::vector<std::vector<float>>& v_vert, std::vector<double>& primal_normal_vert_v1, std::vector<double>& primal_normal_vert_v2, std::vector<std::vector<double>>& z_nabla2_e, std::vector<double>& inv_vert_vert_length, std::vector<double>& inv_primal_edge_length);
+std::vector<std::vector<float>> nabla4_validate_structured_naive(std::vector<std::vector<std::size_t>> &e2c2v,
+    std::vector<std::vector<std::size_t>> &e2ecv,
+    std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::vector<std::vector<float>> &u_vert,
+    std::vector<std::vector<float>> &v_vert,
+    std::vector<double> &primal_normal_vert_v1,
+    std::vector<double> &primal_normal_vert_v2,
+    std::vector<std::vector<double>> &z_nabla2_e,
+    std::vector<double> &inv_vert_vert_length,
+    std::vector<double> &inv_primal_edge_length);
 
-std::vector<std::vector<float>> nabla4_validate_structured_cpu_ifirst(std::vector<std::vector<std::size_t>>& e2c2v, std::vector<std::vector<std::size_t>>& e2ecv, std::size_t CellDim, std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim, std::size_t ECVDim, std::vector<std::vector<float>>& u_vert, std::vector<std::vector<float>>& v_vert, std::vector<double>& primal_normal_vert_v1, std::vector<double>& primal_normal_vert_v2, std::vector<std::vector<double>>& z_nabla2_e, std::vector<double>& inv_vert_vert_length, std::vector<double>& inv_primal_edge_length);
+std::vector<std::vector<float>> nabla4_validate_structured_cpu_ifirst(std::vector<std::vector<std::size_t>> &e2c2v,
+    std::vector<std::vector<std::size_t>> &e2ecv,
+    std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::vector<std::vector<float>> &u_vert,
+    std::vector<std::vector<float>> &v_vert,
+    std::vector<double> &primal_normal_vert_v1,
+    std::vector<double> &primal_normal_vert_v2,
+    std::vector<std::vector<double>> &z_nabla2_e,
+    std::vector<double> &inv_vert_vert_length,
+    std::vector<double> &inv_primal_edge_length);
 
-std::vector<std::vector<float>> nabla4_validate_structured_cpu_kfirst(std::vector<std::vector<std::size_t>>& e2c2v, std::vector<std::vector<std::size_t>>& e2ecv, std::size_t CellDim, std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim, std::size_t ECVDim, std::vector<std::vector<float>>& u_vert, std::vector<std::vector<float>>& v_vert, std::vector<double>& primal_normal_vert_v1, std::vector<double>& primal_normal_vert_v2, std::vector<std::vector<double>>& z_nabla2_e, std::vector<double>& inv_vert_vert_length, std::vector<double>& inv_primal_edge_length);
+std::vector<std::vector<float>> nabla4_validate_structured_cpu_kfirst(std::vector<std::vector<std::size_t>> &e2c2v,
+    std::vector<std::vector<std::size_t>> &e2ecv,
+    std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::vector<std::vector<float>> &u_vert,
+    std::vector<std::vector<float>> &v_vert,
+    std::vector<double> &primal_normal_vert_v1,
+    std::vector<double> &primal_normal_vert_v2,
+    std::vector<std::vector<double>> &z_nabla2_e,
+    std::vector<double> &inv_vert_vert_length,
+    std::vector<double> &inv_primal_edge_length);
 
-std::vector<std::vector<float>> nabla4_validate_structured_gpu(std::vector<std::vector<std::size_t>>& e2c2v, std::vector<std::vector<std::size_t>>& e2ecv, std::size_t CellDim, std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim, std::size_t ECVDim, std::vector<std::vector<float>>& u_vert, std::vector<std::vector<float>>& v_vert, std::vector<double>& primal_normal_vert_v1, std::vector<double>& primal_normal_vert_v2, std::vector<std::vector<double>>& z_nabla2_e, std::vector<double>& inv_vert_vert_length, std::vector<double>& inv_primal_edge_length);
+std::vector<std::vector<float>> nabla4_validate_structured_gpu(std::vector<std::vector<std::size_t>> &e2c2v,
+    std::vector<std::vector<std::size_t>> &e2ecv,
+    std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::vector<std::vector<float>> &u_vert,
+    std::vector<std::vector<float>> &v_vert,
+    std::vector<double> &primal_normal_vert_v1,
+    std::vector<double> &primal_normal_vert_v2,
+    std::vector<std::vector<double>> &z_nabla2_e,
+    std::vector<double> &inv_vert_vert_length,
+    std::vector<double> &inv_primal_edge_length);
