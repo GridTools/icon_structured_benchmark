@@ -81,10 +81,7 @@ public:
         auto latitude = e2c2v_ret[0] % latitude_dim;
         auto longitude = e2c2v_ret[0] / latitude_dim;
         auto latitude_p1 = (latitude + 1) % latitude_dim;
-        // auto longitude_m1 = longitude > 1 ? (e2c2v_ret[0] - latitude_dim)/latitude_dim : longitude_dim - 1;
         auto longitude_p1 = (longitude + 1) % longitude_dim;
-        /// TODO: Adjust below for border edges
-        /// i.e. edges 18, 25
         if (edge_direction == 0) {  // east edge
             auto longitude_m1 = (longitude_dim + (longitude - 1)) % longitude_dim;
             e2c2v_ret[1] = longitude * latitude_dim + latitude_p1;
