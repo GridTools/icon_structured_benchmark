@@ -58,10 +58,37 @@ int main(void) {
                                         { 96,  97,  98,  99},
                                         {100, 101, 102, 103},
                                         {104, 105, 106, 107}};
-    auto nabla4_benchmark_unstructured_naive_runtimes = nabla4_benchmark_unstructured_naive(E2C2V, E2ECV, 18, 9, 27, 65, 4, 101, 1);
+    auto nabla4_benchmark_unstructured_naive_runtimes = nabla4_benchmark_unstructured_naive(E2C2V, E2ECV, 18, 9, 27, 65, 4, 1, 0);
     std::sort(nabla4_benchmark_unstructured_naive_runtimes.begin(), nabla4_benchmark_unstructured_naive_runtimes.end());
     std::cout << "Unstructured naive nabla4 median runtime: " << nabla4_benchmark_unstructured_naive_runtimes[nabla4_benchmark_unstructured_naive_runtimes.size() / 2] << std::endl;
-    auto nabla4_benchmark_structured_naive_runtimes = nabla4_benchmark_structured_naive(E2C2V, E2ECV, 18, 9, 27, 65, 4, 101, 1);
+    std::vector<std::vector<std::size_t>> E2ECV_structured{{  0,   1,   2,   3},
+                                        {  4,   5,   6,   7},
+                                        {  8,   9,  11,  10}, // 2
+                                        { 12,  13,  14,  15},
+                                        { 16,  17,  18,  19},
+                                        { 20,  21,  22,  23},
+                                        { 24,  25,  26,  27},
+                                        { 28,  29,  30,  31},
+                                        { 32,  33,  34,  35},
+                                        { 36,  37,  39,  38}, //9
+                                        { 40,  41,  42,  43},
+                                        { 44,  45,  47,  46}, //11
+                                        { 48,  49,  51,  50}, //12
+                                        { 52,  53,  54,  55},
+                                        { 56,  57,  58,  59},
+                                        { 60,  61,  63,  62}, //15
+                                        { 64,  65,  66,  67},
+                                        { 68,  69,  70,  71},
+                                        { 72,  73,  75,  74}, //18
+                                        { 76,  77,  78,  79},
+                                        { 80,  81,  83,  82}, //20
+                                        { 84,  85,  87,  86}, //21
+                                        { 88,  89,  90,  91},
+                                        { 92,  93,  94,  95},
+                                        { 96,  97,  99,  98}, //24
+                                        {100, 101, 102, 103},
+                                        {104, 105, 106, 107}};
+    auto nabla4_benchmark_structured_naive_runtimes = nabla4_benchmark_structured_naive(E2C2V, E2ECV_structured, 18, 9, 27, 65, 4, 1, 0);
     std::sort(nabla4_benchmark_structured_naive_runtimes.begin(), nabla4_benchmark_structured_naive_runtimes.end());
     std::cout << "Unstructured naive nabla4 median runtime: " << nabla4_benchmark_structured_naive_runtimes[nabla4_benchmark_unstructured_naive_runtimes.size() / 2] << std::endl;
 }
