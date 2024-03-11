@@ -2,9 +2,9 @@
 #include <vector>
 #include <iostream>
 
+#include "common.hpp"
 #include "random_init.hpp"
 
-enum backend_impl {naive = 0, cpu_ifirst, cpu_kfirst, gpu};
 class nabla4_unstructured
 {
 private:
@@ -83,6 +83,9 @@ public:
                 const auto E2ECV_1 = e2ecv[edge_index][1];
                 const auto E2ECV_2 = e2ecv[edge_index][2];
                 const auto E2ECV_3 = e2ecv[edge_index][3];
+                // if (k_index == 0) {
+                //     std::cout << "E2C2V[" << edge_index << "]: [" << E2C2V_0 << ", " << E2C2V_1 << ", " << E2C2V_2 << ", " << E2C2V_3 << "]" << std::endl;
+                // }
                 double nabv_tang_wp = static_cast<double>(u_vert[E2C2V_0][k_index]) * primal_normal_vert_v1[E2ECV_0]
                                     + static_cast<double>(v_vert[E2C2V_0][k_index]) * primal_normal_vert_v2[E2ECV_0]
                                     + static_cast<double>(u_vert[E2C2V_1][k_index]) * primal_normal_vert_v1[E2ECV_1]

@@ -3,9 +3,9 @@
 #include <vector>
 #include <iostream>
 
+#include "common.hpp"
 #include "random_init.hpp"
 
-enum backend_impl {naive = 0, cpu_ifirst, cpu_kfirst, gpu};
 class nabla4_structured
 {
 private:
@@ -75,20 +75,18 @@ public:
 
     inline std::array<std::size_t, 4> get_e2c2v_offsets(std::size_t edge_index) {
         std::array<std::size_t, 4> e2c2v_ret{};
-        const std::size_t edges_per_index = 3;
-        e2c2v_ret[0] = edge_index/edges_per_index;
-        auto edge_direction = edge_index%edges_per_index;
-        auto total_domain_size = latitude_dim*longitude_dim;
-        auto latitude = edge_index % latitude_dim;
-        auto longitude = edge_index / latitude_dim;
-        auto latitude_m1 = (latitude_dim + (latitude - 1)) % latitude_dim;
+        const std::size_t edges_per_index{3};
+        e2c2v_ret[0] = edge_index / edges_per_index;
+        auto edge_direction = edge_index % edges_per_index;
+        auto latitude = e2c2v_ret[0] % latitude_dim;
+        auto longitude = e2c2v_ret[0] / latitude_dim;
         auto latitude_p1 = (latitude + 1) % latitude_dim;
         // auto longitude_m1 = longitude > 1 ? (e2c2v_ret[0] - latitude_dim)/latitude_dim : longitude_dim - 1;
-        auto longitude_m1 = (longitude_dim + (longitude - 1)) % longitude_dim;
         auto longitude_p1 = (longitude + 1) % longitude_dim;
         /// TODO: Adjust below for border edges
         /// i.e. edges 18, 25
         if (edge_direction == 0) {  // east edge
+            auto longitude_m1 = (longitude_dim + (longitude - 1)) % longitude_dim;
             e2c2v_ret[1] = longitude * latitude_dim + latitude_p1;
             e2c2v_ret[2] = longitude_m1 * latitude_dim + latitude;
             e2c2v_ret[3] = longitude_p1 * latitude_dim + latitude_p1;
@@ -97,9 +95,10 @@ public:
             e2c2v_ret[2] = longitude_p1 * latitude_dim + latitude;
             e2c2v_ret[3] = longitude * latitude_dim + latitude_p1;
         } else {  // north edge
+            auto latitude_m1 = (latitude_dim + (latitude - 1)) % latitude_dim;
             e2c2v_ret[1] = longitude_p1 * latitude_dim + latitude;
-            e2c2v_ret[2] = longitude_p1 * latitude_dim + latitude_m1;
-            e2c2v_ret[3] = longitude * latitude_dim + latitude_p1;
+            e2c2v_ret[2] = longitude_p1 * latitude_dim + latitude_p1;
+            e2c2v_ret[3] = longitude * latitude_dim + latitude_m1;
         }
         return e2c2v_ret;
     }
@@ -115,9 +114,9 @@ public:
                 const auto E2C2V_1 = e2c2v_vec[1];
                 const auto E2C2V_2 = e2c2v_vec[2];
                 const auto E2C2V_3 = e2c2v_vec[3];
-                if (k_index == 0) {
-                    std::cout << "E2C2V[" << edge_index << "]: [" << E2C2V_0 << E2C2V_1 << E2C2V_2 << E2C2V_3 << "]" << std::endl;
-                }
+                // if (k_index == 0) {
+                //     std::cout << "E2C2V[" << edge_index << "]: [" << E2C2V_0 << ", " << E2C2V_1 << ", " << E2C2V_2 << ", " << E2C2V_3 << "]" << std::endl;
+                // }
                 const auto E2ECV_0 = e2ecv[edge_index][0];
                 const auto E2ECV_1 = e2ecv[edge_index][1];
                 const auto E2ECV_2 = e2ecv[edge_index][2];

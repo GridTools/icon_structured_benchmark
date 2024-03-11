@@ -44,7 +44,7 @@ def parse_arguments():
         "--repetitions", type=int, default=101, help="Number of repetitions"
     )
     parser.add_argument(
-        "--dry-run", default=True, help="Do a dry run or not", action="store_true"
+        "--dry-run", default=False, help="Do a dry run or not", action="store_true"
     )
 
     return parser.parse_args()
@@ -74,6 +74,42 @@ def run_benchmarks():
         )
     )
 
+    unstructured_naive_runtimes = icon_benchmark.nabla4_benchmark_unstructured_naive(
+        torus_grid.get_offset_provider("E2C2V").table,
+        torus_grid.get_offset_provider("E2ECV").table,
+        torus_grid.num_cells,
+        torus_grid.num_vertices,
+        torus_grid.num_edges,
+        torus_grid.num_levels,
+        torus_grid.size[E2C2VDim],
+        repetitions,
+        dry_runs,
+    )
+
+    print(
+        "unstructured naive mean runtime: {}".format(
+            np.mean(unstructured_naive_runtimes)
+        )
+    )
+
+    structured_naive_runtimes = icon_benchmark.nabla4_benchmark_structured_naive(
+        torus_grid.get_offset_provider("E2C2V").table,
+        torus_grid.get_offset_provider("E2ECV").table,
+        torus_grid.num_cells,
+        torus_grid.num_vertices,
+        torus_grid.num_edges,
+        torus_grid.num_levels,
+        torus_grid.size[E2C2VDim],
+        repetitions,
+        dry_runs,
+    )
+
+    print(
+        "structured naive mean runtime: {}".format(np.mean(structured_naive_runtimes))
+    )
+
+    return
+
     ifirst_runtimes = icon_benchmark.nabla4_benchmark_unstructured_cpu_ifirst(
         torus_grid.get_offset_provider("E2C2V").table,
         torus_grid.get_offset_provider("E2ECV").table,
@@ -86,7 +122,7 @@ def run_benchmarks():
         dry_runs,
     )
 
-    print("cpu_ifirst mean runtime: {}".format(np.mean(ifirst_runtimes)))
+    print("unstructured cpu_ifirst mean runtime: {}".format(np.mean(ifirst_runtimes)))
 
     kfirst_runtimes = icon_benchmark.nabla4_benchmark_unstructured_cpu_kfirst(
         torus_grid.get_offset_provider("E2C2V").table,
@@ -100,7 +136,7 @@ def run_benchmarks():
         dry_runs,
     )
 
-    print("cpu_kfirst mean runtime: {}".format(np.mean(kfirst_runtimes)))
+    print("unstrutcured cpu_kfirst mean runtime: {}".format(np.mean(kfirst_runtimes)))
 
 
 if __name__ == "__main__":
