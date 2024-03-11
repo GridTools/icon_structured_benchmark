@@ -2,6 +2,7 @@
 #include <vector>
 
 #include "nabla4_unstructured.hpp"
+#include "nabla4_structured.hpp"
 
 using std::chrono::high_resolution_clock;
 using std::chrono::duration;

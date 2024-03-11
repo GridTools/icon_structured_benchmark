@@ -1,6 +1,6 @@
 #include <vector>
 
-#include "nabla4_unstructured.hpp"
+#include "common.hpp"
 
 template<typename T, backend_impl I>
 std::vector<std::vector<float>> run_validation(T& benchmark_object) {

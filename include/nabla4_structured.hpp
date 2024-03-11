@@ -68,12 +68,6 @@ public:
         return z_nabla4_e2_wp;
     }
 
-    template<backend_impl I>
-    /// Compute function timed for benchmarking
-    void run() {
-        throw std::runtime_error("Undefined backend implementation");
-    };
-
     inline std::array<std::size_t, 4> get_e2c2v_offsets(std::size_t edge_index) {
         std::array<std::size_t, 4> e2c2v_ret{};
         const std::size_t edges_per_index{3};
@@ -101,9 +95,7 @@ public:
         return e2c2v_ret;
     }
 
-    template<>
-    /// Compute function timed for benchmarking
-    void run<naive>() {
+    void run_naive() {
         // std::cout << "Running naive nabla4_unstructured benchmark" << std::endl;
         for (std::size_t k_index{}; k_index < KDim; ++k_index) {
             for (std::size_t edge_index{}; edge_index < EdgeDim; ++edge_index) {
@@ -135,15 +127,26 @@ public:
         };
     };
 
-    template<>
-    /// Compute function timed for benchmarking
-    void run<cpu_ifirst>() {
+    void run_cpu_ifirst() {
         throw std::runtime_error("Undefined backend implementation");
     };
 
-    template<>
-    /// Compute function timed for benchmarking
-    void run<cpu_kfirst>() {
+    void run_cpu_kfirst() {
         throw std::runtime_error("Undefined backend implementation");
     };
+
+    template<backend_impl I>
+    /// Compute function timed for benchmarking
+    void run() {
+        if constexpr (I == backend_impl::naive) {
+            run_naive();
+        } else if constexpr (I == backend_impl::cpu_ifirst) {
+            run_cpu_ifirst();
+        } else if constexpr (I == backend_impl::cpu_kfirst) {
+            run_cpu_kfirst();
+        } else {
+            throw std::runtime_error("Undefined backend implementation");
+        }
+    };
+
 };
