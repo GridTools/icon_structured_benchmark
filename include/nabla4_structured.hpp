@@ -1,4 +1,5 @@
 #pragma once
+#include <cmath>
 #include <vector>
 #include <iostream>
 
@@ -72,24 +73,33 @@ public:
         throw std::runtime_error("Undefined backend implementation");
     };
 
-    inline std::array<std::size_t, 4> e2c2v(std::size_t edge_index) {
+    inline std::array<std::size_t, 4> get_e2c2v_offsets(std::size_t edge_index) {
         std::array<std::size_t, 4> e2c2v_ret{};
-        e2c2v_ret[0] = edge_index/3;
-        auto edge_direction = edge_index%3;
+        const std::size_t edges_per_index = 3;
+        e2c2v_ret[0] = edge_index/edges_per_index;
+        auto edge_direction = edge_index%edges_per_index;
+        auto total_domain_size = latitude_dim*longitude_dim;
+        auto latitude = edge_index % latitude_dim;
+        auto longitude = edge_index / latitude_dim;
+        auto latitude_m1 = (latitude_dim + (latitude - 1)) % latitude_dim;
+        auto latitude_p1 = (latitude + 1) % latitude_dim;
+        // auto longitude_m1 = longitude > 1 ? (e2c2v_ret[0] - latitude_dim)/latitude_dim : longitude_dim - 1;
+        auto longitude_m1 = (longitude_dim + (longitude - 1)) % longitude_dim;
+        auto longitude_p1 = (longitude + 1) % longitude_dim;
         /// TODO: Adjust below for border edges
         /// i.e. edges 18, 25
         if (edge_direction == 0) {  // east edge
-            e2c2v_ret[1] = e2c2v_ret[0] + 1;
-            e2c2v_ret[2] = e2c2v_ret[0] - longitude_dim;
-            e2c2v_ret[3] = e2c2v_ret[0] + 1 + longitude_dim;
+            e2c2v_ret[1] = longitude * latitude_dim + latitude_p1;
+            e2c2v_ret[2] = longitude_m1 * latitude_dim + latitude;
+            e2c2v_ret[3] = longitude_p1 * latitude_dim + latitude_p1;
         } else if (edge_direction == 1) {  // northeast edge
-            e2c2v_ret[1] = e2c2v_ret[0] + 1 + longitude_dim;
-            e2c2v_ret[2] = e2c2v_ret[0] + longitude_dim;
-            e2c2v_ret[3] = e2c2v_ret[0] + 1;
+            e2c2v_ret[1] = longitude_p1 * latitude_dim + latitude_p1;
+            e2c2v_ret[2] = longitude_p1 * latitude_dim + latitude;
+            e2c2v_ret[3] = longitude * latitude_dim + latitude_p1;
         } else {  // north edge
-            e2c2v_ret[1] = e2c2v_ret[0] + longitude_dim;
-            e2c2v_ret[2] = e2c2v_ret[0] - 1;
-            e2c2v_ret[3] = e2c2v_ret[0] + longitude_dim + 1;
+            e2c2v_ret[1] = longitude_p1 * latitude_dim + latitude;
+            e2c2v_ret[2] = longitude_p1 * latitude_dim + latitude_m1;
+            e2c2v_ret[3] = longitude * latitude_dim + latitude_p1;
         }
         return e2c2v_ret;
     }
@@ -100,10 +110,14 @@ public:
         // std::cout << "Running naive nabla4_unstructured benchmark" << std::endl;
         for (std::size_t k_index{}; k_index < KDim; ++k_index) {
             for (std::size_t edge_index{}; edge_index < EdgeDim; ++edge_index) {
-                const auto E2C2V_0 = e2c2v[edge_index][0];
-                const auto E2C2V_1 = e2c2v[edge_index][1];
-                const auto E2C2V_2 = e2c2v[edge_index][2];
-                const auto E2C2V_3 = e2c2v[edge_index][3];
+                const auto e2c2v_vec = get_e2c2v_offsets(edge_index);
+                const auto E2C2V_0 = e2c2v_vec[0];
+                const auto E2C2V_1 = e2c2v_vec[1];
+                const auto E2C2V_2 = e2c2v_vec[2];
+                const auto E2C2V_3 = e2c2v_vec[3];
+                if (k_index == 0) {
+                    std::cout << "E2C2V[" << edge_index << "]: [" << E2C2V_0 << E2C2V_1 << E2C2V_2 << E2C2V_3 << "]" << std::endl;
+                }
                 const auto E2ECV_0 = e2ecv[edge_index][0];
                 const auto E2ECV_1 = e2ecv[edge_index][1];
                 const auto E2ECV_2 = e2ecv[edge_index][2];
