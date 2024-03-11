@@ -18,4 +18,8 @@ NB_MODULE(icon_benchmark, m) {
     m.def("nabla4_benchmark_structured_cpu_ifirst", &nabla4_benchmark_structured_cpu_ifirst);
     m.def("nabla4_benchmark_structured_cpu_kfirst", &nabla4_benchmark_structured_cpu_kfirst);
     m.def("nabla4_benchmark_structured_gpu", &nabla4_benchmark_structured_gpu);
+    m.def("nabla4_validate_structured_naive", &nabla4_validate_structured_naive);
+    m.def("nabla4_validate_structured_cpu_ifirst", &nabla4_validate_structured_cpu_ifirst);
+    m.def("nabla4_validate_structured_cpu_kfirst", &nabla4_validate_structured_cpu_kfirst);
+    m.def("nabla4_validate_structured_gpu", &nabla4_validate_structured_gpu);
 }
