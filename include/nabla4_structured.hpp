@@ -114,84 +114,41 @@ public:
         return e2c2v_ret;
     }
 
+    template<auto f>
+    inline void inner_kernel(ARRAY_TYPE edge_index, std::size_t k_index) {
+        const auto e2c2v_vec = (this->*f)(edge_index);
+        const auto E2C2V_0 = e2c2v_vec[0];
+        const auto E2C2V_1 = e2c2v_vec[1];
+        const auto E2C2V_2 = e2c2v_vec[2];
+        const auto E2C2V_3 = e2c2v_vec[3];
+        // if (k_index == 0) {
+        //     std::cout << "E2C2V[" << edge_index << "]: [" << E2C2V_0 << ", " << E2C2V_1 << ", " << E2C2V_2 << ", " << E2C2V_3 << "]" << std::endl;
+        // }
+        const auto E2ECV_0 = e2ecv[edge_index][0];
+        const auto E2ECV_1 = e2ecv[edge_index][1];
+        const auto E2ECV_2 = e2ecv[edge_index][2];
+        const auto E2ECV_3 = e2ecv[edge_index][3];
+        double nabv_tang_wp = static_cast<double>(u_vert[E2C2V_0][k_index]) * primal_normal_vert_v1[E2ECV_0]
+                            + static_cast<double>(v_vert[E2C2V_0][k_index]) * primal_normal_vert_v2[E2ECV_0]
+                            + static_cast<double>(u_vert[E2C2V_1][k_index]) * primal_normal_vert_v1[E2ECV_1]
+                            + static_cast<double>(v_vert[E2C2V_1][k_index]) * primal_normal_vert_v2[E2ECV_1];
+        double nabv_norm_wp = static_cast<double>(u_vert[E2C2V_2][k_index]) * primal_normal_vert_v1[E2ECV_2]
+                            + static_cast<double>(v_vert[E2C2V_2][k_index]) * primal_normal_vert_v2[E2ECV_2]
+                            + static_cast<double>(u_vert[E2C2V_3][k_index]) * primal_normal_vert_v1[E2ECV_3]
+                            + static_cast<double>(v_vert[E2C2V_3][k_index]) * primal_normal_vert_v2[E2ECV_3];
+        z_nabla4_e2_wp[edge_index][k_index] = 4.0 * (
+            (nabv_norm_wp - 2.0 * z_nabla2_e[edge_index][k_index]) * (inv_vert_vert_length[edge_index] * inv_vert_vert_length[edge_index])
+            + (nabv_tang_wp - 2.0 * z_nabla2_e[edge_index][k_index]) * (inv_primal_edge_length[edge_index] * inv_primal_edge_length[edge_index])
+            );
+    }
+
     void run_naive() {
         // std::cout << "Running naive nabla4_unstructured benchmark" << std::endl;
         for (std::size_t k_index{}; k_index < KDim; ++k_index) {
             for (std::size_t edge_index{0}; edge_index < EdgeDim; edge_index+=3) {
-                const auto e2c2v_vec0 = get_e2c2v_offsets0(edge_index);
-                const auto E2C2V_0_0 = e2c2v_vec0[0];
-                const auto E2C2V_1_0 = e2c2v_vec0[1];
-                const auto E2C2V_2_0 = e2c2v_vec0[2];
-                const auto E2C2V_3_0 = e2c2v_vec0[3];
-                // if (k_index == 0) {
-                //     std::cout << "E2C2V[" << edge_index << "]: [" << E2C2V_0 << ", " << E2C2V_1 << ", " << E2C2V_2 << ", " << E2C2V_3 << "]" << std::endl;
-                // }
-                const auto E2ECV_0_0 = e2ecv[edge_index][0];
-                const auto E2ECV_1_0 = e2ecv[edge_index][1];
-                const auto E2ECV_2_0 = e2ecv[edge_index][2];
-                const auto E2ECV_3_0 = e2ecv[edge_index][3];
-                double nabv_tang_wp_0 = static_cast<double>(u_vert[E2C2V_0_0][k_index]) * primal_normal_vert_v1[E2ECV_0_0]
-                                    + static_cast<double>(v_vert[E2C2V_0_0][k_index]) * primal_normal_vert_v2[E2ECV_0_0]
-                                    + static_cast<double>(u_vert[E2C2V_1_0][k_index]) * primal_normal_vert_v1[E2ECV_1_0]
-                                    + static_cast<double>(v_vert[E2C2V_1_0][k_index]) * primal_normal_vert_v2[E2ECV_1_0];
-                double nabv_norm_wp_0 = static_cast<double>(u_vert[E2C2V_2_0][k_index]) * primal_normal_vert_v1[E2ECV_2_0]
-                                    + static_cast<double>(v_vert[E2C2V_2_0][k_index]) * primal_normal_vert_v2[E2ECV_2_0]
-                                    + static_cast<double>(u_vert[E2C2V_3_0][k_index]) * primal_normal_vert_v1[E2ECV_3_0]
-                                    + static_cast<double>(v_vert[E2C2V_3_0][k_index]) * primal_normal_vert_v2[E2ECV_3_0];
-                z_nabla4_e2_wp[edge_index][k_index] = 4.0 * (
-                    (nabv_norm_wp_0 - 2.0 * z_nabla2_e[edge_index][k_index]) * (inv_vert_vert_length[edge_index] * inv_vert_vert_length[edge_index])
-                    + (nabv_tang_wp_0 - 2.0 * z_nabla2_e[edge_index][k_index]) * (inv_primal_edge_length[edge_index] * inv_primal_edge_length[edge_index])
-                    );
-
-                const auto e2c2v_vec1 = get_e2c2v_offsets1(edge_index);
-                const auto E2C2V_0_1 = e2c2v_vec1[0];
-                const auto E2C2V_1_1 = e2c2v_vec1[1];
-                const auto E2C2V_2_1 = e2c2v_vec1[2];
-                const auto E2C2V_3_1 = e2c2v_vec1[3];
-                // if (k_index == 0) {
-                //     std::cout << "E2C2V[" << edge_index << "]: [" << E2C2V_0 << ", " << E2C2V_1 << ", " << E2C2V_2 << ", " << E2C2V_3 << "]" << std::endl;
-                // }
-                const auto E2ECV_0_1 = e2ecv[edge_index][0];
-                const auto E2ECV_1_1 = e2ecv[edge_index][1];
-                const auto E2ECV_2_1 = e2ecv[edge_index][2];
-                const auto E2ECV_3_1 = e2ecv[edge_index][3];
-                double nabv_tang_wp_1 = static_cast<double>(u_vert[E2C2V_0_1][k_index]) * primal_normal_vert_v1[E2ECV_0_1]
-                                    + static_cast<double>(v_vert[E2C2V_0_1][k_index]) * primal_normal_vert_v2[E2ECV_0_1]
-                                    + static_cast<double>(u_vert[E2C2V_1_1][k_index]) * primal_normal_vert_v1[E2ECV_1_1]
-                                    + static_cast<double>(v_vert[E2C2V_1_1][k_index]) * primal_normal_vert_v2[E2ECV_1_1];
-                double nabv_norm_wp_1 = static_cast<double>(u_vert[E2C2V_2_1][k_index]) * primal_normal_vert_v1[E2ECV_2_1]
-                                    + static_cast<double>(v_vert[E2C2V_2_1][k_index]) * primal_normal_vert_v2[E2ECV_2_1]
-                                    + static_cast<double>(u_vert[E2C2V_3_1][k_index]) * primal_normal_vert_v1[E2ECV_3_1]
-                                    + static_cast<double>(v_vert[E2C2V_3_1][k_index]) * primal_normal_vert_v2[E2ECV_3_1];
-                z_nabla4_e2_wp[edge_index][k_index] = 4.0 * (
-                    (nabv_norm_wp_1 - 2.0 * z_nabla2_e[edge_index][k_index]) * (inv_vert_vert_length[edge_index] * inv_vert_vert_length[edge_index])
-                    + (nabv_tang_wp_1 - 2.0 * z_nabla2_e[edge_index][k_index]) * (inv_primal_edge_length[edge_index] * inv_primal_edge_length[edge_index])
-                    );
-
-                const auto e2c2v_vec2 = get_e2c2v_offsets2(edge_index);
-                const auto E2C2V_0_2 = e2c2v_vec2[0];
-                const auto E2C2V_1_2 = e2c2v_vec2[1];
-                const auto E2C2V_2_2 = e2c2v_vec2[2];
-                const auto E2C2V_3_2 = e2c2v_vec2[3];
-                // if (k_index == 0) {
-                //     std::cout << "E2C2V[" << edge_index << "]: [" << E2C2V_0 << ", " << E2C2V_1 << ", " << E2C2V_2 << ", " << E2C2V_3 << "]" << std::endl;
-                // }
-                const auto E2ECV_0_2 = e2ecv[edge_index][0];
-                const auto E2ECV_1_2 = e2ecv[edge_index][1];
-                const auto E2ECV_2_2 = e2ecv[edge_index][2];
-                const auto E2ECV_3_2 = e2ecv[edge_index][3];
-                double nabv_tang_wp_2 = static_cast<double>(u_vert[E2C2V_0_2][k_index]) * primal_normal_vert_v1[E2ECV_0_2]
-                                    + static_cast<double>(v_vert[E2C2V_0_2][k_index]) * primal_normal_vert_v2[E2ECV_0_2]
-                                    + static_cast<double>(u_vert[E2C2V_1_2][k_index]) * primal_normal_vert_v1[E2ECV_1_2]
-                                    + static_cast<double>(v_vert[E2C2V_1_2][k_index]) * primal_normal_vert_v2[E2ECV_1_2];
-                double nabv_norm_wp_2 = static_cast<double>(u_vert[E2C2V_2_2][k_index]) * primal_normal_vert_v1[E2ECV_2_2]
-                                    + static_cast<double>(v_vert[E2C2V_2_2][k_index]) * primal_normal_vert_v2[E2ECV_2_2]
-                                    + static_cast<double>(u_vert[E2C2V_3_2][k_index]) * primal_normal_vert_v1[E2ECV_3_2]
-                                    + static_cast<double>(v_vert[E2C2V_3_2][k_index]) * primal_normal_vert_v2[E2ECV_3_2];
-                z_nabla4_e2_wp[edge_index][k_index] = 4.0 * (
-                    (nabv_norm_wp_2 - 2.0 * z_nabla2_e[edge_index][k_index]) * (inv_vert_vert_length[edge_index] * inv_vert_vert_length[edge_index])
-                    + (nabv_tang_wp_2 - 2.0 * z_nabla2_e[edge_index][k_index]) * (inv_primal_edge_length[edge_index] * inv_primal_edge_length[edge_index])
-                    );
+                inner_kernel<&nabla4_structured::get_e2c2v_offsets0>(edge_index, k_index);
+                inner_kernel<&nabla4_structured::get_e2c2v_offsets1>(edge_index+1, k_index);
+                inner_kernel<&nabla4_structured::get_e2c2v_offsets2>(edge_index+2, k_index);
             };
         };
     };
