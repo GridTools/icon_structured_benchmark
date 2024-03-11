@@ -117,7 +117,7 @@ int main(void) {
         nabla4_benchmark_structured_naive(E2C2V, E2ECV_structured, 18, 9, 27, 65, 4, repetitions, dry_runs);
     std::sort(nabla4_benchmark_structured_naive_runtimes.begin(), nabla4_benchmark_structured_naive_runtimes.end());
     std::cout << "Structured naive nabla4 median runtime: "
-              << nabla4_benchmark_structured_naive_runtimes[nabla4_benchmark_unstructured_naive_runtimes.size() / 2]
+              << nabla4_benchmark_structured_naive_runtimes[nabla4_benchmark_structured_naive_runtimes.size() / 2]
               << std::endl;
     auto nabla4_benchmark_structured_cpu_ifirst_runtimes =
         nabla4_benchmark_structured_cpu_ifirst(E2C2V, E2ECV_structured, 18, 9, 27, 65, 4, repetitions, dry_runs);
