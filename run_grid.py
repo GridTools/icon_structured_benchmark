@@ -74,7 +74,7 @@ def run_benchmarks():
         )
     )
 
-    ifirst_runtimes = icon_benchmark.nabla4_benchmark_cpu_ifirst(
+    ifirst_runtimes = icon_benchmark.nabla4_benchmark_unstructured_cpu_ifirst(
         torus_grid.get_offset_provider("E2C2V").table,
         torus_grid.get_offset_provider("E2ECV").table,
         torus_grid.num_cells,
@@ -88,7 +88,7 @@ def run_benchmarks():
 
     print("cpu_ifirst mean runtime: {}".format(np.mean(ifirst_runtimes)))
 
-    kfirst_runtimes = icon_benchmark.nabla4_benchmark_cpu_kfirst(
+    kfirst_runtimes = icon_benchmark.nabla4_benchmark_unstructured_cpu_kfirst(
         torus_grid.get_offset_provider("E2C2V").table,
         torus_grid.get_offset_provider("E2ECV").table,
         torus_grid.num_cells,

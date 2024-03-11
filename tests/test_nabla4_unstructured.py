@@ -48,7 +48,7 @@ def small_torus_grid():
 def test_simple_grid(simple_grid):
     repetitions = 3
     dry_runs = 0
-    runtimes = icon_benchmark.nabla4_benchmark_naive(
+    runtimes = icon_benchmark.nabla4_benchmark_unstructured_naive(
         simple_grid.get_offset_provider("E2C2V").table,
         simple_grid.get_offset_provider("E2ECV").table,
         simple_grid.num_cells,
@@ -189,7 +189,7 @@ def small_torus_grid_kernel_input(small_torus_grid):
 )
 def test_validate_nabla4_unstructured_naive(request, grid):
     grid = request.getfixturevalue(grid)
-    z_nabla4_e2_comp = icon_benchmark.nabla4_validate_naive(
+    z_nabla4_e2_comp = icon_benchmark.nabla4_validate_unstructured_naive(
         grid.e2c2v,
         grid.e2ecv,
         grid.num_cells,
@@ -220,7 +220,7 @@ def test_validate_nabla4_unstructured_naive(request, grid):
 )
 def test_validate_nabla4_unstructured_cpu_ifirst(request, grid):
     grid = request.getfixturevalue(grid)
-    z_nabla4_e2_comp = icon_benchmark.nabla4_validate_cpu_ifirst(
+    z_nabla4_e2_comp = icon_benchmark.nabla4_validate_unstructured_cpu_ifirst(
         grid.e2c2v,
         grid.e2ecv,
         grid.num_cells,
@@ -251,7 +251,7 @@ def test_validate_nabla4_unstructured_cpu_ifirst(request, grid):
 )
 def test_validate_nabla4_unstructured_cpu_kfirst(request, grid):
     grid = request.getfixturevalue(grid)
-    z_nabla4_e2_comp = icon_benchmark.nabla4_validate_cpu_kfirst(
+    z_nabla4_e2_comp = icon_benchmark.nabla4_validate_unstructured_cpu_kfirst(
         grid.e2c2v,
         grid.e2ecv,
         grid.num_cells,
