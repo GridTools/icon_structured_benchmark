@@ -76,22 +76,25 @@ public:
         auto latitude = e2c2v_ret[0] % latitude_dim;
         auto longitude = e2c2v_ret[0] / latitude_dim;
         auto latitude_p1 = (latitude + 1) % latitude_dim;
+        auto latitude_m1 = (latitude_dim + (latitude - 1)) % latitude_dim;
         auto longitude_p1 = (longitude + 1) % longitude_dim;
-        if (edge_direction == 0) {  // east edge
-            auto longitude_m1 = (longitude_dim + (longitude - 1)) % longitude_dim;
-            e2c2v_ret[1] = longitude * latitude_dim + latitude_p1;
-            e2c2v_ret[2] = longitude_m1 * latitude_dim + latitude;
-            e2c2v_ret[3] = longitude_p1 * latitude_dim + latitude_p1;
-        } else if (edge_direction == 1) {  // northeast edge
-            e2c2v_ret[1] = longitude_p1 * latitude_dim + latitude_p1;
-            e2c2v_ret[2] = longitude_p1 * latitude_dim + latitude;
-            e2c2v_ret[3] = longitude * latitude_dim + latitude_p1;
-        } else {  // north edge
-            auto latitude_m1 = (latitude_dim + (latitude - 1)) % latitude_dim;
-            e2c2v_ret[1] = longitude_p1 * latitude_dim + latitude;
-            e2c2v_ret[2] = longitude_p1 * latitude_dim + latitude_p1;
-            e2c2v_ret[3] = longitude * latitude_dim + latitude_m1;
-        }
+        auto longitude_m1 = (longitude_dim + (longitude - 1)) % longitude_dim;
+        e2c2v_ret[1] = edge_direction == 0 ? longitude * latitude_dim + latitude_p1 : edge_direction == 1 ? longitude_p1 * latitude_dim + latitude_p1 : longitude_p1 * latitude_dim + latitude;
+        e2c2v_ret[2] = edge_direction == 0 ? longitude_m1 * latitude_dim + latitude : edge_direction == 1 ? longitude_p1 * latitude_dim + latitude : longitude_p1 * latitude_dim + latitude_p1;
+        e2c2v_ret[3] = edge_direction == 0 ? longitude_p1 * latitude_dim + latitude_p1 : edge_direction == 1 ? longitude * latitude_dim + latitude_p1 : longitude * latitude_dim + latitude_p1;
+        // if (edge_direction == 0) {  // east edge
+        //     // e2c2v_ret[1] = longitude * latitude_dim + latitude_p1;
+        //     // e2c2v_ret[2] = longitude_m1 * latitude_dim + latitude;
+        //     e2c2v_ret[3] = longitude_p1 * latitude_dim + latitude_p1;
+        // } else if (edge_direction == 1) {  // northeast edge
+        //     // e2c2v_ret[1] = longitude_p1 * latitude_dim + latitude_p1;
+        //     // e2c2v_ret[2] = longitude_p1 * latitude_dim + latitude;
+        //     e2c2v_ret[3] = longitude * latitude_dim + latitude_p1;
+        // } else {  // north edge
+        //     // e2c2v_ret[1] = longitude_p1 * latitude_dim + latitude;
+        //     // e2c2v_ret[2] = longitude_p1 * latitude_dim + latitude_p1;
+        //     e2c2v_ret[3] = longitude * latitude_dim + latitude_m1;
+        // }
         return e2c2v_ret;
     }
 
