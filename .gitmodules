@@ -1,5 +1,3 @@
 [submodule "tests/ext/icon4py"]
 	path = tests/ext/icon4py
 	url = https://github.com/C2SM/icon4py.git
-[submodule "tests/ext"]
-	url = git@github.com:C2SM/icon4py.git
