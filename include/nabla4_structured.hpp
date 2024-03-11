@@ -176,9 +176,27 @@ class nabla4_structured {
         };
     };
 
-    void run_cpu_ifirst() { throw std::runtime_error("Undefined backend implementation"); };
+    void run_cpu_ifirst() {
+        for (std::size_t k_index{}; k_index < KDim; ++k_index) {
+#pragma omp simd
+            for (std::size_t edge_index = 0; edge_index < EdgeDim; edge_index += 3) {
+                inner_kernel<&nabla4_structured::get_e2c2v_offsets0>(edge_index, k_index);
+                inner_kernel<&nabla4_structured::get_e2c2v_offsets1>(edge_index + 1, k_index);
+                inner_kernel<&nabla4_structured::get_e2c2v_offsets2>(edge_index + 2, k_index);
+            };
+        };
+    };
 
-    void run_cpu_kfirst() { throw std::runtime_error("Undefined backend implementation"); };
+    void run_cpu_kfirst() {
+        for (std::size_t edge_index{}; edge_index < EdgeDim; edge_index += 3) {
+#pragma omp simd
+            for (std::size_t k_index = 0; k_index < KDim; ++k_index) {
+                inner_kernel<&nabla4_structured::get_e2c2v_offsets0>(edge_index, k_index);
+                inner_kernel<&nabla4_structured::get_e2c2v_offsets1>(edge_index + 1, k_index);
+                inner_kernel<&nabla4_structured::get_e2c2v_offsets2>(edge_index + 2, k_index);
+            };
+        };
+    };
 
     template <backend_impl I>
     /// Compute function timed for benchmarking
