@@ -91,7 +91,7 @@ class nabla4_structured {
 
     std::vector<std::vector<float>> get_output() { return z_nabla4_e2_wp; }
 
-    inline std::array<ARRAY_TYPE, 4> get_e2c2v_offsets0(std::size_t edge_index) {
+    inline std::array<ARRAY_TYPE, 4> get_e2c2v_vertices_east_edge(std::size_t edge_index) {
         std::array<ARRAY_TYPE, 4> e2c2v_ret{};
         const std::size_t edges_per_index{3};
         e2c2v_ret[0] = edge_index / edges_per_index;
@@ -106,7 +106,7 @@ class nabla4_structured {
         return e2c2v_ret;
     }
 
-    inline std::array<ARRAY_TYPE, 4> get_e2c2v_offsets1(std::size_t edge_index) {
+    inline std::array<ARRAY_TYPE, 4> get_e2c2v_vertices_northeast_edge(std::size_t edge_index) {
         std::array<ARRAY_TYPE, 4> e2c2v_ret{};
         const std::size_t edges_per_index{3};
         e2c2v_ret[0] = edge_index / edges_per_index;
@@ -120,7 +120,7 @@ class nabla4_structured {
         return e2c2v_ret;
     }
 
-    inline std::array<ARRAY_TYPE, 4> get_e2c2v_offsets2(std::size_t edge_index) {
+    inline std::array<ARRAY_TYPE, 4> get_e2c2v_vertices_north_edge(std::size_t edge_index) {
         std::array<ARRAY_TYPE, 4> e2c2v_ret{};
         const std::size_t edges_per_index{3};
         e2c2v_ret[0] = edge_index / edges_per_index;
@@ -169,9 +169,9 @@ class nabla4_structured {
         // std::cout << "Running naive nabla4_unstructured benchmark" << std::endl;
         for (std::size_t k_index{}; k_index < KDim; ++k_index) {
             for (std::size_t edge_index{0}; edge_index < EdgeDim; edge_index += 3) {
-                inner_kernel<&nabla4_structured::get_e2c2v_offsets0>(edge_index, k_index);
-                inner_kernel<&nabla4_structured::get_e2c2v_offsets1>(edge_index + 1, k_index);
-                inner_kernel<&nabla4_structured::get_e2c2v_offsets2>(edge_index + 2, k_index);
+                inner_kernel<&nabla4_structured::get_e2c2v_vertices_east_edge>(edge_index, k_index);
+                inner_kernel<&nabla4_structured::get_e2c2v_vertices_northeast_edge>(edge_index + 1, k_index);
+                inner_kernel<&nabla4_structured::get_e2c2v_vertices_north_edge>(edge_index + 2, k_index);
             };
         };
     };
@@ -180,9 +180,9 @@ class nabla4_structured {
         for (std::size_t k_index{}; k_index < KDim; ++k_index) {
 #pragma omp simd
             for (std::size_t edge_index = 0; edge_index < EdgeDim; edge_index += 3) {
-                inner_kernel<&nabla4_structured::get_e2c2v_offsets0>(edge_index, k_index);
-                inner_kernel<&nabla4_structured::get_e2c2v_offsets1>(edge_index + 1, k_index);
-                inner_kernel<&nabla4_structured::get_e2c2v_offsets2>(edge_index + 2, k_index);
+                inner_kernel<&nabla4_structured::get_e2c2v_vertices_east_edge>(edge_index, k_index);
+                inner_kernel<&nabla4_structured::get_e2c2v_vertices_northeast_edge>(edge_index + 1, k_index);
+                inner_kernel<&nabla4_structured::get_e2c2v_vertices_north_edge>(edge_index + 2, k_index);
             };
         };
     };
@@ -191,9 +191,9 @@ class nabla4_structured {
         for (std::size_t edge_index{}; edge_index < EdgeDim; edge_index += 3) {
 #pragma omp simd
             for (std::size_t k_index = 0; k_index < KDim; ++k_index) {
-                inner_kernel<&nabla4_structured::get_e2c2v_offsets0>(edge_index, k_index);
-                inner_kernel<&nabla4_structured::get_e2c2v_offsets1>(edge_index + 1, k_index);
-                inner_kernel<&nabla4_structured::get_e2c2v_offsets2>(edge_index + 2, k_index);
+                inner_kernel<&nabla4_structured::get_e2c2v_vertices_east_edge>(edge_index, k_index);
+                inner_kernel<&nabla4_structured::get_e2c2v_vertices_northeast_edge>(edge_index + 1, k_index);
+                inner_kernel<&nabla4_structured::get_e2c2v_vertices_north_edge>(edge_index + 2, k_index);
             };
         };
     };
