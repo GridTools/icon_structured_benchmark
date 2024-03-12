@@ -146,10 +146,10 @@ class nabla4_structured {
         //     std::cout << "E2C2V[" << edge_index << "]: [" << E2C2V_0 << ", " <<
         //     E2C2V_1 << ", " << E2C2V_2 << ", " << E2C2V_3 << "]" << std::endl;
         // }
-        const auto E2ECV_0 = e2ecv[edge_index][0];
-        const auto E2ECV_1 = e2ecv[edge_index][1];
-        const auto E2ECV_2 = e2ecv[edge_index][2];
-        const auto E2ECV_3 = e2ecv[edge_index][3];
+        const auto E2ECV_0 = edge_index * 4;
+        const auto E2ECV_1 = edge_index * 4 + 1;
+        const auto E2ECV_2 = edge_index * 4 + 2;
+        const auto E2ECV_3 = edge_index * 4 + 3;
         double nabv_tang_wp = static_cast<double>(u_vert[E2C2V_0][k_index]) * primal_normal_vert_v1[E2ECV_0] +
                               static_cast<double>(v_vert[E2C2V_0][k_index]) * primal_normal_vert_v2[E2ECV_0] +
                               static_cast<double>(u_vert[E2C2V_1][k_index]) * primal_normal_vert_v1[E2ECV_1] +

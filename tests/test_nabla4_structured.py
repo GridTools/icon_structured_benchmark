@@ -86,6 +86,13 @@ class Nabla4KernelValidationData:
     ref_z_nabla4_e2: np.ndarray
 
 
+def apply_permutation(perm, vec):
+    ret = []
+    for i in range(len(vec)):
+        ret.append(vec[perm[i]])
+    return ret
+
+
 @pytest.fixture
 def simple_grid_kernel_input(simple_grid):
     nabla4_kernel_validation_data = Nabla4KernelValidationData
@@ -134,12 +141,28 @@ def simple_grid_kernel_input(simple_grid):
     savepoint = serializer.savepoint["ValidationTest"].time[1]
     nabla4_kernel_validation_data.u_vert = serializer.read("u_vert", savepoint)
     nabla4_kernel_validation_data.v_vert = serializer.read("v_vert", savepoint)
+
+    primal_normal_permutation = sum(nabla4_kernel_validation_data.e2ecv, [])
     nabla4_kernel_validation_data.primal_normal_vert_v1 = serializer.read(
         "primal_normal_vert_v1_new", savepoint
     )
+    print("nabla4_kernel_validation_data.primal_normal_vert_v1 ORIGINAL")
+    print(nabla4_kernel_validation_data.primal_normal_vert_v1)
+    nabla4_kernel_validation_data.primal_normal_vert_v1 = apply_permutation(
+        primal_normal_permutation, nabla4_kernel_validation_data.primal_normal_vert_v1
+    )
+    print("nabla4_kernel_validation_data.primal_normal_vert_v1 PERMUTTED")
+    print(nabla4_kernel_validation_data.primal_normal_vert_v1)
     nabla4_kernel_validation_data.primal_normal_vert_v2 = serializer.read(
         "primal_normal_vert_v2_new", savepoint
     )
+    print("nabla4_kernel_validation_data.primal_normal_vert_v2 ORIGINAL")
+    print(nabla4_kernel_validation_data.primal_normal_vert_v2)
+    nabla4_kernel_validation_data.primal_normal_vert_v2 = apply_permutation(
+        primal_normal_permutation, nabla4_kernel_validation_data.primal_normal_vert_v2
+    )
+    print("nabla4_kernel_validation_data.primal_normal_vert_v2 PERMUTTED")
+    print(nabla4_kernel_validation_data.primal_normal_vert_v2)
     nabla4_kernel_validation_data.z_nabla2_e = serializer.read("z_nabla2_e", savepoint)
     nabla4_kernel_validation_data.inv_vert_vert_length = serializer.read(
         "inv_vert_vert_length", savepoint
