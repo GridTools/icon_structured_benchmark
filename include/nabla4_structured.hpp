@@ -91,44 +91,48 @@ class nabla4_structured {
 
     std::vector<std::vector<float>> get_output() { return z_nabla4_e2_wp; }
 
-    inline std::array<ARRAY_TYPE, 4> get_e2c2v_vertices_east_edge(std::size_t edge_index) {
+    inline std::array<ARRAY_TYPE, 4> get_e2c2v_vertices_east_edge(std::size_t edge_index,
+        std::size_t parent_vertex,
+        std::size_t latitude,
+        std::size_t longitude,
+        std::size_t latitude_p1,
+        std::size_t latitude_m1,
+        std::size_t longitude_p1,
+        std::size_t longitude_m1) {
         std::array<ARRAY_TYPE, 4> e2c2v_ret{};
-        const std::size_t edges_per_index{3};
-        e2c2v_ret[0] = edge_index / edges_per_index;
-        auto latitude = e2c2v_ret[0] % latitude_dim;
-        auto longitude = e2c2v_ret[0] / latitude_dim;
-        auto latitude_p1 = (latitude + 1) % latitude_dim;
-        auto longitude_p1 = (longitude + 1) % longitude_dim;
-        auto longitude_m1 = (longitude_dim + (longitude - 1)) % longitude_dim;
+        e2c2v_ret[0] = parent_vertex;
         e2c2v_ret[1] = longitude * latitude_dim + latitude_p1;
         e2c2v_ret[2] = longitude_p1 * latitude_dim + latitude_p1;
         e2c2v_ret[3] = longitude_m1 * latitude_dim + latitude;
         return e2c2v_ret;
     }
 
-    inline std::array<ARRAY_TYPE, 4> get_e2c2v_vertices_northeast_edge(std::size_t edge_index) {
+    inline std::array<ARRAY_TYPE, 4> get_e2c2v_vertices_northeast_edge(std::size_t edge_index,
+        std::size_t parent_vertex,
+        std::size_t latitude,
+        std::size_t longitude,
+        std::size_t latitude_p1,
+        std::size_t latitude_m1,
+        std::size_t longitude_p1,
+        std::size_t longitude_m1) {
         std::array<ARRAY_TYPE, 4> e2c2v_ret{};
-        const std::size_t edges_per_index{3};
-        e2c2v_ret[0] = edge_index / edges_per_index;
-        auto latitude = e2c2v_ret[0] % latitude_dim;
-        auto longitude = e2c2v_ret[0] / latitude_dim;
-        auto latitude_p1 = (latitude + 1) % latitude_dim;
-        auto longitude_p1 = (longitude + 1) % longitude_dim;
+        e2c2v_ret[0] = parent_vertex;
         e2c2v_ret[1] = longitude_p1 * latitude_dim + latitude_p1;
         e2c2v_ret[2] = longitude * latitude_dim + latitude_p1;
         e2c2v_ret[3] = longitude_p1 * latitude_dim + latitude;
         return e2c2v_ret;
     }
 
-    inline std::array<ARRAY_TYPE, 4> get_e2c2v_vertices_north_edge(std::size_t edge_index) {
+    inline std::array<ARRAY_TYPE, 4> get_e2c2v_vertices_north_edge(std::size_t edge_index,
+        std::size_t parent_vertex,
+        std::size_t latitude,
+        std::size_t longitude,
+        std::size_t latitude_p1,
+        std::size_t latitude_m1,
+        std::size_t longitude_p1,
+        std::size_t longitude_m1) {
         std::array<ARRAY_TYPE, 4> e2c2v_ret{};
-        const std::size_t edges_per_index{3};
-        e2c2v_ret[0] = edge_index / edges_per_index;
-        auto latitude = e2c2v_ret[0] % latitude_dim;
-        auto longitude = e2c2v_ret[0] / latitude_dim;
-        auto latitude_p1 = (latitude + 1) % latitude_dim;
-        auto latitude_m1 = (latitude_dim + (latitude - 1)) % latitude_dim;
-        auto longitude_p1 = (longitude + 1) % longitude_dim;
+        e2c2v_ret[0] = parent_vertex;
         e2c2v_ret[1] = longitude_p1 * latitude_dim + latitude;
         e2c2v_ret[2] = longitude * latitude_dim + latitude_m1;
         e2c2v_ret[3] = longitude_p1 * latitude_dim + latitude_p1;
@@ -137,7 +141,16 @@ class nabla4_structured {
 
     template <auto f>
     inline void inner_kernel(ARRAY_TYPE edge_index, std::size_t k_index) {
-        const auto e2c2v_vec = (this->*f)(edge_index);
+        const std::size_t edges_per_index{3};
+        const auto starting_vertex = edge_index / edges_per_index;
+        const auto latitude = starting_vertex % latitude_dim;
+        const auto longitude = starting_vertex / latitude_dim;
+        const auto latitude_p1 = (latitude + 1) % latitude_dim;
+        const auto latitude_m1 = (latitude_dim + (latitude - 1)) % latitude_dim;
+        const auto longitude_p1 = (longitude + 1) % longitude_dim;
+        const auto longitude_m1 = (longitude_dim + (longitude - 1)) % longitude_dim;
+        const auto e2c2v_vec = (this->*f)(
+            edge_index, starting_vertex, latitude, longitude, latitude_p1, latitude_m1, longitude_p1, longitude_m1);
         const auto E2C2V_0 = e2c2v_vec[0];
         const auto E2C2V_1 = e2c2v_vec[1];
         const auto E2C2V_2 = e2c2v_vec[2];
