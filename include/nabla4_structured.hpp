@@ -30,8 +30,8 @@ class nabla4_structured {
     /// Random number utilities
     RandomUniformUtils rand_utils{-2.0, 2.0};
 
-    std::size_t longitude_dim{3};
-    std::size_t latitude_dim{3};
+    static constexpr std::size_t longitude_dim{3};
+    static constexpr std::size_t latitude_dim{3};
 
     /// Initialize vectors needed to execute kernel with random numbers
     void init() {
