@@ -11,8 +11,6 @@
 
 class nabla4_structured {
   private:
-    std::vector<std::vector<std::size_t>> e2c2v;
-    std::vector<std::vector<std::size_t>> e2ecv;
     std::size_t CellDim;
     std::size_t EdgeDim;
     std::size_t VertexDim;
@@ -52,22 +50,14 @@ class nabla4_structured {
   public:
     /// Constructor with all the necessary information for \c nabla4 compute
     /// kernel execution
-    nabla4_structured(std::vector<std::vector<std::size_t>> &e2c2v,
-        std::vector<std::vector<std::size_t>> &e2ecv,
-        std::size_t CellDim,
-        std::size_t VertexDim,
-        std::size_t EdgeDim,
-        std::size_t KDim,
-        std::size_t ECVDim)
-        : e2c2v(e2c2v), e2ecv(e2ecv), CellDim(CellDim), VertexDim(VertexDim), EdgeDim(EdgeDim), KDim(KDim),
-          ECVDim(ECVDim) {
+    nabla4_structured(
+        std::size_t CellDim, std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim, std::size_t ECVDim)
+        : CellDim(CellDim), VertexDim(VertexDim), EdgeDim(EdgeDim), KDim(KDim), ECVDim(ECVDim) {
         init();
     };
 
     /// Constructor for validation
-    nabla4_structured(std::vector<std::vector<std::size_t>> &e2c2v,
-        std::vector<std::vector<std::size_t>> &e2ecv,
-        std::size_t CellDim,
+    nabla4_structured(std::size_t CellDim,
         std::size_t VertexDim,
         std::size_t EdgeDim,
         std::size_t KDim,
@@ -79,10 +69,10 @@ class nabla4_structured {
         std::vector<std::vector<double>> &z_nabla2_e,
         std::vector<double> &inv_vert_vert_length,
         std::vector<double> &inv_primal_edge_length)
-        : e2c2v(e2c2v), e2ecv(e2ecv), CellDim(CellDim), VertexDim(VertexDim), EdgeDim(EdgeDim), KDim(KDim),
-          ECVDim(ECVDim), u_vert(u_vert), v_vert(v_vert), primal_normal_vert_v1(primal_normal_vert_v1),
-          primal_normal_vert_v2(primal_normal_vert_v2), z_nabla2_e(z_nabla2_e),
-          inv_vert_vert_length(inv_vert_vert_length), inv_primal_edge_length(inv_primal_edge_length) {
+        : CellDim(CellDim), VertexDim(VertexDim), EdgeDim(EdgeDim), KDim(KDim), ECVDim(ECVDim), u_vert(u_vert),
+          v_vert(v_vert), primal_normal_vert_v1(primal_normal_vert_v1), primal_normal_vert_v2(primal_normal_vert_v2),
+          z_nabla2_e(z_nabla2_e), inv_vert_vert_length(inv_vert_vert_length),
+          inv_primal_edge_length(inv_primal_edge_length) {
         z_nabla4_e2_wp.resize(EdgeDim);
         for (std::size_t i{}; i < EdgeDim; ++i) {
             z_nabla4_e2_wp[i].resize(KDim);

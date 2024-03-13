@@ -49,8 +49,6 @@ def test_simple_grid(simple_grid):
     repetitions = 3
     dry_runs = 0
     runtimes = icon_benchmark.nabla4_benchmark_structured_naive(
-        simple_grid.get_offset_provider("E2C2V").table,
-        simple_grid.get_offset_provider("E2ECV").table,
         simple_grid.num_cells,
         simple_grid.num_vertices,
         simple_grid.num_edges,
@@ -237,8 +235,6 @@ def small_torus_grid_kernel_input(small_torus_grid):
 
 def test_validate_nabla4_structured_naive(simple_grid_kernel_input):
     z_nabla4_e2_comp = icon_benchmark.nabla4_validate_structured_naive(
-        simple_grid_kernel_input.e2c2v,
-        simple_grid_kernel_input.e2ecv,
         simple_grid_kernel_input.num_cells,
         simple_grid_kernel_input.num_vertices,
         simple_grid_kernel_input.num_edges,
