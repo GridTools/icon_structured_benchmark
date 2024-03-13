@@ -23,8 +23,12 @@ SMALL_TORUS_GRID_FILE = (
 )
 
 
-def init_grid_manager(fname, num_levels=10, transformation=IndexTransformation()):
-    grid_manager = GridManager(transformation, fname, VerticalGridSize(num_levels))
+def init_grid_manager(
+    fname, num_levels=10, transformation=IndexTransformation(), torus=False
+):
+    grid_manager = GridManager(
+        transformation, fname, VerticalGridSize(num_levels), torus
+    )
     grid_manager()
     return grid_manager
 
@@ -39,7 +43,9 @@ def simple_grid():
 
 @pytest.fixture
 def small_torus_grid():
-    grid_manager = init_grid_manager(SMALL_TORUS_GRID_FILE, 65, ToGt4PyTransformation())
+    grid_manager = init_grid_manager(
+        SMALL_TORUS_GRID_FILE, 65, ToGt4PyTransformation(), torus=True
+    )
     grid_manager()
     small_torus_grid = grid_manager.get_grid()
     yield small_torus_grid

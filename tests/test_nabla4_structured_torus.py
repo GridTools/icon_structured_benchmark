@@ -23,7 +23,9 @@ SMALL_TORUS_GRID_FILE = (
 
 
 def init_grid_manager(fname, num_levels=10, transformation=IndexTransformation()):
-    grid_manager = GridManager(transformation, fname, VerticalGridSize(num_levels))
+    grid_manager = GridManager(
+        transformation, fname, VerticalGridSize(num_levels), True
+    )
     grid_manager()
     return grid_manager
 

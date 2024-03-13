@@ -93,8 +93,6 @@ def run_benchmarks():
     )
 
     structured_naive_runtimes = icon_benchmark.nabla4_benchmark_structured_naive(
-        torus_grid.get_offset_provider("E2C2V").table,
-        torus_grid.get_offset_provider("E2ECV").table,
         torus_grid.num_cells,
         torus_grid.num_vertices,
         torus_grid.num_edges,
@@ -107,36 +105,6 @@ def run_benchmarks():
     print(
         "structured naive mean runtime: {}".format(np.mean(structured_naive_runtimes))
     )
-
-    return
-
-    ifirst_runtimes = icon_benchmark.nabla4_benchmark_unstructured_cpu_ifirst(
-        torus_grid.get_offset_provider("E2C2V").table,
-        torus_grid.get_offset_provider("E2ECV").table,
-        torus_grid.num_cells,
-        torus_grid.num_vertices,
-        torus_grid.num_edges,
-        torus_grid.num_levels,
-        torus_grid.size[E2C2VDim],
-        repetitions,
-        dry_runs,
-    )
-
-    print("unstructured cpu_ifirst mean runtime: {}".format(np.mean(ifirst_runtimes)))
-
-    kfirst_runtimes = icon_benchmark.nabla4_benchmark_unstructured_cpu_kfirst(
-        torus_grid.get_offset_provider("E2C2V").table,
-        torus_grid.get_offset_provider("E2ECV").table,
-        torus_grid.num_cells,
-        torus_grid.num_vertices,
-        torus_grid.num_edges,
-        torus_grid.num_levels,
-        torus_grid.size[E2C2VDim],
-        repetitions,
-        dry_runs,
-    )
-
-    print("unstrutcured cpu_kfirst mean runtime: {}".format(np.mean(kfirst_runtimes)))
 
 
 if __name__ == "__main__":
