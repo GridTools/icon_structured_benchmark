@@ -18,9 +18,6 @@ from icon4py.model.common.dimension import E2C2VDim  # type: ignore [import-not-
 import icon_benchmark  # type: ignore [import-not-found]
 
 SIMPLE_GRID_FILE = path.dirname(__file__) + "/data/simple_grid/simple_grid_gridfile.nc"
-SMALL_TORUS_GRID_FILE = (
-    path.dirname(__file__) + "/data/torus_grid/torus_100000_100000_24576.nc"
-)
 
 
 def init_grid_manager(fname, num_levels=10, transformation=IndexTransformation()):
@@ -35,14 +32,6 @@ def simple_grid():
     grid_manager()
     simple_grid = grid_manager.get_grid()
     yield simple_grid
-
-
-@pytest.fixture
-def small_torus_grid():
-    grid_manager = init_grid_manager(SMALL_TORUS_GRID_FILE, 65, ToGt4PyTransformation())
-    grid_manager()
-    small_torus_grid = grid_manager.get_grid()
-    yield small_torus_grid
 
 
 def test_simple_grid(simple_grid):
@@ -96,6 +85,9 @@ def simple_grid_kernel_input(simple_grid):
     nabla4_kernel_validation_data = Nabla4KernelValidationData
 
     nabla4_kernel_validation_data.e2c2v = simple_grid.get_offset_provider("E2C2V").table
+    # Needed to alter the E2ECV elements in some cases because the order of the vertices in the SimpleGrid differ
+    # with the order of vertices being calculated for each edge
+    # With the following E2ECV matrix we get same data as the tests in icon4py
     nabla4_kernel_validation_data.e2ecv = [
         [0, 1, 2, 3],
         [4, 5, 6, 7],
@@ -144,23 +136,16 @@ def simple_grid_kernel_input(simple_grid):
     nabla4_kernel_validation_data.primal_normal_vert_v1 = serializer.read(
         "primal_normal_vert_v1_new", savepoint
     )
-    print("nabla4_kernel_validation_data.primal_normal_vert_v1 ORIGINAL")
-    print(nabla4_kernel_validation_data.primal_normal_vert_v1)
     nabla4_kernel_validation_data.primal_normal_vert_v1 = apply_permutation(
         primal_normal_permutation, nabla4_kernel_validation_data.primal_normal_vert_v1
     )
-    print("nabla4_kernel_validation_data.primal_normal_vert_v1 PERMUTTED")
-    print(nabla4_kernel_validation_data.primal_normal_vert_v1)
     nabla4_kernel_validation_data.primal_normal_vert_v2 = serializer.read(
         "primal_normal_vert_v2_new", savepoint
     )
-    print("nabla4_kernel_validation_data.primal_normal_vert_v2 ORIGINAL")
-    print(nabla4_kernel_validation_data.primal_normal_vert_v2)
     nabla4_kernel_validation_data.primal_normal_vert_v2 = apply_permutation(
         primal_normal_permutation, nabla4_kernel_validation_data.primal_normal_vert_v2
     )
-    print("nabla4_kernel_validation_data.primal_normal_vert_v2 PERMUTTED")
-    print(nabla4_kernel_validation_data.primal_normal_vert_v2)
+
     nabla4_kernel_validation_data.z_nabla2_e = serializer.read("z_nabla2_e", savepoint)
     nabla4_kernel_validation_data.inv_vert_vert_length = serializer.read(
         "inv_vert_vert_length", savepoint
@@ -172,57 +157,6 @@ def simple_grid_kernel_input(simple_grid):
     serializer = ser.Serializer(
         ser.OpenModeKind.Read,
         path.dirname(__file__) + "/data/simple_grid",
-        "nabla4_output",
-    )
-    out_savepoint = serializer.savepoint["OutputValidationTest"].time[1]
-    nabla4_kernel_validation_data.ref_z_nabla4_e2 = serializer.read(
-        "z_nabla4_e2", out_savepoint
-    )
-
-    yield nabla4_kernel_validation_data
-
-
-@pytest.fixture
-def small_torus_grid_kernel_input(small_torus_grid):
-    nabla4_kernel_validation_data = Nabla4KernelValidationData
-
-    nabla4_kernel_validation_data.e2c2v = small_torus_grid.get_offset_provider(
-        "E2C2V"
-    ).table
-    nabla4_kernel_validation_data.e2ecv = small_torus_grid.get_offset_provider(
-        "E2ECV"
-    ).table
-    nabla4_kernel_validation_data.num_cells = small_torus_grid.num_cells
-    nabla4_kernel_validation_data.num_vertices = small_torus_grid.num_vertices
-    nabla4_kernel_validation_data.num_edges = small_torus_grid.num_edges
-    nabla4_kernel_validation_data.num_levels = small_torus_grid.num_levels
-    nabla4_kernel_validation_data.E2C2VDim = small_torus_grid.size[E2C2VDim]
-
-    serializer = ser.Serializer(
-        ser.OpenModeKind.Read,
-        path.dirname(__file__) + "/data/torus_grid",
-        "nabla4_fields",
-    )
-    savepoint = serializer.savepoint["ValidationTest"].time[1]
-    nabla4_kernel_validation_data.u_vert = serializer.read("u_vert", savepoint)
-    nabla4_kernel_validation_data.v_vert = serializer.read("v_vert", savepoint)
-    nabla4_kernel_validation_data.primal_normal_vert_v1 = serializer.read(
-        "primal_normal_vert_v1_new", savepoint
-    )
-    nabla4_kernel_validation_data.primal_normal_vert_v2 = serializer.read(
-        "primal_normal_vert_v2_new", savepoint
-    )
-    nabla4_kernel_validation_data.z_nabla2_e = serializer.read("z_nabla2_e", savepoint)
-    nabla4_kernel_validation_data.inv_vert_vert_length = serializer.read(
-        "inv_vert_vert_length", savepoint
-    )
-    nabla4_kernel_validation_data.inv_primal_edge_length = serializer.read(
-        "inv_primal_edge_length", savepoint
-    )
-
-    serializer = ser.Serializer(
-        ser.OpenModeKind.Read,
-        path.dirname(__file__) + "/data/torus_grid",
         "nabla4_output",
     )
     out_savepoint = serializer.savepoint["OutputValidationTest"].time[1]
@@ -248,11 +182,6 @@ def test_validate_nabla4_structured_naive(simple_grid_kernel_input):
         simple_grid_kernel_input.inv_vert_vert_length,
         simple_grid_kernel_input.inv_primal_edge_length,
     )
-
-    print("=== MY IMPLEMENTATION ===")
-    print(z_nabla4_e2_comp)
-    print("=== REFERENCE ===")
-    print(simple_grid_kernel_input.ref_z_nabla4_e2)
 
     assert np.allclose(
         z_nabla4_e2_comp,

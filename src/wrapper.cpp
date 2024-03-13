@@ -354,3 +354,194 @@ std::vector<std::vector<float>> nabla4_validate_structured_gpu(std::size_t CellD
         inv_primal_edge_length};
     return run_validation<nabla4_structured, gpu>(nabla4_benchmark_object);
 }
+
+template <backend_impl I>
+std::vector<double> nabla4_benchmark_structured_torus(std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::size_t longitude_dim,
+    std::size_t latitude_dim,
+    int repetitions,
+    int dry_runs) {
+    nabla4_structured_torus nabla4_benchmark_object{
+        CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim};
+    return run_benchmark<nabla4_structured_torus, I>(nabla4_benchmark_object, repetitions, dry_runs);
+}
+
+std::vector<double> nabla4_benchmark_structured_torus_naive(std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::size_t longitude_dim,
+    std::size_t latitude_dim,
+    int repetitions,
+    int dry_runs) {
+    return nabla4_benchmark_structured_torus<naive>(
+        CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, repetitions, dry_runs);
+}
+
+std::vector<double> nabla4_benchmark_structured_torus_cpu_ifirst(std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::size_t longitude_dim,
+    std::size_t latitude_dim,
+    int repetitions,
+    int dry_runs) {
+    return nabla4_benchmark_structured_torus<cpu_ifirst>(
+        CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, repetitions, dry_runs);
+}
+
+std::vector<double> nabla4_benchmark_structured_torus_cpu_kfirst(std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::size_t longitude_dim,
+    std::size_t latitude_dim,
+    int repetitions,
+    int dry_runs) {
+    return nabla4_benchmark_structured_torus<cpu_kfirst>(
+        CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, repetitions, dry_runs);
+}
+
+std::vector<double> nabla4_benchmark_structured_torus_gpu(std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::size_t longitude_dim,
+    std::size_t latitude_dim,
+    int repetitions,
+    int dry_runs) {
+    return nabla4_benchmark_structured_torus<gpu>(
+        CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, repetitions, dry_runs);
+}
+
+std::vector<std::vector<float>> nabla4_validate_structured_torus_naive(std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::size_t longitude_dim,
+    std::size_t latitude_dim,
+    std::vector<std::vector<float>> &u_vert,
+    std::vector<std::vector<float>> &v_vert,
+    std::vector<double> &primal_normal_vert_v1,
+    std::vector<double> &primal_normal_vert_v2,
+    std::vector<std::vector<double>> &z_nabla2_e,
+    std::vector<double> &inv_vert_vert_length,
+    std::vector<double> &inv_primal_edge_length) {
+    nabla4_structured_torus nabla4_benchmark_object{CellDim,
+        VertexDim,
+        EdgeDim,
+        KDim,
+        ECVDim,
+        longitude_dim,
+        latitude_dim,
+        u_vert,
+        v_vert,
+        primal_normal_vert_v1,
+        primal_normal_vert_v2,
+        z_nabla2_e,
+        inv_vert_vert_length,
+        inv_primal_edge_length};
+    return run_validation<nabla4_structured_torus, naive>(nabla4_benchmark_object);
+}
+
+std::vector<std::vector<float>> nabla4_validate_structured_torus_cpu_ifirst(std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::size_t longitude_dim,
+    std::size_t latitude_dim,
+    std::vector<std::vector<float>> &u_vert,
+    std::vector<std::vector<float>> &v_vert,
+    std::vector<double> &primal_normal_vert_v1,
+    std::vector<double> &primal_normal_vert_v2,
+    std::vector<std::vector<double>> &z_nabla2_e,
+    std::vector<double> &inv_vert_vert_length,
+    std::vector<double> &inv_primal_edge_length) {
+    nabla4_structured_torus nabla4_benchmark_object{CellDim,
+        VertexDim,
+        EdgeDim,
+        KDim,
+        ECVDim,
+        longitude_dim,
+        latitude_dim,
+        u_vert,
+        v_vert,
+        primal_normal_vert_v1,
+        primal_normal_vert_v2,
+        z_nabla2_e,
+        inv_vert_vert_length,
+        inv_primal_edge_length};
+    return run_validation<nabla4_structured_torus, cpu_ifirst>(nabla4_benchmark_object);
+}
+
+std::vector<std::vector<float>> nabla4_validate_structured_torus_cpu_kfirst(std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::size_t longitude_dim,
+    std::size_t latitude_dim,
+    std::vector<std::vector<float>> &u_vert,
+    std::vector<std::vector<float>> &v_vert,
+    std::vector<double> &primal_normal_vert_v1,
+    std::vector<double> &primal_normal_vert_v2,
+    std::vector<std::vector<double>> &z_nabla2_e,
+    std::vector<double> &inv_vert_vert_length,
+    std::vector<double> &inv_primal_edge_length) {
+    nabla4_structured_torus nabla4_benchmark_object{CellDim,
+        VertexDim,
+        EdgeDim,
+        KDim,
+        ECVDim,
+        longitude_dim,
+        latitude_dim,
+        u_vert,
+        v_vert,
+        primal_normal_vert_v1,
+        primal_normal_vert_v2,
+        z_nabla2_e,
+        inv_vert_vert_length,
+        inv_primal_edge_length};
+    return run_validation<nabla4_structured_torus, cpu_kfirst>(nabla4_benchmark_object);
+}
+
+std::vector<std::vector<float>> nabla4_validate_structured_torus_gpu(std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::size_t longitude_dim,
+    std::size_t latitude_dim,
+    std::vector<std::vector<float>> &u_vert,
+    std::vector<std::vector<float>> &v_vert,
+    std::vector<double> &primal_normal_vert_v1,
+    std::vector<double> &primal_normal_vert_v2,
+    std::vector<std::vector<double>> &z_nabla2_e,
+    std::vector<double> &inv_vert_vert_length,
+    std::vector<double> &inv_primal_edge_length) {
+    nabla4_structured_torus nabla4_benchmark_object{CellDim,
+        VertexDim,
+        EdgeDim,
+        KDim,
+        ECVDim,
+        longitude_dim,
+        latitude_dim,
+        u_vert,
+        v_vert,
+        primal_normal_vert_v1,
+        primal_normal_vert_v2,
+        z_nabla2_e,
+        inv_vert_vert_length,
+        inv_primal_edge_length};
+    return run_validation<nabla4_structured_torus, gpu>(nabla4_benchmark_object);
+}

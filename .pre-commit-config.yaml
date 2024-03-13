@@ -115,6 +115,6 @@ repos:
   - id: clang-format
     exclude: |-
       (?x)^(
-      tests/data/simple_grid/.*
+      tests/data/simple_grid/.* |
       tests/data/torus_grid/.*
       )$
