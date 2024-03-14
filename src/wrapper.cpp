@@ -5,6 +5,18 @@
 /// TODO: See if we can avoid declaring nabla4_benchmark_* and use templates.
 /// Problem with templates are python bindings
 
+nabla4_validation_data get_nabla4_benchmark_validation_data(std::vector<std::vector<std::size_t>> &e2c2v,
+    std::vector<std::vector<std::size_t>> &e2ecv,
+    std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim) {
+    nabla4_unstructured nabla4_benchmark_object{e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim};
+    run_benchmark<nabla4_unstructured, naive>(nabla4_benchmark_object, 1, 0);
+    return nabla4_benchmark_object.get_validation_data();
+}
+
 template <backend_impl I>
 std::vector<double> nabla4_benchmark_unstructured(std::vector<std::vector<std::size_t>> &e2c2v,
     std::vector<std::vector<std::size_t>> &e2ecv,

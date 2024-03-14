@@ -1,5 +1,13 @@
 #include "benchmark.hpp"
 
+nabla4_validation_data get_nabla4_benchmark_validation_data(std::vector<std::vector<std::size_t>> &e2c2v,
+    std::vector<std::vector<std::size_t>> &e2ecv,
+    std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim);
+
 std::vector<double> nabla4_benchmark_unstructured_naive(std::vector<std::vector<std::size_t>> &e2c2v,
     std::vector<std::vector<std::size_t>> &e2ecv,
     std::size_t CellDim,

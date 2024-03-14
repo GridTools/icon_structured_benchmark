@@ -26,7 +26,7 @@ class nabla4_structured {
     std::vector<std::vector<float>> z_nabla4_e2_wp;
 
     /// Random number utilities
-    RandomUniformUtils rand_utils{-2.0, 2.0};
+    RandomUniformUtils rand_utils{-1.0, 1.0};
 
     static constexpr std::size_t longitude_dim{3};
     static constexpr std::size_t latitude_dim{3};
@@ -36,8 +36,8 @@ class nabla4_structured {
         // std::cout << "Initializing vectors" << std::endl;
         u_vert = rand_utils.random_init_vec_2d<float>(VertexDim, KDim);
         v_vert = rand_utils.random_init_vec_2d<float>(VertexDim, KDim);
-        primal_normal_vert_v1 = rand_utils.random_init_vec_1d(ECVDim);
-        primal_normal_vert_v2 = rand_utils.random_init_vec_1d(ECVDim);
+        primal_normal_vert_v1 = rand_utils.random_init_vec_1d(EdgeDim * ECVDim);
+        primal_normal_vert_v2 = rand_utils.random_init_vec_1d(EdgeDim * ECVDim);
         z_nabla2_e = rand_utils.random_init_vec_2d(EdgeDim, KDim);
         inv_vert_vert_length = rand_utils.random_init_vec_1d(EdgeDim);
         inv_primal_edge_length = rand_utils.random_init_vec_1d(EdgeDim);
