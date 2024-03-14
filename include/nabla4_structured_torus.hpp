@@ -99,12 +99,15 @@ class nabla4_structured_torus {
         std::size_t longitude_p1,
         std::size_t longitude_m1) {
         std::array<ARRAY_TYPE, 4> e2c2v_ret{};
+        const auto stride = static_cast<size_t>(longitude_dim / 2); // + longitude_dim % 2; // 1 needs to be longitude%2
         e2c2v_ret[0] = parent_vertex;
         e2c2v_ret[1] = longitude_p1 * latitude_dim + latitude;
-        e2c2v_ret[2] = latitude_m1 > latitude ? longitude_m1 * latitude_dim + latitude_m1
+        const auto longitude_pstride_p01 = (longitude + stride + longitude_dim % 2) % longitude_dim;
+        e2c2v_ret[2] = latitude_m1 > latitude ? longitude_pstride_p01 * latitude_dim + latitude_m1
                                               : longitude_p1 * latitude_dim + latitude_m1;
-        e2c2v_ret[3] =
-            latitude_p1 < latitude ? longitude_m1 * latitude_dim + latitude_p1 : longitude * latitude_dim + latitude_p1;
+        const auto longitude_pstride_p1 = (longitude + stride + 1) % longitude_dim;
+        e2c2v_ret[3] = latitude_p1 < latitude ? longitude_pstride_p1 * latitude_dim + latitude_p1
+                                              : longitude * latitude_dim + latitude_p1;
         return e2c2v_ret;
     }
 
@@ -118,10 +121,13 @@ class nabla4_structured_torus {
         std::size_t longitude_m1) {
         std::array<ARRAY_TYPE, 4> e2c2v_ret{};
         e2c2v_ret[0] = parent_vertex;
-        e2c2v_ret[1] =
-            latitude_p1 < latitude ? longitude_m1 * latitude_dim + latitude_p1 : longitude * latitude_dim + latitude_p1;
+        const auto stride = static_cast<size_t>(longitude_dim / 2); // + longitude_dim % 2;
+        const auto longitude_pstride_p1 = (longitude + stride + 1) % longitude_dim;
+        e2c2v_ret[1] = latitude_p1 < latitude ? longitude_pstride_p1 * latitude_dim + latitude_p1
+                                              : longitude * latitude_dim + latitude_p1;
         e2c2v_ret[2] = longitude_p1 * latitude_dim + latitude;
-        e2c2v_ret[3] = latitude_p1 < latitude ? longitude_p1 * latitude_dim + latitude_p1
+        const auto longitude_pstride = (longitude + stride) % longitude_dim;
+        e2c2v_ret[3] = latitude_p1 < latitude ? longitude_pstride * latitude_dim + latitude_p1
                                               : longitude_m1 * latitude_dim + latitude_p1;
         return e2c2v_ret;
     }
@@ -135,11 +141,14 @@ class nabla4_structured_torus {
         std::size_t longitude_p1,
         std::size_t longitude_m1) {
         std::array<ARRAY_TYPE, 4> e2c2v_ret{};
+        const auto stride = static_cast<size_t>(longitude_dim / 2); // + longitude_dim % 2;
         e2c2v_ret[0] = parent_vertex;
-        e2c2v_ret[1] = latitude_p1 < latitude ? longitude_p1 * latitude_dim + latitude_p1
+        const auto longitude_pstride = (longitude + stride) % longitude_dim;
+        e2c2v_ret[1] = latitude_p1 < latitude ? longitude_pstride * latitude_dim + latitude_p1
                                               : longitude_m1 * latitude_dim + latitude_p1;
-        e2c2v_ret[2] =
-            latitude_p1 < latitude ? longitude_m1 * latitude_dim + latitude_p1 : longitude * latitude_dim + latitude_p1;
+        const auto longitude_pstride_p1 = (longitude + stride + 1) % longitude_dim;
+        e2c2v_ret[2] = latitude_p1 < latitude ? longitude_pstride_p1 * latitude_dim + latitude_p1
+                                              : longitude * latitude_dim + latitude_p1;
         e2c2v_ret[3] = longitude_m1 * latitude_dim + latitude;
         return e2c2v_ret;
     }
@@ -161,8 +170,8 @@ class nabla4_structured_torus {
         const auto E2C2V_2 = e2c2v_vec[2];
         const auto E2C2V_3 = e2c2v_vec[3];
         // if (k_index == 0) {
-        //     std::cout << "E2C2V[" << edge_index << "]: {" << E2C2V_0 << ", " <<
-        //     E2C2V_1 << ", " << E2C2V_2 << ", " << E2C2V_3 << "}" << std::endl;
+        //     std::cout << "E2C2V[" << edge_index << "]: [" << E2C2V_0 << " " <<
+        //     E2C2V_1 << " " << E2C2V_2 << " " << E2C2V_3 << "]" << std::endl;
         // }
         const auto E2ECV_0 = edge_index * 4;
         const auto E2ECV_1 = edge_index * 4 + 1;
