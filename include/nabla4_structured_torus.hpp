@@ -144,11 +144,11 @@ class nabla4_structured_torus {
         std::size_t longitude_p1,
         std::size_t longitude_m1) {
         std::array<ARRAY_TYPE, 4> e2c2v_ret{};
-        const auto stride = static_cast<size_t>(longitude_dim / 2); // + longitude_dim % 2;
         e2c2v_ret[0] = parent_vertex;
-        const auto longitude_pstride = (longitude + stride) % longitude_dim;
-        e2c2v_ret[1] = latitude_p1 < latitude ? longitude_pstride * latitude_dim + latitude_p1
-                                              : longitude_m1 * latitude_dim + latitude_p1;
+        e2c2v_ret[1] = ((((latitude == latitude_dim - 1) * static_cast<size_t>(latitude_dim / 2)) + longitude - 1) %
+                           longitude_dim) *
+                           latitude_dim +
+                       latitude_p1;
         e2c2v_ret[2] =
             ((((latitude == latitude_dim - 1) * (latitude_dim / 2)) + longitude) % longitude_dim) * latitude_dim +
             latitude_p1;
