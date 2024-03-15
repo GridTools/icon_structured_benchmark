@@ -17,6 +17,21 @@ import icon_benchmark  # type: ignore [import-not-found]
 
 from plot_runtimes import plot_runtimes
 
+import netCDF4  # type: ignore [import-not-found]
+
+
+def print_median_runtimes(runtimes):
+    for key in runtimes.keys():
+        print("{} median runtime: {}".format(key, np.median(runtimes[key])))
+
+
+def get_torus_cartesian_dimensions(filename):
+    nc = netCDF4.Dataset(filename, mode="r")
+    sorted_y_coordinates = np.sort(nc["cartesian_y_vertices"][:])
+    longitude_dimension = np.count_nonzero(sorted_y_coordinates == 0.0)
+    latitude_dimension = int(len(sorted_y_coordinates) / longitude_dimension)
+    return (longitude_dimension, latitude_dimension)
+
 
 def init_grid_manager(fname, num_levels=65, transformation=ToGt4PyTransformation()):
     grid_manager = GridManager(
@@ -159,10 +174,6 @@ def parse_arguments():
         "--dry-run", default=False, help="Do a dry run or not", action="store_true"
     )
     parser.add_argument(
-        "--lon-dim", type=int, help="Longitude dimension", required=True
-    )
-    parser.add_argument("--lat-dim", type=int, help="Latitude dimension", required=True)
-    parser.add_argument(
         "--output", type=str, default="output.pdf", help="Output file with plots"
     )
     parser.add_argument(
@@ -189,18 +200,24 @@ def run_benchmarks():
     repetitions = args.repetitions
     dry_runs = 1 if args.dry_run else 0
 
+    grid_cartesian_dimensions = get_torus_cartesian_dimensions(args.grid)
+
     print(
-        "CellsDim: {} VertexDim: {} EdgeDim: {} KDim: {} E2C2VDim: {}".format(
+        "CellsDim: {} VertexDim: {} EdgeDim: {} KDim: {} E2C2VDim: {} Longitude dimension: {} Latitude dimension: {}".format(
             torus_grid.num_cells,
             torus_grid.num_vertices,
             torus_grid.num_edges,
             torus_grid.num_levels,
             torus_grid.size[E2C2VDim],
+            grid_cartesian_dimensions[0],
+            grid_cartesian_dimensions[1],
         )
     )
 
     if args.sanity_checks:
-        run_sanity_checks(torus_grid, args.lon_dim, args.lat_dim)
+        run_sanity_checks(
+            torus_grid, grid_cartesian_dimensions[0], grid_cartesian_dimensions[1]
+        )
 
     runtimes = {}
 
@@ -217,7 +234,12 @@ def run_benchmarks():
         repetitions,
         dry_runs,
     )
+    # print("Unstructured E2C2V")
+    # with open("unstructured_grid_e2c2v.txt", 'w') as f:
+    #     for i, arr in enumerate(torus_grid.get_offset_provider("E2C2V").table):
+    #         f.write("E2C2V[{}]: [{} {} {} {}]\n".format(i, arr[0], arr[1], arr[2], arr[3]))
 
+    # print("Structured E2C2V")
     runtimes[
         "nabla4_benchmark_structured_torus_naive"
     ] = icon_benchmark.nabla4_benchmark_structured_torus_naive(
@@ -226,11 +248,13 @@ def run_benchmarks():
         torus_grid.num_edges,
         torus_grid.num_levels,
         torus_grid.size[E2C2VDim],
-        args.lon_dim,
-        args.lat_dim,
+        grid_cartesian_dimensions[0],
+        grid_cartesian_dimensions[1],
         repetitions,
         dry_runs,
     )
+
+    # return
 
     runtimes[
         "nabla4_benchmark_unstructured_cpu_ifirst"
@@ -254,8 +278,8 @@ def run_benchmarks():
         torus_grid.num_edges,
         torus_grid.num_levels,
         torus_grid.size[E2C2VDim],
-        args.lon_dim,
-        args.lat_dim,
+        grid_cartesian_dimensions[0],
+        grid_cartesian_dimensions[1],
         repetitions,
         dry_runs,
     )
@@ -282,12 +306,13 @@ def run_benchmarks():
         torus_grid.num_edges,
         torus_grid.num_levels,
         torus_grid.size[E2C2VDim],
-        args.lon_dim,
-        args.lat_dim,
+        grid_cartesian_dimensions[0],
+        grid_cartesian_dimensions[1],
         repetitions,
         dry_runs,
     )
 
+    print_median_runtimes(runtimes)
     plot_runtimes(runtimes, args.output)
 
 

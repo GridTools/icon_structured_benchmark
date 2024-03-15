@@ -4,3 +4,7 @@
 # build directories
 build*
 
+# debug temporary files
+*.txt
+*.out
+
