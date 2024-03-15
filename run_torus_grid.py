@@ -19,6 +19,8 @@ from plot_runtimes import plot_runtimes
 
 import netCDF4  # type: ignore [import-not-found]
 
+from json import dump
+
 
 def print_median_runtimes(runtimes):
     for key in runtimes.keys():
@@ -314,6 +316,9 @@ def run_benchmarks():
 
     print_median_runtimes(runtimes)
     plot_runtimes(runtimes, args.output)
+
+    with open(args.output.split(".")[0] + ".json", "w") as file:
+        dump(runtimes, file)
 
 
 if __name__ == "__main__":
