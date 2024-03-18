@@ -90,10 +90,7 @@ class nabla4_structured_torus {
 
     std::vector<std::vector<float>> get_output() { return z_nabla4_e2_wp; }
 
-    template <typename T>
-    inline std::size_t modulo(T a, std::size_t b) {
-        return a - b * (a / b);
-    }
+    inline std::size_t modulo(int a, int b) { return a - b * (a / b); }
 
     inline std::array<ARRAY_TYPE, 4> get_e2c2v_vertices_north_edge(std::size_t edge_index,
         std::size_t parent_vertex,
@@ -110,11 +107,11 @@ class nabla4_structured_torus {
         // " longitude: " << longitude << " longitude_dim: " << longitude_dim << " latitude_dim: " << latitude_dim << "
         // latitude_m1: " << latitude_m1 << std::endl;
         e2c2v_ret[2] =
-            ((((latitude == 0) * ((2 * longitude_dim - latitude_dim) / 2)) + longitude + 1) % longitude_dim) *
+            modulo((((latitude == 0) * ((2 * longitude_dim - latitude_dim) / 2)) + longitude + 1), longitude_dim) *
                 latitude_dim +
             latitude_m1;
         e2c2v_ret[3] =
-            ((((latitude == latitude_dim - 1) * (latitude_dim / 2)) + longitude) % longitude_dim) * latitude_dim +
+            modulo((((latitude == latitude_dim - 1) * (latitude_dim / 2)) + longitude), longitude_dim) * latitude_dim +
             latitude_p1;
         return e2c2v_ret;
     }
@@ -130,13 +127,13 @@ class nabla4_structured_torus {
         std::array<ARRAY_TYPE, 4> e2c2v_ret{};
         e2c2v_ret[0] = parent_vertex;
         e2c2v_ret[1] =
-            ((((latitude == latitude_dim - 1) * (latitude_dim / 2)) + longitude) % longitude_dim) * latitude_dim +
+            modulo((((latitude == latitude_dim - 1) * (latitude_dim / 2)) + longitude), longitude_dim) * latitude_dim +
             latitude_p1;
         e2c2v_ret[2] = longitude_p1 * latitude_dim + latitude;
-        e2c2v_ret[3] =
-            ((((latitude == latitude_dim - 1) * (latitude_dim / 2)) + longitude_dim + longitude - 1) % longitude_dim) *
-                latitude_dim +
-            latitude_p1;
+        e2c2v_ret[3] = modulo((((latitude == latitude_dim - 1) * (latitude_dim / 2)) + longitude_dim + longitude - 1),
+                           longitude_dim) *
+                           latitude_dim +
+                       latitude_p1;
         return e2c2v_ret;
     }
 
@@ -150,12 +147,12 @@ class nabla4_structured_torus {
         std::size_t longitude_m1) {
         std::array<ARRAY_TYPE, 4> e2c2v_ret{};
         e2c2v_ret[0] = parent_vertex;
-        e2c2v_ret[1] =
-            ((((latitude == latitude_dim - 1) * (latitude_dim / 2)) + longitude_dim + longitude - 1) % longitude_dim) *
-                latitude_dim +
-            latitude_p1;
+        e2c2v_ret[1] = modulo((((latitude == latitude_dim - 1) * (latitude_dim / 2)) + longitude_dim + longitude - 1),
+                           longitude_dim) *
+                           latitude_dim +
+                       latitude_p1;
         e2c2v_ret[2] =
-            ((((latitude == latitude_dim - 1) * (latitude_dim / 2)) + longitude) % longitude_dim) * latitude_dim +
+            modulo((((latitude == latitude_dim - 1) * (latitude_dim / 2)) + longitude), longitude_dim) * latitude_dim +
             latitude_p1;
         e2c2v_ret[3] = longitude_m1 * latitude_dim + latitude;
         return e2c2v_ret;
@@ -167,10 +164,10 @@ class nabla4_structured_torus {
         const auto starting_vertex = edge_index / edges_per_index;
         const auto latitude = modulo(starting_vertex, latitude_dim);
         const auto longitude = starting_vertex / latitude_dim;
-        const auto latitude_p1 = (latitude + 1) % latitude_dim;
-        const auto latitude_m1 = (latitude_dim + (latitude - 1)) % latitude_dim;
-        const auto longitude_p1 = (longitude + 1) % longitude_dim;
-        const auto longitude_m1 = (longitude_dim + (longitude - 1)) % longitude_dim;
+        const auto latitude_p1 = modulo((latitude + 1), latitude_dim);
+        const auto latitude_m1 = modulo((latitude_dim + (latitude - 1)), latitude_dim);
+        const auto longitude_p1 = modulo((longitude + 1), longitude_dim);
+        const auto longitude_m1 = modulo((longitude_dim + (longitude - 1)), longitude_dim);
         const auto e2c2v_vec = (this->*f)(
             edge_index, starting_vertex, latitude, longitude, latitude_p1, latitude_m1, longitude_p1, longitude_m1);
         const auto E2C2V_0 = e2c2v_vec[0];
