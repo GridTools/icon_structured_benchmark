@@ -153,9 +153,9 @@ class nabla4_structured_torus {
     }
 
     template <auto f>
-    inline void inner_kernel(ARRAY_TYPE edge_index, std::size_t k_index) {
-        const std::size_t edges_per_index{3};
-        const auto starting_vertex = edge_index / edges_per_index;
+    inline std::array<ARRAY_TYPE, 4> get_e2c2v(ARRAY_TYPE edge_index) {
+        const std::size_t edges_per_index{EdgeDim / 3};
+        const auto starting_vertex = edge_index % edges_per_index;
         const auto latitude = modulo(starting_vertex, latitude_dim);
         const auto longitude = starting_vertex / latitude_dim;
         const auto latitude_p1 = modulo((latitude + 1), latitude_dim);
@@ -180,6 +180,40 @@ class nabla4_structured_torus {
             longitude_m1,
             longitude_pstride_latitude_p1,
             logitude_pstride_m1_latitude_p1);
+        return e2c2v_vec;
+    }
+
+    template <auto f>
+    inline void inner_kernel(ARRAY_TYPE edge_index, std::size_t k_index) {
+        const auto e2c2v_vec = get_e2c2v<f>(edge_index);
+        const auto E2C2V_0 = e2c2v_vec[0];
+        const auto E2C2V_1 = e2c2v_vec[1];
+        const auto E2C2V_2 = e2c2v_vec[2];
+        const auto E2C2V_3 = e2c2v_vec[3];
+        // if (k_index == 0) {
+        //     std::cout << "E2C2V[" << edge_index << "]: [" << E2C2V_0 << " " << E2C2V_1 << " " << E2C2V_2 << " "
+        //               << E2C2V_3 << "]" << std::endl;
+        // }
+        const auto E2ECV_0 = edge_index * 4;
+        const auto E2ECV_1 = edge_index * 4 + 1;
+        const auto E2ECV_2 = edge_index * 4 + 2;
+        const auto E2ECV_3 = edge_index * 4 + 3;
+        double nabv_tang_wp = u_vert[E2C2V_0][k_index] * primal_normal_vert_v1[E2ECV_0] +
+                              v_vert[E2C2V_0][k_index] * primal_normal_vert_v2[E2ECV_0] +
+                              u_vert[E2C2V_1][k_index] * primal_normal_vert_v1[E2ECV_1] +
+                              v_vert[E2C2V_1][k_index] * primal_normal_vert_v2[E2ECV_1];
+        double nabv_norm_wp = u_vert[E2C2V_2][k_index] * primal_normal_vert_v1[E2ECV_2] +
+                              v_vert[E2C2V_2][k_index] * primal_normal_vert_v2[E2ECV_2] +
+                              u_vert[E2C2V_3][k_index] * primal_normal_vert_v1[E2ECV_3] +
+                              v_vert[E2C2V_3][k_index] * primal_normal_vert_v2[E2ECV_3];
+        z_nabla4_e2_wp[edge_index][k_index] =
+            4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e[edge_index][k_index]) *
+                          (inv_vert_vert_length[edge_index] * inv_vert_vert_length[edge_index]) +
+                      (nabv_tang_wp - 2.0 * z_nabla2_e[edge_index][k_index]) *
+                          (inv_primal_edge_length[edge_index] * inv_primal_edge_length[edge_index]));
+    }
+
+    inline void inner_kernel(std::array<ARRAY_TYPE, 4> e2c2v_vec, std::size_t edge_index, std::size_t k_index) {
         const auto E2C2V_0 = e2c2v_vec[0];
         const auto E2C2V_1 = e2c2v_vec[1];
         const auto E2C2V_2 = e2c2v_vec[2];
@@ -210,10 +244,14 @@ class nabla4_structured_torus {
     void run_naive() {
         // std::cout << "Running naive nabla4_unstructured benchmark" << std::endl;
         for (std::size_t k_index{}; k_index < KDim; ++k_index) {
-            for (std::size_t edge_index{0}; edge_index < EdgeDim; edge_index += 3) {
+            for (std::size_t edge_index{0}; edge_index < EdgeDim / 3; ++edge_index) {
                 inner_kernel<&nabla4_structured_torus::get_e2c2v_vertices_north_edge>(edge_index, k_index);
-                inner_kernel<&nabla4_structured_torus::get_e2c2v_vertices_east_edge>(edge_index + 1, k_index);
-                inner_kernel<&nabla4_structured_torus::get_e2c2v_vertices_southeast_edge>(edge_index + 2, k_index);
+            }
+            for (std::size_t edge_index{EdgeDim / 3}; edge_index < 2 * EdgeDim / 3; ++edge_index) {
+                inner_kernel<&nabla4_structured_torus::get_e2c2v_vertices_east_edge>(edge_index, k_index);
+            }
+            for (std::size_t edge_index{2 * EdgeDim / 3}; edge_index < EdgeDim; ++edge_index) {
+                inner_kernel<&nabla4_structured_torus::get_e2c2v_vertices_southeast_edge>(edge_index, k_index);
             };
         };
     };
@@ -221,21 +259,40 @@ class nabla4_structured_torus {
     void run_cpu_ifirst() {
         for (std::size_t k_index{}; k_index < KDim; ++k_index) {
 #pragma omp simd
-            for (std::size_t edge_index = 0; edge_index < EdgeDim; edge_index += 3) {
+            for (std::size_t edge_index = 0; edge_index < EdgeDim / 3; ++edge_index) {
                 inner_kernel<&nabla4_structured_torus::get_e2c2v_vertices_north_edge>(edge_index, k_index);
-                inner_kernel<&nabla4_structured_torus::get_e2c2v_vertices_east_edge>(edge_index + 1, k_index);
-                inner_kernel<&nabla4_structured_torus::get_e2c2v_vertices_southeast_edge>(edge_index + 2, k_index);
+            }
+#pragma omp simd
+            for (std::size_t edge_index = EdgeDim / 3; edge_index < 2 * EdgeDim / 3; ++edge_index) {
+                inner_kernel<&nabla4_structured_torus::get_e2c2v_vertices_east_edge>(edge_index, k_index);
+            }
+#pragma omp simd
+            for (std::size_t edge_index = 2 * EdgeDim / 3; edge_index < EdgeDim; ++edge_index) {
+                inner_kernel<&nabla4_structured_torus::get_e2c2v_vertices_southeast_edge>(edge_index, k_index);
             };
         };
     };
 
     void run_cpu_kfirst() {
-        for (std::size_t edge_index{}; edge_index < EdgeDim; edge_index += 3) {
+        for (std::size_t edge_index{}; edge_index < EdgeDim / 3; ++edge_index) {
+            const auto e2c2v_vec = get_e2c2v<&nabla4_structured_torus::get_e2c2v_vertices_north_edge>(edge_index);
 #pragma omp simd
             for (std::size_t k_index = 0; k_index < KDim; ++k_index) {
-                inner_kernel<&nabla4_structured_torus::get_e2c2v_vertices_north_edge>(edge_index, k_index);
-                inner_kernel<&nabla4_structured_torus::get_e2c2v_vertices_east_edge>(edge_index + 1, k_index);
-                inner_kernel<&nabla4_structured_torus::get_e2c2v_vertices_southeast_edge>(edge_index + 2, k_index);
+                inner_kernel(e2c2v_vec, edge_index, k_index);
+            };
+        };
+        for (std::size_t edge_index{EdgeDim / 3}; edge_index < 2 * EdgeDim / 3; ++edge_index) {
+            const auto e2c2v_vec = get_e2c2v<&nabla4_structured_torus::get_e2c2v_vertices_east_edge>(edge_index);
+#pragma omp simd
+            for (std::size_t k_index = 0; k_index < KDim; ++k_index) {
+                inner_kernel(e2c2v_vec, edge_index, k_index);
+            };
+        };
+        for (std::size_t edge_index{2 * EdgeDim / 3}; edge_index < EdgeDim; ++edge_index) {
+            const auto e2c2v_vec = get_e2c2v<&nabla4_structured_torus::get_e2c2v_vertices_southeast_edge>(edge_index);
+#pragma omp simd
+            for (std::size_t k_index = 0; k_index < KDim; ++k_index) {
+                inner_kernel(e2c2v_vec, edge_index, k_index);
             };
         };
     };

@@ -298,15 +298,15 @@ class nabla4_unstructured {
         // std::cout << "Running cpu_kfirst nabla4_unstructured benchmark" <<
         // std::endl;
         for (std::size_t edge_index{}; edge_index < EdgeDim; ++edge_index) {
+            const auto E2C2V_0 = e2c2v[edge_index][0];
+            const auto E2C2V_1 = e2c2v[edge_index][1];
+            const auto E2C2V_2 = e2c2v[edge_index][2];
+            const auto E2C2V_3 = e2c2v[edge_index][3];
+            const auto E2ECV_0 = e2ecv[edge_index][0];
+            const auto E2ECV_1 = e2ecv[edge_index][1];
+            const auto E2ECV_2 = e2ecv[edge_index][2];
+            const auto E2ECV_3 = e2ecv[edge_index][3];
             for (std::size_t k_index{}; k_index < KDim; ++k_index) {
-                const auto E2C2V_0 = e2c2v[edge_index][0];
-                const auto E2C2V_1 = e2c2v[edge_index][1];
-                const auto E2C2V_2 = e2c2v[edge_index][2];
-                const auto E2C2V_3 = e2c2v[edge_index][3];
-                const auto E2ECV_0 = e2ecv[edge_index][0];
-                const auto E2ECV_1 = e2ecv[edge_index][1];
-                const auto E2ECV_2 = e2ecv[edge_index][2];
-                const auto E2ECV_3 = e2ecv[edge_index][3];
                 double nabv_tang_wp = static_cast<double>(u_vert[E2C2V_0][k_index]) * primal_normal_vert_v1[E2ECV_0] +
                                       static_cast<double>(v_vert[E2C2V_0][k_index]) * primal_normal_vert_v2[E2ECV_0] +
                                       static_cast<double>(u_vert[E2C2V_1][k_index]) * primal_normal_vert_v1[E2ECV_1] +
