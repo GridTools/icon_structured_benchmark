@@ -90,6 +90,11 @@ class nabla4_structured_torus {
 
     std::vector<std::vector<float>> get_output() { return z_nabla4_e2_wp; }
 
+    template <typename T>
+    inline std::size_t modulo(T a, std::size_t b) {
+        return a - b * (a / b);
+    }
+
     inline std::array<ARRAY_TYPE, 4> get_e2c2v_vertices_north_edge(std::size_t edge_index,
         std::size_t parent_vertex,
         std::size_t latitude,
@@ -160,7 +165,7 @@ class nabla4_structured_torus {
     inline void inner_kernel(ARRAY_TYPE edge_index, std::size_t k_index) {
         const std::size_t edges_per_index{3};
         const auto starting_vertex = edge_index / edges_per_index;
-        const auto latitude = starting_vertex % latitude_dim;
+        const auto latitude = modulo(starting_vertex, latitude_dim);
         const auto longitude = starting_vertex / latitude_dim;
         const auto latitude_p1 = (latitude + 1) % latitude_dim;
         const auto latitude_m1 = (latitude_dim + (latitude - 1)) % latitude_dim;
