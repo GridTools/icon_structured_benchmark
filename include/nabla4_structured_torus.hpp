@@ -99,7 +99,9 @@ class nabla4_structured_torus {
         std::size_t latitude_p1,
         std::size_t latitude_m1,
         std::size_t longitude_p1,
-        std::size_t longitude_m1) {
+        std::size_t longitude_m1,
+        std::size_t longitude_pstride_latitude_p1,
+        std::size_t logitude_pstride_m1_latitude_p1) {
         std::array<ARRAY_TYPE, 4> e2c2v_ret{};
         e2c2v_ret[0] = parent_vertex;
         e2c2v_ret[1] = longitude_p1 * latitude_dim + latitude;
@@ -110,9 +112,7 @@ class nabla4_structured_torus {
             modulo((((latitude == 0) * ((2 * longitude_dim - latitude_dim) / 2)) + longitude + 1), longitude_dim) *
                 latitude_dim +
             latitude_m1;
-        e2c2v_ret[3] =
-            modulo((((latitude == latitude_dim - 1) * (latitude_dim / 2)) + longitude), longitude_dim) * latitude_dim +
-            latitude_p1;
+        e2c2v_ret[3] = longitude_pstride_latitude_p1;
         return e2c2v_ret;
     }
 
@@ -123,17 +123,14 @@ class nabla4_structured_torus {
         std::size_t latitude_p1,
         std::size_t latitude_m1,
         std::size_t longitude_p1,
-        std::size_t longitude_m1) {
+        std::size_t longitude_m1,
+        std::size_t longitude_pstride_latitude_p1,
+        std::size_t logitude_pstride_m1_latitude_p1) {
         std::array<ARRAY_TYPE, 4> e2c2v_ret{};
         e2c2v_ret[0] = parent_vertex;
-        e2c2v_ret[1] =
-            modulo((((latitude == latitude_dim - 1) * (latitude_dim / 2)) + longitude), longitude_dim) * latitude_dim +
-            latitude_p1;
+        e2c2v_ret[1] = longitude_pstride_latitude_p1;
         e2c2v_ret[2] = longitude_p1 * latitude_dim + latitude;
-        e2c2v_ret[3] = modulo((((latitude == latitude_dim - 1) * (latitude_dim / 2)) + longitude_dim + longitude - 1),
-                           longitude_dim) *
-                           latitude_dim +
-                       latitude_p1;
+        e2c2v_ret[3] = logitude_pstride_m1_latitude_p1;
         return e2c2v_ret;
     }
 
@@ -144,16 +141,13 @@ class nabla4_structured_torus {
         std::size_t latitude_p1,
         std::size_t latitude_m1,
         std::size_t longitude_p1,
-        std::size_t longitude_m1) {
+        std::size_t longitude_m1,
+        std::size_t longitude_pstride_latitude_p1,
+        std::size_t logitude_pstride_m1_latitude_p1) {
         std::array<ARRAY_TYPE, 4> e2c2v_ret{};
         e2c2v_ret[0] = parent_vertex;
-        e2c2v_ret[1] = modulo((((latitude == latitude_dim - 1) * (latitude_dim / 2)) + longitude_dim + longitude - 1),
-                           longitude_dim) *
-                           latitude_dim +
-                       latitude_p1;
-        e2c2v_ret[2] =
-            modulo((((latitude == latitude_dim - 1) * (latitude_dim / 2)) + longitude), longitude_dim) * latitude_dim +
-            latitude_p1;
+        e2c2v_ret[1] = logitude_pstride_m1_latitude_p1;
+        e2c2v_ret[2] = longitude_pstride_latitude_p1;
         e2c2v_ret[3] = longitude_m1 * latitude_dim + latitude;
         return e2c2v_ret;
     }
@@ -168,8 +162,24 @@ class nabla4_structured_torus {
         const auto latitude_m1 = modulo((latitude_dim + (latitude - 1)), latitude_dim);
         const auto longitude_p1 = modulo((longitude + 1), longitude_dim);
         const auto longitude_m1 = modulo((longitude_dim + (longitude - 1)), longitude_dim);
-        const auto e2c2v_vec = (this->*f)(
-            edge_index, starting_vertex, latitude, longitude, latitude_p1, latitude_m1, longitude_p1, longitude_m1);
+        const auto longitude_pstride_latitude_p1 =
+            modulo((((latitude == latitude_dim - 1) * (latitude_dim / 2)) + longitude), longitude_dim) * latitude_dim +
+            latitude_p1;
+        const auto logitude_pstride_m1_latitude_p1 =
+            modulo((((latitude == latitude_dim - 1) * (latitude_dim / 2)) + longitude_dim + longitude - 1),
+                longitude_dim) *
+                latitude_dim +
+            latitude_p1;
+        const auto e2c2v_vec = (this->*f)(edge_index,
+            starting_vertex,
+            latitude,
+            longitude,
+            latitude_p1,
+            latitude_m1,
+            longitude_p1,
+            longitude_m1,
+            longitude_pstride_latitude_p1,
+            logitude_pstride_m1_latitude_p1);
         const auto E2C2V_0 = e2c2v_vec[0];
         const auto E2C2V_1 = e2c2v_vec[1];
         const auto E2C2V_2 = e2c2v_vec[2];
