@@ -24,7 +24,15 @@ from json import dump
 
 def print_median_runtimes(runtimes):
     for key in runtimes.keys():
-        print("{} median runtime: {}".format(key, np.median(runtimes[key])))
+        values = runtimes[key]
+        print(
+            "{} median runtime: {}".format(
+                key,
+                np.median(
+                    np.sort(values)[int(0.25 * len(values)) : int(0.75 * len(values))]
+                ),
+            )
+        )
 
 
 def get_torus_cartesian_dimensions(filename):
