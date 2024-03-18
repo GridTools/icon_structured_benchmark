@@ -57,13 +57,6 @@ class Nabla4KernelValidationData:
     ref_z_nabla4_e2: np.ndarray
 
 
-def apply_permutation(perm, vec):
-    ret = []
-    for i in range(len(vec)):
-        ret.append(vec[perm[i]])
-    return ret
-
-
 @pytest.fixture
 def small_torus_grid_kernel_input(small_torus_grid):
     nabla4_kernel_validation_data = Nabla4KernelValidationData
