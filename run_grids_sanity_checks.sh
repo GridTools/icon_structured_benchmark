@@ -7,7 +7,7 @@ REPETITIONS=1
 
 source venv_py311_icon4py/bin/activate
 
-export PYTHONPATH=/Users/ioannmag/cscs_repos/cycle20/icon-structured/build:/Users/ioannmag/cscs_repos/serialbox/build/install/python:$PYTHONPATH
+export PYTHONPATH=/Users/ioannmag/cscs_repos/cycle20/icon-structured/build_santis:/Users/ioannmag/cscs_repos/serialbox/build/install/python:$PYTHONPATH
 
 for grid_file in ${GRIDS_DIRECTORY}/torus_100000_100000_*.nc; do
     echo "Running grid ${grid_file}"
