@@ -90,7 +90,7 @@ class nabla4_structured_torus {
 
     std::vector<std::vector<float>> get_output() { return z_nabla4_e2_wp; }
 
-    inline std::size_t modulo(int a, int b) { return a - b * (a / b); }
+    inline std::size_t modulo(int a, int b) { return a % b; }
 
     inline std::array<ARRAY_TYPE, 4> get_e2c2v_vertices_north_edge(std::size_t edge_index,
         std::size_t parent_vertex,
