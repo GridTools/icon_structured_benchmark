@@ -154,8 +154,8 @@ class nabla4_structured_torus {
 
     template <auto f>
     inline std::array<ARRAY_TYPE, 4> get_e2c2v(ARRAY_TYPE edge_index) {
-        const std::size_t edges_per_index{EdgeDim / 3};
-        const auto starting_vertex = edge_index % edges_per_index;
+        const std::size_t edges_per_index{3};
+        const auto starting_vertex = edge_index / edges_per_index;
         const auto latitude = modulo(starting_vertex, latitude_dim);
         const auto longitude = starting_vertex / latitude_dim;
         const auto latitude_p1 = modulo((latitude + 1), latitude_dim);
@@ -244,55 +244,36 @@ class nabla4_structured_torus {
     void run_naive() {
         // std::cout << "Running naive nabla4_unstructured benchmark" << std::endl;
         for (std::size_t k_index{}; k_index < KDim; ++k_index) {
-            for (std::size_t edge_index{0}; edge_index < EdgeDim / 3; ++edge_index) {
+            for (std::size_t edge_index{0}; edge_index < EdgeDim; edge_index += 3) {
                 inner_kernel<&nabla4_structured_torus::get_e2c2v_vertices_north_edge>(edge_index, k_index);
+                inner_kernel<&nabla4_structured_torus::get_e2c2v_vertices_east_edge>(edge_index + 1, k_index);
+                inner_kernel<&nabla4_structured_torus::get_e2c2v_vertices_southeast_edge>(edge_index + 2, k_index);
             }
-            for (std::size_t edge_index{EdgeDim / 3}; edge_index < 2 * EdgeDim / 3; ++edge_index) {
-                inner_kernel<&nabla4_structured_torus::get_e2c2v_vertices_east_edge>(edge_index, k_index);
-            }
-            for (std::size_t edge_index{2 * EdgeDim / 3}; edge_index < EdgeDim; ++edge_index) {
-                inner_kernel<&nabla4_structured_torus::get_e2c2v_vertices_southeast_edge>(edge_index, k_index);
-            };
         };
     };
 
     void run_cpu_ifirst() {
         for (std::size_t k_index{}; k_index < KDim; ++k_index) {
 #pragma omp simd
-            for (std::size_t edge_index = 0; edge_index < EdgeDim / 3; ++edge_index) {
+            for (std::size_t edge_index = 0; edge_index < EdgeDim; edge_index += 3) {
                 inner_kernel<&nabla4_structured_torus::get_e2c2v_vertices_north_edge>(edge_index, k_index);
+                inner_kernel<&nabla4_structured_torus::get_e2c2v_vertices_east_edge>(edge_index + 1, k_index);
+                inner_kernel<&nabla4_structured_torus::get_e2c2v_vertices_southeast_edge>(edge_index + 2, k_index);
             }
-#pragma omp simd
-            for (std::size_t edge_index = EdgeDim / 3; edge_index < 2 * EdgeDim / 3; ++edge_index) {
-                inner_kernel<&nabla4_structured_torus::get_e2c2v_vertices_east_edge>(edge_index, k_index);
-            }
-#pragma omp simd
-            for (std::size_t edge_index = 2 * EdgeDim / 3; edge_index < EdgeDim; ++edge_index) {
-                inner_kernel<&nabla4_structured_torus::get_e2c2v_vertices_southeast_edge>(edge_index, k_index);
-            };
-        };
+        }
     };
 
     void run_cpu_kfirst() {
-        for (std::size_t edge_index{}; edge_index < EdgeDim / 3; ++edge_index) {
-            const auto e2c2v_vec = get_e2c2v<&nabla4_structured_torus::get_e2c2v_vertices_north_edge>(edge_index);
+        for (std::size_t edge_index{}; edge_index < EdgeDim; edge_index += 3) {
+            const auto e2c2v_vec_north = get_e2c2v<&nabla4_structured_torus::get_e2c2v_vertices_north_edge>(edge_index);
+            const auto e2c2v_vec_east = get_e2c2v<&nabla4_structured_torus::get_e2c2v_vertices_east_edge>(edge_index);
+            const auto e2c2v_vec_southeast =
+                get_e2c2v<&nabla4_structured_torus::get_e2c2v_vertices_southeast_edge>(edge_index);
 #pragma omp simd
             for (std::size_t k_index = 0; k_index < KDim; ++k_index) {
-                inner_kernel(e2c2v_vec, edge_index, k_index);
-            };
-        };
-        for (std::size_t edge_index{EdgeDim / 3}; edge_index < 2 * EdgeDim / 3; ++edge_index) {
-            const auto e2c2v_vec = get_e2c2v<&nabla4_structured_torus::get_e2c2v_vertices_east_edge>(edge_index);
-#pragma omp simd
-            for (std::size_t k_index = 0; k_index < KDim; ++k_index) {
-                inner_kernel(e2c2v_vec, edge_index, k_index);
-            };
-        };
-        for (std::size_t edge_index{2 * EdgeDim / 3}; edge_index < EdgeDim; ++edge_index) {
-            const auto e2c2v_vec = get_e2c2v<&nabla4_structured_torus::get_e2c2v_vertices_southeast_edge>(edge_index);
-#pragma omp simd
-            for (std::size_t k_index = 0; k_index < KDim; ++k_index) {
-                inner_kernel(e2c2v_vec, edge_index, k_index);
+                inner_kernel(e2c2v_vec_north, edge_index, k_index);
+                inner_kernel(e2c2v_vec_east, edge_index + 1, k_index);
+                inner_kernel(e2c2v_vec_southeast, edge_index + 2, k_index);
             };
         };
     };
