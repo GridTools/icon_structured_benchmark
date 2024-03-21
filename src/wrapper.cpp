@@ -27,8 +27,8 @@ std::vector<double> nabla4_benchmark_unstructured(std::vector<std::vector<std::s
     std::size_t ECVDim,
     int repetitions,
     int dry_runs) {
-    nabla4_unstructured nabla4_benchmark_object{e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim};
-    return run_benchmark<nabla4_unstructured, I>(nabla4_benchmark_object, repetitions, dry_runs);
+    return run_benchmark<nabla4_unstructured, I>(
+        e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim, repetitions, dry_runs);
 }
 
 std::vector<double> nabla4_benchmark_unstructured_naive(std::vector<std::vector<std::size_t>> &e2c2v,
@@ -215,8 +215,7 @@ std::vector<double> nabla4_benchmark_structured(std::size_t CellDim,
     std::size_t ECVDim,
     int repetitions,
     int dry_runs) {
-    nabla4_structured nabla4_benchmark_object{CellDim, VertexDim, EdgeDim, KDim, ECVDim};
-    return run_benchmark<nabla4_structured, I>(nabla4_benchmark_object, repetitions, dry_runs);
+    return run_benchmark<nabla4_structured, I>(CellDim, VertexDim, EdgeDim, KDim, ECVDim, repetitions, dry_runs);
 }
 
 std::vector<double> nabla4_benchmark_structured_naive(std::size_t CellDim,
@@ -377,9 +376,8 @@ std::vector<double> nabla4_benchmark_structured_torus(std::size_t CellDim,
     std::size_t latitude_dim,
     int repetitions,
     int dry_runs) {
-    nabla4_structured_torus nabla4_benchmark_object{
-        CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim};
-    return run_benchmark<nabla4_structured_torus, I>(nabla4_benchmark_object, repetitions, dry_runs);
+    return run_benchmark<nabla4_structured_torus, I>(
+        CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, repetitions, dry_runs);
 }
 
 std::vector<double> nabla4_benchmark_structured_torus_naive(std::size_t CellDim,
