@@ -12,14 +12,14 @@ struct nabla4_validation_data {
     std::size_t VertexDim;
     std::size_t KDim;
     std::size_t ECVDim;
-    std::vector<std::vector<float>> u_vert;
-    std::vector<std::vector<float>> v_vert;
+    std::vector<std::vector<VP_TYPE>> u_vert;
+    std::vector<std::vector<VP_TYPE>> v_vert;
     std::vector<double> primal_normal_vert_v1;
     std::vector<double> primal_normal_vert_v2;
     std::vector<std::vector<double>> z_nabla2_e;
     std::vector<double> inv_vert_vert_length;
     std::vector<double> inv_primal_edge_length;
-    std::vector<std::vector<float>> z_nabla4_e2_wp;
+    std::vector<std::vector<VP_TYPE>> z_nabla4_e2_wp;
 };
 
 class nabla4_unstructured {
@@ -31,14 +31,14 @@ class nabla4_unstructured {
     std::size_t VertexDim;
     std::size_t KDim;
     std::size_t ECVDim;
-    std::vector<std::vector<float>> u_vert;
-    std::vector<std::vector<float>> v_vert;
+    std::vector<std::vector<VP_TYPE>> u_vert;
+    std::vector<std::vector<VP_TYPE>> v_vert;
     std::vector<double> primal_normal_vert_v1;
     std::vector<double> primal_normal_vert_v2;
     std::vector<std::vector<double>> z_nabla2_e;
     std::vector<double> inv_vert_vert_length;
     std::vector<double> inv_primal_edge_length;
-    std::vector<std::vector<float>> z_nabla4_e2_wp;
+    std::vector<std::vector<VP_TYPE>> z_nabla4_e2_wp;
 
     /// Random number utilities
     RandomUniformUtils rand_utils{-1.0, 1.0};
@@ -46,8 +46,8 @@ class nabla4_unstructured {
     /// Initialize vectors needed to execute kernel with random numbers
     void init() {
         // std::cout << "Initializing vectors" << std::endl;
-        u_vert = rand_utils.random_init_vec_2d<float>(VertexDim, KDim);
-        v_vert = rand_utils.random_init_vec_2d<float>(VertexDim, KDim);
+        u_vert = rand_utils.random_init_vec_2d<VP_TYPE>(VertexDim, KDim);
+        v_vert = rand_utils.random_init_vec_2d<VP_TYPE>(VertexDim, KDim);
         primal_normal_vert_v1 = rand_utils.random_init_vec_1d(EdgeDim * ECVDim);
         primal_normal_vert_v2 = rand_utils.random_init_vec_1d(EdgeDim * ECVDim);
         z_nabla2_e = rand_utils.random_init_vec_2d(EdgeDim, KDim);
@@ -82,8 +82,8 @@ class nabla4_unstructured {
         std::size_t EdgeDim,
         std::size_t KDim,
         std::size_t ECVDim,
-        std::vector<std::vector<float>> &u_vert,
-        std::vector<std::vector<float>> &v_vert,
+        std::vector<std::vector<VP_TYPE>> &u_vert,
+        std::vector<std::vector<VP_TYPE>> &v_vert,
         std::vector<double> &primal_normal_vert_v1,
         std::vector<double> &primal_normal_vert_v2,
         std::vector<std::vector<double>> &z_nabla2_e,
@@ -101,7 +101,7 @@ class nabla4_unstructured {
         // print_all();
     };
 
-    std::vector<std::vector<float>> get_output() {
+    std::vector<std::vector<VP_TYPE>> get_output() {
         // print_z_nabla4_e2_wp();
         return z_nabla4_e2_wp;
     }

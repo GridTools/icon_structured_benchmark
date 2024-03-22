@@ -7,10 +7,6 @@
 #include "common.hpp"
 #include "random_init.hpp"
 
-#define ARRAY_TYPE std::size_t
-
-enum class Data { ifirst, kfirst };
-
 template <Data T>
 class nabla4_structured_torus {
   private:
@@ -19,14 +15,14 @@ class nabla4_structured_torus {
     std::size_t VertexDim;
     std::size_t KDim;
     std::size_t ECVDim;
-    std::vector<std::vector<float>> u_vert;
-    std::vector<std::vector<float>> v_vert;
-    std::vector<double> primal_normal_vert_v1;
-    std::vector<double> primal_normal_vert_v2;
-    std::vector<std::vector<double>> z_nabla2_e;
-    std::vector<double> inv_vert_vert_length;
-    std::vector<double> inv_primal_edge_length;
-    std::vector<std::vector<float>> z_nabla4_e2_wp;
+    std::vector<std::vector<VP_TYPE>> u_vert;
+    std::vector<std::vector<VP_TYPE>> v_vert;
+    std::vector<WP_TYPE> primal_normal_vert_v1;
+    std::vector<WP_TYPE> primal_normal_vert_v2;
+    std::vector<std::vector<WP_TYPE>> z_nabla2_e;
+    std::vector<WP_TYPE> inv_vert_vert_length;
+    std::vector<WP_TYPE> inv_primal_edge_length;
+    std::vector<std::vector<VP_TYPE>> z_nabla4_e2_wp;
 
     /// Random number utilities
     RandomUniformUtils rand_utils{-1.0, 1.0};
@@ -37,8 +33,8 @@ class nabla4_structured_torus {
     /// Initialize vectors needed to execute kernel with random numbers
     void init_ifirst() {
         // std::cout << "Initializing vectors" << std::endl;
-        u_vert = rand_utils.random_init_vec_2d<float>(KDim, VertexDim);
-        v_vert = rand_utils.random_init_vec_2d<float>(KDim, VertexDim);
+        u_vert = rand_utils.random_init_vec_2d<VP_TYPE>(KDim, VertexDim);
+        v_vert = rand_utils.random_init_vec_2d<VP_TYPE>(KDim, VertexDim);
         primal_normal_vert_v1 = rand_utils.random_init_vec_1d(EdgeDim * ECVDim);
         primal_normal_vert_v2 = rand_utils.random_init_vec_1d(EdgeDim * ECVDim);
         z_nabla2_e = rand_utils.random_init_vec_2d(KDim, EdgeDim);
@@ -53,8 +49,8 @@ class nabla4_structured_torus {
     /// Initialize vectors needed to execute kernel with random numbers
     void init_kfirst() {
         // std::cout << "Initializing vectors" << std::endl;
-        u_vert = rand_utils.random_init_vec_2d<float>(VertexDim, KDim);
-        v_vert = rand_utils.random_init_vec_2d<float>(VertexDim, KDim);
+        u_vert = rand_utils.random_init_vec_2d<VP_TYPE>(VertexDim, KDim);
+        v_vert = rand_utils.random_init_vec_2d<VP_TYPE>(VertexDim, KDim);
         primal_normal_vert_v1 = rand_utils.random_init_vec_1d(EdgeDim * ECVDim);
         primal_normal_vert_v2 = rand_utils.random_init_vec_1d(EdgeDim * ECVDim);
         z_nabla2_e = rand_utils.random_init_vec_2d(EdgeDim, KDim);
@@ -95,8 +91,8 @@ class nabla4_structured_torus {
         std::size_t ECVDim,
         std::size_t longitude_dim,
         std::size_t latitude_dim,
-        std::vector<std::vector<float>> &u_vert,
-        std::vector<std::vector<float>> &v_vert,
+        std::vector<std::vector<VP_TYPE>> &u_vert,
+        std::vector<std::vector<VP_TYPE>> &v_vert,
         std::vector<double> &primal_normal_vert_v1,
         std::vector<double> &primal_normal_vert_v2,
         std::vector<std::vector<double>> &z_nabla2_e,
@@ -122,7 +118,7 @@ class nabla4_structured_torus {
         }
     };
 
-    std::vector<std::vector<float>> get_output() { return z_nabla4_e2_wp; }
+    std::vector<std::vector<VP_TYPE>> get_output() { return z_nabla4_e2_wp; }
 
     inline std::size_t modulo(int a, int b) { return a % b; }
 
