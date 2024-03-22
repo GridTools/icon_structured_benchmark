@@ -100,47 +100,23 @@ def run_sanity_checks(grid, lon_dim, lat_dim):
             random_validation_data.ECVDim,
             lon_dim,
             lat_dim,
-            np.array(random_validation_data.u_vert).T,
-            np.array(random_validation_data.v_vert).T,
+            random_validation_data.u_vert,
+            random_validation_data.v_vert,
             random_validation_data.primal_normal_vert_v1,
             random_validation_data.primal_normal_vert_v2,
-            np.array(random_validation_data.z_nabla2_e).T,
+            random_validation_data.z_nabla2_e,
             random_validation_data.inv_vert_vert_length,
             random_validation_data.inv_primal_edge_length,
         )
     )
 
     assert np.allclose(
-        np.array(z_nabla4_e2_comp_structured_naive).T,
+        z_nabla4_e2_comp_structured_naive,
         random_validation_data.z_nabla4_e2_wp,
     )
 
     z_nabla4_e2_comp_structured_cpu_ifirst = (
         icon_benchmark.nabla4_validate_structured_torus_cpu_ifirst(
-            random_validation_data.CellDim,
-            random_validation_data.VertexDim,
-            random_validation_data.EdgeDim,
-            random_validation_data.KDim,
-            random_validation_data.ECVDim,
-            lon_dim,
-            lat_dim,
-            np.array(random_validation_data.u_vert).T,
-            np.array(random_validation_data.v_vert).T,
-            random_validation_data.primal_normal_vert_v1,
-            random_validation_data.primal_normal_vert_v2,
-            np.array(random_validation_data.z_nabla2_e).T,
-            random_validation_data.inv_vert_vert_length,
-            random_validation_data.inv_primal_edge_length,
-        )
-    )
-
-    assert np.allclose(
-        np.array(z_nabla4_e2_comp_structured_cpu_ifirst).T,
-        random_validation_data.z_nabla4_e2_wp,
-    )
-
-    z_nabla4_e2_comp_structured_cpu_kfirst = (
-        icon_benchmark.nabla4_validate_structured_torus_cpu_kfirst(
             random_validation_data.CellDim,
             random_validation_data.VertexDim,
             random_validation_data.EdgeDim,
@@ -159,7 +135,31 @@ def run_sanity_checks(grid, lon_dim, lat_dim):
     )
 
     assert np.allclose(
-        z_nabla4_e2_comp_structured_cpu_kfirst,
+        z_nabla4_e2_comp_structured_cpu_ifirst,
+        random_validation_data.z_nabla4_e2_wp,
+    )
+
+    z_nabla4_e2_comp_structured_cpu_kfirst = (
+        icon_benchmark.nabla4_validate_structured_torus_cpu_kfirst(
+            random_validation_data.CellDim,
+            random_validation_data.VertexDim,
+            random_validation_data.EdgeDim,
+            random_validation_data.KDim,
+            random_validation_data.ECVDim,
+            lon_dim,
+            lat_dim,
+            np.array(random_validation_data.u_vert).T,
+            np.array(random_validation_data.v_vert).T,
+            random_validation_data.primal_normal_vert_v1,
+            random_validation_data.primal_normal_vert_v2,
+            np.array(random_validation_data.z_nabla2_e).T,
+            random_validation_data.inv_vert_vert_length,
+            random_validation_data.inv_primal_edge_length,
+        )
+    )
+
+    assert np.allclose(
+        np.array(z_nabla4_e2_comp_structured_cpu_kfirst).T,
         random_validation_data.z_nabla4_e2_wp,
     )
 

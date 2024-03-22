@@ -12,8 +12,8 @@ nabla4_validation_data get_nabla4_benchmark_validation_data(std::vector<std::vec
     std::size_t EdgeDim,
     std::size_t KDim,
     std::size_t ECVDim) {
-    nabla4_unstructured nabla4_benchmark_object{e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim};
-    run_benchmark<nabla4_unstructured, naive>(nabla4_benchmark_object, 1, 0);
+    nabla4_unstructured<Data::ifirst> nabla4_benchmark_object{e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim};
+    run_benchmark<nabla4_unstructured<Data::ifirst>, naive>(nabla4_benchmark_object, 1, 0);
     return nabla4_benchmark_object.get_validation_data();
 }
 
@@ -27,8 +27,21 @@ std::vector<double> nabla4_benchmark_unstructured(std::vector<std::vector<std::s
     std::size_t ECVDim,
     int repetitions,
     int dry_runs) {
-    return run_benchmark<nabla4_unstructured, I>(
-        e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim, repetitions, dry_runs);
+    if constexpr (I == backend_impl::naive) {
+        return run_benchmark<nabla4_unstructured<Data::ifirst>, I>(
+            e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim, repetitions, dry_runs);
+    } else if constexpr (I == backend_impl::cpu_ifirst) {
+        return run_benchmark<nabla4_unstructured<Data::ifirst>, I>(
+            e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim, repetitions, dry_runs);
+    } else if constexpr (I == backend_impl::cpu_kfirst) {
+        return run_benchmark<nabla4_unstructured<Data::kfirst>, I>(
+            e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim, repetitions, dry_runs);
+    } else if constexpr (I == backend_impl::gpu) {
+        return run_benchmark<nabla4_unstructured<Data::kfirst>, I>(
+            e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim, repetitions, dry_runs);
+    } else {
+        throw std::runtime_error("Undefined backend implementation");
+    }
 }
 
 std::vector<double> nabla4_benchmark_unstructured_naive(std::vector<std::vector<std::size_t>> &e2c2v,
@@ -97,7 +110,7 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_naive(std::vector
     std::vector<std::vector<double>> &z_nabla2_e,
     std::vector<double> &inv_vert_vert_length,
     std::vector<double> &inv_primal_edge_length) {
-    nabla4_unstructured nabla4_benchmark_object{e2c2v,
+    nabla4_unstructured<Data::ifirst> nabla4_benchmark_object{e2c2v,
         e2ecv,
         CellDim,
         VertexDim,
@@ -111,7 +124,7 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_naive(std::vector
         z_nabla2_e,
         inv_vert_vert_length,
         inv_primal_edge_length};
-    return run_validation<nabla4_unstructured, naive>(nabla4_benchmark_object);
+    return run_validation<nabla4_unstructured<Data::ifirst>, naive>(nabla4_benchmark_object);
 }
 
 std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_ifirst(std::vector<std::vector<std::size_t>> &e2c2v,
@@ -128,7 +141,7 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_ifirst(std::v
     std::vector<std::vector<double>> &z_nabla2_e,
     std::vector<double> &inv_vert_vert_length,
     std::vector<double> &inv_primal_edge_length) {
-    nabla4_unstructured nabla4_benchmark_object{e2c2v,
+    nabla4_unstructured<Data::ifirst> nabla4_benchmark_object{e2c2v,
         e2ecv,
         CellDim,
         VertexDim,
@@ -142,7 +155,7 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_ifirst(std::v
         z_nabla2_e,
         inv_vert_vert_length,
         inv_primal_edge_length};
-    return run_validation<nabla4_unstructured, cpu_ifirst>(nabla4_benchmark_object);
+    return run_validation<nabla4_unstructured<Data::ifirst>, cpu_ifirst>(nabla4_benchmark_object);
 }
 
 std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_kfirst(std::vector<std::vector<std::size_t>> &e2c2v,
@@ -159,7 +172,7 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_kfirst(std::v
     std::vector<std::vector<double>> &z_nabla2_e,
     std::vector<double> &inv_vert_vert_length,
     std::vector<double> &inv_primal_edge_length) {
-    nabla4_unstructured nabla4_benchmark_object{e2c2v,
+    nabla4_unstructured<Data::kfirst> nabla4_benchmark_object{e2c2v,
         e2ecv,
         CellDim,
         VertexDim,
@@ -173,7 +186,7 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_kfirst(std::v
         z_nabla2_e,
         inv_vert_vert_length,
         inv_primal_edge_length};
-    return run_validation<nabla4_unstructured, cpu_kfirst>(nabla4_benchmark_object);
+    return run_validation<nabla4_unstructured<Data::kfirst>, cpu_kfirst>(nabla4_benchmark_object);
 }
 
 std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_gpu(std::vector<std::vector<std::size_t>> &e2c2v,
@@ -190,7 +203,7 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_gpu(std::vector<s
     std::vector<std::vector<double>> &z_nabla2_e,
     std::vector<double> &inv_vert_vert_length,
     std::vector<double> &inv_primal_edge_length) {
-    nabla4_unstructured nabla4_benchmark_object{e2c2v,
+    nabla4_unstructured<Data::kfirst> nabla4_benchmark_object{e2c2v,
         e2ecv,
         CellDim,
         VertexDim,
@@ -204,7 +217,7 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_gpu(std::vector<s
         z_nabla2_e,
         inv_vert_vert_length,
         inv_primal_edge_length};
-    return run_validation<nabla4_unstructured, gpu>(nabla4_benchmark_object);
+    return run_validation<nabla4_unstructured<Data::kfirst>, gpu>(nabla4_benchmark_object);
 }
 
 template <backend_impl I>
