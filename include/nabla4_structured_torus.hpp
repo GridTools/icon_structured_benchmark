@@ -213,19 +213,6 @@ class nabla4_structured_torus {
         return e2c2v_vec;
     }
 
-    template <backend_impl I>
-    inline void inner_kernel(std::array<ARRAY_TYPE, 4> e2c2v_vec, std::size_t edge_index, std::size_t k_index) {
-        if constexpr (I == backend_impl::naive) {
-            inner_kernel_ifirst(e2c2v_vec, edge_index, k_index);
-        } else if constexpr (I == backend_impl::cpu_ifirst) {
-            inner_kernel_ifirst(e2c2v_vec, edge_index, k_index);
-        } else if constexpr (I == backend_impl::cpu_kfirst) {
-            inner_kernel_kfirst(e2c2v_vec, edge_index, k_index);
-        } else {
-            throw std::runtime_error("Undefined backend implementation");
-        }
-    }
-
     inline void inner_kernel_ifirst(std::array<ARRAY_TYPE, 4> e2c2v_vec, std::size_t edge_index, std::size_t k_index) {
         const auto E2C2V_0 = e2c2v_vec[0];
         const auto E2C2V_1 = e2c2v_vec[1];
@@ -288,13 +275,13 @@ class nabla4_structured_torus {
             for (std::size_t edge_index{0}; edge_index < EdgeDim; edge_index += 3) {
                 const auto e2c2v_vec_north =
                     get_e2c2v<&nabla4_structured_torus::get_e2c2v_vertices_north_edge>(edge_index);
-                inner_kernel<cpu_ifirst>(e2c2v_vec_north, edge_index, k_index);
+                inner_kernel_ifirst(e2c2v_vec_north, edge_index, k_index);
                 const auto e2c2v_vec_east =
                     get_e2c2v<&nabla4_structured_torus::get_e2c2v_vertices_east_edge>(edge_index);
-                inner_kernel<cpu_ifirst>(e2c2v_vec_east, edge_index + 1, k_index);
+                inner_kernel_ifirst(e2c2v_vec_east, edge_index + 1, k_index);
                 const auto e2c2v_vec_southeast =
                     get_e2c2v<&nabla4_structured_torus::get_e2c2v_vertices_southeast_edge>(edge_index);
-                inner_kernel<cpu_ifirst>(e2c2v_vec_southeast, edge_index + 2, k_index);
+                inner_kernel_ifirst(e2c2v_vec_southeast, edge_index + 2, k_index);
             }
         };
     };
@@ -305,13 +292,13 @@ class nabla4_structured_torus {
             for (std::size_t edge_index = 0; edge_index < EdgeDim; edge_index += 3) {
                 const auto e2c2v_vec_north =
                     get_e2c2v<&nabla4_structured_torus::get_e2c2v_vertices_north_edge>(edge_index);
-                inner_kernel<cpu_ifirst>(e2c2v_vec_north, edge_index, k_index);
+                inner_kernel_ifirst(e2c2v_vec_north, edge_index, k_index);
                 const auto e2c2v_vec_east =
                     get_e2c2v<&nabla4_structured_torus::get_e2c2v_vertices_east_edge>(edge_index);
-                inner_kernel<cpu_ifirst>(e2c2v_vec_east, edge_index + 1, k_index);
+                inner_kernel_ifirst(e2c2v_vec_east, edge_index + 1, k_index);
                 const auto e2c2v_vec_southeast =
                     get_e2c2v<&nabla4_structured_torus::get_e2c2v_vertices_southeast_edge>(edge_index);
-                inner_kernel<cpu_ifirst>(e2c2v_vec_southeast, edge_index + 2, k_index);
+                inner_kernel_ifirst(e2c2v_vec_southeast, edge_index + 2, k_index);
             }
         }
     };
@@ -324,9 +311,9 @@ class nabla4_structured_torus {
                 get_e2c2v<&nabla4_structured_torus::get_e2c2v_vertices_southeast_edge>(edge_index);
 #pragma omp simd
             for (std::size_t k_index = 0; k_index < KDim; ++k_index) {
-                inner_kernel<cpu_kfirst>(e2c2v_vec_north, edge_index, k_index);
-                inner_kernel<cpu_kfirst>(e2c2v_vec_east, edge_index + 1, k_index);
-                inner_kernel<cpu_kfirst>(e2c2v_vec_southeast, edge_index + 2, k_index);
+                inner_kernel_kfirst(e2c2v_vec_north, edge_index, k_index);
+                inner_kernel_kfirst(e2c2v_vec_east, edge_index + 1, k_index);
+                inner_kernel_kfirst(e2c2v_vec_southeast, edge_index + 2, k_index);
             };
         };
     };
