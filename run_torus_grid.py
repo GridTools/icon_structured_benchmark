@@ -100,18 +100,18 @@ def run_sanity_checks(grid, lon_dim, lat_dim):
             random_validation_data.ECVDim,
             lon_dim,
             lat_dim,
-            random_validation_data.u_vert,
-            random_validation_data.v_vert,
+            np.array(random_validation_data.u_vert).T,
+            np.array(random_validation_data.v_vert).T,
             random_validation_data.primal_normal_vert_v1,
             random_validation_data.primal_normal_vert_v2,
-            random_validation_data.z_nabla2_e,
+            np.array(random_validation_data.z_nabla2_e).T,
             random_validation_data.inv_vert_vert_length,
             random_validation_data.inv_primal_edge_length,
         )
     )
 
     assert np.allclose(
-        z_nabla4_e2_comp_structured_naive,
+        np.array(z_nabla4_e2_comp_structured_naive).T,
         random_validation_data.z_nabla4_e2_wp,
     )
 
@@ -124,18 +124,18 @@ def run_sanity_checks(grid, lon_dim, lat_dim):
             random_validation_data.ECVDim,
             lon_dim,
             lat_dim,
-            random_validation_data.u_vert,
-            random_validation_data.v_vert,
+            np.array(random_validation_data.u_vert).T,
+            np.array(random_validation_data.v_vert).T,
             random_validation_data.primal_normal_vert_v1,
             random_validation_data.primal_normal_vert_v2,
-            random_validation_data.z_nabla2_e,
+            np.array(random_validation_data.z_nabla2_e).T,
             random_validation_data.inv_vert_vert_length,
             random_validation_data.inv_primal_edge_length,
         )
     )
 
     assert np.allclose(
-        z_nabla4_e2_comp_structured_cpu_ifirst,
+        np.array(z_nabla4_e2_comp_structured_cpu_ifirst).T,
         random_validation_data.z_nabla4_e2_wp,
     )
 
