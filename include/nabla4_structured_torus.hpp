@@ -183,7 +183,7 @@ class nabla4_structured_torus {
     }
 
     template <auto f>
-    inline std::array<ARRAY_TYPE, 4> get_e2c2v(ARRAY_TYPE edge_index) {
+    inline const std::array<ARRAY_TYPE, 4> get_e2c2v(ARRAY_TYPE edge_index) {
         const std::size_t edges_per_index{3};
         const auto starting_vertex = edge_index / edges_per_index;
         const auto latitude = modulo(starting_vertex, latitude_dim);
@@ -213,7 +213,8 @@ class nabla4_structured_torus {
         return e2c2v_vec;
     }
 
-    inline void inner_kernel_ifirst(std::array<ARRAY_TYPE, 4> e2c2v_vec, std::size_t edge_index, std::size_t k_index) {
+    inline void inner_kernel_ifirst(
+        const std::array<ARRAY_TYPE, 4> &e2c2v_vec, std::size_t edge_index, std::size_t k_index) {
         const auto E2C2V_0 = e2c2v_vec[0];
         const auto E2C2V_1 = e2c2v_vec[1];
         const auto E2C2V_2 = e2c2v_vec[2];
@@ -241,7 +242,8 @@ class nabla4_structured_torus {
                           (inv_primal_edge_length[edge_index] * inv_primal_edge_length[edge_index]));
     }
 
-    inline void inner_kernel_kfirst(std::array<ARRAY_TYPE, 4> e2c2v_vec, std::size_t edge_index, std::size_t k_index) {
+    inline void inner_kernel_kfirst(
+        const std::array<ARRAY_TYPE, 4> &e2c2v_vec, std::size_t edge_index, std::size_t k_index) {
         const auto E2C2V_0 = e2c2v_vec[0];
         const auto E2C2V_1 = e2c2v_vec[1];
         const auto E2C2V_2 = e2c2v_vec[2];
