@@ -174,17 +174,17 @@ def test_validate_nabla4_structured_naive(simple_grid_kernel_input):
         simple_grid_kernel_input.num_edges,
         simple_grid_kernel_input.num_levels,
         simple_grid_kernel_input.E2C2VDim,
-        simple_grid_kernel_input.u_vert,
-        simple_grid_kernel_input.v_vert,
+        np.array(simple_grid_kernel_input.u_vert).T,
+        np.array(simple_grid_kernel_input.v_vert).T,
         simple_grid_kernel_input.primal_normal_vert_v1,
         simple_grid_kernel_input.primal_normal_vert_v2,
-        simple_grid_kernel_input.z_nabla2_e,
+        np.array(simple_grid_kernel_input.z_nabla2_e).T,
         simple_grid_kernel_input.inv_vert_vert_length,
         simple_grid_kernel_input.inv_primal_edge_length,
     )
 
     assert np.allclose(
-        z_nabla4_e2_comp,
+        np.array(z_nabla4_e2_comp).T,
         simple_grid_kernel_input.ref_z_nabla4_e2,
         equal_nan=True,
         atol=1e-8,
