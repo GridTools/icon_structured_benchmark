@@ -27,3 +27,28 @@ find_package(nanobind CONFIG REQUIRED)
 nanobind_add_module(icon_benchmark python/extensions.cpp)
 target_include_directories(icon_benchmark PRIVATE include)
 target_link_libraries(icon_benchmark PRIVATE benchmark)
+
+# Find or fetch GridTools
+if(NOT _gridtools_already_fetched)
+    find_package(GridTools "2" QUIET)
+endif()
+if(NOT GridTools_FOUND)
+  set(_gridtools_repository "https://github.com/GridTools/gridtools.git")
+  set(_gridtools_tag        "v2.3.2")
+  if(NOT _gridtools_already_fetched)
+    message(STATUS "Fetching GridTools ${_gridtools_tag} from ${_gridtools_repository}")
+  endif()
+  include(FetchContent)
+  FetchContent_Declare(
+    gridtools
+    GIT_REPOSITORY ${_gridtools_repository}
+    GIT_TAG        ${_gridtools_tag}
+    OVERRIDE_FIND_PACKAGE
+  )
+  FetchContent_MakeAvailable(gridtools)
+  set(_gridtools_already_fetched ON CACHE INTERNAL "")
+endif()
+
+nanobind_add_module(nabla4_gtfn python/nabla4_gtfn_bindings.cpp)
+target_include_directories(nabla4_gtfn PRIVATE include GridTools)
+target_link_libraries(nabla4_gtfn PRIVATE benchmark GridTools::gridtools GridTools::stencil_naive GridTools::storage_cpu_ifirst GridTools::storage_cpu_kfirst)
