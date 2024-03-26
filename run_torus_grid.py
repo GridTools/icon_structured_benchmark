@@ -242,12 +242,7 @@ def run_benchmarks():
         repetitions,
         dry_runs,
     )
-    # print("Unstructured E2C2V")
-    # with open("unstructured_grid_e2c2v.txt", 'w') as f:
-    #     for i, arr in enumerate(torus_grid.get_offset_provider("E2C2V").table):
-    #         f.write("E2C2V[{}]: [{} {} {} {}]\n".format(i, arr[0], arr[1], arr[2], arr[3]))
 
-    # print("Structured E2C2V")
     runtimes[
         "nabla4_benchmark_structured_torus_naive"
     ] = icon_benchmark.nabla4_benchmark_structured_torus_naive(
@@ -261,8 +256,6 @@ def run_benchmarks():
         repetitions,
         dry_runs,
     )
-
-    # return
 
     runtimes[
         "nabla4_benchmark_unstructured_cpu_ifirst"
