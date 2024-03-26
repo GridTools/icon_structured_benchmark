@@ -25,8 +25,8 @@ struct nabla4_validation_data {
 template <Data T>
 class nabla4_unstructured {
   private:
-    std::vector<std::vector<std::size_t>> e2c2v;
-    std::vector<std::vector<std::size_t>> e2ecv;
+    std::vector<std::array<std::size_t, 4>> e2c2v;
+    std::vector<std::array<std::size_t, 4>> e2ecv;
     std::size_t CellDim;
     std::size_t EdgeDim;
     std::size_t VertexDim;
@@ -76,8 +76,8 @@ class nabla4_unstructured {
   public:
     /// Constructor with all the necessary information for \c nabla4 compute
     /// kernel execution
-    nabla4_unstructured(std::vector<std::vector<std::size_t>> e2c2v,
-        std::vector<std::vector<std::size_t>> e2ecv,
+    nabla4_unstructured(std::vector<std::array<std::size_t, 4>> e2c2v,
+        std::vector<std::array<std::size_t, 4>> e2ecv,
         std::size_t CellDim,
         std::size_t VertexDim,
         std::size_t EdgeDim,
@@ -95,8 +95,8 @@ class nabla4_unstructured {
     };
 
     /// Constructor for validation
-    nabla4_unstructured(std::vector<std::vector<std::size_t>> &e2c2v,
-        std::vector<std::vector<std::size_t>> &e2ecv,
+    nabla4_unstructured(std::vector<std::array<std::size_t, 4>> &e2c2v,
+        std::vector<std::array<std::size_t, 4>> &e2ecv,
         std::size_t CellDim,
         std::size_t VertexDim,
         std::size_t EdgeDim,

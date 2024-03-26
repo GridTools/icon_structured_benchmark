@@ -24,8 +24,8 @@ std::vector<double> run_benchmark(T &benchmark_object, int repetitions = 101, in
 }
 
 template <typename T, backend_impl I>
-std::vector<double> run_benchmark(std::vector<std::vector<std::size_t>> &e2c2v,
-    std::vector<std::vector<std::size_t>> &e2ecv,
+std::vector<double> run_benchmark(std::vector<std::array<std::size_t, 4>> &e2c2v,
+    std::vector<std::array<std::size_t, 4>> &e2ecv,
     std::size_t CellDim,
     std::size_t VertexDim,
     std::size_t EdgeDim,

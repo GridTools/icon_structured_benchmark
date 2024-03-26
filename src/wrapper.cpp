@@ -5,8 +5,8 @@
 /// TODO: See if we can avoid declaring nabla4_benchmark_* and use templates.
 /// Problem with templates are python bindings
 
-nabla4_validation_data get_nabla4_benchmark_validation_data(std::vector<std::vector<std::size_t>> &e2c2v,
-    std::vector<std::vector<std::size_t>> &e2ecv,
+nabla4_validation_data get_nabla4_benchmark_validation_data(std::vector<std::array<std::size_t, 4>> &e2c2v,
+    std::vector<std::array<std::size_t, 4>> &e2ecv,
     std::size_t CellDim,
     std::size_t VertexDim,
     std::size_t EdgeDim,
@@ -18,8 +18,8 @@ nabla4_validation_data get_nabla4_benchmark_validation_data(std::vector<std::vec
 }
 
 template <backend_impl I>
-std::vector<double> nabla4_benchmark_unstructured(std::vector<std::vector<std::size_t>> &e2c2v,
-    std::vector<std::vector<std::size_t>> &e2ecv,
+std::vector<double> nabla4_benchmark_unstructured(std::vector<std::array<std::size_t, 4>> &e2c2v,
+    std::vector<std::array<std::size_t, 4>> &e2ecv,
     std::size_t CellDim,
     std::size_t VertexDim,
     std::size_t EdgeDim,
@@ -44,8 +44,8 @@ std::vector<double> nabla4_benchmark_unstructured(std::vector<std::vector<std::s
     }
 }
 
-std::vector<double> nabla4_benchmark_unstructured_naive(std::vector<std::vector<std::size_t>> &e2c2v,
-    std::vector<std::vector<std::size_t>> &e2ecv,
+std::vector<double> nabla4_benchmark_unstructured_naive(std::vector<std::array<std::size_t, 4>> &e2c2v,
+    std::vector<std::array<std::size_t, 4>> &e2ecv,
     std::size_t CellDim,
     std::size_t VertexDim,
     std::size_t EdgeDim,
@@ -57,8 +57,8 @@ std::vector<double> nabla4_benchmark_unstructured_naive(std::vector<std::vector<
         e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim, repetitions, dry_runs);
 }
 
-std::vector<double> nabla4_benchmark_unstructured_cpu_ifirst(std::vector<std::vector<std::size_t>> &e2c2v,
-    std::vector<std::vector<std::size_t>> &e2ecv,
+std::vector<double> nabla4_benchmark_unstructured_cpu_ifirst(std::vector<std::array<std::size_t, 4>> &e2c2v,
+    std::vector<std::array<std::size_t, 4>> &e2ecv,
     std::size_t CellDim,
     std::size_t VertexDim,
     std::size_t EdgeDim,
@@ -70,8 +70,8 @@ std::vector<double> nabla4_benchmark_unstructured_cpu_ifirst(std::vector<std::ve
         e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim, repetitions, dry_runs);
 }
 
-std::vector<double> nabla4_benchmark_unstructured_cpu_kfirst(std::vector<std::vector<std::size_t>> &e2c2v,
-    std::vector<std::vector<std::size_t>> &e2ecv,
+std::vector<double> nabla4_benchmark_unstructured_cpu_kfirst(std::vector<std::array<std::size_t, 4>> &e2c2v,
+    std::vector<std::array<std::size_t, 4>> &e2ecv,
     std::size_t CellDim,
     std::size_t VertexDim,
     std::size_t EdgeDim,
@@ -83,8 +83,8 @@ std::vector<double> nabla4_benchmark_unstructured_cpu_kfirst(std::vector<std::ve
         e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim, repetitions, dry_runs);
 }
 
-std::vector<double> nabla4_benchmark_unstructured_gpu(std::vector<std::vector<std::size_t>> &e2c2v,
-    std::vector<std::vector<std::size_t>> &e2ecv,
+std::vector<double> nabla4_benchmark_unstructured_gpu(std::vector<std::array<std::size_t, 4>> &e2c2v,
+    std::vector<std::array<std::size_t, 4>> &e2ecv,
     std::size_t CellDim,
     std::size_t VertexDim,
     std::size_t EdgeDim,
@@ -96,8 +96,8 @@ std::vector<double> nabla4_benchmark_unstructured_gpu(std::vector<std::vector<st
         e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim, repetitions, dry_runs);
 }
 
-std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_naive(std::vector<std::vector<std::size_t>> &e2c2v,
-    std::vector<std::vector<std::size_t>> &e2ecv,
+std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_naive(std::vector<std::array<std::size_t, 4>> &e2c2v,
+    std::vector<std::array<std::size_t, 4>> &e2ecv,
     std::size_t CellDim,
     std::size_t VertexDim,
     std::size_t EdgeDim,
@@ -127,8 +127,9 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_naive(std::vector
     return run_validation<nabla4_unstructured<Data::ifirst>, naive>(nabla4_benchmark_object);
 }
 
-std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_ifirst(std::vector<std::vector<std::size_t>> &e2c2v,
-    std::vector<std::vector<std::size_t>> &e2ecv,
+std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_ifirst(
+    std::vector<std::array<std::size_t, 4>> &e2c2v,
+    std::vector<std::array<std::size_t, 4>> &e2ecv,
     std::size_t CellDim,
     std::size_t VertexDim,
     std::size_t EdgeDim,
@@ -158,8 +159,9 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_ifirst(std::v
     return run_validation<nabla4_unstructured<Data::ifirst>, cpu_ifirst>(nabla4_benchmark_object);
 }
 
-std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_kfirst(std::vector<std::vector<std::size_t>> &e2c2v,
-    std::vector<std::vector<std::size_t>> &e2ecv,
+std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_kfirst(
+    std::vector<std::array<std::size_t, 4>> &e2c2v,
+    std::vector<std::array<std::size_t, 4>> &e2ecv,
     std::size_t CellDim,
     std::size_t VertexDim,
     std::size_t EdgeDim,
@@ -189,8 +191,8 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_kfirst(std::v
     return run_validation<nabla4_unstructured<Data::kfirst>, cpu_kfirst>(nabla4_benchmark_object);
 }
 
-std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_gpu(std::vector<std::vector<std::size_t>> &e2c2v,
-    std::vector<std::vector<std::size_t>> &e2ecv,
+std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_gpu(std::vector<std::array<std::size_t, 4>> &e2c2v,
+    std::vector<std::array<std::size_t, 4>> &e2ecv,
     std::size_t CellDim,
     std::size_t VertexDim,
     std::size_t EdgeDim,

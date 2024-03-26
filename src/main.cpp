@@ -4,7 +4,7 @@
 #include "wrapper.hpp"
 
 int main(void) {
-    std::vector<std::vector<std::size_t>> E2C2V{{0, 1, 4, 6},
+    std::vector<std::array<std::size_t, 4>> E2C2V{{0, 1, 4, 6},
         {0, 4, 1, 3},
         {0, 3, 4, 2},
         {1, 2, 5, 7},
@@ -31,7 +31,7 @@ int main(void) {
         {8, 6, 5, 0},
         {8, 0, 6, 2},
         {8, 2, 7, 0}};
-    std::vector<std::vector<std::size_t>> E2ECV{{0, 1, 2, 3},
+    std::vector<std::array<std::size_t, 4>> E2ECV{{0, 1, 2, 3},
         {4, 5, 6, 7},
         {8, 9, 10, 11},
         {12, 13, 14, 15},
@@ -113,7 +113,7 @@ int main(void) {
                      [nabla4_benchmark_structured_simple_cpu_kfirst_runtimes.size() / 2]
               << std::endl;
 
-    std::vector<std::vector<std::size_t>> E2C2V_torus_24576{{0, 4, 11, 1},
+    std::vector<std::array<std::size_t, 4>> E2C2V_torus_24576{{0, 4, 11, 1},
         {0, 1, 4, 9},
         {0, 9, 1, 8},
         {1, 5, 4, 2},
@@ -149,7 +149,7 @@ int main(void) {
         {11, 3, 2, 4},
         {11, 4, 3, 0},
         {11, 0, 4, 7}};
-    std::vector<std::vector<std::size_t>> E2ECV_torus_24576{{0, 1, 2, 3},
+    std::vector<std::array<std::size_t, 4>> E2ECV_torus_24576{{0, 1, 2, 3},
         {4, 5, 6, 7},
         {8, 9, 10, 11},
         {12, 13, 14, 15},
