@@ -38,8 +38,6 @@ class RandomUniformUtils {
         }
         for (std::size_t i{}; i < domain_i_size; ++i) {
             for (std::size_t j{}; j < domain_j_size; ++j) {
-                // std::cout << "Initializing v[" << i << "][" << j << "] with " <<
-                // vec[i][j] << std::endl;
                 vec[i][j] = get<T>();
             }
         }

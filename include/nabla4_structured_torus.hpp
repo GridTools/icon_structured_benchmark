@@ -135,9 +135,6 @@ class nabla4_structured_torus {
         std::array<ARRAY_TYPE, 4> e2c2v_ret{};
         e2c2v_ret[0] = parent_vertex;
         e2c2v_ret[1] = longitude_p1 * latitude_dim + latitude;
-        // std::cout << "latitude: " << latitude << " longitude_dim / 2: " << static_cast<size_t>(longitude_dim / 2) <<
-        // " longitude: " << longitude << " longitude_dim: " << longitude_dim << " latitude_dim: " << latitude_dim << "
-        // latitude_m1: " << latitude_m1 << std::endl;
         e2c2v_ret[2] =
             modulo((((latitude == 0) * ((2 * longitude_dim - latitude_dim) / 2)) + longitude + 1), longitude_dim) *
                 latitude_dim +
@@ -219,10 +216,6 @@ class nabla4_structured_torus {
         const auto E2C2V_1 = e2c2v_vec[1];
         const auto E2C2V_2 = e2c2v_vec[2];
         const auto E2C2V_3 = e2c2v_vec[3];
-        // if (k_index == 0) {
-        //     std::cout << "E2C2V[" << edge_index << "]: [" << E2C2V_0 << " " << E2C2V_1 << " " << E2C2V_2 << " "
-        //               << E2C2V_3 << "]" << std::endl;
-        // }
         const auto E2ECV_0 = edge_index * 4;
         const auto E2ECV_1 = edge_index * 4 + 1;
         const auto E2ECV_2 = edge_index * 4 + 2;
@@ -248,10 +241,6 @@ class nabla4_structured_torus {
         const auto E2C2V_1 = e2c2v_vec[1];
         const auto E2C2V_2 = e2c2v_vec[2];
         const auto E2C2V_3 = e2c2v_vec[3];
-        // if (k_index == 0) {
-        //     std::cout << "E2C2V[" << edge_index << "]: [" << E2C2V_0 << " " << E2C2V_1 << " " << E2C2V_2 << " "
-        //               << E2C2V_3 << "]" << std::endl;
-        // }
         const auto E2ECV_0 = edge_index * 4;
         const auto E2ECV_1 = edge_index * 4 + 1;
         const auto E2ECV_2 = edge_index * 4 + 2;
@@ -272,7 +261,6 @@ class nabla4_structured_torus {
     }
 
     void run_naive() {
-        // std::cout << "Running naive nabla4_unstructured benchmark" << std::endl;
         for (std::size_t k_index{}; k_index < KDim; ++k_index) {
             for (std::size_t edge_index{0}; edge_index < EdgeDim; edge_index += 3) {
                 const auto e2c2v_vec_north =
@@ -320,8 +308,8 @@ class nabla4_structured_torus {
         };
     };
 
-    template <backend_impl I>
     /// Compute function timed for benchmarking
+    template <backend_impl I>
     void run() {
         if constexpr (I == backend_impl::naive) {
             run_naive();

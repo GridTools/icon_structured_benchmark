@@ -12,15 +12,11 @@ from utilities import (
     get_vertices_coordinates,
     print_torus_file_information,
     print_lat_lon_dimensions,
-    get_torus_cartesian_dimensions,
 )  # type: ignore [import-not-found]
-
-# grid_file = path.dirname(__file__) + "/tests/data/torus_grid/torus_100000_100000_24576.nc"
 
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
-
     parser.add_argument("grid")
     return parser.parse_args()
 
@@ -36,15 +32,6 @@ print_lat_lon_dimensions(grid_file)
 
 print_torus_file_information(grid_file)
 
-# print(grid.get_offset_provider("E2C2V").table)
-for i in range(len(grid.get_offset_provider("E2C2V").table)):
-    print("{} {}".format(i, grid.get_offset_provider("E2C2V").table[i]))
-
-np.set_printoptions(threshold=np.inf)  # type: ignore [arg-type]
-
-for i in range(len(grid.get_offset_provider("E2V").table)):
-    print("E2V[{}]: {}".format(i, grid.get_offset_provider("E2V").table[i]))
-print(get_torus_cartesian_dimensions(grid_file))
 plot_torus(
     vertice_coords,
     grid.get_offset_provider("E2V").table,

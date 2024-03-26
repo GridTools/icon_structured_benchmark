@@ -33,7 +33,6 @@ class nabla4_structured {
 
     /// Initialize vectors needed to execute kernel with random numbers
     void init_ifirst() {
-        // std::cout << "Initializing vectors" << std::endl;
         u_vert = rand_utils.random_init_vec_2d<VP_TYPE>(KDim, VertexDim);
         v_vert = rand_utils.random_init_vec_2d<VP_TYPE>(KDim, VertexDim);
         primal_normal_vert_v1 = rand_utils.random_init_vec_1d(EdgeDim * ECVDim);
@@ -49,7 +48,6 @@ class nabla4_structured {
 
     /// Initialize vectors needed to execute kernel with random numbers
     void init_kfirst() {
-        // std::cout << "Initializing vectors" << std::endl;
         u_vert = rand_utils.random_init_vec_2d<VP_TYPE>(VertexDim, KDim);
         v_vert = rand_utils.random_init_vec_2d<VP_TYPE>(VertexDim, KDim);
         primal_normal_vert_v1 = rand_utils.random_init_vec_1d(EdgeDim * ECVDim);
@@ -181,10 +179,6 @@ class nabla4_structured {
         const auto E2C2V_1 = e2c2v_vec[1];
         const auto E2C2V_2 = e2c2v_vec[2];
         const auto E2C2V_3 = e2c2v_vec[3];
-        // if (k_index == 0) {
-        //     std::cout << "E2C2V[" << edge_index << "]: [" << E2C2V_0 << ", " <<
-        //     E2C2V_1 << ", " << E2C2V_2 << ", " << E2C2V_3 << "]" << std::endl;
-        // }
         const auto E2ECV_0 = edge_index * 4;
         const auto E2ECV_1 = edge_index * 4 + 1;
         const auto E2ECV_2 = edge_index * 4 + 2;
@@ -210,10 +204,6 @@ class nabla4_structured {
         const auto E2C2V_1 = e2c2v_vec[1];
         const auto E2C2V_2 = e2c2v_vec[2];
         const auto E2C2V_3 = e2c2v_vec[3];
-        // if (k_index == 0) {
-        //     std::cout << "E2C2V[" << edge_index << "]: [" << E2C2V_0 << ", " <<
-        //     E2C2V_1 << ", " << E2C2V_2 << ", " << E2C2V_3 << "]" << std::endl;
-        // }
         const auto E2ECV_0 = edge_index * 4;
         const auto E2ECV_1 = edge_index * 4 + 1;
         const auto E2ECV_2 = edge_index * 4 + 2;
@@ -278,8 +268,8 @@ class nabla4_structured {
         };
     };
 
-    template <backend_impl I>
     /// Compute function timed for benchmarking
+    template <backend_impl I>
     void run() {
         if constexpr (I == backend_impl::naive) {
             run_naive();

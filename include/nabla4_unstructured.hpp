@@ -60,7 +60,6 @@ class nabla4_unstructured {
     }
 
     void init_kfirst() {
-        // std::cout << "Initializing vectors" << std::endl;
         u_vert = rand_utils.random_init_vec_2d<VP_TYPE>(VertexDim, KDim);
         v_vert = rand_utils.random_init_vec_2d<VP_TYPE>(VertexDim, KDim);
         primal_normal_vert_v1 = rand_utils.random_init_vec_1d(EdgeDim * ECVDim);
@@ -127,123 +126,11 @@ class nabla4_unstructured {
         } else {
             throw std::runtime_error("Undefined backend implementation");
         }
-        // std::cout << "=== Initializing validation ===" << std::endl;
-        // print_all();
     };
 
-    std::vector<std::vector<VP_TYPE>> get_output() {
-        // print_z_nabla4_e2_wp();
-        return z_nabla4_e2_wp;
-    }
-
-    void print_all() {
-        print_e2c2v();
-        print_e2ecv();
-        print_u_vert();
-        print_v_vert();
-        print_primal_normal_vert_v1();
-        print_primal_normal_vert_v2();
-        print_z_nabla2_e();
-        print_inv_vert_vert_length();
-        print_inv_primal_edge_length();
-        print_z_nabla4_e2_wp();
-    }
-
-    void print_e2c2v() {
-        for (int i{}; i < e2c2v.size(); ++i) {
-            std::cout << "e2c2v[" << i << "]: [";
-            for (int j{}; j < e2c2v[0].size(); ++j) {
-                std::cout << e2c2v[i][j] << " ";
-            }
-            std::cout << "]" << std::endl;
-        }
-    }
-
-    void print_e2ecv() {
-        for (int i{}; i < e2ecv.size(); ++i) {
-            std::cout << "e2ecv[" << i << "]: [";
-            for (int j{}; j < e2ecv[0].size(); ++j) {
-                std::cout << e2ecv[i][j] << " ";
-            }
-            std::cout << "]" << std::endl;
-        }
-    }
-
-    void print_u_vert() {
-        for (int i{}; i < u_vert.size(); ++i) {
-            std::cout << "u_vert[" << i << "]: [";
-            for (int j{}; j < u_vert[0].size(); ++j) {
-                std::cout << u_vert[i][j] << " ";
-            }
-            std::cout << "]" << std::endl;
-        }
-    }
-
-    void print_v_vert() {
-        for (int i{}; i < v_vert.size(); ++i) {
-            std::cout << "v_vert[" << i << "]: [";
-            for (int j{}; j < v_vert[0].size(); ++j) {
-                std::cout << v_vert[i][j] << " ";
-            }
-            std::cout << "]" << std::endl;
-        }
-    }
-
-    void print_primal_normal_vert_v1() {
-        std::cout << "primal_normal_vert_v1: [";
-        for (int i{}; i < primal_normal_vert_v1.size(); ++i) {
-            std::cout << primal_normal_vert_v1[i] << " ";
-        }
-        std::cout << "]" << std::endl;
-    }
-
-    void print_primal_normal_vert_v2() {
-        std::cout << "primal_normal_vert_v2: [";
-        for (int i{}; i < primal_normal_vert_v2.size(); ++i) {
-            std::cout << primal_normal_vert_v2[i] << " ";
-        }
-        std::cout << "]" << std::endl;
-    }
-
-    void print_z_nabla2_e() {
-        for (int i{}; i < z_nabla2_e.size(); ++i) {
-            std::cout << "z_nabla2_e[" << i << "]: [";
-            for (int j{}; j < z_nabla2_e[0].size(); ++j) {
-                std::cout << z_nabla2_e[i][j] << " ";
-            }
-            std::cout << "]" << std::endl;
-        }
-    }
-
-    void print_inv_vert_vert_length() {
-        std::cout << "inv_vert_vert_length: [";
-        for (int i{}; i < inv_vert_vert_length.size(); ++i) {
-            std::cout << inv_vert_vert_length[i] << " ";
-        }
-        std::cout << "]" << std::endl;
-    }
-
-    void print_inv_primal_edge_length() {
-        std::cout << "inv_primal_edge_length: [";
-        for (int i{}; i < inv_primal_edge_length.size(); ++i) {
-            std::cout << inv_primal_edge_length[i] << " ";
-        }
-        std::cout << "]" << std::endl;
-    }
-
-    void print_z_nabla4_e2_wp() {
-        for (int i{}; i < z_nabla4_e2_wp.size(); ++i) {
-            std::cout << "z_nabla4_e2_wp[" << i << "]: [";
-            for (int j{}; j < z_nabla4_e2_wp[0].size(); ++j) {
-                std::cout << z_nabla4_e2_wp[i][j] << " ";
-            }
-            std::cout << "]" << std::endl;
-        }
-    }
+    std::vector<std::vector<VP_TYPE>> get_output() { return z_nabla4_e2_wp; }
 
     nabla4_validation_data get_validation_data() {
-        // std::cout << "=== Getting validation data ===" << std::endl;
-        // print_all();
         return nabla4_validation_data{CellDim,
             EdgeDim,
             VertexDim,
@@ -260,7 +147,6 @@ class nabla4_unstructured {
     }
 
     void run_naive() {
-        // std::cout << "Running naive nabla4_unstructured benchmark" << std::endl;
         for (std::size_t k_index{}; k_index < KDim; ++k_index) {
             for (std::size_t edge_index{}; edge_index < EdgeDim; ++edge_index) {
                 const auto E2C2V_0 = e2c2v[edge_index][0];
@@ -271,12 +157,6 @@ class nabla4_unstructured {
                 const auto E2ECV_1 = e2ecv[edge_index][1];
                 const auto E2ECV_2 = e2ecv[edge_index][2];
                 const auto E2ECV_3 = e2ecv[edge_index][3];
-                // if (k_index == 0) {
-                //     std::cout << "E2C2V[" << edge_index << "]: [" << E2C2V_0 <<
-                //     ", "
-                //     << E2C2V_1 << ", " << E2C2V_2 << ", " << E2C2V_3 << "]" <<
-                //     std::endl;
-                // }
                 double nabv_tang_wp = u_vert[k_index][E2C2V_0] * primal_normal_vert_v1[E2ECV_0] +
                                       v_vert[k_index][E2C2V_0] * primal_normal_vert_v2[E2ECV_0] +
                                       u_vert[k_index][E2C2V_1] * primal_normal_vert_v1[E2ECV_1] +
@@ -295,8 +175,6 @@ class nabla4_unstructured {
     };
 
     void run_cpu_ifirst() {
-        // std::cout << "Running cpu_ifirst nabla4_unstructured benchmark" <<
-        // std::endl;
         for (std::size_t k_index{}; k_index < KDim; ++k_index) {
 #pragma omp simd
             for (std::size_t edge_index = 0; edge_index < EdgeDim; ++edge_index) {
@@ -326,8 +204,6 @@ class nabla4_unstructured {
     };
 
     void run_cpu_kfirst() {
-        // std::cout << "Running cpu_kfirst nabla4_unstructured benchmark" <<
-        // std::endl;
         for (std::size_t edge_index{}; edge_index < EdgeDim; ++edge_index) {
             const auto E2C2V_0 = e2c2v[edge_index][0];
             const auto E2C2V_1 = e2c2v[edge_index][1];
@@ -356,8 +232,8 @@ class nabla4_unstructured {
         };
     };
 
-    template <backend_impl I>
     /// Compute function timed for benchmarking
+    template <backend_impl I>
     void run() {
         if constexpr (I == backend_impl::naive) {
             run_naive();
