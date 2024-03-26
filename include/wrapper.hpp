@@ -108,7 +108,7 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_gpu(std::vector<s
     std::vector<double> &inv_vert_vert_length,
     std::vector<double> &inv_primal_edge_length);
 
-std::vector<double> nabla4_benchmark_structured_naive(std::size_t CellDim,
+std::vector<double> nabla4_benchmark_structured_simple_naive(std::size_t CellDim,
     std::size_t VertexDim,
     std::size_t EdgeDim,
     std::size_t KDim,
@@ -116,7 +116,7 @@ std::vector<double> nabla4_benchmark_structured_naive(std::size_t CellDim,
     int repetitions = 101,
     int dry_runs = 1);
 
-std::vector<double> nabla4_benchmark_structured_cpu_ifirst(std::size_t CellDim,
+std::vector<double> nabla4_benchmark_structured_simple_cpu_ifirst(std::size_t CellDim,
     std::size_t VertexDim,
     std::size_t EdgeDim,
     std::size_t KDim,
@@ -124,7 +124,7 @@ std::vector<double> nabla4_benchmark_structured_cpu_ifirst(std::size_t CellDim,
     int repetitions = 101,
     int dry_runs = 1);
 
-std::vector<double> nabla4_benchmark_structured_cpu_kfirst(std::size_t CellDim,
+std::vector<double> nabla4_benchmark_structured_simple_cpu_kfirst(std::size_t CellDim,
     std::size_t VertexDim,
     std::size_t EdgeDim,
     std::size_t KDim,
@@ -132,7 +132,7 @@ std::vector<double> nabla4_benchmark_structured_cpu_kfirst(std::size_t CellDim,
     int repetitions = 101,
     int dry_runs = 1);
 
-std::vector<double> nabla4_benchmark_structured_gpu(std::size_t CellDim,
+std::vector<double> nabla4_benchmark_structured_simple_gpu(std::size_t CellDim,
     std::size_t VertexDim,
     std::size_t EdgeDim,
     std::size_t KDim,
@@ -140,7 +140,7 @@ std::vector<double> nabla4_benchmark_structured_gpu(std::size_t CellDim,
     int repetitions = 101,
     int dry_runs = 1);
 
-std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_naive(std::size_t CellDim,
+std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_simple_naive(std::size_t CellDim,
     std::size_t VertexDim,
     std::size_t EdgeDim,
     std::size_t KDim,
@@ -153,7 +153,7 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_naive(std::size_t C
     std::vector<double> &inv_vert_vert_length,
     std::vector<double> &inv_primal_edge_length);
 
-std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_cpu_ifirst(std::size_t CellDim,
+std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_simple_cpu_ifirst(std::size_t CellDim,
     std::size_t VertexDim,
     std::size_t EdgeDim,
     std::size_t KDim,
@@ -166,7 +166,7 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_cpu_ifirst(std::siz
     std::vector<double> &inv_vert_vert_length,
     std::vector<double> &inv_primal_edge_length);
 
-std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_cpu_kfirst(std::size_t CellDim,
+std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_simple_cpu_kfirst(std::size_t CellDim,
     std::size_t VertexDim,
     std::size_t EdgeDim,
     std::size_t KDim,
@@ -179,7 +179,7 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_cpu_kfirst(std::siz
     std::vector<double> &inv_vert_vert_length,
     std::vector<double> &inv_primal_edge_length);
 
-std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_gpu(std::size_t CellDim,
+std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_simple_gpu(std::size_t CellDim,
     std::size_t VertexDim,
     std::size_t EdgeDim,
     std::size_t KDim,

@@ -1,7 +1,7 @@
 #include <chrono>
 #include <vector>
 
-#include "nabla4_structured.hpp"
+#include "nabla4_structured_simple.hpp"
 #include "nabla4_structured_torus.hpp"
 #include "nabla4_unstructured.hpp"
 

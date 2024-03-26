@@ -29,14 +29,14 @@ NB_MODULE(icon_benchmark, m) {
     m.def("nabla4_validate_unstructured_cpu_kfirst", &nabla4_validate_unstructured_cpu_kfirst);
     m.def("nabla4_validate_unstructured_gpu", &nabla4_validate_unstructured_gpu);
     /// Structured
-    m.def("nabla4_benchmark_structured_naive", &nabla4_benchmark_structured_naive);
-    m.def("nabla4_benchmark_structured_cpu_ifirst", &nabla4_benchmark_structured_cpu_ifirst);
-    m.def("nabla4_benchmark_structured_cpu_kfirst", &nabla4_benchmark_structured_cpu_kfirst);
-    m.def("nabla4_benchmark_structured_gpu", &nabla4_benchmark_structured_gpu);
-    m.def("nabla4_validate_structured_naive", &nabla4_validate_structured_naive);
-    m.def("nabla4_validate_structured_cpu_ifirst", &nabla4_validate_structured_cpu_ifirst);
-    m.def("nabla4_validate_structured_cpu_kfirst", &nabla4_validate_structured_cpu_kfirst);
-    m.def("nabla4_validate_structured_gpu", &nabla4_validate_structured_gpu);
+    m.def("nabla4_benchmark_structured_simple_naive", &nabla4_benchmark_structured_simple_naive);
+    m.def("nabla4_benchmark_structured_simple_cpu_ifirst", &nabla4_benchmark_structured_simple_cpu_ifirst);
+    m.def("nabla4_benchmark_structured_simple_cpu_kfirst", &nabla4_benchmark_structured_simple_cpu_kfirst);
+    m.def("nabla4_benchmark_structured_simple_gpu", &nabla4_benchmark_structured_simple_gpu);
+    m.def("nabla4_validate_structured_simple_naive", &nabla4_validate_structured_simple_naive);
+    m.def("nabla4_validate_structured_simple_cpu_ifirst", &nabla4_validate_structured_simple_cpu_ifirst);
+    m.def("nabla4_validate_structured_simple_cpu_kfirst", &nabla4_validate_structured_simple_cpu_kfirst);
+    m.def("nabla4_validate_structured_simple_gpu", &nabla4_validate_structured_simple_gpu);
     /// Structured torus
     m.def("nabla4_benchmark_structured_torus_naive", &nabla4_benchmark_structured_torus_naive);
     m.def("nabla4_benchmark_structured_torus_cpu_ifirst", &nabla4_benchmark_structured_torus_cpu_ifirst);

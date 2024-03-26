@@ -9,7 +9,7 @@
 
 #define ARRAY_TYPE std::size_t
 template <Data T>
-class nabla4_structured {
+class nabla4_structured_simple {
   private:
     std::size_t CellDim;
     std::size_t EdgeDim;
@@ -64,7 +64,7 @@ class nabla4_structured {
   public:
     /// Constructor with all the necessary information for \c nabla4 compute
     /// kernel execution
-    nabla4_structured(
+    nabla4_structured_simple(
         std::size_t CellDim, std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim, std::size_t ECVDim)
         : CellDim(CellDim), VertexDim(VertexDim), EdgeDim(EdgeDim), KDim(KDim), ECVDim(ECVDim) {
         if constexpr (T == Data::ifirst) {
@@ -77,7 +77,7 @@ class nabla4_structured {
     };
 
     /// Constructor for validation
-    nabla4_structured(std::size_t CellDim,
+    nabla4_structured_simple(std::size_t CellDim,
         std::size_t VertexDim,
         std::size_t EdgeDim,
         std::size_t KDim,
@@ -227,12 +227,14 @@ class nabla4_structured {
         // std::cout << "Running naive nabla4_unstructured benchmark" << std::endl;
         for (std::size_t k_index{}; k_index < KDim; ++k_index) {
             for (std::size_t edge_index{0}; edge_index < EdgeDim; edge_index += 3) {
-                const auto e2c2v_vec_east = get_e2c2v<&nabla4_structured::get_e2c2v_vertices_east_edge>(edge_index);
+                const auto e2c2v_vec_east =
+                    get_e2c2v<&nabla4_structured_simple::get_e2c2v_vertices_east_edge>(edge_index);
                 inner_kernel_ifirst(e2c2v_vec_east, edge_index, k_index);
                 const auto e2c2v_vec_northeast =
-                    get_e2c2v<&nabla4_structured::get_e2c2v_vertices_northeast_edge>(edge_index);
+                    get_e2c2v<&nabla4_structured_simple::get_e2c2v_vertices_northeast_edge>(edge_index);
                 inner_kernel_ifirst(e2c2v_vec_northeast, edge_index + 1, k_index);
-                const auto e2c2v_vec_north = get_e2c2v<&nabla4_structured::get_e2c2v_vertices_north_edge>(edge_index);
+                const auto e2c2v_vec_north =
+                    get_e2c2v<&nabla4_structured_simple::get_e2c2v_vertices_north_edge>(edge_index);
                 inner_kernel_ifirst(e2c2v_vec_north, edge_index + 2, k_index);
             };
         };
@@ -242,12 +244,14 @@ class nabla4_structured {
         for (std::size_t k_index{}; k_index < KDim; ++k_index) {
 #pragma omp simd
             for (std::size_t edge_index = 0; edge_index < EdgeDim; edge_index += 3) {
-                const auto e2c2v_vec_east = get_e2c2v<&nabla4_structured::get_e2c2v_vertices_east_edge>(edge_index);
+                const auto e2c2v_vec_east =
+                    get_e2c2v<&nabla4_structured_simple::get_e2c2v_vertices_east_edge>(edge_index);
                 inner_kernel_ifirst(e2c2v_vec_east, edge_index, k_index);
                 const auto e2c2v_vec_northeast =
-                    get_e2c2v<&nabla4_structured::get_e2c2v_vertices_northeast_edge>(edge_index);
+                    get_e2c2v<&nabla4_structured_simple::get_e2c2v_vertices_northeast_edge>(edge_index);
                 inner_kernel_ifirst(e2c2v_vec_northeast, edge_index + 1, k_index);
-                const auto e2c2v_vec_north = get_e2c2v<&nabla4_structured::get_e2c2v_vertices_north_edge>(edge_index);
+                const auto e2c2v_vec_north =
+                    get_e2c2v<&nabla4_structured_simple::get_e2c2v_vertices_north_edge>(edge_index);
                 inner_kernel_ifirst(e2c2v_vec_north, edge_index + 2, k_index);
             };
         };
@@ -255,10 +259,11 @@ class nabla4_structured {
 
     void run_cpu_kfirst() {
         for (std::size_t edge_index{}; edge_index < EdgeDim; edge_index += 3) {
-            const auto e2c2v_vec_east = get_e2c2v<&nabla4_structured::get_e2c2v_vertices_east_edge>(edge_index);
+            const auto e2c2v_vec_east = get_e2c2v<&nabla4_structured_simple::get_e2c2v_vertices_east_edge>(edge_index);
             const auto e2c2v_vec_northeast =
-                get_e2c2v<&nabla4_structured::get_e2c2v_vertices_northeast_edge>(edge_index);
-            const auto e2c2v_vec_north = get_e2c2v<&nabla4_structured::get_e2c2v_vertices_north_edge>(edge_index);
+                get_e2c2v<&nabla4_structured_simple::get_e2c2v_vertices_northeast_edge>(edge_index);
+            const auto e2c2v_vec_north =
+                get_e2c2v<&nabla4_structured_simple::get_e2c2v_vertices_north_edge>(edge_index);
 #pragma omp simd
             for (std::size_t k_index = 0; k_index < KDim; ++k_index) {
                 inner_kernel_kfirst(e2c2v_vec_east, edge_index, k_index);

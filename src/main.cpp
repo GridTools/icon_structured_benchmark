@@ -87,28 +87,31 @@ int main(void) {
                                                              2]
         << std::endl;
 
-    auto nabla4_benchmark_structured_naive_runtimes =
-        nabla4_benchmark_structured_naive(18, 9, 27, 65, 4, repetitions, dry_runs);
-    std::sort(nabla4_benchmark_structured_naive_runtimes.begin(), nabla4_benchmark_structured_naive_runtimes.end());
-    std::cout << "Structured SimpleGrid naive nabla4 median runtime: "
-              << nabla4_benchmark_structured_naive_runtimes[nabla4_benchmark_structured_naive_runtimes.size() / 2]
+    auto nabla4_benchmark_structured_simple_naive_runtimes =
+        nabla4_benchmark_structured_simple_naive(18, 9, 27, 65, 4, repetitions, dry_runs);
+    std::sort(nabla4_benchmark_structured_simple_naive_runtimes.begin(),
+        nabla4_benchmark_structured_simple_naive_runtimes.end());
+    std::cout
+        << "Structured SimpleGrid naive nabla4 median runtime: "
+        << nabla4_benchmark_structured_simple_naive_runtimes[nabla4_benchmark_structured_simple_naive_runtimes.size() /
+                                                             2]
+        << std::endl;
+    auto nabla4_benchmark_structured_simple_cpu_ifirst_runtimes =
+        nabla4_benchmark_structured_simple_cpu_ifirst(18, 9, 27, 65, 4, repetitions, dry_runs);
+    std::sort(nabla4_benchmark_structured_simple_cpu_ifirst_runtimes.begin(),
+        nabla4_benchmark_structured_simple_cpu_ifirst_runtimes.end());
+    std::cout << "Structured SimpleGrid cpu_ifirst nabla4 median runtime: "
+              << nabla4_benchmark_structured_simple_cpu_ifirst_runtimes
+                     [nabla4_benchmark_structured_simple_cpu_ifirst_runtimes.size() / 2]
               << std::endl;
-    auto nabla4_benchmark_structured_cpu_ifirst_runtimes =
-        nabla4_benchmark_structured_cpu_ifirst(18, 9, 27, 65, 4, repetitions, dry_runs);
-    std::sort(
-        nabla4_benchmark_structured_cpu_ifirst_runtimes.begin(), nabla4_benchmark_structured_cpu_ifirst_runtimes.end());
-    std::cout
-        << "Structured SimpleGrid cpu_ifirst nabla4 median runtime: "
-        << nabla4_benchmark_structured_cpu_ifirst_runtimes[nabla4_benchmark_structured_cpu_ifirst_runtimes.size() / 2]
-        << std::endl;
-    auto nabla4_benchmark_structured_cpu_kfirst_runtimes =
-        nabla4_benchmark_structured_cpu_kfirst(18, 9, 27, 65, 4, repetitions, dry_runs);
-    std::sort(
-        nabla4_benchmark_structured_cpu_kfirst_runtimes.begin(), nabla4_benchmark_structured_cpu_kfirst_runtimes.end());
-    std::cout
-        << "Structured SimpleGrid cpu_kfirst nabla4 median runtime: "
-        << nabla4_benchmark_structured_cpu_kfirst_runtimes[nabla4_benchmark_structured_cpu_kfirst_runtimes.size() / 2]
-        << std::endl;
+    auto nabla4_benchmark_structured_simple_cpu_kfirst_runtimes =
+        nabla4_benchmark_structured_simple_cpu_kfirst(18, 9, 27, 65, 4, repetitions, dry_runs);
+    std::sort(nabla4_benchmark_structured_simple_cpu_kfirst_runtimes.begin(),
+        nabla4_benchmark_structured_simple_cpu_kfirst_runtimes.end());
+    std::cout << "Structured SimpleGrid cpu_kfirst nabla4 median runtime: "
+              << nabla4_benchmark_structured_simple_cpu_kfirst_runtimes
+                     [nabla4_benchmark_structured_simple_cpu_kfirst_runtimes.size() / 2]
+              << std::endl;
 
     std::vector<std::vector<std::size_t>> E2C2V_torus_24576{{0, 4, 11, 1},
         {0, 1, 4, 9},

@@ -37,7 +37,7 @@ def simple_grid():
 def test_simple_grid(simple_grid):
     repetitions = 3
     dry_runs = 0
-    runtimes = icon_benchmark.nabla4_benchmark_structured_naive(
+    runtimes = icon_benchmark.nabla4_benchmark_structured_simple_naive(
         simple_grid.num_cells,
         simple_grid.num_vertices,
         simple_grid.num_edges,
@@ -167,8 +167,8 @@ def simple_grid_kernel_input(simple_grid):
     yield nabla4_kernel_validation_data
 
 
-def test_validate_nabla4_structured_naive(simple_grid_kernel_input):
-    z_nabla4_e2_comp = icon_benchmark.nabla4_validate_structured_naive(
+def test_validate_nabla4_structured_simple_naive(simple_grid_kernel_input):
+    z_nabla4_e2_comp = icon_benchmark.nabla4_validate_structured_simple_naive(
         simple_grid_kernel_input.num_cells,
         simple_grid_kernel_input.num_vertices,
         simple_grid_kernel_input.num_edges,
