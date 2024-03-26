@@ -167,7 +167,7 @@ def run_sanity_checks(grid, lon_dim, lat_dim):
 def parse_arguments():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("grid")
+    parser.add_argument("grid", help="Torus grid netCDF4 file")
     parser.add_argument(
         "--transformation",
         choices=["gt4py", "index"],
@@ -182,7 +182,7 @@ def parse_arguments():
         "--dry-run", default=False, help="Do a dry run or not", action="store_true"
     )
     parser.add_argument(
-        "--output", type=str, default="output.pdf", help="Output file with plots"
+        "--output", type=str, default="output", help="JSON output file name"
     )
     parser.add_argument(
         "--sanity-checks",

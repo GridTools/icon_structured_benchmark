@@ -33,7 +33,7 @@ def get_torus_grid(filename, num_levels):
 def parse_arguments():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("grid")
+    parser.add_argument("grid", help="SimpleGrid netCDF4 file")
     parser.add_argument("--klevels", type=int, default=65, help="Number of k levels")
     parser.add_argument(
         "--repetitions", type=int, default=101, help="Number of repetitions"
