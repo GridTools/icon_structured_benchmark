@@ -15,8 +15,6 @@ from icon4py.model.common.dimension import E2C2VDim  # type: ignore [import-not-
 
 import icon_benchmark  # type: ignore [import-not-found]
 
-from plot_runtimes import plot_runtimes
-
 import netCDF4  # type: ignore [import-not-found]
 
 from json import dump
@@ -24,7 +22,15 @@ from json import dump
 
 def print_median_runtimes(runtimes):
     for key in runtimes.keys():
-        print("{} median runtime: {}".format(key, np.median(runtimes[key])))
+        values = runtimes[key]
+        print(
+            "{} median runtime: {}".format(
+                key,
+                np.median(
+                    np.sort(values)[int(0.25 * len(values)) : int(0.75 * len(values))]
+                ),
+            )
+        )
 
 
 def get_torus_cartesian_dimensions(filename):
@@ -140,18 +146,18 @@ def run_sanity_checks(grid, lon_dim, lat_dim):
             random_validation_data.ECVDim,
             lon_dim,
             lat_dim,
-            random_validation_data.u_vert,
-            random_validation_data.v_vert,
+            np.array(random_validation_data.u_vert).T,
+            np.array(random_validation_data.v_vert).T,
             random_validation_data.primal_normal_vert_v1,
             random_validation_data.primal_normal_vert_v2,
-            random_validation_data.z_nabla2_e,
+            np.array(random_validation_data.z_nabla2_e).T,
             random_validation_data.inv_vert_vert_length,
             random_validation_data.inv_primal_edge_length,
         )
     )
 
     assert np.allclose(
-        z_nabla4_e2_comp_structured_cpu_kfirst,
+        np.array(z_nabla4_e2_comp_structured_cpu_kfirst).T,
         random_validation_data.z_nabla4_e2_wp,
     )
 
@@ -315,7 +321,6 @@ def run_benchmarks():
     )
 
     print_median_runtimes(runtimes)
-    plot_runtimes(runtimes, args.output)
 
     with open(args.output.split(".")[0] + ".json", "w") as file:
         dump(runtimes, file)

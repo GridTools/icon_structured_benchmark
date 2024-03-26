@@ -3,7 +3,7 @@
 # to keep version numbers in sync with 'constraints.txt'
 
 default_language_version:
-  python: python3.9.6
+  python: python3.11
 repos:
 # - repo: meta
 #   hooks:
@@ -116,5 +116,7 @@ repos:
     exclude: |-
       (?x)^(
       tests/data/simple_grid/.* |
-      tests/data/torus_grid/.*
+      tests/data/torus_grid/.* |
+      results/output_b6bc6f/.*.json |
+      results/output_b6bc6f_multi/.*.json
       )$

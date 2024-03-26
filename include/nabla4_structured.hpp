@@ -8,7 +8,7 @@
 #include "random_init.hpp"
 
 #define ARRAY_TYPE std::size_t
-
+template <Data T>
 class nabla4_structured {
   private:
     std::size_t CellDim;
@@ -16,14 +16,14 @@ class nabla4_structured {
     std::size_t VertexDim;
     std::size_t KDim;
     std::size_t ECVDim;
-    std::vector<std::vector<float>> u_vert;
-    std::vector<std::vector<float>> v_vert;
+    std::vector<std::vector<VP_TYPE>> u_vert;
+    std::vector<std::vector<VP_TYPE>> v_vert;
     std::vector<double> primal_normal_vert_v1;
     std::vector<double> primal_normal_vert_v2;
     std::vector<std::vector<double>> z_nabla2_e;
     std::vector<double> inv_vert_vert_length;
     std::vector<double> inv_primal_edge_length;
-    std::vector<std::vector<float>> z_nabla4_e2_wp;
+    std::vector<std::vector<VP_TYPE>> z_nabla4_e2_wp;
 
     /// Random number utilities
     RandomUniformUtils rand_utils{-1.0, 1.0};
@@ -32,10 +32,26 @@ class nabla4_structured {
     static constexpr std::size_t latitude_dim{3};
 
     /// Initialize vectors needed to execute kernel with random numbers
-    void init() {
+    void init_ifirst() {
         // std::cout << "Initializing vectors" << std::endl;
-        u_vert = rand_utils.random_init_vec_2d<float>(VertexDim, KDim);
-        v_vert = rand_utils.random_init_vec_2d<float>(VertexDim, KDim);
+        u_vert = rand_utils.random_init_vec_2d<VP_TYPE>(KDim, VertexDim);
+        v_vert = rand_utils.random_init_vec_2d<VP_TYPE>(KDim, VertexDim);
+        primal_normal_vert_v1 = rand_utils.random_init_vec_1d(EdgeDim * ECVDim);
+        primal_normal_vert_v2 = rand_utils.random_init_vec_1d(EdgeDim * ECVDim);
+        z_nabla2_e = rand_utils.random_init_vec_2d(KDim, EdgeDim);
+        inv_vert_vert_length = rand_utils.random_init_vec_1d(EdgeDim);
+        inv_primal_edge_length = rand_utils.random_init_vec_1d(EdgeDim);
+        z_nabla4_e2_wp.resize(KDim);
+        for (std::size_t i{}; i < KDim; ++i) {
+            z_nabla4_e2_wp[i].resize(EdgeDim);
+        }
+    }
+
+    /// Initialize vectors needed to execute kernel with random numbers
+    void init_kfirst() {
+        // std::cout << "Initializing vectors" << std::endl;
+        u_vert = rand_utils.random_init_vec_2d<VP_TYPE>(VertexDim, KDim);
+        v_vert = rand_utils.random_init_vec_2d<VP_TYPE>(VertexDim, KDim);
         primal_normal_vert_v1 = rand_utils.random_init_vec_1d(EdgeDim * ECVDim);
         primal_normal_vert_v2 = rand_utils.random_init_vec_1d(EdgeDim * ECVDim);
         z_nabla2_e = rand_utils.random_init_vec_2d(EdgeDim, KDim);
@@ -53,7 +69,13 @@ class nabla4_structured {
     nabla4_structured(
         std::size_t CellDim, std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim, std::size_t ECVDim)
         : CellDim(CellDim), VertexDim(VertexDim), EdgeDim(EdgeDim), KDim(KDim), ECVDim(ECVDim) {
-        init();
+        if constexpr (T == Data::ifirst) {
+            init_ifirst();
+        } else if constexpr (T == Data::kfirst) {
+            init_kfirst();
+        } else {
+            throw std::runtime_error("Undefined backend implementation");
+        }
     };
 
     /// Constructor for validation
@@ -62,8 +84,8 @@ class nabla4_structured {
         std::size_t EdgeDim,
         std::size_t KDim,
         std::size_t ECVDim,
-        std::vector<std::vector<float>> &u_vert,
-        std::vector<std::vector<float>> &v_vert,
+        std::vector<std::vector<VP_TYPE>> &u_vert,
+        std::vector<std::vector<VP_TYPE>> &v_vert,
         std::vector<double> &primal_normal_vert_v1,
         std::vector<double> &primal_normal_vert_v2,
         std::vector<std::vector<double>> &z_nabla2_e,
@@ -73,13 +95,22 @@ class nabla4_structured {
           v_vert(v_vert), primal_normal_vert_v1(primal_normal_vert_v1), primal_normal_vert_v2(primal_normal_vert_v2),
           z_nabla2_e(z_nabla2_e), inv_vert_vert_length(inv_vert_vert_length),
           inv_primal_edge_length(inv_primal_edge_length) {
-        z_nabla4_e2_wp.resize(EdgeDim);
-        for (std::size_t i{}; i < EdgeDim; ++i) {
-            z_nabla4_e2_wp[i].resize(KDim);
+        if constexpr (T == Data::ifirst) {
+            z_nabla4_e2_wp.resize(KDim);
+            for (std::size_t i{}; i < KDim; ++i) {
+                z_nabla4_e2_wp[i].resize(EdgeDim);
+            }
+        } else if constexpr (T == Data::kfirst) {
+            z_nabla4_e2_wp.resize(EdgeDim);
+            for (std::size_t i{}; i < EdgeDim; ++i) {
+                z_nabla4_e2_wp[i].resize(KDim);
+            }
+        } else {
+            throw std::runtime_error("Undefined backend implementation");
         }
     };
 
-    std::vector<std::vector<float>> get_output() { return z_nabla4_e2_wp; }
+    std::vector<std::vector<VP_TYPE>> get_output() { return z_nabla4_e2_wp; }
 
     inline std::array<ARRAY_TYPE, 4> get_e2c2v_vertices_east_edge(std::size_t edge_index,
         std::size_t parent_vertex,
@@ -130,7 +161,7 @@ class nabla4_structured {
     }
 
     template <auto f>
-    inline void inner_kernel(ARRAY_TYPE edge_index, std::size_t k_index) {
+    inline const std::array<ARRAY_TYPE, 4> get_e2c2v(ARRAY_TYPE edge_index) {
         const std::size_t edges_per_index{3};
         const auto starting_vertex = edge_index / edges_per_index;
         const auto latitude = starting_vertex % latitude_dim;
@@ -141,6 +172,40 @@ class nabla4_structured {
         const auto longitude_m1 = (longitude_dim + (longitude - 1)) % longitude_dim;
         const auto e2c2v_vec = (this->*f)(
             edge_index, starting_vertex, latitude, longitude, latitude_p1, latitude_m1, longitude_p1, longitude_m1);
+        return e2c2v_vec;
+    }
+
+    inline void inner_kernel_ifirst(
+        const std::array<ARRAY_TYPE, 4> &e2c2v_vec, std::size_t edge_index, std::size_t k_index) {
+        const auto E2C2V_0 = e2c2v_vec[0];
+        const auto E2C2V_1 = e2c2v_vec[1];
+        const auto E2C2V_2 = e2c2v_vec[2];
+        const auto E2C2V_3 = e2c2v_vec[3];
+        // if (k_index == 0) {
+        //     std::cout << "E2C2V[" << edge_index << "]: [" << E2C2V_0 << ", " <<
+        //     E2C2V_1 << ", " << E2C2V_2 << ", " << E2C2V_3 << "]" << std::endl;
+        // }
+        const auto E2ECV_0 = edge_index * 4;
+        const auto E2ECV_1 = edge_index * 4 + 1;
+        const auto E2ECV_2 = edge_index * 4 + 2;
+        const auto E2ECV_3 = edge_index * 4 + 3;
+        double nabv_tang_wp = static_cast<double>(u_vert[k_index][E2C2V_0]) * primal_normal_vert_v1[E2ECV_0] +
+                              static_cast<double>(v_vert[k_index][E2C2V_0]) * primal_normal_vert_v2[E2ECV_0] +
+                              static_cast<double>(u_vert[k_index][E2C2V_1]) * primal_normal_vert_v1[E2ECV_1] +
+                              static_cast<double>(v_vert[k_index][E2C2V_1]) * primal_normal_vert_v2[E2ECV_1];
+        double nabv_norm_wp = static_cast<double>(u_vert[k_index][E2C2V_2]) * primal_normal_vert_v1[E2ECV_2] +
+                              static_cast<double>(v_vert[k_index][E2C2V_2]) * primal_normal_vert_v2[E2ECV_2] +
+                              static_cast<double>(u_vert[k_index][E2C2V_3]) * primal_normal_vert_v1[E2ECV_3] +
+                              static_cast<double>(v_vert[k_index][E2C2V_3]) * primal_normal_vert_v2[E2ECV_3];
+        z_nabla4_e2_wp[k_index][edge_index] =
+            4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e[k_index][edge_index]) *
+                          (inv_vert_vert_length[edge_index] * inv_vert_vert_length[edge_index]) +
+                      (nabv_tang_wp - 2.0 * z_nabla2_e[k_index][edge_index]) *
+                          (inv_primal_edge_length[edge_index] * inv_primal_edge_length[edge_index]));
+    }
+
+    inline void inner_kernel_kfirst(
+        const std::array<ARRAY_TYPE, 4> &e2c2v_vec, std::size_t edge_index, std::size_t k_index) {
         const auto E2C2V_0 = e2c2v_vec[0];
         const auto E2C2V_1 = e2c2v_vec[1];
         const auto E2C2V_2 = e2c2v_vec[2];
@@ -172,9 +237,13 @@ class nabla4_structured {
         // std::cout << "Running naive nabla4_unstructured benchmark" << std::endl;
         for (std::size_t k_index{}; k_index < KDim; ++k_index) {
             for (std::size_t edge_index{0}; edge_index < EdgeDim; edge_index += 3) {
-                inner_kernel<&nabla4_structured::get_e2c2v_vertices_east_edge>(edge_index, k_index);
-                inner_kernel<&nabla4_structured::get_e2c2v_vertices_northeast_edge>(edge_index + 1, k_index);
-                inner_kernel<&nabla4_structured::get_e2c2v_vertices_north_edge>(edge_index + 2, k_index);
+                const auto e2c2v_vec_east = get_e2c2v<&nabla4_structured::get_e2c2v_vertices_east_edge>(edge_index);
+                inner_kernel_ifirst(e2c2v_vec_east, edge_index, k_index);
+                const auto e2c2v_vec_northeast =
+                    get_e2c2v<&nabla4_structured::get_e2c2v_vertices_northeast_edge>(edge_index);
+                inner_kernel_ifirst(e2c2v_vec_northeast, edge_index + 1, k_index);
+                const auto e2c2v_vec_north = get_e2c2v<&nabla4_structured::get_e2c2v_vertices_north_edge>(edge_index);
+                inner_kernel_ifirst(e2c2v_vec_north, edge_index + 2, k_index);
             };
         };
     };
@@ -183,20 +252,28 @@ class nabla4_structured {
         for (std::size_t k_index{}; k_index < KDim; ++k_index) {
 #pragma omp simd
             for (std::size_t edge_index = 0; edge_index < EdgeDim; edge_index += 3) {
-                inner_kernel<&nabla4_structured::get_e2c2v_vertices_east_edge>(edge_index, k_index);
-                inner_kernel<&nabla4_structured::get_e2c2v_vertices_northeast_edge>(edge_index + 1, k_index);
-                inner_kernel<&nabla4_structured::get_e2c2v_vertices_north_edge>(edge_index + 2, k_index);
+                const auto e2c2v_vec_east = get_e2c2v<&nabla4_structured::get_e2c2v_vertices_east_edge>(edge_index);
+                inner_kernel_ifirst(e2c2v_vec_east, edge_index, k_index);
+                const auto e2c2v_vec_northeast =
+                    get_e2c2v<&nabla4_structured::get_e2c2v_vertices_northeast_edge>(edge_index);
+                inner_kernel_ifirst(e2c2v_vec_northeast, edge_index + 1, k_index);
+                const auto e2c2v_vec_north = get_e2c2v<&nabla4_structured::get_e2c2v_vertices_north_edge>(edge_index);
+                inner_kernel_ifirst(e2c2v_vec_north, edge_index + 2, k_index);
             };
         };
     };
 
     void run_cpu_kfirst() {
         for (std::size_t edge_index{}; edge_index < EdgeDim; edge_index += 3) {
+            const auto e2c2v_vec_east = get_e2c2v<&nabla4_structured::get_e2c2v_vertices_east_edge>(edge_index);
+            const auto e2c2v_vec_northeast =
+                get_e2c2v<&nabla4_structured::get_e2c2v_vertices_northeast_edge>(edge_index);
+            const auto e2c2v_vec_north = get_e2c2v<&nabla4_structured::get_e2c2v_vertices_north_edge>(edge_index);
 #pragma omp simd
             for (std::size_t k_index = 0; k_index < KDim; ++k_index) {
-                inner_kernel<&nabla4_structured::get_e2c2v_vertices_east_edge>(edge_index, k_index);
-                inner_kernel<&nabla4_structured::get_e2c2v_vertices_northeast_edge>(edge_index + 1, k_index);
-                inner_kernel<&nabla4_structured::get_e2c2v_vertices_north_edge>(edge_index + 2, k_index);
+                inner_kernel_kfirst(e2c2v_vec_east, edge_index, k_index);
+                inner_kernel_kfirst(e2c2v_vec_northeast, edge_index + 1, k_index);
+                inner_kernel_kfirst(e2c2v_vec_north, edge_index + 2, k_index);
             };
         };
     };

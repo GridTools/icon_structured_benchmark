@@ -203,17 +203,17 @@ def test_validate_nabla4_unstructured_naive(request, grid):
         grid.num_edges,
         grid.num_levels,
         grid.E2C2VDim,
-        grid.u_vert,
-        grid.v_vert,
+        np.array(grid.u_vert).T,
+        np.array(grid.v_vert).T,
         grid.primal_normal_vert_v1,
         grid.primal_normal_vert_v2,
-        grid.z_nabla2_e,
+        np.array(grid.z_nabla2_e).T,
         grid.inv_vert_vert_length,
         grid.inv_primal_edge_length,
     )
 
     assert np.allclose(
-        z_nabla4_e2_comp,
+        np.array(z_nabla4_e2_comp).T,
         grid.ref_z_nabla4_e2,
         equal_nan=True,
         atol=1e-8,
@@ -234,17 +234,17 @@ def test_validate_nabla4_unstructured_cpu_ifirst(request, grid):
         grid.num_edges,
         grid.num_levels,
         grid.E2C2VDim,
-        grid.u_vert,
-        grid.v_vert,
+        np.array(grid.u_vert).T,
+        np.array(grid.v_vert).T,
         grid.primal_normal_vert_v1,
         grid.primal_normal_vert_v2,
-        grid.z_nabla2_e,
+        np.array(grid.z_nabla2_e).T,
         grid.inv_vert_vert_length,
         grid.inv_primal_edge_length,
     )
 
     assert np.allclose(
-        z_nabla4_e2_comp,
+        np.array(z_nabla4_e2_comp).T,
         grid.ref_z_nabla4_e2,
         equal_nan=True,
         atol=1e-8,

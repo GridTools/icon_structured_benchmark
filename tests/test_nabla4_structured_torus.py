@@ -57,13 +57,6 @@ class Nabla4KernelValidationData:
     ref_z_nabla4_e2: np.ndarray
 
 
-def apply_permutation(perm, vec):
-    ret = []
-    for i in range(len(vec)):
-        ret.append(vec[perm[i]])
-    return ret
-
-
 @pytest.fixture
 def small_torus_grid_kernel_input(small_torus_grid):
     nabla4_kernel_validation_data = Nabla4KernelValidationData
@@ -124,17 +117,17 @@ def test_validate_nabla4_structured_torus_naive(small_torus_grid_kernel_input):
         small_torus_grid_kernel_input.E2C2VDim,
         3,
         4,
-        small_torus_grid_kernel_input.u_vert,
-        small_torus_grid_kernel_input.v_vert,
+        np.array(small_torus_grid_kernel_input.u_vert).T,
+        np.array(small_torus_grid_kernel_input.v_vert).T,
         small_torus_grid_kernel_input.primal_normal_vert_v1,
         small_torus_grid_kernel_input.primal_normal_vert_v2,
-        small_torus_grid_kernel_input.z_nabla2_e,
+        np.array(small_torus_grid_kernel_input.z_nabla2_e).T,
         small_torus_grid_kernel_input.inv_vert_vert_length,
         small_torus_grid_kernel_input.inv_primal_edge_length,
     )
 
     assert np.allclose(
-        z_nabla4_e2_comp,
+        np.array(z_nabla4_e2_comp).T,
         small_torus_grid_kernel_input.ref_z_nabla4_e2,
         equal_nan=True,
         atol=1e-8,
