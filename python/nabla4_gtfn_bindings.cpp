@@ -34,7 +34,8 @@ decltype(auto) calculate_nabla4_wrapper(
     std::pair<nanobind::ndarray<std::int64_t, nanobind::shape<nanobind::any, nanobind::any>>,
         std::tuple<ptrdiff_t, ptrdiff_t>> gt_conn_e2c2v,
     std::pair<nanobind::ndarray<std::int64_t, nanobind::shape<nanobind::any, nanobind::any>>,
-        std::tuple<ptrdiff_t, ptrdiff_t>> gt_conn_e2ecv) {
+        std::tuple<ptrdiff_t, ptrdiff_t>> gt_conn_e2ecv,
+    int repetitions) {
     return calculate_nabla4(
         gridtools::sid::rename_numbered_dimensions<generated::Vertex_t, generated::K_t>(
             gridtools::sid::shift_sid_origin(gridtools::nanobind::as_sid(u_vert.first), u_vert.second)),
@@ -59,7 +60,8 @@ decltype(auto) calculate_nabla4_wrapper(
         gridtools::sid::rename_numbered_dimensions<generated::Edge_t, generated::E2C2V_t>(
             gridtools::sid::shift_sid_origin(gridtools::nanobind::as_sid(gt_conn_e2c2v.first), gt_conn_e2c2v.second)),
         gridtools::sid::rename_numbered_dimensions<generated::Edge_t, generated::E2ECV_t>(
-            gridtools::sid::shift_sid_origin(gridtools::nanobind::as_sid(gt_conn_e2ecv.first), gt_conn_e2ecv.second)));
+            gridtools::sid::shift_sid_origin(gridtools::nanobind::as_sid(gt_conn_e2ecv.first), gt_conn_e2ecv.second)),
+        repetitions);
 }
 
 NB_MODULE(nabla4_gtfn, module) { module.def("calculate_nabla4", &calculate_nabla4_wrapper); }

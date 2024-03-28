@@ -243,7 +243,7 @@ def run_benchmarks():
         torus_grid.size[E2C2VDim],
     )
 
-    z_nabla4_e2_wp_gtfn = np.ndarray(
+    z_nabla4_e2_wp_gtfn = np.zeros(
         shape=(torus_grid.num_edges, torus_grid.num_levels), dtype=np.float64
     )
 
@@ -299,6 +299,7 @@ def run_benchmarks():
             torus_grid.get_offset_provider("E2ECV").table.astype(np.int64),
             (0, 0),
         ),
+        repetitions,
     )
 
     runtimes[

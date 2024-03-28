@@ -101,9 +101,10 @@ namespace generated {
                        auto &&horizontal_start,
                        auto &&horizontal_end,
                        auto &&vertical_start,
-                       auto &&vertical_end) {
+                       auto &&vertical_end,
+                       int repetitions) {
                 std::vector<double> runtimes;
-                for (int i = 0; i < 11; ++i) {
+                for (int i = 0; i < repetitions; ++i) {
                     auto tmp_alloc__ = gtfn::backend::tmp_allocator(backend);
 
                     const auto start = high_resolution_clock::now();
@@ -155,7 +156,8 @@ decltype(auto) calculate_nabla4(BufferT0 &&u_vert,
     std::int32_t vertical_start,
     std::int32_t vertical_end,
     BufferT12 &&gt_conn_e2c2v,
-    BufferT13 &&gt_conn_e2ecv) {
+    BufferT13 &&gt_conn_e2ecv,
+    int repetitions) {
     return generated::calculate_nabla4(
         gridtools::hymap::keys<generated::E2C2V_t>::make_values(
             gridtools::fn::sid_neighbor_table::as_neighbor_table<generated::Edge_t, generated::E2C2V_t, 4>(
@@ -174,5 +176,6 @@ decltype(auto) calculate_nabla4(BufferT0 &&u_vert,
         std::forward<decltype(horizontal_start)>(horizontal_start),
         std::forward<decltype(horizontal_end)>(horizontal_end),
         std::forward<decltype(vertical_start)>(vertical_start),
-        std::forward<decltype(vertical_end)>(vertical_end));
+        std::forward<decltype(vertical_end)>(vertical_end),
+        repetitions);
 }
