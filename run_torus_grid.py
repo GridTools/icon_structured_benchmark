@@ -69,6 +69,69 @@ def run_sanity_checks(grid, lon_dim, lat_dim):
         grid.size[E2C2VDim],
     )
 
+    z_nabla4_e2_wp_gtfn = np.zeros(
+        shape=(grid.num_edges, grid.num_levels), dtype=np.float64
+    )
+
+    nabla4_gtfn.calculate_nabla4(
+        (
+            np.array(random_validation_data.u_vert, dtype=float).T.astype(np.float64),
+            (0, 0),
+        ),
+        (
+            np.array(random_validation_data.v_vert, dtype=float).T.astype(np.float64),
+            (0, 0),
+        ),
+        (
+            np.array(random_validation_data.primal_normal_vert_v1, dtype=float).astype(
+                np.float64
+            ),
+            (0,),
+        ),
+        (
+            np.array(random_validation_data.primal_normal_vert_v2, dtype=float).astype(
+                np.float64
+            ),
+            (0,),
+        ),
+        (
+            np.array(random_validation_data.z_nabla2_e, dtype=float).T.astype(
+                np.float64
+            ),
+            (0, 0),
+        ),
+        (
+            np.array(random_validation_data.inv_vert_vert_length, dtype=float).astype(
+                np.float64
+            ),
+            (0,),
+        ),
+        (
+            np.array(random_validation_data.inv_primal_edge_length, dtype=float).astype(
+                np.float64
+            ),
+            (0,),
+        ),
+        (z_nabla4_e2_wp_gtfn, (0, 0)),
+        0,
+        grid.num_edges,
+        0,
+        grid.num_levels,
+        (
+            grid.get_offset_provider("E2C2V").table.astype(np.int64),
+            (0, 0),
+        ),
+        (
+            grid.get_offset_provider("E2ECV").table.astype(np.int64),
+            (0, 0),
+        ),
+    )
+
+    assert np.allclose(
+        z_nabla4_e2_wp_gtfn.T,
+        random_validation_data.z_nabla4_e2_wp,
+    )
+
     z_nabla4_e2_comp_unstructured = icon_benchmark.nabla4_validate_unstructured_naive(
         grid.get_offset_provider("E2C2V").table,
         grid.get_offset_provider("E2ECV").table,
