@@ -101,33 +101,28 @@ namespace generated {
                        auto &&horizontal_start,
                        auto &&horizontal_end,
                        auto &&vertical_start,
-                       auto &&vertical_end,
-                       int repetitions) {
-                std::vector<double> runtimes;
-                for (int i = 0; i < repetitions; ++i) {
-                    auto tmp_alloc__ = gtfn::backend::tmp_allocator(backend);
+                       auto &&vertical_end) {
+                auto tmp_alloc__ = gtfn::backend::tmp_allocator(backend);
 
-                    const auto start = high_resolution_clock::now();
-                    make_backend(backend,
-                        gtfn::unstructured_domain(
-                            ::gridtools::tuple((horizontal_end - horizontal_start), (vertical_end - vertical_start)),
-                            ::gridtools::tuple(horizontal_start, vertical_start),
-                            connectivities__...))
-                        .stencil_executor()()
-                        .arg(z_nabla4_e2)
-                        .arg(u_vert)
-                        .arg(v_vert)
-                        .arg(primal_normal_vert_v1)
-                        .arg(primal_normal_vert_v2)
-                        .arg(z_nabla2_e)
-                        .arg(inv_vert_vert_length)
-                        .arg(inv_primal_edge_length)
-                        .assign(0_c, _fun_1(), 1_c, 2_c, 3_c, 4_c, 5_c, 6_c, 7_c)
-                        .execute();
-                    const auto end = high_resolution_clock::now();
-                    runtimes.push_back(duration<double>(end - start).count());
-                }
-                return runtimes;
+                const auto start = high_resolution_clock::now();
+                make_backend(backend,
+                    gtfn::unstructured_domain(
+                        ::gridtools::tuple((horizontal_end - horizontal_start), (vertical_end - vertical_start)),
+                        ::gridtools::tuple(horizontal_start, vertical_start),
+                        connectivities__...))
+                    .stencil_executor()()
+                    .arg(z_nabla4_e2)
+                    .arg(u_vert)
+                    .arg(v_vert)
+                    .arg(primal_normal_vert_v1)
+                    .arg(primal_normal_vert_v2)
+                    .arg(z_nabla2_e)
+                    .arg(inv_vert_vert_length)
+                    .arg(inv_primal_edge_length)
+                    .assign(0_c, _fun_1(), 1_c, 2_c, 3_c, 4_c, 5_c, 6_c, 7_c)
+                    .execute();
+                const auto end = high_resolution_clock::now();
+                return duration<double>(end - start).count();
             };
         };
     } // namespace
@@ -156,8 +151,7 @@ decltype(auto) calculate_nabla4(BufferT0 &&u_vert,
     std::int32_t vertical_start,
     std::int32_t vertical_end,
     BufferT12 &&gt_conn_e2c2v,
-    BufferT13 &&gt_conn_e2ecv,
-    int repetitions) {
+    BufferT13 &&gt_conn_e2ecv) {
     return generated::calculate_nabla4(
         gridtools::hymap::keys<generated::E2C2V_t>::make_values(
             gridtools::fn::sid_neighbor_table::as_neighbor_table<generated::Edge_t, generated::E2C2V_t, 4>(
@@ -176,6 +170,5 @@ decltype(auto) calculate_nabla4(BufferT0 &&u_vert,
         std::forward<decltype(horizontal_start)>(horizontal_start),
         std::forward<decltype(horizontal_end)>(horizontal_end),
         std::forward<decltype(vertical_start)>(vertical_start),
-        std::forward<decltype(vertical_end)>(vertical_end),
-        repetitions);
+        std::forward<decltype(vertical_end)>(vertical_end));
 }
