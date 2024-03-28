@@ -8,6 +8,12 @@
 #include <gridtools/fn/sid_neighbor_table.hpp>
 #include <gridtools/fn/unstructured.hpp>
 
+#include <chrono>
+#include <iostream>
+
+using std::chrono::duration;
+using std::chrono::high_resolution_clock;
+
 namespace generated {
 
     namespace gtfn = ::gridtools::fn;
@@ -96,24 +102,31 @@ namespace generated {
                        auto &&horizontal_end,
                        auto &&vertical_start,
                        auto &&vertical_end) {
-                auto tmp_alloc__ = gtfn::backend::tmp_allocator(backend);
+                std::vector<double> runtimes;
+                for (int i = 0; i < 11; ++i) {
+                    auto tmp_alloc__ = gtfn::backend::tmp_allocator(backend);
 
-                make_backend(backend,
-                    gtfn::unstructured_domain(
-                        ::gridtools::tuple((horizontal_end - horizontal_start), (vertical_end - vertical_start)),
-                        ::gridtools::tuple(horizontal_start, vertical_start),
-                        connectivities__...))
-                    .stencil_executor()()
-                    .arg(z_nabla4_e2)
-                    .arg(u_vert)
-                    .arg(v_vert)
-                    .arg(primal_normal_vert_v1)
-                    .arg(primal_normal_vert_v2)
-                    .arg(z_nabla2_e)
-                    .arg(inv_vert_vert_length)
-                    .arg(inv_primal_edge_length)
-                    .assign(0_c, _fun_1(), 1_c, 2_c, 3_c, 4_c, 5_c, 6_c, 7_c)
-                    .execute();
+                    const auto start = high_resolution_clock::now();
+                    make_backend(backend,
+                        gtfn::unstructured_domain(
+                            ::gridtools::tuple((horizontal_end - horizontal_start), (vertical_end - vertical_start)),
+                            ::gridtools::tuple(horizontal_start, vertical_start),
+                            connectivities__...))
+                        .stencil_executor()()
+                        .arg(z_nabla4_e2)
+                        .arg(u_vert)
+                        .arg(v_vert)
+                        .arg(primal_normal_vert_v1)
+                        .arg(primal_normal_vert_v2)
+                        .arg(z_nabla2_e)
+                        .arg(inv_vert_vert_length)
+                        .arg(inv_primal_edge_length)
+                        .assign(0_c, _fun_1(), 1_c, 2_c, 3_c, 4_c, 5_c, 6_c, 7_c)
+                        .execute();
+                    const auto end = high_resolution_clock::now();
+                    runtimes.push_back(duration<double>(end - start).count());
+                }
+                return runtimes;
             };
         };
     } // namespace

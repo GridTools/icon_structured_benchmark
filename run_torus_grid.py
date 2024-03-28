@@ -15,6 +15,8 @@ from icon4py.model.common.dimension import E2C2VDim  # type: ignore [import-not-
 
 import icon_benchmark  # type: ignore [import-not-found]
 
+import nabla4_gtfn  # type: ignore [import-not-found]
+
 import netCDF4  # type: ignore [import-not-found]
 
 from json import dump
@@ -228,6 +230,76 @@ def run_benchmarks():
         )
 
     runtimes = {}
+
+    runtimes["nabla4_benchmark_unstructured_gtfn"] = []
+
+    random_validation_data = icon_benchmark.get_nabla4_benchmark_validation_data(
+        torus_grid.get_offset_provider("E2C2V").table,
+        torus_grid.get_offset_provider("E2ECV").table,
+        torus_grid.num_cells,
+        torus_grid.num_vertices,
+        torus_grid.num_edges,
+        torus_grid.num_levels,
+        torus_grid.size[E2C2VDim],
+    )
+
+    z_nabla4_e2_wp_gtfn = np.ndarray(
+        shape=(torus_grid.num_edges, torus_grid.num_levels), dtype=np.float64
+    )
+
+    runtimes["nabla4_benchmark_unstructured_gtfn"] = nabla4_gtfn.calculate_nabla4(
+        (
+            np.array(random_validation_data.u_vert, dtype=float).T.astype(np.float64),
+            (0, 0),
+        ),
+        (
+            np.array(random_validation_data.v_vert, dtype=float).T.astype(np.float64),
+            (0, 0),
+        ),
+        (
+            np.array(random_validation_data.primal_normal_vert_v1, dtype=float).astype(
+                np.float64
+            ),
+            (0,),
+        ),
+        (
+            np.array(random_validation_data.primal_normal_vert_v2, dtype=float).astype(
+                np.float64
+            ),
+            (0,),
+        ),
+        (
+            np.array(random_validation_data.z_nabla2_e, dtype=float).T.astype(
+                np.float64
+            ),
+            (0, 0),
+        ),
+        (
+            np.array(random_validation_data.inv_vert_vert_length, dtype=float).astype(
+                np.float64
+            ),
+            (0,),
+        ),
+        (
+            np.array(random_validation_data.inv_primal_edge_length, dtype=float).astype(
+                np.float64
+            ),
+            (0,),
+        ),
+        (z_nabla4_e2_wp_gtfn, (0, 0)),
+        0,
+        torus_grid.num_edges,
+        0,
+        torus_grid.num_levels,
+        (
+            torus_grid.get_offset_provider("E2C2V").table.astype(np.int64),
+            (0, 0),
+        ),
+        (
+            torus_grid.get_offset_provider("E2ECV").table.astype(np.int64),
+            (0, 0),
+        ),
+    )
 
     runtimes[
         "nabla4_benchmark_unstructured_naive"

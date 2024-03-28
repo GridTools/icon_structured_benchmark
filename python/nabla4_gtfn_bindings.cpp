@@ -12,6 +12,7 @@
 #include <nanobind/ndarray.h>
 #include <nanobind/stl/pair.h>
 #include <nanobind/stl/tuple.h>
+#include <nanobind/stl/vector.h>
 
 decltype(auto) calculate_nabla4_wrapper(
     std::pair<nanobind::ndarray<double, nanobind::shape<nanobind::any, nanobind::any>>,
