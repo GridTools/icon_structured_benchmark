@@ -55,30 +55,26 @@ namespace generated {
                            auto const &__stencil_arg5,
                            auto const &__stencil_arg6) {
                     return [=](auto _cs_1, auto _cs_2, auto _cs_3) {
-                        return static_cast<double>((
-                            4.0 *
-                            (((static_cast<double>(static_cast<double>((
-                                   (((static_cast<double>(gtfn::deref(gtfn::shift(__stencil_arg0, E2C2V, 2_c))) *
-                                         gtfn::deref(gtfn::shift(__stencil_arg2, E2ECV, 2_c))) +
-                                        (static_cast<double>(gtfn::deref(gtfn::shift(__stencil_arg1, E2C2V, 2_c))) *
-                                            gtfn::deref(gtfn::shift(__stencil_arg3, E2ECV, 2_c)))) +
-                                       (static_cast<double>(gtfn::deref(gtfn::shift(__stencil_arg0, E2C2V, 3_c))) *
-                                           gtfn::deref(gtfn::shift(__stencil_arg2, E2ECV, 3_c)))) +
-                                   (static_cast<double>(gtfn::deref(gtfn::shift(__stencil_arg1, E2C2V, 3_c))) *
-                                       gtfn::deref(gtfn::shift(__stencil_arg3, E2ECV, 3_c)))))) -
-                                  _cs_1) *
-                                 (_cs_2 * _cs_2)) +
-                                ((static_cast<double>(static_cast<double>(
-                                      ((((static_cast<double>(gtfn::deref(gtfn::shift(__stencil_arg0, E2C2V, 0_c))) *
-                                             gtfn::deref(gtfn::shift(__stencil_arg2, E2ECV, 0_c))) +
-                                            (static_cast<double>(gtfn::deref(gtfn::shift(__stencil_arg1, E2C2V, 0_c))) *
-                                                gtfn::deref(gtfn::shift(__stencil_arg3, E2ECV, 0_c)))) +
-                                           (static_cast<double>(gtfn::deref(gtfn::shift(__stencil_arg0, E2C2V, 1_c))) *
-                                               gtfn::deref(gtfn::shift(__stencil_arg2, E2ECV, 1_c)))) +
-                                          (static_cast<double>(gtfn::deref(gtfn::shift(__stencil_arg1, E2C2V, 1_c))) *
-                                              gtfn::deref(gtfn::shift(__stencil_arg3, E2ECV, 1_c)))))) -
-                                     _cs_1) *
-                                    (_cs_3 * _cs_3)))));
+                        return 4.0 * ((gtfn::deref(gtfn::shift(__stencil_arg0, E2C2V, 2_c)) *
+                                              gtfn::deref(gtfn::shift(__stencil_arg2, E2ECV, 2_c)) +
+                                          gtfn::deref(gtfn::shift(__stencil_arg1, E2C2V, 2_c)) *
+                                              gtfn::deref(gtfn::shift(__stencil_arg3, E2ECV, 2_c)) +
+                                          gtfn::deref(gtfn::shift(__stencil_arg0, E2C2V, 3_c)) *
+                                              gtfn::deref(gtfn::shift(__stencil_arg2, E2ECV, 3_c)) +
+                                          gtfn::deref(gtfn::shift(__stencil_arg1, E2C2V, 3_c)) *
+                                              gtfn::deref(gtfn::shift(__stencil_arg3, E2ECV, 3_c)) -
+                                          _cs_1) *
+                                             _cs_2 * _cs_2 +
+                                         (gtfn::deref(gtfn::shift(__stencil_arg0, E2C2V, 0_c)) *
+                                                 gtfn::deref(gtfn::shift(__stencil_arg2, E2ECV, 0_c)) +
+                                             gtfn::deref(gtfn::shift(__stencil_arg1, E2C2V, 0_c)) *
+                                                 gtfn::deref(gtfn::shift(__stencil_arg3, E2ECV, 0_c)) +
+                                             gtfn::deref(gtfn::shift(__stencil_arg0, E2C2V, 1_c)) *
+                                                 gtfn::deref(gtfn::shift(__stencil_arg2, E2ECV, 1_c)) +
+                                             gtfn::deref(gtfn::shift(__stencil_arg1, E2C2V, 1_c)) *
+                                                 gtfn::deref(gtfn::shift(__stencil_arg3, E2ECV, 1_c)) -
+                                             _cs_1) *
+                                             _cs_3 * _cs_3);
                     }((2.0 * gtfn::deref(__stencil_arg4)), gtfn::deref(__stencil_arg5), gtfn::deref(__stencil_arg6));
                 };
             }
@@ -103,14 +99,13 @@ namespace generated {
                        auto &&vertical_start,
                        auto &&vertical_end) {
                 auto tmp_alloc__ = gtfn::backend::tmp_allocator(backend);
-
-                const auto start = high_resolution_clock::now();
-                make_backend(backend,
+                auto gtfn_backend = make_backend(backend,
                     gtfn::unstructured_domain(
                         ::gridtools::tuple((horizontal_end - horizontal_start), (vertical_end - vertical_start)),
                         ::gridtools::tuple(horizontal_start, vertical_start),
-                        connectivities__...))
-                    .stencil_executor()()
+                        connectivities__...));
+                const auto start = high_resolution_clock::now();
+                gtfn_backend.stencil_executor()()
                     .arg(z_nabla4_e2)
                     .arg(u_vert)
                     .arg(v_vert)
