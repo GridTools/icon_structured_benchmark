@@ -5,7 +5,7 @@
 /// TODO: See if we can avoid declaring nabla4_benchmark_* and use templates.
 /// Problem with templates are python bindings
 
-nabla4_validation_data get_nabla4_benchmark_validation_data(std::vector<std::array<std::size_t, 4>> &e2c2v,
+nabla4_data<Data::ifirst> get_nabla4_benchmark_validation_data(std::vector<std::array<std::size_t, 4>> &e2c2v,
     std::vector<std::array<std::size_t, 4>> &e2ecv,
     std::size_t CellDim,
     std::size_t VertexDim,

@@ -5,20 +5,20 @@
 #include "wrapper.hpp"
 
 NB_MODULE(icon_benchmark, m) {
-    nanobind::class_<nabla4_validation_data>(m, "nabla4_validation_data")
-        .def_rw("CellDim", &nabla4_validation_data::CellDim)
-        .def_rw("EdgeDim", &nabla4_validation_data::EdgeDim)
-        .def_rw("VertexDim", &nabla4_validation_data::VertexDim)
-        .def_rw("KDim", &nabla4_validation_data::KDim)
-        .def_rw("ECVDim", &nabla4_validation_data::ECVDim)
-        .def_rw("u_vert", &nabla4_validation_data::u_vert)
-        .def_rw("v_vert", &nabla4_validation_data::v_vert)
-        .def_rw("primal_normal_vert_v1", &nabla4_validation_data::primal_normal_vert_v1)
-        .def_rw("primal_normal_vert_v2", &nabla4_validation_data::primal_normal_vert_v2)
-        .def_rw("z_nabla2_e", &nabla4_validation_data::z_nabla2_e)
-        .def_rw("inv_vert_vert_length", &nabla4_validation_data::inv_vert_vert_length)
-        .def_rw("inv_primal_edge_length", &nabla4_validation_data::inv_primal_edge_length)
-        .def_rw("z_nabla4_e2_wp", &nabla4_validation_data::z_nabla4_e2_wp);
+    nanobind::class_<nabla4_data<Data::ifirst>>(m, "nabla4_data")
+        .def_ro("CellDim", &nabla4_data<Data::ifirst>::CellDim)
+        .def_ro("EdgeDim", &nabla4_data<Data::ifirst>::EdgeDim)
+        .def_ro("VertexDim", &nabla4_data<Data::ifirst>::VertexDim)
+        .def_ro("KDim", &nabla4_data<Data::ifirst>::KDim)
+        .def_ro("ECVDim", &nabla4_data<Data::ifirst>::ECVDim)
+        .def_ro("u_vert", &nabla4_data<Data::ifirst>::u_vert)
+        .def_ro("v_vert", &nabla4_data<Data::ifirst>::v_vert)
+        .def_ro("primal_normal_vert_v1", &nabla4_data<Data::ifirst>::primal_normal_vert_v1)
+        .def_ro("primal_normal_vert_v2", &nabla4_data<Data::ifirst>::primal_normal_vert_v2)
+        .def_ro("z_nabla2_e", &nabla4_data<Data::ifirst>::z_nabla2_e)
+        .def_ro("inv_vert_vert_length", &nabla4_data<Data::ifirst>::inv_vert_vert_length)
+        .def_ro("inv_primal_edge_length", &nabla4_data<Data::ifirst>::inv_primal_edge_length)
+        .def_ro("z_nabla4_e2_wp", &nabla4_data<Data::ifirst>::z_nabla4_e2_wp);
     m.def("get_nabla4_benchmark_validation_data", &get_nabla4_benchmark_validation_data);
     /// Unstructured
     m.def("nabla4_benchmark_unstructured_naive", &nabla4_benchmark_unstructured_naive);

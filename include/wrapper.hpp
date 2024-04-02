@@ -1,6 +1,6 @@
 #include "benchmark.hpp"
 
-nabla4_validation_data get_nabla4_benchmark_validation_data(std::vector<std::array<std::size_t, 4>> &e2c2v,
+nabla4_data<Data::ifirst> get_nabla4_benchmark_validation_data(std::vector<std::array<std::size_t, 4>> &e2c2v,
     std::vector<std::array<std::size_t, 4>> &e2ecv,
     std::size_t CellDim,
     std::size_t VertexDim,

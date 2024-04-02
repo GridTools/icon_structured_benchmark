@@ -5,76 +5,35 @@
 #include <vector>
 
 #include "common.hpp"
-#include "random_init.hpp"
 
 #define ARRAY_TYPE std::size_t
-template <Data T>
-class nabla4_structured_simple {
-  private:
-    std::size_t CellDim;
-    std::size_t EdgeDim;
-    std::size_t VertexDim;
-    std::size_t KDim;
-    std::size_t ECVDim;
-    std::vector<std::vector<VP_TYPE>> u_vert;
-    std::vector<std::vector<VP_TYPE>> v_vert;
-    std::vector<double> primal_normal_vert_v1;
-    std::vector<double> primal_normal_vert_v2;
-    std::vector<std::vector<double>> z_nabla2_e;
-    std::vector<double> inv_vert_vert_length;
-    std::vector<double> inv_primal_edge_length;
-    std::vector<std::vector<VP_TYPE>> z_nabla4_e2_wp;
 
-    /// Random number utilities
-    RandomUniformUtils rand_utils{-1.0, 1.0};
+template <Data T>
+class nabla4_structured_simple : private nabla4_data<T> {
+
+    using nabla4_data<T>::CellDim;
+    using nabla4_data<T>::EdgeDim;
+    using nabla4_data<T>::VertexDim;
+    using nabla4_data<T>::KDim;
+    using nabla4_data<T>::ECVDim;
+    using nabla4_data<T>::u_vert;
+    using nabla4_data<T>::v_vert;
+    using nabla4_data<T>::primal_normal_vert_v1;
+    using nabla4_data<T>::primal_normal_vert_v2;
+    using nabla4_data<T>::z_nabla2_e;
+    using nabla4_data<T>::inv_vert_vert_length;
+    using nabla4_data<T>::inv_primal_edge_length;
+    using nabla4_data<T>::z_nabla4_e2_wp;
 
     static constexpr std::size_t longitude_dim{3};
     static constexpr std::size_t latitude_dim{3};
-
-    /// Initialize vectors needed to execute kernel with random numbers
-    void init_ifirst() {
-        u_vert = rand_utils.random_init_vec_2d<VP_TYPE>(KDim, VertexDim);
-        v_vert = rand_utils.random_init_vec_2d<VP_TYPE>(KDim, VertexDim);
-        primal_normal_vert_v1 = rand_utils.random_init_vec_1d(EdgeDim * ECVDim);
-        primal_normal_vert_v2 = rand_utils.random_init_vec_1d(EdgeDim * ECVDim);
-        z_nabla2_e = rand_utils.random_init_vec_2d(KDim, EdgeDim);
-        inv_vert_vert_length = rand_utils.random_init_vec_1d(EdgeDim);
-        inv_primal_edge_length = rand_utils.random_init_vec_1d(EdgeDim);
-        z_nabla4_e2_wp.resize(KDim);
-        for (std::size_t i{}; i < KDim; ++i) {
-            z_nabla4_e2_wp[i].resize(EdgeDim);
-        }
-    }
-
-    /// Initialize vectors needed to execute kernel with random numbers
-    void init_kfirst() {
-        u_vert = rand_utils.random_init_vec_2d<VP_TYPE>(VertexDim, KDim);
-        v_vert = rand_utils.random_init_vec_2d<VP_TYPE>(VertexDim, KDim);
-        primal_normal_vert_v1 = rand_utils.random_init_vec_1d(EdgeDim * ECVDim);
-        primal_normal_vert_v2 = rand_utils.random_init_vec_1d(EdgeDim * ECVDim);
-        z_nabla2_e = rand_utils.random_init_vec_2d(EdgeDim, KDim);
-        inv_vert_vert_length = rand_utils.random_init_vec_1d(EdgeDim);
-        inv_primal_edge_length = rand_utils.random_init_vec_1d(EdgeDim);
-        z_nabla4_e2_wp.resize(EdgeDim);
-        for (std::size_t i{}; i < EdgeDim; ++i) {
-            z_nabla4_e2_wp[i].resize(KDim);
-        }
-    }
 
   public:
     /// Constructor with all the necessary information for \c nabla4 compute
     /// kernel execution
     nabla4_structured_simple(
         std::size_t CellDim, std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim, std::size_t ECVDim)
-        : CellDim(CellDim), VertexDim(VertexDim), EdgeDim(EdgeDim), KDim(KDim), ECVDim(ECVDim) {
-        if constexpr (T == Data::ifirst) {
-            init_ifirst();
-        } else if constexpr (T == Data::kfirst) {
-            init_kfirst();
-        } else {
-            throw std::runtime_error("Undefined backend implementation");
-        }
-    };
+        : nabla4_data<T>(CellDim, VertexDim, EdgeDim, KDim, ECVDim){};
 
     /// Constructor for validation
     nabla4_structured_simple(std::size_t CellDim,
@@ -89,24 +48,18 @@ class nabla4_structured_simple {
         std::vector<std::vector<double>> &z_nabla2_e,
         std::vector<double> &inv_vert_vert_length,
         std::vector<double> &inv_primal_edge_length)
-        : CellDim(CellDim), VertexDim(VertexDim), EdgeDim(EdgeDim), KDim(KDim), ECVDim(ECVDim), u_vert(u_vert),
-          v_vert(v_vert), primal_normal_vert_v1(primal_normal_vert_v1), primal_normal_vert_v2(primal_normal_vert_v2),
-          z_nabla2_e(z_nabla2_e), inv_vert_vert_length(inv_vert_vert_length),
-          inv_primal_edge_length(inv_primal_edge_length) {
-        if constexpr (T == Data::ifirst) {
-            z_nabla4_e2_wp.resize(KDim);
-            for (std::size_t i{}; i < KDim; ++i) {
-                z_nabla4_e2_wp[i].resize(EdgeDim);
-            }
-        } else if constexpr (T == Data::kfirst) {
-            z_nabla4_e2_wp.resize(EdgeDim);
-            for (std::size_t i{}; i < EdgeDim; ++i) {
-                z_nabla4_e2_wp[i].resize(KDim);
-            }
-        } else {
-            throw std::runtime_error("Undefined backend implementation");
-        }
-    };
+        : nabla4_data<T>(CellDim,
+              VertexDim,
+              EdgeDim,
+              KDim,
+              ECVDim,
+              u_vert,
+              v_vert,
+              primal_normal_vert_v1,
+              primal_normal_vert_v2,
+              z_nabla2_e,
+              inv_vert_vert_length,
+              inv_primal_edge_length){};
 
     std::vector<std::vector<VP_TYPE>> get_output() { return z_nabla4_e2_wp; }
 
