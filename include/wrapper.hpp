@@ -57,11 +57,11 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_naive(std::vector
     std::size_t ECVDim,
     std::vector<std::vector<VP_TYPE>> &u_vert,
     std::vector<std::vector<VP_TYPE>> &v_vert,
-    std::vector<double> &primal_normal_vert_v1,
-    std::vector<double> &primal_normal_vert_v2,
-    std::vector<std::vector<double>> &z_nabla2_e,
-    std::vector<double> &inv_vert_vert_length,
-    std::vector<double> &inv_primal_edge_length);
+    std::vector<WP_TYPE> &primal_normal_vert_v1,
+    std::vector<WP_TYPE> &primal_normal_vert_v2,
+    std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+    std::vector<WP_TYPE> &inv_vert_vert_length,
+    std::vector<WP_TYPE> &inv_primal_edge_length);
 
 std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_ifirst(
     std::vector<std::array<std::size_t, 4>> &e2c2v,
@@ -73,11 +73,11 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_ifirst(
     std::size_t ECVDim,
     std::vector<std::vector<VP_TYPE>> &u_vert,
     std::vector<std::vector<VP_TYPE>> &v_vert,
-    std::vector<double> &primal_normal_vert_v1,
-    std::vector<double> &primal_normal_vert_v2,
-    std::vector<std::vector<double>> &z_nabla2_e,
-    std::vector<double> &inv_vert_vert_length,
-    std::vector<double> &inv_primal_edge_length);
+    std::vector<WP_TYPE> &primal_normal_vert_v1,
+    std::vector<WP_TYPE> &primal_normal_vert_v2,
+    std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+    std::vector<WP_TYPE> &inv_vert_vert_length,
+    std::vector<WP_TYPE> &inv_primal_edge_length);
 
 std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_kfirst(
     std::vector<std::array<std::size_t, 4>> &e2c2v,
@@ -89,11 +89,11 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_kfirst(
     std::size_t ECVDim,
     std::vector<std::vector<VP_TYPE>> &u_vert,
     std::vector<std::vector<VP_TYPE>> &v_vert,
-    std::vector<double> &primal_normal_vert_v1,
-    std::vector<double> &primal_normal_vert_v2,
-    std::vector<std::vector<double>> &z_nabla2_e,
-    std::vector<double> &inv_vert_vert_length,
-    std::vector<double> &inv_primal_edge_length);
+    std::vector<WP_TYPE> &primal_normal_vert_v1,
+    std::vector<WP_TYPE> &primal_normal_vert_v2,
+    std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+    std::vector<WP_TYPE> &inv_vert_vert_length,
+    std::vector<WP_TYPE> &inv_primal_edge_length);
 
 std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_gpu(std::vector<std::array<std::size_t, 4>> &e2c2v,
     std::vector<std::array<std::size_t, 4>> &e2ecv,
@@ -104,11 +104,11 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_gpu(std::vector<s
     std::size_t ECVDim,
     std::vector<std::vector<VP_TYPE>> &u_vert,
     std::vector<std::vector<VP_TYPE>> &v_vert,
-    std::vector<double> &primal_normal_vert_v1,
-    std::vector<double> &primal_normal_vert_v2,
-    std::vector<std::vector<double>> &z_nabla2_e,
-    std::vector<double> &inv_vert_vert_length,
-    std::vector<double> &inv_primal_edge_length);
+    std::vector<WP_TYPE> &primal_normal_vert_v1,
+    std::vector<WP_TYPE> &primal_normal_vert_v2,
+    std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+    std::vector<WP_TYPE> &inv_vert_vert_length,
+    std::vector<WP_TYPE> &inv_primal_edge_length);
 
 std::vector<double> nabla4_benchmark_structured_simple_naive(std::size_t CellDim,
     std::size_t VertexDim,
@@ -149,11 +149,11 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_simple_naive(std::s
     std::size_t ECVDim,
     std::vector<std::vector<VP_TYPE>> &u_vert,
     std::vector<std::vector<VP_TYPE>> &v_vert,
-    std::vector<double> &primal_normal_vert_v1,
-    std::vector<double> &primal_normal_vert_v2,
-    std::vector<std::vector<double>> &z_nabla2_e,
-    std::vector<double> &inv_vert_vert_length,
-    std::vector<double> &inv_primal_edge_length);
+    std::vector<WP_TYPE> &primal_normal_vert_v1,
+    std::vector<WP_TYPE> &primal_normal_vert_v2,
+    std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+    std::vector<WP_TYPE> &inv_vert_vert_length,
+    std::vector<WP_TYPE> &inv_primal_edge_length);
 
 std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_simple_cpu_ifirst(std::size_t CellDim,
     std::size_t VertexDim,
@@ -162,11 +162,11 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_simple_cpu_ifirst(s
     std::size_t ECVDim,
     std::vector<std::vector<VP_TYPE>> &u_vert,
     std::vector<std::vector<VP_TYPE>> &v_vert,
-    std::vector<double> &primal_normal_vert_v1,
-    std::vector<double> &primal_normal_vert_v2,
-    std::vector<std::vector<double>> &z_nabla2_e,
-    std::vector<double> &inv_vert_vert_length,
-    std::vector<double> &inv_primal_edge_length);
+    std::vector<WP_TYPE> &primal_normal_vert_v1,
+    std::vector<WP_TYPE> &primal_normal_vert_v2,
+    std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+    std::vector<WP_TYPE> &inv_vert_vert_length,
+    std::vector<WP_TYPE> &inv_primal_edge_length);
 
 std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_simple_cpu_kfirst(std::size_t CellDim,
     std::size_t VertexDim,
@@ -175,11 +175,11 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_simple_cpu_kfirst(s
     std::size_t ECVDim,
     std::vector<std::vector<VP_TYPE>> &u_vert,
     std::vector<std::vector<VP_TYPE>> &v_vert,
-    std::vector<double> &primal_normal_vert_v1,
-    std::vector<double> &primal_normal_vert_v2,
-    std::vector<std::vector<double>> &z_nabla2_e,
-    std::vector<double> &inv_vert_vert_length,
-    std::vector<double> &inv_primal_edge_length);
+    std::vector<WP_TYPE> &primal_normal_vert_v1,
+    std::vector<WP_TYPE> &primal_normal_vert_v2,
+    std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+    std::vector<WP_TYPE> &inv_vert_vert_length,
+    std::vector<WP_TYPE> &inv_primal_edge_length);
 
 std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_simple_gpu(std::size_t CellDim,
     std::size_t VertexDim,
@@ -188,11 +188,11 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_simple_gpu(std::siz
     std::size_t ECVDim,
     std::vector<std::vector<VP_TYPE>> &u_vert,
     std::vector<std::vector<VP_TYPE>> &v_vert,
-    std::vector<double> &primal_normal_vert_v1,
-    std::vector<double> &primal_normal_vert_v2,
-    std::vector<std::vector<double>> &z_nabla2_e,
-    std::vector<double> &inv_vert_vert_length,
-    std::vector<double> &inv_primal_edge_length);
+    std::vector<WP_TYPE> &primal_normal_vert_v1,
+    std::vector<WP_TYPE> &primal_normal_vert_v2,
+    std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+    std::vector<WP_TYPE> &inv_vert_vert_length,
+    std::vector<WP_TYPE> &inv_primal_edge_length);
 
 std::vector<double> nabla4_benchmark_structured_torus_naive(std::size_t CellDim,
     std::size_t VertexDim,
@@ -243,11 +243,11 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_naive(std::si
     std::size_t latitude_dim,
     std::vector<std::vector<VP_TYPE>> &u_vert,
     std::vector<std::vector<VP_TYPE>> &v_vert,
-    std::vector<double> &primal_normal_vert_v1,
-    std::vector<double> &primal_normal_vert_v2,
-    std::vector<std::vector<double>> &z_nabla2_e,
-    std::vector<double> &inv_vert_vert_length,
-    std::vector<double> &inv_primal_edge_length);
+    std::vector<WP_TYPE> &primal_normal_vert_v1,
+    std::vector<WP_TYPE> &primal_normal_vert_v2,
+    std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+    std::vector<WP_TYPE> &inv_vert_vert_length,
+    std::vector<WP_TYPE> &inv_primal_edge_length);
 
 std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_cpu_ifirst(std::size_t CellDim,
     std::size_t VertexDim,
@@ -258,11 +258,11 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_cpu_ifirst(st
     std::size_t latitude_dim,
     std::vector<std::vector<VP_TYPE>> &u_vert,
     std::vector<std::vector<VP_TYPE>> &v_vert,
-    std::vector<double> &primal_normal_vert_v1,
-    std::vector<double> &primal_normal_vert_v2,
-    std::vector<std::vector<double>> &z_nabla2_e,
-    std::vector<double> &inv_vert_vert_length,
-    std::vector<double> &inv_primal_edge_length);
+    std::vector<WP_TYPE> &primal_normal_vert_v1,
+    std::vector<WP_TYPE> &primal_normal_vert_v2,
+    std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+    std::vector<WP_TYPE> &inv_vert_vert_length,
+    std::vector<WP_TYPE> &inv_primal_edge_length);
 
 std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_cpu_kfirst(std::size_t CellDim,
     std::size_t VertexDim,
@@ -273,11 +273,11 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_cpu_kfirst(st
     std::size_t latitude_dim,
     std::vector<std::vector<VP_TYPE>> &u_vert,
     std::vector<std::vector<VP_TYPE>> &v_vert,
-    std::vector<double> &primal_normal_vert_v1,
-    std::vector<double> &primal_normal_vert_v2,
-    std::vector<std::vector<double>> &z_nabla2_e,
-    std::vector<double> &inv_vert_vert_length,
-    std::vector<double> &inv_primal_edge_length);
+    std::vector<WP_TYPE> &primal_normal_vert_v1,
+    std::vector<WP_TYPE> &primal_normal_vert_v2,
+    std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+    std::vector<WP_TYPE> &inv_vert_vert_length,
+    std::vector<WP_TYPE> &inv_primal_edge_length);
 
 std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_gpu(std::size_t CellDim,
     std::size_t VertexDim,
@@ -288,8 +288,8 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_gpu(std::size
     std::size_t latitude_dim,
     std::vector<std::vector<VP_TYPE>> &u_vert,
     std::vector<std::vector<VP_TYPE>> &v_vert,
-    std::vector<double> &primal_normal_vert_v1,
-    std::vector<double> &primal_normal_vert_v2,
-    std::vector<std::vector<double>> &z_nabla2_e,
-    std::vector<double> &inv_vert_vert_length,
-    std::vector<double> &inv_primal_edge_length);
+    std::vector<WP_TYPE> &primal_normal_vert_v1,
+    std::vector<WP_TYPE> &primal_normal_vert_v2,
+    std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+    std::vector<WP_TYPE> &inv_vert_vert_length,
+    std::vector<WP_TYPE> &inv_primal_edge_length);

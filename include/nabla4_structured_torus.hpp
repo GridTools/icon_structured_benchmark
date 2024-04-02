@@ -50,11 +50,11 @@ class nabla4_structured_torus : private nabla4_data<T> {
         std::size_t latitude_dim,
         std::vector<std::vector<VP_TYPE>> &u_vert,
         std::vector<std::vector<VP_TYPE>> &v_vert,
-        std::vector<double> &primal_normal_vert_v1,
-        std::vector<double> &primal_normal_vert_v2,
-        std::vector<std::vector<double>> &z_nabla2_e,
-        std::vector<double> &inv_vert_vert_length,
-        std::vector<double> &inv_primal_edge_length)
+        std::vector<WP_TYPE> &primal_normal_vert_v1,
+        std::vector<WP_TYPE> &primal_normal_vert_v2,
+        std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+        std::vector<WP_TYPE> &inv_vert_vert_length,
+        std::vector<WP_TYPE> &inv_primal_edge_length)
         : longitude_dim(longitude_dim), latitude_dim(latitude_dim), nabla4_data<T>(CellDim,
                                                                         VertexDim,
                                                                         EdgeDim,
