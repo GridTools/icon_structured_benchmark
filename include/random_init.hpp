@@ -9,7 +9,7 @@ class RandomUniformUtils {
     std::uniform_real_distribution<double> _dist;
 
     template <typename T>
-    double get() {
+    T get() {
         return static_cast<T>(_dist(_gen));
     }
 
