@@ -69,6 +69,8 @@ The memory layout and the backends are divided into `cpu_ifirst` and `cpu_kfirst
 - `cpu_ifirst`: the `stride=1` dimension is the dimension of the edges
 - `cpu_kifirst`: the `stride=1` dimension is the dimension of the `k` levels
 
+On top of these handwritten implementation there is a `gtfn` implementation as well. This one was generated automatically by `gt4py` for the `nabla4` kernel and was slightly adapted for the purposes of the benchmark framework.
+
 ## Installation
 
 For running the benchmarking framework with its tests there are the following dependencies:
