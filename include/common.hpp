@@ -28,7 +28,7 @@ struct nabla4_data {
     std::vector<std::vector<WP_TYPE>> z_nabla2_e;
     std::vector<WP_TYPE> inv_vert_vert_length;
     std::vector<WP_TYPE> inv_primal_edge_length;
-    std::vector<std::vector<WP_TYPE>> z_nabla4_e2_wp;
+    std::vector<std::vector<VP_TYPE>> z_nabla4_e2_wp;
 
     /// Initialize vectors needed to execute kernel with random numbers
     void init_ifirst() {
