@@ -1,5 +1,19 @@
 #pragma once
 
+#include "demangle_helper.hpp"
+
+#include <gridtools/storage/builder.hpp>
+
+using namespace gridtools;
+
+#ifdef GT_CUDACC
+#include <gridtools/storage/gpu.hpp>
+using traits_t = storage::gpu;
+#else
+#include <gridtools/storage/cpu_ifirst.hpp>
+using traits_t = storage::cpu_ifirst;
+#endif
+
 #include "random_init.hpp"
 
 #define ARRAY_TYPE std::size_t
@@ -21,6 +35,51 @@ struct nabla4_data {
     std::size_t EdgeDim;
     std::size_t KDim;
     std::size_t ECVDim;
+
+    // using data_store_2d_t = decltype(gridtools::storage::builder<traits_t>.dimensions(0, 0).type<double>().build());
+    using data_store_2d_t =
+        std::__1::shared_ptr<gridtools::storage::data_store_impl_::data_store<gridtools::storage::cpu_ifirst,
+            double,
+            gridtools::storage::info_impl_::info<gridtools::tuple<int, int>,
+                gridtools::tuple<gridtools::integral_constant<int, 1>, int>,
+                std::__1::integer_sequence<unsigned long, 0ul, 1ul>>,
+            gridtools::meta::list<gridtools::tuple<gridtools::integral_constant<int, 1>, int> const &,
+                gridtools::layout_map_impl::layout_map<1, 0>,
+                void,
+                gridtools::integral_constant<int, 8>>,
+            false,
+            true>>;
+    // using data_store_1d_t = decltype(gridtools::storage::builder<traits_t>.dimensions(0).type<double>().build());
+    using data_store_1d_t =
+        std::__1::shared_ptr<gridtools::storage::data_store_impl_::data_store<gridtools::storage::cpu_ifirst,
+            double,
+            gridtools::storage::info_impl_::info<gridtools::tuple<int>,
+                gridtools::tuple<gridtools::integral_constant<int, 1>>,
+                std::__1::integer_sequence<unsigned long, 0ul>>,
+            gridtools::tuple<gridtools::integral_constant<int, 1>> const &,
+            false,
+            true>>;
+
+    // std::shared_ptr<gridtools::storage::data_store_impl_::data_store<gridtools::storage::cpu_ifirst, VP_TYPE,
+    // gridtools::storage::info_impl_::info<gridtools::tuple<int, int, int>,
+    // gridtools::tuple<gridtools::integral_constant<int, 1>, int, int>, std::integer_sequence<unsigned long, 0ul, 1ul,
+    // 2ul>>, gridtools::meta::list<gridtools::tuple<gridtools::integral_constant<int, 1>, int, int> const&,
+    // gridtools::layout_map_impl::layout_map<2, 0, 1>, void, gridtools::integral_constant<int, 8>>, false, true>>
+    // u_vert; std::shared_ptr<gridtools::storage::data_store_impl_::data_store<gridtools::storage::cpu_ifirst, VP_TYPE,
+    // gridtools::storage::info_impl_::info<gridtools::tuple<int, int, int>,
+    // gridtools::tuple<gridtools::integral_constant<int, 1>, int, int>, std::integer_sequence<unsigned long, 0ul, 1ul,
+    // 2ul>>, gridtools::meta::list<gridtools::tuple<gridtools::integral_constant<int, 1>, int, int> const&,
+    // gridtools::layout_map_impl::layout_map<2, 0, 1>, void, gridtools::integral_constant<int, 8>>, false, true>>
+    // v_vert;
+    data_store_2d_t u_vert_gt;
+    data_store_2d_t v_vert_gt;
+    data_store_1d_t primal_normal_vert_v1_gt;
+    data_store_1d_t primal_normal_vert_v2_gt;
+    data_store_2d_t z_nabla2_e_gt;
+    data_store_1d_t inv_vert_vert_length_gt;
+    data_store_1d_t inv_primal_edge_length_gt;
+    data_store_2d_t z_nabla4_e2_wp_gt;
+
     std::vector<std::vector<VP_TYPE>> u_vert;
     std::vector<std::vector<VP_TYPE>> v_vert;
     std::vector<WP_TYPE> primal_normal_vert_v1;
@@ -32,6 +91,19 @@ struct nabla4_data {
 
     /// Initialize vectors needed to execute kernel with random numbers
     void init_ifirst() {
+        const auto storage_builder = storage::builder<traits_t>.type<double>();
+        u_vert_gt = storage_builder.dimensions(KDim, VertexDim).build();
+        v_vert_gt = storage_builder.dimensions(KDim, VertexDim).build();
+        // std::cout << "v_vert_gt " << debug::print_type<decltype(v_vert_gt)>("") << std::endl;
+        primal_normal_vert_v1_gt = storage_builder.dimensions(EdgeDim * ECVDim).build();
+        // std::cout << "primal_normal_vert_v1_gt " << debug::print_type<decltype(primal_normal_vert_v1_gt)>("") <<
+        // std::endl;
+        primal_normal_vert_v2_gt = storage_builder.dimensions(EdgeDim * ECVDim).build();
+        z_nabla2_e_gt = storage_builder.dimensions(KDim, EdgeDim).build();
+        inv_vert_vert_length_gt = storage_builder.dimensions(EdgeDim).build();
+        inv_primal_edge_length_gt = storage_builder.dimensions(EdgeDim).build();
+        z_nabla4_e2_wp_gt = storage_builder.dimensions(KDim, EdgeDim).build();
+        // Old vectors
         u_vert = rand_utils.random_init_vec_2d<VP_TYPE>(KDim, VertexDim);
         v_vert = rand_utils.random_init_vec_2d<VP_TYPE>(KDim, VertexDim);
         primal_normal_vert_v1 = rand_utils.random_init_vec_1d(EdgeDim * ECVDim);
