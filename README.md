@@ -150,6 +150,8 @@ options:
   --dry-run             Do a dry run or not
   --output OUTPUT       JSON output file name
   --sanity-checks       Do a validation with random data between structured and unstructured for the given grid
+  --backend {all,gtfn,naive,cpu_ifirst,cpu_kfirst}
+                        Which backend to benchmark
 ```
 
 ### Plotting torus results
