@@ -34,12 +34,14 @@ struct nabla4_data {
     std::size_t KDim;
     std::size_t ECVDim;
 
-    using data_store_2d_t = decltype(gridtools::storage::builder<traits_t>.dimensions(0, 0).type<double>().build());
-    using data_store_1d_t = decltype(gridtools::storage::builder<traits_t>.dimensions(0).type<double>().build());
+    using data_store_2d_t =
+        decltype(gridtools::storage::builder<traits_t>.dimensions(0, 0).template type<double>().build());
+    using data_store_1d_t =
+        decltype(gridtools::storage::builder<traits_t>.dimensions(0).template type<double>().build());
     using data_store_2d_tv_t =
-        decltype(gridtools::storage::builder<traits_t>.dimensions(0, 0).type<double>().build()->target_view());
+        decltype(gridtools::storage::builder<traits_t>.dimensions(0, 0).template type<double>().build()->target_view());
     using data_store_1d_tv_t =
-        decltype(gridtools::storage::builder<traits_t>.dimensions(0).type<double>().build()->target_view());
+        decltype(gridtools::storage::builder<traits_t>.dimensions(0).template type<double>().build()->target_view());
     // using data_store_2d_t =
     //     std::__1::shared_ptr<gridtools::storage::data_store_impl_::data_store<gridtools::storage::cpu_ifirst,
     //         double,
@@ -91,7 +93,7 @@ struct nabla4_data {
 
     /// Initialize vectors needed to execute kernel with random numbers
     void init_ifirst() {
-        const auto storage_builder = storage::builder<traits_t>.type<double>();
+        const auto storage_builder = storage::builder<traits_t>.template type<double>();
         u_vert_gt = storage_builder.dimensions(KDim, VertexDim).build();
         v_vert_gt = storage_builder.dimensions(KDim, VertexDim).build();
         // std::cout << "v_vert_gt " << debug::print_type<decltype(v_vert_gt)>("") << std::endl;
