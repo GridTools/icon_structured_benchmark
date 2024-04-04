@@ -1,7 +1,5 @@
 #pragma once
 
-#include "demangle_helper.hpp"
-
 #include <gridtools/storage/builder.hpp>
 
 using namespace gridtools;
