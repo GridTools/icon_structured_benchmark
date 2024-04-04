@@ -23,14 +23,6 @@ class nabla4_structured_torus : private nabla4_data<T> {
     using nabla4_data<T>::inv_vert_vert_length;
     using nabla4_data<T>::inv_primal_edge_length;
     using nabla4_data<T>::z_nabla4_e2_wp;
-    using nabla4_data<T>::u_vert_gt;
-    using nabla4_data<T>::v_vert_gt;
-    using nabla4_data<T>::primal_normal_vert_v1_gt;
-    using nabla4_data<T>::primal_normal_vert_v2_gt;
-    using nabla4_data<T>::z_nabla2_e_gt;
-    using nabla4_data<T>::inv_vert_vert_length_gt;
-    using nabla4_data<T>::inv_primal_edge_length_gt;
-    using nabla4_data<T>::z_nabla4_e2_wp_gt;
     using nabla4_data<T>::u_vert_gt_tv;
     using nabla4_data<T>::v_vert_gt_tv;
     using nabla4_data<T>::primal_normal_vert_v1_gt_tv;
