@@ -38,6 +38,10 @@ struct nabla4_data {
 
     using data_store_2d_t = decltype(gridtools::storage::builder<traits_t>.dimensions(0, 0).type<double>().build());
     using data_store_1d_t = decltype(gridtools::storage::builder<traits_t>.dimensions(0).type<double>().build());
+    using data_store_2d_tv_t =
+        decltype(gridtools::storage::builder<traits_t>.dimensions(0, 0).type<double>().build()->target_view());
+    using data_store_1d_tv_t =
+        decltype(gridtools::storage::builder<traits_t>.dimensions(0).type<double>().build()->target_view());
     // using data_store_2d_t =
     //     std::__1::shared_ptr<gridtools::storage::data_store_impl_::data_store<gridtools::storage::cpu_ifirst,
     //         double,
@@ -69,6 +73,15 @@ struct nabla4_data {
     data_store_1d_t inv_primal_edge_length_gt;
     data_store_2d_t z_nabla4_e2_wp_gt;
 
+    data_store_2d_tv_t u_vert_gt_tv;
+    data_store_2d_tv_t v_vert_gt_tv;
+    data_store_1d_tv_t primal_normal_vert_v1_gt_tv;
+    data_store_1d_tv_t primal_normal_vert_v2_gt_tv;
+    data_store_2d_tv_t z_nabla2_e_gt_tv;
+    data_store_1d_tv_t inv_vert_vert_length_gt_tv;
+    data_store_1d_tv_t inv_primal_edge_length_gt_tv;
+    data_store_2d_tv_t z_nabla4_e2_wp_gt_tv;
+
     std::vector<std::vector<VP_TYPE>> u_vert;
     std::vector<std::vector<VP_TYPE>> v_vert;
     std::vector<WP_TYPE> primal_normal_vert_v1;
@@ -92,6 +105,14 @@ struct nabla4_data {
         inv_vert_vert_length_gt = storage_builder.dimensions(EdgeDim).build();
         inv_primal_edge_length_gt = storage_builder.dimensions(EdgeDim).build();
         z_nabla4_e2_wp_gt = storage_builder.dimensions(KDim, EdgeDim).build();
+        u_vert_gt_tv = u_vert_gt->target_view();
+        v_vert_gt_tv = v_vert_gt->target_view();
+        primal_normal_vert_v1_gt_tv = primal_normal_vert_v1_gt->target_view();
+        primal_normal_vert_v2_gt_tv = primal_normal_vert_v2_gt->target_view();
+        z_nabla2_e_gt_tv = z_nabla2_e_gt->target_view();
+        inv_vert_vert_length_gt_tv = inv_vert_vert_length_gt->target_view();
+        inv_primal_edge_length_gt_tv = inv_primal_edge_length_gt->target_view();
+        z_nabla4_e2_wp_gt_tv = z_nabla4_e2_wp_gt->target_view();
         // Old vectors
         u_vert = rand_utils.random_init_vec_2d<VP_TYPE>(KDim, VertexDim);
         v_vert = rand_utils.random_init_vec_2d<VP_TYPE>(KDim, VertexDim);
