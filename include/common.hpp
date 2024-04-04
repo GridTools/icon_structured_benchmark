@@ -36,41 +36,30 @@ struct nabla4_data {
     std::size_t KDim;
     std::size_t ECVDim;
 
-    // using data_store_2d_t = decltype(gridtools::storage::builder<traits_t>.dimensions(0, 0).type<double>().build());
-    using data_store_2d_t =
-        std::__1::shared_ptr<gridtools::storage::data_store_impl_::data_store<gridtools::storage::cpu_ifirst,
-            double,
-            gridtools::storage::info_impl_::info<gridtools::tuple<int, int>,
-                gridtools::tuple<gridtools::integral_constant<int, 1>, int>,
-                std::__1::integer_sequence<unsigned long, 0ul, 1ul>>,
-            gridtools::meta::list<gridtools::tuple<gridtools::integral_constant<int, 1>, int> const &,
-                gridtools::layout_map_impl::layout_map<1, 0>,
-                void,
-                gridtools::integral_constant<int, 8>>,
-            false,
-            true>>;
-    // using data_store_1d_t = decltype(gridtools::storage::builder<traits_t>.dimensions(0).type<double>().build());
-    using data_store_1d_t =
-        std::__1::shared_ptr<gridtools::storage::data_store_impl_::data_store<gridtools::storage::cpu_ifirst,
-            double,
-            gridtools::storage::info_impl_::info<gridtools::tuple<int>,
-                gridtools::tuple<gridtools::integral_constant<int, 1>>,
-                std::__1::integer_sequence<unsigned long, 0ul>>,
-            gridtools::tuple<gridtools::integral_constant<int, 1>> const &,
-            false,
-            true>>;
+    using data_store_2d_t = decltype(gridtools::storage::builder<traits_t>.dimensions(0, 0).type<double>().build());
+    using data_store_1d_t = decltype(gridtools::storage::builder<traits_t>.dimensions(0).type<double>().build());
+    // using data_store_2d_t =
+    //     std::__1::shared_ptr<gridtools::storage::data_store_impl_::data_store<gridtools::storage::cpu_ifirst,
+    //         double,
+    //         gridtools::storage::info_impl_::info<gridtools::tuple<int, int>,
+    //             gridtools::tuple<gridtools::integral_constant<int, 1>, int>,
+    //             std::__1::integer_sequence<unsigned long, 0ul, 1ul>>,
+    //         gridtools::meta::list<gridtools::tuple<gridtools::integral_constant<int, 1>, int> const &,
+    //             gridtools::layout_map_impl::layout_map<1, 0>,
+    //             void,
+    //             gridtools::integral_constant<int, 8>>,
+    //         false,
+    //         true>>;
+    // using data_store_1d_t =
+    //     std::shared_ptr<gridtools::storage::data_store_impl_::data_store<gridtools::storage::cpu_ifirst,
+    //         double,
+    //         gridtools::storage::info_impl_::info<gridtools::tuple<int>,
+    //             gridtools::tuple<gridtools::integral_constant<int, 1>>,
+    //             std::integer_sequence<unsigned long, 0ul>>,
+    //         gridtools::tuple<gridtools::integral_constant<int, 1>> const &,
+    //         false,
+    //         true>>;
 
-    // std::shared_ptr<gridtools::storage::data_store_impl_::data_store<gridtools::storage::cpu_ifirst, VP_TYPE,
-    // gridtools::storage::info_impl_::info<gridtools::tuple<int, int, int>,
-    // gridtools::tuple<gridtools::integral_constant<int, 1>, int, int>, std::integer_sequence<unsigned long, 0ul, 1ul,
-    // 2ul>>, gridtools::meta::list<gridtools::tuple<gridtools::integral_constant<int, 1>, int, int> const&,
-    // gridtools::layout_map_impl::layout_map<2, 0, 1>, void, gridtools::integral_constant<int, 8>>, false, true>>
-    // u_vert; std::shared_ptr<gridtools::storage::data_store_impl_::data_store<gridtools::storage::cpu_ifirst, VP_TYPE,
-    // gridtools::storage::info_impl_::info<gridtools::tuple<int, int, int>,
-    // gridtools::tuple<gridtools::integral_constant<int, 1>, int, int>, std::integer_sequence<unsigned long, 0ul, 1ul,
-    // 2ul>>, gridtools::meta::list<gridtools::tuple<gridtools::integral_constant<int, 1>, int, int> const&,
-    // gridtools::layout_map_impl::layout_map<2, 0, 1>, void, gridtools::integral_constant<int, 8>>, false, true>>
-    // v_vert;
     data_store_2d_t u_vert_gt;
     data_store_2d_t v_vert_gt;
     data_store_1d_t primal_normal_vert_v1_gt;
