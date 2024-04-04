@@ -255,6 +255,12 @@ def parse_arguments():
         help="Do a validation with random data between structured and unstructured for the given grid",
         action="store_true",
     )
+    parser.add_argument(
+        "--backend",
+        choices=["all", "gtfn", "naive", "cpu_ifirst", "cpu_kfirst"],
+        default="all",
+        help="Which backend to benchmark",
+    )
 
     return parser.parse_args()
 
@@ -294,10 +300,90 @@ def run_benchmarks():
 
     runtimes = {}
 
-    runtimes["nabla4_benchmark_unstructured_gtfn"] = []
+    if args.backend in ["all", "gtfn"]:
+        runtimes["nabla4_benchmark_unstructured_gtfn"] = []
 
-    for _ in range(repetitions):
-        random_validation_data = icon_benchmark.get_nabla4_benchmark_validation_data(
+        for _ in range(repetitions):
+            random_validation_data = (
+                icon_benchmark.get_nabla4_benchmark_validation_data(
+                    torus_grid.get_offset_provider("E2C2V").table,
+                    torus_grid.get_offset_provider("E2ECV").table,
+                    torus_grid.num_cells,
+                    torus_grid.num_vertices,
+                    torus_grid.num_edges,
+                    torus_grid.num_levels,
+                    torus_grid.size[E2C2VDim],
+                )
+            )
+
+            z_nabla4_e2_wp_gtfn = np.zeros(
+                shape=(torus_grid.num_edges, torus_grid.num_levels), dtype=np.float64
+            )
+
+            runtimes["nabla4_benchmark_unstructured_gtfn"].append(
+                nabla4_gtfn.calculate_nabla4(
+                    (
+                        np.array(random_validation_data.u_vert, dtype=float).T.astype(
+                            np.float64
+                        ),
+                        (0, 0),
+                    ),
+                    (
+                        np.array(random_validation_data.v_vert, dtype=float).T.astype(
+                            np.float64
+                        ),
+                        (0, 0),
+                    ),
+                    (
+                        np.array(
+                            random_validation_data.primal_normal_vert_v1, dtype=float
+                        ).astype(np.float64),
+                        (0,),
+                    ),
+                    (
+                        np.array(
+                            random_validation_data.primal_normal_vert_v2, dtype=float
+                        ).astype(np.float64),
+                        (0,),
+                    ),
+                    (
+                        np.array(
+                            random_validation_data.z_nabla2_e, dtype=float
+                        ).T.astype(np.float64),
+                        (0, 0),
+                    ),
+                    (
+                        np.array(
+                            random_validation_data.inv_vert_vert_length, dtype=float
+                        ).astype(np.float64),
+                        (0,),
+                    ),
+                    (
+                        np.array(
+                            random_validation_data.inv_primal_edge_length, dtype=float
+                        ).astype(np.float64),
+                        (0,),
+                    ),
+                    (z_nabla4_e2_wp_gtfn, (0, 0)),
+                    0,
+                    torus_grid.num_edges,
+                    0,
+                    torus_grid.num_levels,
+                    (
+                        torus_grid.get_offset_provider("E2C2V").table.astype(np.int64),
+                        (0, 0),
+                    ),
+                    (
+                        torus_grid.get_offset_provider("E2ECV").table.astype(np.int64),
+                        (0, 0),
+                    ),
+                )
+            )
+
+    if args.backend in ["all", "naive"]:
+        runtimes[
+            "nabla4_benchmark_unstructured_naive"
+        ] = icon_benchmark.nabla4_benchmark_unstructured_naive(
             torus_grid.get_offset_provider("E2C2V").table,
             torus_grid.get_offset_provider("E2ECV").table,
             torus_grid.num_cells,
@@ -305,155 +391,81 @@ def run_benchmarks():
             torus_grid.num_edges,
             torus_grid.num_levels,
             torus_grid.size[E2C2VDim],
+            repetitions,
+            dry_runs,
         )
 
-        z_nabla4_e2_wp_gtfn = np.zeros(
-            shape=(torus_grid.num_edges, torus_grid.num_levels), dtype=np.float64
+        runtimes[
+            "nabla4_benchmark_structured_torus_naive"
+        ] = icon_benchmark.nabla4_benchmark_structured_torus_naive(
+            torus_grid.num_cells,
+            torus_grid.num_vertices,
+            torus_grid.num_edges,
+            torus_grid.num_levels,
+            torus_grid.size[E2C2VDim],
+            grid_cartesian_dimensions[0],
+            grid_cartesian_dimensions[1],
+            repetitions,
+            dry_runs,
         )
 
-        runtimes["nabla4_benchmark_unstructured_gtfn"].append(
-            nabla4_gtfn.calculate_nabla4(
-                (
-                    np.array(random_validation_data.u_vert, dtype=float).T.astype(
-                        np.float64
-                    ),
-                    (0, 0),
-                ),
-                (
-                    np.array(random_validation_data.v_vert, dtype=float).T.astype(
-                        np.float64
-                    ),
-                    (0, 0),
-                ),
-                (
-                    np.array(
-                        random_validation_data.primal_normal_vert_v1, dtype=float
-                    ).astype(np.float64),
-                    (0,),
-                ),
-                (
-                    np.array(
-                        random_validation_data.primal_normal_vert_v2, dtype=float
-                    ).astype(np.float64),
-                    (0,),
-                ),
-                (
-                    np.array(random_validation_data.z_nabla2_e, dtype=float).T.astype(
-                        np.float64
-                    ),
-                    (0, 0),
-                ),
-                (
-                    np.array(
-                        random_validation_data.inv_vert_vert_length, dtype=float
-                    ).astype(np.float64),
-                    (0,),
-                ),
-                (
-                    np.array(
-                        random_validation_data.inv_primal_edge_length, dtype=float
-                    ).astype(np.float64),
-                    (0,),
-                ),
-                (z_nabla4_e2_wp_gtfn, (0, 0)),
-                0,
-                torus_grid.num_edges,
-                0,
-                torus_grid.num_levels,
-                (
-                    torus_grid.get_offset_provider("E2C2V").table.astype(np.int64),
-                    (0, 0),
-                ),
-                (
-                    torus_grid.get_offset_provider("E2ECV").table.astype(np.int64),
-                    (0, 0),
-                ),
-            )
+    if args.backend in ["all", "cpu_ifirst"]:
+        runtimes[
+            "nabla4_benchmark_unstructured_cpu_ifirst"
+        ] = icon_benchmark.nabla4_benchmark_unstructured_cpu_ifirst(
+            torus_grid.get_offset_provider("E2C2V").table,
+            torus_grid.get_offset_provider("E2ECV").table,
+            torus_grid.num_cells,
+            torus_grid.num_vertices,
+            torus_grid.num_edges,
+            torus_grid.num_levels,
+            torus_grid.size[E2C2VDim],
+            repetitions,
+            dry_runs,
         )
 
-    runtimes[
-        "nabla4_benchmark_unstructured_naive"
-    ] = icon_benchmark.nabla4_benchmark_unstructured_naive(
-        torus_grid.get_offset_provider("E2C2V").table,
-        torus_grid.get_offset_provider("E2ECV").table,
-        torus_grid.num_cells,
-        torus_grid.num_vertices,
-        torus_grid.num_edges,
-        torus_grid.num_levels,
-        torus_grid.size[E2C2VDim],
-        repetitions,
-        dry_runs,
-    )
+        runtimes[
+            "nabla4_benchmark_structured_torus_cpu_ifirst"
+        ] = icon_benchmark.nabla4_benchmark_structured_torus_cpu_ifirst(
+            torus_grid.num_cells,
+            torus_grid.num_vertices,
+            torus_grid.num_edges,
+            torus_grid.num_levels,
+            torus_grid.size[E2C2VDim],
+            grid_cartesian_dimensions[0],
+            grid_cartesian_dimensions[1],
+            repetitions,
+            dry_runs,
+        )
 
-    runtimes[
-        "nabla4_benchmark_structured_torus_naive"
-    ] = icon_benchmark.nabla4_benchmark_structured_torus_naive(
-        torus_grid.num_cells,
-        torus_grid.num_vertices,
-        torus_grid.num_edges,
-        torus_grid.num_levels,
-        torus_grid.size[E2C2VDim],
-        grid_cartesian_dimensions[0],
-        grid_cartesian_dimensions[1],
-        repetitions,
-        dry_runs,
-    )
+    if args.backend in ["all", "cpu_kfirst"]:
+        runtimes[
+            "nabla4_benchmark_unstructured_cpu_kfirst"
+        ] = icon_benchmark.nabla4_benchmark_unstructured_cpu_kfirst(
+            torus_grid.get_offset_provider("E2C2V").table,
+            torus_grid.get_offset_provider("E2ECV").table,
+            torus_grid.num_cells,
+            torus_grid.num_vertices,
+            torus_grid.num_edges,
+            torus_grid.num_levels,
+            torus_grid.size[E2C2VDim],
+            repetitions,
+            dry_runs,
+        )
 
-    runtimes[
-        "nabla4_benchmark_unstructured_cpu_ifirst"
-    ] = icon_benchmark.nabla4_benchmark_unstructured_cpu_ifirst(
-        torus_grid.get_offset_provider("E2C2V").table,
-        torus_grid.get_offset_provider("E2ECV").table,
-        torus_grid.num_cells,
-        torus_grid.num_vertices,
-        torus_grid.num_edges,
-        torus_grid.num_levels,
-        torus_grid.size[E2C2VDim],
-        repetitions,
-        dry_runs,
-    )
-
-    runtimes[
-        "nabla4_benchmark_structured_torus_cpu_ifirst"
-    ] = icon_benchmark.nabla4_benchmark_structured_torus_cpu_ifirst(
-        torus_grid.num_cells,
-        torus_grid.num_vertices,
-        torus_grid.num_edges,
-        torus_grid.num_levels,
-        torus_grid.size[E2C2VDim],
-        grid_cartesian_dimensions[0],
-        grid_cartesian_dimensions[1],
-        repetitions,
-        dry_runs,
-    )
-
-    runtimes[
-        "nabla4_benchmark_unstructured_cpu_kfirst"
-    ] = icon_benchmark.nabla4_benchmark_unstructured_cpu_kfirst(
-        torus_grid.get_offset_provider("E2C2V").table,
-        torus_grid.get_offset_provider("E2ECV").table,
-        torus_grid.num_cells,
-        torus_grid.num_vertices,
-        torus_grid.num_edges,
-        torus_grid.num_levels,
-        torus_grid.size[E2C2VDim],
-        repetitions,
-        dry_runs,
-    )
-
-    runtimes[
-        "nabla4_benchmark_structured_torus_cpu_kfirst"
-    ] = icon_benchmark.nabla4_benchmark_structured_torus_cpu_kfirst(
-        torus_grid.num_cells,
-        torus_grid.num_vertices,
-        torus_grid.num_edges,
-        torus_grid.num_levels,
-        torus_grid.size[E2C2VDim],
-        grid_cartesian_dimensions[0],
-        grid_cartesian_dimensions[1],
-        repetitions,
-        dry_runs,
-    )
+        runtimes[
+            "nabla4_benchmark_structured_torus_cpu_kfirst"
+        ] = icon_benchmark.nabla4_benchmark_structured_torus_cpu_kfirst(
+            torus_grid.num_cells,
+            torus_grid.num_vertices,
+            torus_grid.num_edges,
+            torus_grid.num_levels,
+            torus_grid.size[E2C2VDim],
+            grid_cartesian_dimensions[0],
+            grid_cartesian_dimensions[1],
+            repetitions,
+            dry_runs,
+        )
 
     print_median_runtimes(runtimes)
 
