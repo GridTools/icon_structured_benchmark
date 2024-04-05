@@ -91,7 +91,7 @@ class nabla4_structured_torus : private nabla4_data<T> {
         std::size_t longitude_m1,
         std::size_t longitude_pstride_latitude_p1,
         std::size_t logitude_pstride_m1_latitude_p1) {
-        std::array<ARRAY_TYPE, 4> e2c2v_ret{};
+        std::array<ARRAY_TYPE, 4> e2c2v_ret;
         e2c2v_ret[0] = parent_vertex;
         e2c2v_ret[1] = longitude_p1 * latitude_dim + latitude;
         e2c2v_ret[2] =
@@ -112,7 +112,7 @@ class nabla4_structured_torus : private nabla4_data<T> {
         std::size_t longitude_m1,
         std::size_t longitude_pstride_latitude_p1,
         std::size_t logitude_pstride_m1_latitude_p1) {
-        std::array<ARRAY_TYPE, 4> e2c2v_ret{};
+        std::array<ARRAY_TYPE, 4> e2c2v_ret;
         e2c2v_ret[0] = parent_vertex;
         e2c2v_ret[1] = longitude_pstride_latitude_p1;
         e2c2v_ret[2] = longitude_p1 * latitude_dim + latitude;
@@ -131,7 +131,7 @@ class nabla4_structured_torus : private nabla4_data<T> {
         std::size_t longitude_m1,
         std::size_t longitude_pstride_latitude_p1,
         std::size_t logitude_pstride_m1_latitude_p1) {
-        std::array<ARRAY_TYPE, 4> e2c2v_ret{};
+        std::array<ARRAY_TYPE, 4> e2c2v_ret;
         e2c2v_ret[0] = parent_vertex;
         e2c2v_ret[1] = logitude_pstride_m1_latitude_p1;
         e2c2v_ret[2] = longitude_pstride_latitude_p1;
