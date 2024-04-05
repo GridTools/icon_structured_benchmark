@@ -205,19 +205,19 @@ class nabla4_structured_torus : private nabla4_data<T> {
         const auto E2ECV_1 = edge_index * 4 + 1;
         const auto E2ECV_2 = edge_index * 4 + 2;
         const auto E2ECV_3 = edge_index * 4 + 3;
-        double nabv_tang_wp = u_vert[E2C2V_0][k_index] * primal_normal_vert_v1[E2ECV_0] +
-                              v_vert[E2C2V_0][k_index] * primal_normal_vert_v2[E2ECV_0] +
-                              u_vert[E2C2V_1][k_index] * primal_normal_vert_v1[E2ECV_1] +
-                              v_vert[E2C2V_1][k_index] * primal_normal_vert_v2[E2ECV_1];
-        double nabv_norm_wp = u_vert[E2C2V_2][k_index] * primal_normal_vert_v1[E2ECV_2] +
-                              v_vert[E2C2V_2][k_index] * primal_normal_vert_v2[E2ECV_2] +
-                              u_vert[E2C2V_3][k_index] * primal_normal_vert_v1[E2ECV_3] +
-                              v_vert[E2C2V_3][k_index] * primal_normal_vert_v2[E2ECV_3];
-        z_nabla4_e2_wp[edge_index][k_index] =
-            4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e[edge_index][k_index]) *
-                          (inv_vert_vert_length[edge_index] * inv_vert_vert_length[edge_index]) +
-                      (nabv_tang_wp - 2.0 * z_nabla2_e[edge_index][k_index]) *
-                          (inv_primal_edge_length[edge_index] * inv_primal_edge_length[edge_index]));
+        double nabv_tang_wp = u_vert_gt_hv(E2C2V_0, k_index) * primal_normal_vert_v1_gt_hv(E2ECV_0) +
+                              v_vert_gt_hv(E2C2V_0, k_index) * primal_normal_vert_v2_gt_hv(E2ECV_0) +
+                              u_vert_gt_hv(E2C2V_1, k_index) * primal_normal_vert_v1_gt_hv(E2ECV_1) +
+                              v_vert_gt_hv(E2C2V_1, k_index) * primal_normal_vert_v2_gt_hv(E2ECV_1);
+        double nabv_norm_wp = u_vert_gt_hv(E2C2V_2, k_index) * primal_normal_vert_v1_gt_hv(E2ECV_2) +
+                              v_vert_gt_hv(E2C2V_2, k_index) * primal_normal_vert_v2_gt_hv(E2ECV_2) +
+                              u_vert_gt_hv(E2C2V_3, k_index) * primal_normal_vert_v1_gt_hv(E2ECV_3) +
+                              v_vert_gt_hv(E2C2V_3, k_index) * primal_normal_vert_v2_gt_hv(E2ECV_3);
+        z_nabla4_e2_wp_gt_hv(edge_index, k_index) =
+            4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_hv(edge_index, k_index)) *
+                          (inv_vert_vert_length_gt_hv(edge_index) * inv_vert_vert_length_gt_hv(edge_index)) +
+                      (nabv_tang_wp - 2.0 * z_nabla2_e_gt_hv(edge_index, k_index)) *
+                          (inv_primal_edge_length_gt_hv(edge_index) * inv_primal_edge_length_gt_hv(edge_index)));
     }
 
     void run_naive() {
