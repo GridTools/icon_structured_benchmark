@@ -23,14 +23,14 @@ class nabla4_structured_torus : private nabla4_data<T> {
     using nabla4_data<T>::inv_vert_vert_length;
     using nabla4_data<T>::inv_primal_edge_length;
     using nabla4_data<T>::z_nabla4_e2_wp;
-    using nabla4_data<T>::u_vert_gt_tv;
-    using nabla4_data<T>::v_vert_gt_tv;
-    using nabla4_data<T>::primal_normal_vert_v1_gt_tv;
-    using nabla4_data<T>::primal_normal_vert_v2_gt_tv;
-    using nabla4_data<T>::z_nabla2_e_gt_tv;
-    using nabla4_data<T>::inv_vert_vert_length_gt_tv;
-    using nabla4_data<T>::inv_primal_edge_length_gt_tv;
-    using nabla4_data<T>::z_nabla4_e2_wp_gt_tv;
+    using nabla4_data<T>::u_vert_gt;
+    using nabla4_data<T>::v_vert_gt;
+    using nabla4_data<T>::primal_normal_vert_v1_gt;
+    using nabla4_data<T>::primal_normal_vert_v2_gt;
+    using nabla4_data<T>::z_nabla2_e_gt;
+    using nabla4_data<T>::inv_vert_vert_length_gt;
+    using nabla4_data<T>::inv_primal_edge_length_gt;
+    using nabla4_data<T>::z_nabla4_e2_wp_gt;
 
     const std::size_t longitude_dim;
     const std::size_t latitude_dim;
@@ -180,6 +180,14 @@ class nabla4_structured_torus : private nabla4_data<T> {
         const auto E2ECV_1 = edge_index * 4 + 1;
         const auto E2ECV_2 = edge_index * 4 + 2;
         const auto E2ECV_3 = edge_index * 4 + 3;
+        const auto u_vert_gt_tv = u_vert_gt->target_view();
+        const auto v_vert_gt_tv = v_vert_gt->target_view();
+        const auto primal_normal_vert_v1_gt_tv = primal_normal_vert_v1_gt->target_view();
+        const auto primal_normal_vert_v2_gt_tv = primal_normal_vert_v2_gt->target_view();
+        const auto z_nabla2_e_gt_tv = z_nabla2_e_gt->target_view();
+        const auto inv_vert_vert_length_gt_tv = inv_vert_vert_length_gt->target_view();
+        const auto inv_primal_edge_length_gt_tv = inv_primal_edge_length_gt->target_view();
+        const auto z_nabla4_e2_wp_gt_tv = z_nabla4_e2_wp_gt->target_view();
         double nabv_tang_wp = u_vert_gt_tv(k_index, E2C2V_0) * primal_normal_vert_v1_gt_tv(E2ECV_0) +
                               v_vert_gt_tv(k_index, E2C2V_0) * primal_normal_vert_v2_gt_tv(E2ECV_0) +
                               u_vert_gt_tv(k_index, E2C2V_1) * primal_normal_vert_v1_gt_tv(E2ECV_1) +
