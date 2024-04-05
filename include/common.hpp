@@ -4,13 +4,8 @@
 
 using namespace gridtools;
 
-#ifdef GT_CUDACC
-#include <gridtools/storage/gpu.hpp>
-using traits_t = storage::gpu;
-#else
 #include <gridtools/storage/cpu_ifirst.hpp>
 using traits_t = storage::cpu_ifirst;
-#endif
 
 #include "random_init.hpp"
 
