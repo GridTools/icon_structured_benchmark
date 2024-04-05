@@ -3,6 +3,7 @@
 
 #include "nabla4_structured_simple.hpp"
 #include "nabla4_structured_torus.hpp"
+#include "nabla4_structured_torus_gridtools.hpp"
 #include "nabla4_unstructured.hpp"
 
 using std::chrono::duration;

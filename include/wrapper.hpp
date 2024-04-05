@@ -293,3 +293,23 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_gpu(std::size
     std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
     std::vector<WP_TYPE> &inv_vert_vert_length,
     std::vector<WP_TYPE> &inv_primal_edge_length);
+
+std::vector<double> nabla4_benchmark_structured_torus_cpu_ifirst_gridtools(std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::size_t longitude_dim,
+    std::size_t latitude_dim,
+    int repetitions = 101,
+    int dry_runs = 1);
+
+std::vector<double> nabla4_benchmark_structured_torus_cpu_kfirst_gridtools(std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::size_t longitude_dim,
+    std::size_t latitude_dim,
+    int repetitions = 101,
+    int dry_runs = 1);

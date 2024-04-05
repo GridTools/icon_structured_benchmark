@@ -257,7 +257,7 @@ def parse_arguments():
     )
     parser.add_argument(
         "--backend",
-        choices=["all", "gtfn", "naive", "cpu_ifirst", "cpu_kfirst"],
+        choices=["all", "gtfn", "naive", "cpu_ifirst", "cpu_kfirst", "gridtools"],
         default="all",
         help="Which backend to benchmark",
     )
@@ -438,6 +438,20 @@ def run_benchmarks():
             dry_runs,
         )
 
+        runtimes[
+            "nabla4_benchmark_structured_torus_cpu_ifirst_gridtools"
+        ] = icon_benchmark.nabla4_benchmark_structured_torus_cpu_ifirst_gridtools(
+            torus_grid.num_cells,
+            torus_grid.num_vertices,
+            torus_grid.num_edges,
+            torus_grid.num_levels,
+            torus_grid.size[E2C2VDim],
+            grid_cartesian_dimensions[0],
+            grid_cartesian_dimensions[1],
+            repetitions,
+            dry_runs,
+        )
+
     if args.backend in ["all", "cpu_kfirst"]:
         runtimes[
             "nabla4_benchmark_unstructured_cpu_kfirst"
@@ -456,6 +470,20 @@ def run_benchmarks():
         runtimes[
             "nabla4_benchmark_structured_torus_cpu_kfirst"
         ] = icon_benchmark.nabla4_benchmark_structured_torus_cpu_kfirst(
+            torus_grid.num_cells,
+            torus_grid.num_vertices,
+            torus_grid.num_edges,
+            torus_grid.num_levels,
+            torus_grid.size[E2C2VDim],
+            grid_cartesian_dimensions[0],
+            grid_cartesian_dimensions[1],
+            repetitions,
+            dry_runs,
+        )
+
+        runtimes[
+            "nabla4_benchmark_structured_torus_cpu_kfirst_gridtools"
+        ] = icon_benchmark.nabla4_benchmark_structured_torus_cpu_ifirst_gridtools(
             torus_grid.num_cells,
             torus_grid.num_vertices,
             torus_grid.num_edges,
