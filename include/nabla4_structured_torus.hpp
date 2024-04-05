@@ -78,9 +78,10 @@ class nabla4_structured_torus : private nabla4_data<T> {
 
     std::vector<std::vector<VP_TYPE>> get_output() { return z_nabla4_e2_wp; }
 
-    inline std::size_t modulo(int a, int b) { return a % b; }
+    inline __attribute__((always_inline)) std::size_t modulo(int a, int b) { return a % b; }
 
-    inline std::array<ARRAY_TYPE, 4> get_e2c2v_vertices_north_edge(std::size_t edge_index,
+    inline __attribute__((always_inline)) std::array<ARRAY_TYPE, 4> get_e2c2v_vertices_north_edge(
+        std::size_t edge_index,
         std::size_t parent_vertex,
         std::size_t latitude,
         std::size_t longitude,
@@ -101,7 +102,7 @@ class nabla4_structured_torus : private nabla4_data<T> {
         return e2c2v_ret;
     }
 
-    inline std::array<ARRAY_TYPE, 4> get_e2c2v_vertices_east_edge(std::size_t edge_index,
+    inline __attribute__((always_inline)) std::array<ARRAY_TYPE, 4> get_e2c2v_vertices_east_edge(std::size_t edge_index,
         std::size_t parent_vertex,
         std::size_t latitude,
         std::size_t longitude,
@@ -119,7 +120,8 @@ class nabla4_structured_torus : private nabla4_data<T> {
         return e2c2v_ret;
     }
 
-    inline std::array<ARRAY_TYPE, 4> get_e2c2v_vertices_southeast_edge(std::size_t edge_index,
+    inline __attribute__((always_inline)) std::array<ARRAY_TYPE, 4> get_e2c2v_vertices_southeast_edge(
+        std::size_t edge_index,
         std::size_t parent_vertex,
         std::size_t latitude,
         std::size_t longitude,
@@ -138,7 +140,7 @@ class nabla4_structured_torus : private nabla4_data<T> {
     }
 
     template <auto f>
-    inline const std::array<ARRAY_TYPE, 4> get_e2c2v(ARRAY_TYPE edge_index) {
+    inline __attribute__((always_inline)) const std::array<ARRAY_TYPE, 4> get_e2c2v(ARRAY_TYPE edge_index) {
         const std::size_t edges_per_index{3};
         const auto starting_vertex = edge_index / edges_per_index;
         const auto latitude = modulo(starting_vertex, latitude_dim);
@@ -168,7 +170,7 @@ class nabla4_structured_torus : private nabla4_data<T> {
         return e2c2v_vec;
     }
 
-    inline void inner_kernel_ifirst(
+    inline __attribute__((always_inline)) void inner_kernel_ifirst(
         const std::array<ARRAY_TYPE, 4> &e2c2v_vec, std::size_t edge_index, std::size_t k_index) {
         const auto E2C2V_0 = e2c2v_vec[0];
         const auto E2C2V_1 = e2c2v_vec[1];
@@ -193,7 +195,7 @@ class nabla4_structured_torus : private nabla4_data<T> {
                           (inv_primal_edge_length_gt_tv(edge_index) * inv_primal_edge_length_gt_tv(edge_index)));
     }
 
-    inline void inner_kernel_kfirst(
+    inline __attribute__((always_inline)) void inner_kernel_kfirst(
         const std::array<ARRAY_TYPE, 4> &e2c2v_vec, std::size_t edge_index, std::size_t k_index) {
         const auto E2C2V_0 = e2c2v_vec[0];
         const auto E2C2V_1 = e2c2v_vec[1];
