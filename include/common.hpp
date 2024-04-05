@@ -45,14 +45,14 @@ struct nabla4_data {
     const data_store_1d_t inv_vert_vert_length_gt;
     const data_store_1d_t inv_primal_edge_length_gt;
     const data_store_2d_t z_nabla4_e2_wp_gt;
-    const data_store_2d_hv_t u_vert_gt_tv;
-    const data_store_2d_hv_t v_vert_gt_tv;
-    const data_store_1d_hv_t primal_normal_vert_v1_gt_tv;
-    const data_store_1d_hv_t primal_normal_vert_v2_gt_tv;
-    const data_store_2d_hv_t z_nabla2_e_gt_tv;
-    const data_store_1d_hv_t inv_vert_vert_length_gt_tv;
-    const data_store_1d_hv_t inv_primal_edge_length_gt_tv;
-    const data_store_2d_hv_t z_nabla4_e2_wp_gt_tv;
+    const data_store_2d_hv_t u_vert_gt_hv;
+    const data_store_2d_hv_t v_vert_gt_hv;
+    const data_store_1d_hv_t primal_normal_vert_v1_gt_hv;
+    const data_store_1d_hv_t primal_normal_vert_v2_gt_hv;
+    const data_store_2d_hv_t z_nabla2_e_gt_hv;
+    const data_store_1d_hv_t inv_vert_vert_length_gt_hv;
+    const data_store_1d_hv_t inv_primal_edge_length_gt_hv;
+    const data_store_2d_hv_t z_nabla4_e2_wp_gt_hv;
 
     std::vector<std::vector<VP_TYPE>> u_vert;
     std::vector<std::vector<VP_TYPE>> v_vert;
@@ -102,14 +102,14 @@ struct nabla4_data {
         inv_vert_vert_length_gt(storage::builder<traits_t>.template type<double>().dimensions(EdgeDim).initializer([](int i) { return rand_utils.template get<double>(); }).build()),
         inv_primal_edge_length_gt(storage::builder<traits_t>.template type<double>().dimensions(EdgeDim).initializer([](int i) { return rand_utils.template get<double>(); }).build()),
         z_nabla4_e2_wp_gt(storage::builder<traits_t>.template type<double>().dimensions(KDim, EdgeDim).initializer([](int i, int j) { return rand_utils.template get<double>(); }).build()),
-        u_vert_gt_tv(u_vert_gt->host_view()),
-        v_vert_gt_tv(v_vert_gt->host_view()),
-        primal_normal_vert_v1_gt_tv(primal_normal_vert_v1_gt->host_view()),
-        primal_normal_vert_v2_gt_tv(primal_normal_vert_v2_gt->host_view()),
-        z_nabla2_e_gt_tv(z_nabla2_e_gt->host_view()),
-        inv_vert_vert_length_gt_tv(inv_vert_vert_length_gt->host_view()),
-        inv_primal_edge_length_gt_tv(inv_primal_edge_length_gt->host_view()),
-        z_nabla4_e2_wp_gt_tv(z_nabla4_e2_wp_gt->host_view())
+        u_vert_gt_hv(u_vert_gt->host_view()),
+        v_vert_gt_hv(v_vert_gt->host_view()),
+        primal_normal_vert_v1_gt_hv(primal_normal_vert_v1_gt->host_view()),
+        primal_normal_vert_v2_gt_hv(primal_normal_vert_v2_gt->host_view()),
+        z_nabla2_e_gt_hv(z_nabla2_e_gt->host_view()),
+        inv_vert_vert_length_gt_hv(inv_vert_vert_length_gt->host_view()),
+        inv_primal_edge_length_gt_hv(inv_primal_edge_length_gt->host_view()),
+        z_nabla4_e2_wp_gt_hv(z_nabla4_e2_wp_gt->host_view())
         {
         if constexpr (T == Data::ifirst) {
             init_ifirst();
@@ -145,14 +145,14 @@ struct nabla4_data {
         inv_vert_vert_length_gt(storage::builder<traits_t>.template type<double>().dimensions(EdgeDim).initializer([](int i) { return rand_utils.template get<double>(); }).build()),
         inv_primal_edge_length_gt(storage::builder<traits_t>.template type<double>().dimensions(EdgeDim).initializer([](int i) { return rand_utils.template get<double>(); }).build()),
         z_nabla4_e2_wp_gt(storage::builder<traits_t>.template type<double>().dimensions(KDim, EdgeDim).initializer([](int i, int j) { return rand_utils.template get<double>(); }).build()),
-        u_vert_gt_tv(u_vert_gt->host_view()),
-        v_vert_gt_tv(v_vert_gt->host_view()),
-        primal_normal_vert_v1_gt_tv(primal_normal_vert_v1_gt->host_view()),
-        primal_normal_vert_v2_gt_tv(primal_normal_vert_v2_gt->host_view()),
-        z_nabla2_e_gt_tv(z_nabla2_e_gt->host_view()),
-        inv_vert_vert_length_gt_tv(inv_vert_vert_length_gt->host_view()),
-        inv_primal_edge_length_gt_tv(inv_primal_edge_length_gt->host_view()),
-        z_nabla4_e2_wp_gt_tv(z_nabla4_e2_wp_gt->host_view()) {
+        u_vert_gt_hv(u_vert_gt->host_view()),
+        v_vert_gt_hv(v_vert_gt->host_view()),
+        primal_normal_vert_v1_gt_hv(primal_normal_vert_v1_gt->host_view()),
+        primal_normal_vert_v2_gt_hv(primal_normal_vert_v2_gt->host_view()),
+        z_nabla2_e_gt_hv(z_nabla2_e_gt->host_view()),
+        inv_vert_vert_length_gt_hv(inv_vert_vert_length_gt->host_view()),
+        inv_primal_edge_length_gt_hv(inv_primal_edge_length_gt->host_view()),
+        z_nabla4_e2_wp_gt_hv(z_nabla4_e2_wp_gt->host_view()) {
         if constexpr (T == Data::ifirst) {
             z_nabla4_e2_wp.resize(KDim);
             for (std::size_t i{}; i < KDim; ++i) {

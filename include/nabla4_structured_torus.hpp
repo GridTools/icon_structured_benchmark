@@ -23,14 +23,14 @@ class nabla4_structured_torus : private nabla4_data<T> {
     using nabla4_data<T>::inv_vert_vert_length;
     using nabla4_data<T>::inv_primal_edge_length;
     using nabla4_data<T>::z_nabla4_e2_wp;
-    using nabla4_data<T>::u_vert_gt_tv;
-    using nabla4_data<T>::v_vert_gt_tv;
-    using nabla4_data<T>::primal_normal_vert_v1_gt_tv;
-    using nabla4_data<T>::primal_normal_vert_v2_gt_tv;
-    using nabla4_data<T>::z_nabla2_e_gt_tv;
-    using nabla4_data<T>::inv_vert_vert_length_gt_tv;
-    using nabla4_data<T>::inv_primal_edge_length_gt_tv;
-    using nabla4_data<T>::z_nabla4_e2_wp_gt_tv;
+    using nabla4_data<T>::u_vert_gt_hv;
+    using nabla4_data<T>::v_vert_gt_hv;
+    using nabla4_data<T>::primal_normal_vert_v1_gt_hv;
+    using nabla4_data<T>::primal_normal_vert_v2_gt_hv;
+    using nabla4_data<T>::z_nabla2_e_gt_hv;
+    using nabla4_data<T>::inv_vert_vert_length_gt_hv;
+    using nabla4_data<T>::inv_primal_edge_length_gt_hv;
+    using nabla4_data<T>::z_nabla4_e2_wp_gt_hv;
 
     const std::size_t longitude_dim;
     const std::size_t latitude_dim;
@@ -180,19 +180,19 @@ class nabla4_structured_torus : private nabla4_data<T> {
         const auto E2ECV_1 = edge_index * 4 + 1;
         const auto E2ECV_2 = edge_index * 4 + 2;
         const auto E2ECV_3 = edge_index * 4 + 3;
-        double nabv_tang_wp = u_vert_gt_tv(k_index, E2C2V_0) * primal_normal_vert_v1_gt_tv(E2ECV_0) +
-                              v_vert_gt_tv(k_index, E2C2V_0) * primal_normal_vert_v2_gt_tv(E2ECV_0) +
-                              u_vert_gt_tv(k_index, E2C2V_1) * primal_normal_vert_v1_gt_tv(E2ECV_1) +
-                              v_vert_gt_tv(k_index, E2C2V_1) * primal_normal_vert_v2_gt_tv(E2ECV_1);
-        double nabv_norm_wp = u_vert_gt_tv(k_index, E2C2V_2) * primal_normal_vert_v1_gt_tv(E2ECV_2) +
-                              v_vert_gt_tv(k_index, E2C2V_2) * primal_normal_vert_v2_gt_tv(E2ECV_2) +
-                              u_vert_gt_tv(k_index, E2C2V_3) * primal_normal_vert_v1_gt_tv(E2ECV_3) +
-                              v_vert_gt_tv(k_index, E2C2V_3) * primal_normal_vert_v2_gt_tv(E2ECV_3);
-        z_nabla4_e2_wp_gt_tv(k_index, edge_index) =
-            4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_tv(k_index, edge_index)) *
-                          (inv_vert_vert_length_gt_tv(edge_index) * inv_vert_vert_length_gt_tv(edge_index)) +
-                      (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(k_index, edge_index)) *
-                          (inv_primal_edge_length_gt_tv(edge_index) * inv_primal_edge_length_gt_tv(edge_index)));
+        double nabv_tang_wp = u_vert_gt_hv(k_index, E2C2V_0) * primal_normal_vert_v1_gt_hv(E2ECV_0) +
+                              v_vert_gt_hv(k_index, E2C2V_0) * primal_normal_vert_v2_gt_hv(E2ECV_0) +
+                              u_vert_gt_hv(k_index, E2C2V_1) * primal_normal_vert_v1_gt_hv(E2ECV_1) +
+                              v_vert_gt_hv(k_index, E2C2V_1) * primal_normal_vert_v2_gt_hv(E2ECV_1);
+        double nabv_norm_wp = u_vert_gt_hv(k_index, E2C2V_2) * primal_normal_vert_v1_gt_hv(E2ECV_2) +
+                              v_vert_gt_hv(k_index, E2C2V_2) * primal_normal_vert_v2_gt_hv(E2ECV_2) +
+                              u_vert_gt_hv(k_index, E2C2V_3) * primal_normal_vert_v1_gt_hv(E2ECV_3) +
+                              v_vert_gt_hv(k_index, E2C2V_3) * primal_normal_vert_v2_gt_hv(E2ECV_3);
+        z_nabla4_e2_wp_gt_hv(k_index, edge_index) =
+            4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_hv(k_index, edge_index)) *
+                          (inv_vert_vert_length_gt_hv(edge_index) * inv_vert_vert_length_gt_hv(edge_index)) +
+                      (nabv_tang_wp - 2.0 * z_nabla2_e_gt_hv(k_index, edge_index)) *
+                          (inv_primal_edge_length_gt_hv(edge_index) * inv_primal_edge_length_gt_hv(edge_index)));
     }
 
     inline __attribute__((always_inline)) void inner_kernel_kfirst(
