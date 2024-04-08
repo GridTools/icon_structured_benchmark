@@ -9,6 +9,8 @@ using namespace gridtools;
 
 #include "common.hpp"
 
+using namespace literals;
+
 template <typename T>
 struct nabla4_gt_data {
     std::size_t CellDim;

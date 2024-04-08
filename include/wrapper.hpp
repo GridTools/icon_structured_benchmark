@@ -38,6 +38,26 @@ std::vector<double> nabla4_benchmark_unstructured_cpu_kfirst(std::vector<std::ar
     int repetitions = 101,
     int dry_runs = 1);
 
+std::vector<double> nabla4_benchmark_unstructured_cpu_ifirst_gridtools(std::vector<std::array<std::size_t, 4>> &e2c2v,
+    std::vector<std::array<std::size_t, 4>> &e2ecv,
+    std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    int repetitions = 101,
+    int dry_runs = 1);
+
+std::vector<double> nabla4_benchmark_unstructured_cpu_kfirst_gridtools(std::vector<std::array<std::size_t, 4>> &e2c2v,
+    std::vector<std::array<std::size_t, 4>> &e2ecv,
+    std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    int repetitions = 101,
+    int dry_runs = 1);
+
 std::vector<double> nabla4_benchmark_unstructured_gpu(std::vector<std::array<std::size_t, 4>> &e2c2v,
     std::vector<std::array<std::size_t, 4>> &e2ecv,
     std::size_t CellDim,

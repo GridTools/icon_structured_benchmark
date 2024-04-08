@@ -5,6 +5,7 @@
 #include "nabla4_structured_torus.hpp"
 #include "nabla4_structured_torus_gridtools.hpp"
 #include "nabla4_unstructured.hpp"
+#include "nabla4_unstructured_gridtools.hpp"
 
 using std::chrono::duration;
 using std::chrono::high_resolution_clock;

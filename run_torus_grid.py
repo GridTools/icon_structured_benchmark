@@ -425,6 +425,20 @@ def run_benchmarks():
         )
 
         runtimes[
+            "nabla4_benchmark_unstructured_cpu_ifirst_gridtools"
+        ] = icon_benchmark.nabla4_benchmark_unstructured_cpu_ifirst_gridtools(
+            torus_grid.get_offset_provider("E2C2V").table,
+            torus_grid.get_offset_provider("E2ECV").table,
+            torus_grid.num_cells,
+            torus_grid.num_vertices,
+            torus_grid.num_edges,
+            torus_grid.num_levels,
+            torus_grid.size[E2C2VDim],
+            repetitions,
+            dry_runs,
+        )
+
+        runtimes[
             "nabla4_benchmark_structured_torus_cpu_ifirst"
         ] = icon_benchmark.nabla4_benchmark_structured_torus_cpu_ifirst(
             torus_grid.num_cells,
@@ -456,6 +470,20 @@ def run_benchmarks():
         runtimes[
             "nabla4_benchmark_unstructured_cpu_kfirst"
         ] = icon_benchmark.nabla4_benchmark_unstructured_cpu_kfirst(
+            torus_grid.get_offset_provider("E2C2V").table,
+            torus_grid.get_offset_provider("E2ECV").table,
+            torus_grid.num_cells,
+            torus_grid.num_vertices,
+            torus_grid.num_edges,
+            torus_grid.num_levels,
+            torus_grid.size[E2C2VDim],
+            repetitions,
+            dry_runs,
+        )
+
+        runtimes[
+            "nabla4_benchmark_unstructured_cpu_kfirst_gridtools"
+        ] = icon_benchmark.nabla4_benchmark_unstructured_cpu_kfirst_gridtools(
             torus_grid.get_offset_provider("E2C2V").table,
             torus_grid.get_offset_provider("E2ECV").table,
             torus_grid.num_cells,

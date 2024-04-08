@@ -96,6 +96,53 @@ std::vector<double> nabla4_benchmark_unstructured_gpu(std::vector<std::array<std
         e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim, repetitions, dry_runs);
 }
 
+template <backend_impl I>
+std::vector<double> nabla4_benchmark_unstructured_gridtools(std::vector<std::array<std::size_t, 4>> &e2c2v,
+    std::vector<std::array<std::size_t, 4>> &e2ecv,
+    std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    int repetitions,
+    int dry_runs) {
+    if constexpr (I == backend_impl::cpu_ifirst) {
+        return run_benchmark<nabla4_unstructured_gt<storage::cpu_ifirst>, I>(
+            e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim, repetitions, dry_runs);
+    } else if constexpr (I == backend_impl::cpu_kfirst) {
+        return run_benchmark<nabla4_unstructured_gt<storage::cpu_kfirst>, I>(
+            e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim, repetitions, dry_runs);
+    } else {
+        throw std::runtime_error("Undefined backend implementation");
+    }
+}
+
+std::vector<double> nabla4_benchmark_unstructured_cpu_ifirst_gridtools(std::vector<std::array<std::size_t, 4>> &e2c2v,
+    std::vector<std::array<std::size_t, 4>> &e2ecv,
+    std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    int repetitions,
+    int dry_runs) {
+    return nabla4_benchmark_unstructured<cpu_ifirst>(
+        e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim, repetitions, dry_runs);
+}
+
+std::vector<double> nabla4_benchmark_unstructured_cpu_kfirst_gridtools(std::vector<std::array<std::size_t, 4>> &e2c2v,
+    std::vector<std::array<std::size_t, 4>> &e2ecv,
+    std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    int repetitions,
+    int dry_runs) {
+    return nabla4_benchmark_unstructured<cpu_kfirst>(
+        e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim, repetitions, dry_runs);
+}
+
 std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_naive(std::vector<std::array<std::size_t, 4>> &e2c2v,
     std::vector<std::array<std::size_t, 4>> &e2ecv,
     std::size_t CellDim,
