@@ -6,7 +6,7 @@
 #include "nabla4_gridtools.hpp"
 
 template <typename T>
-class nabla4_unstructured_gt : private nabla4_gt_data<T> {
+class nabla4_unstructured_gt : public nabla4_gt_data<T> {
 
     using nabla4_gt_data<T>::CellDim;
     using nabla4_gt_data<T>::EdgeDim;
@@ -47,8 +47,37 @@ class nabla4_unstructured_gt : private nabla4_gt_data<T> {
         e2ecv_gt_hv(e2ecv_gt->host_view()),
         nabla4_gt_data<T>(CellDim, VertexDim, EdgeDim, KDim, ECVDim){};
 
-    inline __attribute__((always_inline)) void inner_kernel(
-        std::size_t edge_index, std::size_t k_index, const auto &e2c2v_vec, const auto &e2ecv_vec) {
+    nabla4_unstructured_gt(std::vector<std::array<std::size_t, 4>> e2c2v,
+        std::vector<std::array<std::size_t, 4>> e2ecv,
+        std::size_t CellDim,
+        std::size_t VertexDim,
+        std::size_t EdgeDim,
+        std::size_t KDim,
+        std::size_t ECVDim,
+        std::vector<std::vector<VP_TYPE>> &u_vert,
+        std::vector<std::vector<VP_TYPE>> &v_vert,
+        std::vector<WP_TYPE> &primal_normal_vert_v1,
+        std::vector<WP_TYPE> &primal_normal_vert_v2,
+        std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+        std::vector<WP_TYPE> &inv_vert_vert_length,
+        std::vector<WP_TYPE> &inv_primal_edge_length)
+        : e2c2v_gt(storage::builder<T>.template type<std::size_t>().dimensions(e2c2v.size(), 4_c).initializer([&e2c2v](int i, int j) { return e2c2v[i][j]; }).build()),
+        e2ecv_gt(storage::builder<T>.template type<std::size_t>().dimensions(e2ecv.size(), 4_c).initializer([&e2ecv](int i, int j) { return e2ecv[i][j]; }).build()),
+        e2c2v_gt_hv(e2c2v_gt->host_view()),
+        e2ecv_gt_hv(e2ecv_gt->host_view()),
+        nabla4_gt_data<T>(CellDim, VertexDim, EdgeDim, KDim, ECVDim, u_vert,
+                                          v_vert,
+                                          primal_normal_vert_v1,
+                                          primal_normal_vert_v2,
+                                          z_nabla2_e,
+                                          inv_vert_vert_length,
+                                          inv_primal_edge_length){};
+
+  private:
+    inline __attribute__((always_inline)) void inner_kernel(std::size_t edge_index,
+        std::size_t k_index,
+        const std::array<std::size_t, 4> &e2c2v_vec,
+        const std::array<std::size_t, 4> &e2ecv_vec) {
         const auto E2C2V_0 = e2c2v_vec[0];
         const auto E2C2V_1 = e2c2v_vec[1];
         const auto E2C2V_2 = e2c2v_vec[2];
@@ -108,6 +137,7 @@ class nabla4_unstructured_gt : private nabla4_gt_data<T> {
         };
     };
 
+  public:
     /// Compute function timed for benchmarking
     template <backend_impl I>
     void run() {

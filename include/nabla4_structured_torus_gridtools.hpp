@@ -8,7 +8,7 @@
 #include "random_init.hpp"
 
 template <typename T>
-class nabla4_structured_torus_gt : private nabla4_gt_data<T> {
+class nabla4_structured_torus_gt : public nabla4_gt_data<T> {
 
     using nabla4_gt_data<T>::CellDim;
     using nabla4_gt_data<T>::EdgeDim;
@@ -39,7 +39,34 @@ class nabla4_structured_torus_gt : private nabla4_gt_data<T> {
         std::size_t latitude_dim)
         : longitude_dim(longitude_dim),
           latitude_dim(latitude_dim), nabla4_gt_data<T>(CellDim, VertexDim, EdgeDim, KDim, ECVDim){};
+    nabla4_structured_torus_gt(std::size_t CellDim,
+        std::size_t VertexDim,
+        std::size_t EdgeDim,
+        std::size_t KDim,
+        std::size_t ECVDim,
+        std::size_t longitude_dim,
+        std::size_t latitude_dim,
+        std::vector<std::vector<VP_TYPE>> &u_vert,
+        std::vector<std::vector<VP_TYPE>> &v_vert,
+        std::vector<WP_TYPE> &primal_normal_vert_v1,
+        std::vector<WP_TYPE> &primal_normal_vert_v2,
+        std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+        std::vector<WP_TYPE> &inv_vert_vert_length,
+        std::vector<WP_TYPE> &inv_primal_edge_length)
+        : longitude_dim(longitude_dim), latitude_dim(latitude_dim), nabla4_gt_data<T>(CellDim,
+                                                                        VertexDim,
+                                                                        EdgeDim,
+                                                                        KDim,
+                                                                        ECVDim,
+                                                                        u_vert,
+                                                                        v_vert,
+                                                                        primal_normal_vert_v1,
+                                                                        primal_normal_vert_v2,
+                                                                        z_nabla2_e,
+                                                                        inv_vert_vert_length,
+                                                                        inv_primal_edge_length){};
 
+  private:
     inline __attribute__((always_inline)) std::size_t modulo(int a, int b) { return a % b; }
 
     inline __attribute__((always_inline)) std::array<ARRAY_TYPE, 4> get_e2c2v_vertices_north_edge(
@@ -215,6 +242,7 @@ class nabla4_structured_torus_gt : private nabla4_gt_data<T> {
         };
     };
 
+  public:
     /// Compute function timed for benchmarking
     template <backend_impl I>
     void run() {
