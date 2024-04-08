@@ -483,7 +483,7 @@ def run_benchmarks():
 
         runtimes[
             "nabla4_benchmark_structured_torus_cpu_kfirst_gridtools"
-        ] = icon_benchmark.nabla4_benchmark_structured_torus_cpu_ifirst_gridtools(
+        ] = icon_benchmark.nabla4_benchmark_structured_torus_cpu_kfirst_gridtools(
             torus_grid.num_cells,
             torus_grid.num_vertices,
             torus_grid.num_edges,

@@ -200,7 +200,7 @@ class nabla4_structured_torus_gt : private nabla4_gt_data<T> {
 
     void run_cpu_ifirst() {
         for (std::size_t k_index{}; k_index < KDim; ++k_index) {
-#pragma omp simd
+#pragma clang loop vectorize(assume_safety) interleave(enable) unroll_count(4) distribute(enable)
             for (std::size_t edge_index = 0; edge_index < EdgeDim; edge_index += 3) {
                 const auto e2c2v_vec_north =
                     get_e2c2v<&nabla4_structured_torus_gt::get_e2c2v_vertices_north_edge>(edge_index);
@@ -223,7 +223,7 @@ class nabla4_structured_torus_gt : private nabla4_gt_data<T> {
                 get_e2c2v<&nabla4_structured_torus_gt::get_e2c2v_vertices_east_edge>(edge_index);
             const auto e2c2v_vec_southeast =
                 get_e2c2v<&nabla4_structured_torus_gt::get_e2c2v_vertices_southeast_edge>(edge_index);
-#pragma omp simd
+#pragma clang loop unroll_count(8) vectorize(assume_safety) interleave(enable)
             for (std::size_t k_index = 0; k_index < KDim; ++k_index) {
                 inner_kernel_kfirst(e2c2v_vec_north, edge_index, k_index);
                 inner_kernel_kfirst(e2c2v_vec_east, edge_index + 1, k_index);

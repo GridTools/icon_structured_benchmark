@@ -50,5 +50,5 @@ NB_MODULE(icon_benchmark, m) {
     m.def("nabla4_benchmark_structured_torus_cpu_ifirst_gridtools",
         &nabla4_benchmark_structured_torus_cpu_ifirst_gridtools);
     m.def("nabla4_benchmark_structured_torus_cpu_kfirst_gridtools",
-        &nabla4_benchmark_structured_torus_cpu_ifirst_gridtools);
+        &nabla4_benchmark_structured_torus_cpu_kfirst_gridtools);
 }
