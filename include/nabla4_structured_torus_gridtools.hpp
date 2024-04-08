@@ -132,32 +132,7 @@ class nabla4_structured_torus_gt : private nabla4_gt_data<T> {
         return e2c2v_vec;
     }
 
-    inline __attribute__((always_inline)) void inner_kernel_ifirst(
-        const std::array<ARRAY_TYPE, 4> &e2c2v_vec, std::size_t edge_index, std::size_t k_index) {
-        const auto E2C2V_0 = e2c2v_vec[0];
-        const auto E2C2V_1 = e2c2v_vec[1];
-        const auto E2C2V_2 = e2c2v_vec[2];
-        const auto E2C2V_3 = e2c2v_vec[3];
-        const auto E2ECV_0 = edge_index * 4;
-        const auto E2ECV_1 = edge_index * 4 + 1;
-        const auto E2ECV_2 = edge_index * 4 + 2;
-        const auto E2ECV_3 = edge_index * 4 + 3;
-        double nabv_tang_wp = u_vert_gt_hv(k_index, E2C2V_0) * primal_normal_vert_v1_gt_hv(E2ECV_0) +
-                              v_vert_gt_hv(k_index, E2C2V_0) * primal_normal_vert_v2_gt_hv(E2ECV_0) +
-                              u_vert_gt_hv(k_index, E2C2V_1) * primal_normal_vert_v1_gt_hv(E2ECV_1) +
-                              v_vert_gt_hv(k_index, E2C2V_1) * primal_normal_vert_v2_gt_hv(E2ECV_1);
-        double nabv_norm_wp = u_vert_gt_hv(k_index, E2C2V_2) * primal_normal_vert_v1_gt_hv(E2ECV_2) +
-                              v_vert_gt_hv(k_index, E2C2V_2) * primal_normal_vert_v2_gt_hv(E2ECV_2) +
-                              u_vert_gt_hv(k_index, E2C2V_3) * primal_normal_vert_v1_gt_hv(E2ECV_3) +
-                              v_vert_gt_hv(k_index, E2C2V_3) * primal_normal_vert_v2_gt_hv(E2ECV_3);
-        z_nabla4_e2_wp_gt_hv(k_index, edge_index) =
-            4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_hv(k_index, edge_index)) *
-                          (inv_vert_vert_length_gt_hv(edge_index) * inv_vert_vert_length_gt_hv(edge_index)) +
-                      (nabv_tang_wp - 2.0 * z_nabla2_e_gt_hv(k_index, edge_index)) *
-                          (inv_primal_edge_length_gt_hv(edge_index) * inv_primal_edge_length_gt_hv(edge_index)));
-    }
-
-    inline __attribute__((always_inline)) void inner_kernel_kfirst(
+    inline __attribute__((always_inline)) void inner_kernel(
         const std::array<ARRAY_TYPE, 4> &e2c2v_vec, std::size_t edge_index, std::size_t k_index) {
         const auto E2C2V_0 = e2c2v_vec[0];
         const auto E2C2V_1 = e2c2v_vec[1];
@@ -187,30 +162,34 @@ class nabla4_structured_torus_gt : private nabla4_gt_data<T> {
             for (std::size_t edge_index{0}; edge_index < EdgeDim; edge_index += 3) {
                 const auto e2c2v_vec_north =
                     get_e2c2v<&nabla4_structured_torus_gt::get_e2c2v_vertices_north_edge>(edge_index);
-                inner_kernel_ifirst(e2c2v_vec_north, edge_index, k_index);
+                inner_kernel(e2c2v_vec_north, edge_index, k_index);
                 const auto e2c2v_vec_east =
                     get_e2c2v<&nabla4_structured_torus_gt::get_e2c2v_vertices_east_edge>(edge_index);
-                inner_kernel_ifirst(e2c2v_vec_east, edge_index + 1, k_index);
+                inner_kernel(e2c2v_vec_east, edge_index + 1, k_index);
                 const auto e2c2v_vec_southeast =
                     get_e2c2v<&nabla4_structured_torus_gt::get_e2c2v_vertices_southeast_edge>(edge_index);
-                inner_kernel_ifirst(e2c2v_vec_southeast, edge_index + 2, k_index);
+                inner_kernel(e2c2v_vec_southeast, edge_index + 2, k_index);
             }
         };
     };
 
     void run_cpu_ifirst() {
         for (std::size_t k_index{}; k_index < KDim; ++k_index) {
-#pragma clang loop vectorize(assume_safety) interleave(enable) unroll_count(4) distribute(enable)
+#ifdef __clang__
+#pragma clang loop unroll_count(8) vectorize(assume_safety) interleave(enable)
+#elif defined(__GNUC__)
+#pragma GCC ivdep
+#endif
             for (std::size_t edge_index = 0; edge_index < EdgeDim; edge_index += 3) {
                 const auto e2c2v_vec_north =
                     get_e2c2v<&nabla4_structured_torus_gt::get_e2c2v_vertices_north_edge>(edge_index);
-                inner_kernel_ifirst(e2c2v_vec_north, edge_index, k_index);
+                inner_kernel(e2c2v_vec_north, edge_index, k_index);
                 const auto e2c2v_vec_east =
                     get_e2c2v<&nabla4_structured_torus_gt::get_e2c2v_vertices_east_edge>(edge_index);
-                inner_kernel_ifirst(e2c2v_vec_east, edge_index + 1, k_index);
+                inner_kernel(e2c2v_vec_east, edge_index + 1, k_index);
                 const auto e2c2v_vec_southeast =
                     get_e2c2v<&nabla4_structured_torus_gt::get_e2c2v_vertices_southeast_edge>(edge_index);
-                inner_kernel_ifirst(e2c2v_vec_southeast, edge_index + 2, k_index);
+                inner_kernel(e2c2v_vec_southeast, edge_index + 2, k_index);
             }
         }
     };
@@ -223,11 +202,15 @@ class nabla4_structured_torus_gt : private nabla4_gt_data<T> {
                 get_e2c2v<&nabla4_structured_torus_gt::get_e2c2v_vertices_east_edge>(edge_index);
             const auto e2c2v_vec_southeast =
                 get_e2c2v<&nabla4_structured_torus_gt::get_e2c2v_vertices_southeast_edge>(edge_index);
+#ifdef __clang__
 #pragma clang loop unroll_count(8) vectorize(assume_safety) interleave(enable)
+#elif defined(__GNUC__)
+#pragma GCC ivdep
+#endif
             for (std::size_t k_index = 0; k_index < KDim; ++k_index) {
-                inner_kernel_kfirst(e2c2v_vec_north, edge_index, k_index);
-                inner_kernel_kfirst(e2c2v_vec_east, edge_index + 1, k_index);
-                inner_kernel_kfirst(e2c2v_vec_southeast, edge_index + 2, k_index);
+                inner_kernel(e2c2v_vec_north, edge_index, k_index);
+                inner_kernel(e2c2v_vec_east, edge_index + 1, k_index);
+                inner_kernel(e2c2v_vec_southeast, edge_index + 2, k_index);
             };
         };
     };
