@@ -100,11 +100,6 @@ class nabla4_unstructured : private nabla4_data<T> {
 
     void run_cpu_ifirst() {
         for (std::size_t k_index{}; k_index < KDim; ++k_index) {
-#ifdef __clang__
-#pragma clang loop unroll_count(8) vectorize(assume_safety) interleave(enable)
-#elif defined(__GNUC__)
-#pragma GCC ivdep
-#endif
             for (std::size_t edge_index = 0; edge_index < EdgeDim; ++edge_index) {
                 const auto E2C2V_0 = e2c2v[edge_index][0];
                 const auto E2C2V_1 = e2c2v[edge_index][1];
