@@ -36,7 +36,7 @@ class nabla4_unstructured : private nabla4_data<T> {
         std::size_t EdgeDim,
         std::size_t KDim,
         std::size_t ECVDim)
-        : e2c2v(e2c2v), e2ecv(e2ecv), nabla4_data<T>(CellDim, VertexDim, EdgeDim, KDim, ECVDim){};
+        : e2c2v(e2c2v), e2ecv(e2ecv), nabla4_data<T>(CellDim, VertexDim, EdgeDim, KDim, ECVDim, e2c2v.size()){};
 
     /// Constructor for validation
     nabla4_unstructured(std::vector<std::array<std::size_t, 4>> &e2c2v,
@@ -58,6 +58,7 @@ class nabla4_unstructured : private nabla4_data<T> {
                                           EdgeDim,
                                           KDim,
                                           ECVDim,
+                                          e2c2v.size(),
                                           u_vert,
                                           v_vert,
                                           primal_normal_vert_v1,
@@ -72,7 +73,7 @@ class nabla4_unstructured : private nabla4_data<T> {
 
     void run_naive() {
         for (std::size_t k_index{}; k_index < KDim; ++k_index) {
-            for (std::size_t edge_index{}; edge_index < EdgeDim; ++edge_index) {
+            for (std::size_t edge_index{}; edge_index < e2c2v.size(); ++edge_index) {
                 const auto E2C2V_0 = e2c2v[edge_index][0];
                 const auto E2C2V_1 = e2c2v[edge_index][1];
                 const auto E2C2V_2 = e2c2v[edge_index][2];
@@ -100,7 +101,7 @@ class nabla4_unstructured : private nabla4_data<T> {
 
     void run_cpu_ifirst() {
         for (std::size_t k_index{}; k_index < KDim; ++k_index) {
-            for (std::size_t edge_index = 0; edge_index < EdgeDim; ++edge_index) {
+            for (std::size_t edge_index = 0; edge_index < e2c2v.size(); ++edge_index) {
                 const auto E2C2V_0 = e2c2v[edge_index][0];
                 const auto E2C2V_1 = e2c2v[edge_index][1];
                 const auto E2C2V_2 = e2c2v[edge_index][2];
@@ -127,7 +128,7 @@ class nabla4_unstructured : private nabla4_data<T> {
     };
 
     void run_cpu_kfirst() {
-        for (std::size_t edge_index{}; edge_index < EdgeDim; ++edge_index) {
+        for (std::size_t edge_index{}; edge_index < e2c2v.size(); ++edge_index) {
             const auto E2C2V_0 = e2c2v[edge_index][0];
             const auto E2C2V_1 = e2c2v[edge_index][1];
             const auto E2C2V_2 = e2c2v[edge_index][2];

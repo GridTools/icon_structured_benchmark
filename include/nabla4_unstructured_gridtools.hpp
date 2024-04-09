@@ -45,7 +45,7 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
         e2ecv_gt(storage::builder<T>.template type<std::size_t>().dimensions(e2ecv.size(), 4_c).initializer([&e2ecv](int i, int j) { return e2ecv[i][j]; }).build()),
         e2c2v_gt_hv(e2c2v_gt->host_view()),
         e2ecv_gt_hv(e2ecv_gt->host_view()),
-        nabla4_gt_data<T>(CellDim, VertexDim, EdgeDim, KDim, ECVDim){};
+        nabla4_gt_data<T>(CellDim, VertexDim, EdgeDim, KDim, ECVDim, e2c2v.size()){};
 
     nabla4_unstructured_gt(std::vector<std::array<std::size_t, 4>> e2c2v,
         std::vector<std::array<std::size_t, 4>> e2ecv,
@@ -65,7 +65,7 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
         e2ecv_gt(storage::builder<T>.template type<std::size_t>().dimensions(e2ecv.size(), 4_c).initializer([&e2ecv](int i, int j) { return e2ecv[i][j]; }).build()),
         e2c2v_gt_hv(e2c2v_gt->host_view()),
         e2ecv_gt_hv(e2ecv_gt->host_view()),
-        nabla4_gt_data<T>(CellDim, VertexDim, EdgeDim, KDim, ECVDim, u_vert,
+        nabla4_gt_data<T>(CellDim, VertexDim, EdgeDim, KDim, ECVDim, e2c2v.size(), u_vert,
                                           v_vert,
                                           primal_normal_vert_v1,
                                           primal_normal_vert_v2,
@@ -103,7 +103,7 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
 
     void run_cpu_ifirst() {
         for (std::size_t k_index{}; k_index < KDim; ++k_index) {
-            for (std::size_t edge_index = 0; edge_index < EdgeDim; ++edge_index) {
+            for (std::size_t edge_index = 0; edge_index < e2c2v_gt_hv.lengths()[0]; ++edge_index) {
                 const auto E2C2V_0 = e2c2v_gt_hv(edge_index, 0);
                 const auto E2C2V_1 = e2c2v_gt_hv(edge_index, 1);
                 const auto E2C2V_2 = e2c2v_gt_hv(edge_index, 2);
@@ -119,7 +119,7 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
     };
 
     void run_cpu_kfirst() {
-        for (std::size_t edge_index{}; edge_index < EdgeDim; ++edge_index) {
+        for (std::size_t edge_index{}; edge_index < e2c2v_gt_hv.lengths()[0]; ++edge_index) {
             const auto E2C2V_0 = e2c2v_gt_hv(edge_index, 0);
             const auto E2C2V_1 = e2c2v_gt_hv(edge_index, 1);
             const auto E2C2V_2 = e2c2v_gt_hv(edge_index, 2);

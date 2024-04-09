@@ -38,7 +38,7 @@ class nabla4_structured_torus : private nabla4_data<T> {
         std::size_t longitude_dim,
         std::size_t latitude_dim)
         : longitude_dim(longitude_dim),
-          latitude_dim(latitude_dim), nabla4_data<T>(CellDim, VertexDim, EdgeDim, KDim, ECVDim){};
+          latitude_dim(latitude_dim), nabla4_data<T>(CellDim, VertexDim, EdgeDim, KDim, ECVDim, EdgeDim){};
 
     /// Constructor for validation
     nabla4_structured_torus(std::size_t CellDim,
@@ -60,6 +60,7 @@ class nabla4_structured_torus : private nabla4_data<T> {
                                                                         EdgeDim,
                                                                         KDim,
                                                                         ECVDim,
+                                                                        EdgeDim,
                                                                         u_vert,
                                                                         v_vert,
                                                                         primal_normal_vert_v1,

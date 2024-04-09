@@ -47,16 +47,24 @@ NB_MODULE(icon_benchmark, m) {
     m.def("nabla4_benchmark_structured_torus_cpu_ifirst", &nabla4_benchmark_structured_torus_cpu_ifirst);
     m.def("nabla4_benchmark_structured_torus_cpu_ifirst_gridtools",
         &nabla4_benchmark_structured_torus_cpu_ifirst_gridtools);
+    m.def("nabla4_benchmark_structured_torus_cpu_ifirst_gridtools_halo",
+        &nabla4_benchmark_structured_torus_cpu_ifirst_gridtools_halo);
     m.def("nabla4_benchmark_structured_torus_cpu_kfirst", &nabla4_benchmark_structured_torus_cpu_kfirst);
     m.def("nabla4_benchmark_structured_torus_cpu_kfirst_gridtools",
         &nabla4_benchmark_structured_torus_cpu_kfirst_gridtools);
+    m.def("nabla4_benchmark_structured_torus_cpu_kfirst_gridtools_halo",
+        &nabla4_benchmark_structured_torus_cpu_kfirst_gridtools_halo);
     m.def("nabla4_benchmark_structured_torus_gpu", &nabla4_benchmark_structured_torus_gpu);
     m.def("nabla4_validate_structured_torus_naive", &nabla4_validate_structured_torus_naive);
     m.def("nabla4_validate_structured_torus_cpu_ifirst", &nabla4_validate_structured_torus_cpu_ifirst);
     m.def("nabla4_validate_structured_torus_cpu_ifirst_gridtools",
         &nabla4_validate_structured_torus_cpu_ifirst_gridtools);
+    m.def("nabla4_validate_structured_torus_cpu_ifirst_gridtools_halo",
+        &nabla4_validate_structured_torus_cpu_ifirst_gridtools_halo);
     m.def("nabla4_validate_structured_torus_cpu_kfirst", &nabla4_validate_structured_torus_cpu_kfirst);
     m.def("nabla4_validate_structured_torus_cpu_kfirst_gridtools",
         &nabla4_validate_structured_torus_cpu_kfirst_gridtools);
+    m.def("nabla4_validate_structured_torus_cpu_kfirst_gridtools_halo",
+        &nabla4_validate_structured_torus_cpu_kfirst_gridtools_halo);
     m.def("nabla4_validate_structured_torus_gpu", &nabla4_validate_structured_torus_gpu);
 }

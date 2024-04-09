@@ -37,8 +37,8 @@ class nabla4_structured_torus_gt : public nabla4_gt_data<T> {
         std::size_t ECVDim,
         std::size_t longitude_dim,
         std::size_t latitude_dim)
-        : longitude_dim(longitude_dim),
-          latitude_dim(latitude_dim), nabla4_gt_data<T>(CellDim, VertexDim, EdgeDim, KDim, ECVDim){};
+        : longitude_dim(longitude_dim), latitude_dim(latitude_dim),
+          nabla4_gt_data<T>(CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim * latitude_dim * 3){};
     nabla4_structured_torus_gt(std::size_t CellDim,
         std::size_t VertexDim,
         std::size_t EdgeDim,
@@ -58,6 +58,7 @@ class nabla4_structured_torus_gt : public nabla4_gt_data<T> {
                                                                         EdgeDim,
                                                                         KDim,
                                                                         ECVDim,
+                                                                        longitude_dim * latitude_dim * 3,
                                                                         u_vert,
                                                                         v_vert,
                                                                         primal_normal_vert_v1,

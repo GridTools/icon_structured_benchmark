@@ -33,7 +33,7 @@ class nabla4_structured_simple : private nabla4_data<T> {
     /// kernel execution
     nabla4_structured_simple(
         std::size_t CellDim, std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim, std::size_t ECVDim)
-        : nabla4_data<T>(CellDim, VertexDim, EdgeDim, KDim, ECVDim){};
+        : nabla4_data<T>(CellDim, VertexDim, EdgeDim, KDim, ECVDim, EdgeDim){};
 
     /// Constructor for validation
     nabla4_structured_simple(std::size_t CellDim,
@@ -53,6 +53,7 @@ class nabla4_structured_simple : private nabla4_data<T> {
               EdgeDim,
               KDim,
               ECVDim,
+              EdgeDim,
               u_vert,
               v_vert,
               primal_normal_vert_v1,

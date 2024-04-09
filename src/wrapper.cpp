@@ -560,6 +560,34 @@ std::vector<double> nabla4_benchmark_structured_torus_gridtools(std::size_t Cell
     }
 }
 
+template <backend_impl I>
+std::vector<double> nabla4_benchmark_structured_torus_gridtools_halo(std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::size_t longitude_dim,
+    std::size_t latitude_dim,
+    std::size_t halo,
+    int repetitions,
+    int dry_runs) {
+    if constexpr (I == backend_impl::naive) {
+        return run_benchmark<nabla4_structured_torus_halo_gt<storage::cpu_ifirst>, backend_impl::cpu_ifirst>(
+            CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, halo, repetitions, dry_runs);
+    } else if constexpr (I == backend_impl::cpu_ifirst) {
+        return run_benchmark<nabla4_structured_torus_halo_gt<storage::cpu_ifirst>, backend_impl::cpu_ifirst>(
+            CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, halo, repetitions, dry_runs);
+    } else if constexpr (I == backend_impl::cpu_kfirst) {
+        return run_benchmark<nabla4_structured_torus_halo_gt<storage::cpu_kfirst>, backend_impl::cpu_kfirst>(
+            CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, halo, repetitions, dry_runs);
+    } else if constexpr (I == backend_impl::gpu) {
+        return run_benchmark<nabla4_structured_torus_halo_gt<storage::cpu_kfirst>, I>(
+            CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, halo, repetitions, dry_runs);
+    } else {
+        throw std::runtime_error("Undefined backend implementation");
+    }
+}
+
 std::vector<double> nabla4_benchmark_structured_torus_naive(std::size_t CellDim,
     std::size_t VertexDim,
     std::size_t EdgeDim,
@@ -599,6 +627,20 @@ std::vector<double> nabla4_benchmark_structured_torus_cpu_ifirst_gridtools(std::
         CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, repetitions, dry_runs);
 }
 
+std::vector<double> nabla4_benchmark_structured_torus_cpu_ifirst_gridtools_halo(std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::size_t longitude_dim,
+    std::size_t latitude_dim,
+    std::size_t halo,
+    int repetitions,
+    int dry_runs) {
+    return nabla4_benchmark_structured_torus_gridtools_halo<cpu_ifirst>(
+        CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, halo, repetitions, dry_runs);
+}
+
 std::vector<double> nabla4_benchmark_structured_torus_cpu_kfirst(std::size_t CellDim,
     std::size_t VertexDim,
     std::size_t EdgeDim,
@@ -623,6 +665,20 @@ std::vector<double> nabla4_benchmark_structured_torus_cpu_kfirst_gridtools(std::
     int dry_runs) {
     return nabla4_benchmark_structured_torus_gridtools<cpu_kfirst>(
         CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, repetitions, dry_runs);
+}
+
+std::vector<double> nabla4_benchmark_structured_torus_cpu_kfirst_gridtools_halo(std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::size_t longitude_dim,
+    std::size_t latitude_dim,
+    std::size_t halo,
+    int repetitions,
+    int dry_runs) {
+    return nabla4_benchmark_structured_torus_gridtools_halo<cpu_kfirst>(
+        CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, halo, repetitions, dry_runs);
 }
 
 std::vector<double> nabla4_benchmark_structured_torus_gpu(std::size_t CellDim,
@@ -731,6 +787,39 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_cpu_ifirst_gr
     return run_validation<nabla4_structured_torus_gt<storage::cpu_ifirst>, cpu_ifirst>(nabla4_benchmark_object);
 }
 
+std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_cpu_ifirst_gridtools_halo(std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::size_t longitude_dim,
+    std::size_t latitude_dim,
+    std::size_t halo,
+    std::vector<std::vector<VP_TYPE>> &u_vert,
+    std::vector<std::vector<VP_TYPE>> &v_vert,
+    std::vector<WP_TYPE> &primal_normal_vert_v1,
+    std::vector<WP_TYPE> &primal_normal_vert_v2,
+    std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+    std::vector<WP_TYPE> &inv_vert_vert_length,
+    std::vector<WP_TYPE> &inv_primal_edge_length) {
+    nabla4_structured_torus_halo_gt<storage::cpu_ifirst> nabla4_benchmark_object{CellDim,
+        VertexDim,
+        EdgeDim,
+        KDim,
+        ECVDim,
+        longitude_dim,
+        latitude_dim,
+        halo,
+        u_vert,
+        v_vert,
+        primal_normal_vert_v1,
+        primal_normal_vert_v2,
+        z_nabla2_e,
+        inv_vert_vert_length,
+        inv_primal_edge_length};
+    return run_validation<nabla4_structured_torus_halo_gt<storage::cpu_ifirst>, cpu_ifirst>(nabla4_benchmark_object);
+}
+
 std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_cpu_kfirst(std::size_t CellDim,
     std::size_t VertexDim,
     std::size_t EdgeDim,
@@ -791,6 +880,39 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_cpu_kfirst_gr
         inv_vert_vert_length,
         inv_primal_edge_length};
     return run_validation<nabla4_structured_torus_gt<storage::cpu_kfirst>, cpu_kfirst>(nabla4_benchmark_object);
+}
+
+std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_cpu_kfirst_gridtools_halo(std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::size_t longitude_dim,
+    std::size_t latitude_dim,
+    std::size_t halo,
+    std::vector<std::vector<VP_TYPE>> &u_vert,
+    std::vector<std::vector<VP_TYPE>> &v_vert,
+    std::vector<WP_TYPE> &primal_normal_vert_v1,
+    std::vector<WP_TYPE> &primal_normal_vert_v2,
+    std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+    std::vector<WP_TYPE> &inv_vert_vert_length,
+    std::vector<WP_TYPE> &inv_primal_edge_length) {
+    nabla4_structured_torus_halo_gt<storage::cpu_kfirst> nabla4_benchmark_object{CellDim,
+        VertexDim,
+        EdgeDim,
+        KDim,
+        ECVDim,
+        longitude_dim,
+        latitude_dim,
+        halo,
+        u_vert,
+        v_vert,
+        primal_normal_vert_v1,
+        primal_normal_vert_v2,
+        z_nabla2_e,
+        inv_vert_vert_length,
+        inv_primal_edge_length};
+    return run_validation<nabla4_structured_torus_halo_gt<storage::cpu_kfirst>, cpu_kfirst>(nabla4_benchmark_object);
 }
 
 std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_gpu(std::size_t CellDim,
