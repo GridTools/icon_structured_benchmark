@@ -230,7 +230,7 @@ klevels = [1, 16, 65]
 
 edges_size = {"1024": 14208, "512": 58050, "256": 229758, "128": 915948, "64": 3663792}
 
-git_commit = "b6bc6f"
+git_commit = "9ced41e"
 
 runtimes_output = read_torus_results(
     "results/output_{}".format(git_commit), torus_files, klevels
@@ -256,8 +256,8 @@ print_median_acceleration_over_k(
 print_median_acceleration_over_k(
     filter_runtime_data(
         runtimes_output,
-        "nabla4_benchmark_unstructured_cpu_ifirst",
-        "nabla4_benchmark_structured_torus_cpu_ifirst",
+        "nabla4_benchmark_unstructured_cpu_ifirst_gridtools",
+        "nabla4_benchmark_structured_torus_cpu_ifirst_gridtools",
     ),
     "cpu_ifirst",
     output_directory,
@@ -265,8 +265,8 @@ print_median_acceleration_over_k(
 print_median_acceleration_over_k(
     filter_runtime_data(
         runtimes_output,
-        "nabla4_benchmark_unstructured_cpu_kfirst",
-        "nabla4_benchmark_structured_torus_cpu_kfirst",
+        "nabla4_benchmark_unstructured_cpu_kfirst_gridtools",
+        "nabla4_benchmark_structured_torus_cpu_kfirst_gridtools",
     ),
     "cpu_kfirst",
     output_directory,
