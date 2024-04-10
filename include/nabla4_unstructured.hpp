@@ -23,8 +23,8 @@ class nabla4_unstructured : private nabla4_data<T> {
     using nabla4_data<T>::z_nabla4_e2_wp;
     using nabla4_data<T>::get_data;
 
-    std::vector<std::array<std::size_t, 4>> e2c2v;
-    std::vector<std::array<std::size_t, 4>> e2ecv;
+    const std::vector<std::array<std::size_t, 4>> e2c2v;
+    const std::vector<std::array<std::size_t, 4>> e2ecv;
 
   public:
     /// Constructor with all the necessary information for \c nabla4 compute

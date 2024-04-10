@@ -140,7 +140,7 @@ class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
     run_cpu_kfirst() {
         for (std::size_t j = halo; j < y_dim - halo; ++j) {
 #ifdef __clang__
-#pragma clang loop unroll(enable)
+#pragma clang loop unroll(enable) vectorize(assume_safety) interleave(enable)
 #endif
             for (std::size_t i = halo; i < x_dim - halo; ++i) {
                 const auto local_edge_index = ((j - halo) * (x_dim - 2 * halo) + (i - halo)) * 3;
