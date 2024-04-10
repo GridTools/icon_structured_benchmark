@@ -165,7 +165,7 @@ klevels = [1, 16, 65]
 
 edges_size = {"1024": 14208, "512": 58050, "256": 229758, "128": 915948, "64": 3663792}
 
-git_commit = "b6bc6f"
+git_commit = "9ced41e"
 
 runtimes_output = read_torus_results(
     "results/output_{}".format(git_commit), torus_files, klevels
@@ -236,12 +236,12 @@ for torus_file in runtimes_output.keys():
     for k in klevels:
         ifirst_torus_klevels_runtimes[torus_name][k] = {}
         for backend_impl in [
-            "nabla4_benchmark_unstructured_cpu_ifirst",
-            "nabla4_benchmark_structured_torus_cpu_ifirst",
+            "nabla4_benchmark_unstructured_cpu_ifirst_gridtools",
+            "nabla4_benchmark_structured_torus_cpu_ifirst_gridtools",
         ]:
             name = (
                 "unstructured"
-                if backend_impl == "nabla4_benchmark_unstructured_cpu_ifirst"
+                if backend_impl == "nabla4_benchmark_unstructured_cpu_ifirst_gridtools"
                 else "structured"
             )
             ifirst_torus_klevels_runtimes[torus_name][k][name] = runtimes_output[
@@ -256,12 +256,12 @@ for torus_file in runtimes_output.keys():
     for k in klevels:
         kfirst_torus_klevels_runtimes[torus_name][k] = {}
         for backend_impl in [
-            "nabla4_benchmark_unstructured_cpu_kfirst",
-            "nabla4_benchmark_structured_torus_cpu_kfirst",
+            "nabla4_benchmark_unstructured_cpu_kfirst_gridtools",
+            "nabla4_benchmark_structured_torus_cpu_kfirst_gridtools",
         ]:
             name = (
                 "unstructured"
-                if backend_impl == "nabla4_benchmark_unstructured_cpu_kfirst"
+                if backend_impl == "nabla4_benchmark_unstructured_cpu_kfirst_gridtools"
                 else "structured"
             )
             kfirst_torus_klevels_runtimes[torus_name][k][name] = runtimes_output[

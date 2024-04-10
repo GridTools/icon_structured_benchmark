@@ -125,7 +125,7 @@ edges_size = {"1024": 14208, "512": 58050, "256": 229758, "128": 915948, "64": 3
 
 klevels = [1, 16, 65]
 
-git_commit = "b6bc6f"
+git_commit = "9ced41e"
 
 runtimes_output_multi = read_torus_results(
     "results/output_{}_multi".format(git_commit), torus_files, klevels
