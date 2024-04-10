@@ -129,7 +129,7 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
             const auto E2ECV_2 = e2ecv_gt_hv(edge_index, 2);
             const auto E2ECV_3 = e2ecv_gt_hv(edge_index, 3);
 #ifdef __clang__
-#pragma clang loop unroll_count(8) vectorize(assume_safety) interleave(enable)
+#pragma clang loop unroll(enable) vectorize(assume_safety) interleave(enable)
 #elif defined(__GNUC__)
 #pragma GCC ivdep
 #endif

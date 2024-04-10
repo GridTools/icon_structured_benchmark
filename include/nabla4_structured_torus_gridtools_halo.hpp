@@ -72,46 +72,6 @@ class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
                                                       inv_primal_edge_length){};
 
   private:
-    inline __attribute__((always_inline)) std::array<ARRAY_TYPE, 4> get_e2c2v_vertices_north_edge(
-        std::size_t i, std::size_t j, std::size_t i_p1, std::size_t i_m1, std::size_t j_p1, std::size_t j_m1) {
-        std::array<ARRAY_TYPE, 4> e2c2v_ret;
-        e2c2v_ret[0] = j * x_dim + i;
-        e2c2v_ret[1] = j_p1 * x_dim + i;
-        e2c2v_ret[2] = j_p1 * x_dim + i_m1;
-        e2c2v_ret[3] = j * x_dim + i_p1;
-        return e2c2v_ret;
-    }
-
-    inline __attribute__((always_inline)) std::array<ARRAY_TYPE, 4> get_e2c2v_vertices_east_edge(
-        std::size_t i, std::size_t j, std::size_t i_p1, std::size_t i_m1, std::size_t j_p1, std::size_t j_m1) {
-        std::array<ARRAY_TYPE, 4> e2c2v_ret;
-        e2c2v_ret[0] = j * x_dim + i;
-        e2c2v_ret[1] = j * x_dim + i_p1;
-        e2c2v_ret[2] = j_p1 * x_dim + i;
-        e2c2v_ret[3] = j_m1 * x_dim + i_p1;
-        return e2c2v_ret;
-    }
-
-    inline __attribute__((always_inline)) std::array<ARRAY_TYPE, 4> get_e2c2v_vertices_southeast_edge(
-        std::size_t i, std::size_t j, std::size_t i_p1, std::size_t i_m1, std::size_t j_p1, std::size_t j_m1) {
-        std::array<ARRAY_TYPE, 4> e2c2v_ret;
-        e2c2v_ret[0] = j * x_dim + i;
-        e2c2v_ret[1] = j_m1 * x_dim + i_p1;
-        e2c2v_ret[2] = j * x_dim + i_p1;
-        e2c2v_ret[3] = j_m1 * x_dim + i;
-        return e2c2v_ret;
-    }
-
-    template <auto f>
-    inline __attribute__((always_inline)) const std::array<ARRAY_TYPE, 4> get_e2c2v(std::size_t i, std::size_t j) {
-        const auto i_p1 = i + 1;
-        const auto i_m1 = i - 1;
-        const auto j_p1 = j + 1;
-        const auto j_m1 = j - 1;
-        const auto e2c2v_vec = (this->*f)(i, j, i_p1, i_m1, j_p1, j_m1);
-        return e2c2v_vec;
-    }
-
     inline __attribute__((always_inline)) void inner_kernel(const std::array<ARRAY_TYPE, 4> &e2c2v_vec,
         std::size_t edge_index,
         std::size_t k_index,
@@ -142,23 +102,26 @@ class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
     void run_cpu_ifirst() {
         for (std::size_t k_index{}; k_index < KDim; ++k_index) {
 #ifdef __clang__
-#pragma clang loop unroll_count(8) vectorize(assume_safety) interleave(enable)
+#pragma clang loop unroll(enable) vectorize(assume_safety) interleave(enable)
 #elif defined(__GNUC__)
 #pragma GCC ivdep
 #endif
             for (std::size_t j = halo; j < y_dim - halo; ++j) {
+#ifdef __clang__
+#pragma clang loop unroll(enable)
+#endif
                 for (std::size_t i = halo; i < x_dim - halo; ++i) {
                     const auto local_edge_index = ((j - halo) * (x_dim - 2 * halo) + (i - halo)) * 3;
                     const auto global_edge_index = (j * x_dim + i) * 3;
-                    const auto e2c2v_vec_north =
-                        get_e2c2v<&nabla4_structured_torus_halo_gt::get_e2c2v_vertices_north_edge>(i, j);
-                    inner_kernel(e2c2v_vec_north, local_edge_index, k_index, global_edge_index);
-                    const auto e2c2v_vec_east =
-                        get_e2c2v<&nabla4_structured_torus_halo_gt::get_e2c2v_vertices_east_edge>(i, j);
-                    inner_kernel(e2c2v_vec_east, local_edge_index + 1, k_index, global_edge_index + 1);
-                    const auto e2c2v_vec_southeast =
-                        get_e2c2v<&nabla4_structured_torus_halo_gt::get_e2c2v_vertices_southeast_edge>(i, j);
-                    inner_kernel(e2c2v_vec_southeast, local_edge_index + 2, k_index, global_edge_index + 2);
+                    const auto i_j = j * x_dim + i;
+                    const auto ip1_j = j * x_dim + i + 1;
+                    const auto i_jp1 = (j + 1) * x_dim + i;
+                    const auto i_jm1 = (j - 1) * x_dim + i;
+                    const auto ip1_jm1 = (j - 1) * x_dim + i + 1;
+                    const auto im1_jp1 = (j + 1) * x_dim + i - 1;
+                    inner_kernel({i_j, i_jp1, im1_jp1, ip1_j}, local_edge_index, k_index, global_edge_index);
+                    inner_kernel({i_j, ip1_j, i_jp1, ip1_jm1}, local_edge_index + 1, k_index, global_edge_index + 1);
+                    inner_kernel({i_j, ip1_jm1, ip1_j, i_jm1}, local_edge_index + 2, k_index, global_edge_index + 2);
                 }
             }
         }
@@ -166,24 +129,27 @@ class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
 
     void run_cpu_kfirst() {
         for (std::size_t j = halo; j < y_dim - halo; ++j) {
+#ifdef __clang__
+#pragma clang loop unroll(enable)
+#endif
             for (std::size_t i = halo; i < x_dim - halo; ++i) {
                 const auto local_edge_index = ((j - halo) * (x_dim - 2 * halo) + (i - halo)) * 3;
                 const auto global_edge_index = (j * x_dim + i) * 3;
+                const auto i_j = j * x_dim + i;
+                const auto ip1_j = j * x_dim + i + 1;
+                const auto i_jp1 = (j + 1) * x_dim + i;
+                const auto i_jm1 = (j - 1) * x_dim + i;
+                const auto ip1_jm1 = (j - 1) * x_dim + i + 1;
+                const auto im1_jp1 = (j + 1) * x_dim + i - 1;
 #ifdef __clang__
-#pragma clang loop unroll_count(8) vectorize(assume_safety) interleave(enable)
+#pragma clang loop unroll(enable) vectorize(assume_safety) interleave(enable)
 #elif defined(__GNUC__)
 #pragma GCC ivdep
 #endif
                 for (std::size_t k_index{}; k_index < KDim; ++k_index) {
-                    const auto e2c2v_vec_north =
-                        get_e2c2v<&nabla4_structured_torus_halo_gt::get_e2c2v_vertices_north_edge>(i, j);
-                    inner_kernel(e2c2v_vec_north, local_edge_index, k_index, global_edge_index);
-                    const auto e2c2v_vec_east =
-                        get_e2c2v<&nabla4_structured_torus_halo_gt::get_e2c2v_vertices_east_edge>(i, j);
-                    inner_kernel(e2c2v_vec_east, local_edge_index + 1, k_index, global_edge_index + 1);
-                    const auto e2c2v_vec_southeast =
-                        get_e2c2v<&nabla4_structured_torus_halo_gt::get_e2c2v_vertices_southeast_edge>(i, j);
-                    inner_kernel(e2c2v_vec_southeast, local_edge_index + 2, k_index, global_edge_index + 2);
+                    inner_kernel({i_j, i_jp1, im1_jp1, ip1_j}, local_edge_index, k_index, global_edge_index);
+                    inner_kernel({i_j, ip1_j, i_jp1, ip1_jm1}, local_edge_index + 1, k_index, global_edge_index + 1);
+                    inner_kernel({i_j, ip1_jm1, ip1_j, i_jm1}, local_edge_index + 2, k_index, global_edge_index + 2);
                 }
             }
         }
