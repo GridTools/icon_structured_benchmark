@@ -59,8 +59,6 @@ def get_torus_grid(filename, num_levels, transformation):
 
 
 def filter_edge_vector(vector, grid_cartesian_dimensions):
-    # print("Original vector size: ", len(vector))
-    # print(vector)
     filtered_vector = []
     for i in range(grid_cartesian_dimensions[0]):
         for j in range(grid_cartesian_dimensions[1]):
@@ -73,32 +71,13 @@ def filter_edge_vector(vector, grid_cartesian_dimensions):
                 filtered_vector.append(
                     vector[(i * grid_cartesian_dimensions[1] + j) * 3]
                 )
-                # print("E2C2V[{}] = {}".format((i*grid_cartesian_dimensions[1] + j)*3, " ".join(str(x) for x in vector[(i*grid_cartesian_dimensions[1] + j)*3])))
                 filtered_vector.append(
                     vector[(i * grid_cartesian_dimensions[1] + j) * 3 + 1]
                 )
-                # print("E2C2V[{}] = {}".format((i*grid_cartesian_dimensions[1] + j)*3+1, " ".join(str(x) for x in vector[(i*grid_cartesian_dimensions[1] + j)*3 + 1])))
                 filtered_vector.append(
                     vector[(i * grid_cartesian_dimensions[1] + j) * 3 + 2]
                 )
-                # print("E2C2V[{}] = {}".format((i*grid_cartesian_dimensions[1] + j)*3+2, " ".join(str(x) for x in vector[(i*grid_cartesian_dimensions[1] + j)*3 + 2])))
-    # print("Filtered vector size: ", len(filtered_vector))
-    # print(filtered_vector)
     return np.array(filtered_vector)
-
-
-# def filter_k_edge_vector(vector, grid_cartesian_dimensions):
-#     print("Original vector shape: ", np.array(vector).shape)
-#     filtered_vector = []
-#     for k_index in range(len(vector)):
-#         filtered_vector.append([])
-#         for i in range(grid_cartesian_dimensions[0]):
-#             for j in range(grid_cartesian_dimensions[1]):
-#                 if i > 1 and j > 1 and i < grid_cartesian_dimensions[0] - 2 and j < grid_cartesian_dimensions[1] - 2:
-#                     filtered_vector[k_index].append(vector[k_index][(i*grid_cartesian_dimensions[1] + j)*3])
-#                     filtered_vector[k_index].append(vector[k_index][(i*grid_cartesian_dimensions[1] + j)*3+1])
-#                     filtered_vector[k_index].append(vector[k_index][(i*grid_cartesian_dimensions[1] + j)*3+2])
-#     return np.array(filtered_vector)
 
 
 def run_sanity_checks(filtered_e2c2v, filtered_e2ecv, grid, lon_dim, lat_dim):
@@ -112,77 +91,70 @@ def run_sanity_checks(filtered_e2c2v, filtered_e2ecv, grid, lon_dim, lat_dim):
         grid.num_levels,
         grid.size[E2C2VDim],
     )
-    # random_validation_data.z_nabla2_e = filter_k_edge_vector(random_validation_data.z_nabla2_e, (lon_dim, lat_dim))
-    # random_validation_data.inv_vert_vert_length = filter_edge_vector(random_validation_data.inv_vert_vert_length, (lon_dim, lat_dim))
-    # random_validation_data.inv_primal_edge_length = filter_edge_vector(random_validation_data.inv_primal_edge_length, (lon_dim, lat_dim))
-    # random_validation_data.z_nabla4_e2_wp = filter_k_edge_vector(random_validation_data.z_nabla4_e2_wp, (lon_dim, lat_dim))
     print("Generated validation data")
-    # z_nabla4_e2_wp_gtfn = np.zeros(
-    #     shape=(grid.num_edges, grid.num_levels), dtype=np.float64
-    # )
-    # print("Running gtfn sanity check")
-    # nabla4_gtfn.calculate_nabla4(
-    #     (
-    #         np.array(random_validation_data.u_vert, dtype=float).T.astype(np.float64),
-    #         (0, 0),
-    #     ),
-    #     (
-    #         np.array(random_validation_data.v_vert, dtype=float).T.astype(np.float64),
-    #         (0, 0),
-    #     ),
-    #     (
-    #         np.array(random_validation_data.primal_normal_vert_v1, dtype=float).astype(
-    #             np.float64
-    #         ),
-    #         (0,),
-    #     ),
-    #     (
-    #         np.array(random_validation_data.primal_normal_vert_v2, dtype=float).astype(
-    #             np.float64
-    #         ),
-    #         (0,),
-    #     ),
-    #     (
-    #         np.array(random_validation_data.z_nabla2_e, dtype=float).T.astype(
-    #             np.float64
-    #         ),
-    #         (0, 0),
-    #     ),
-    #     (
-    #         np.array(random_validation_data.inv_vert_vert_length, dtype=float).astype(
-    #             np.float64
-    #         ),
-    #         (0,),
-    #     ),
-    #     (
-    #         np.array(random_validation_data.inv_primal_edge_length, dtype=float).astype(
-    #             np.float64
-    #         ),
-    #         (0,),
-    #     ),
-    #     (z_nabla4_e2_wp_gtfn, (0, 0)),
-    #     0,
-    #     len(filtered_e2c2v),
-    #     0,
-    #     grid.num_levels,
-    #     (
-    #         filtered_e2c2v.astype(np.int64),
-    #         (0, 0),
-    #     ),
-    #     (
-    #         filtered_e2ecv.astype(np.int64),
-    #         (0, 0),
-    #     ),
-    # )
+    z_nabla4_e2_wp_gtfn = np.zeros(
+        shape=(len(filtered_e2c2v), grid.num_levels), dtype=np.float64
+    )
+    print("Running gtfn sanity check")
+    nabla4_gtfn.calculate_nabla4(
+        (
+            np.array(random_validation_data.u_vert, dtype=float).T.astype(np.float64),
+            (0, 0),
+        ),
+        (
+            np.array(random_validation_data.v_vert, dtype=float).T.astype(np.float64),
+            (0, 0),
+        ),
+        (
+            np.array(random_validation_data.primal_normal_vert_v1, dtype=float).astype(
+                np.float64
+            ),
+            (0,),
+        ),
+        (
+            np.array(random_validation_data.primal_normal_vert_v2, dtype=float).astype(
+                np.float64
+            ),
+            (0,),
+        ),
+        (
+            np.array(random_validation_data.z_nabla2_e, dtype=float).T.astype(
+                np.float64
+            ),
+            (0, 0),
+        ),
+        (
+            np.array(random_validation_data.inv_vert_vert_length, dtype=float).astype(
+                np.float64
+            ),
+            (0,),
+        ),
+        (
+            np.array(random_validation_data.inv_primal_edge_length, dtype=float).astype(
+                np.float64
+            ),
+            (0,),
+        ),
+        (z_nabla4_e2_wp_gtfn, (0, 0)),
+        0,
+        len(filtered_e2c2v),
+        0,
+        grid.num_levels,
+        (
+            filtered_e2c2v.astype(np.int64),
+            (0, 0),
+        ),
+        (
+            filtered_e2ecv.astype(np.int64),
+            (0, 0),
+        ),
+    )
 
-    # print(z_nabla4_e2_wp_gtfn.T)
-    # print(random_validation_data.z_nabla4_e2_wp)
-
-    # assert np.allclose(
-    #     z_nabla4_e2_wp_gtfn.T,
-    #     random_validation_data.z_nabla4_e2_wp,
-    # )
-    # print("gtfn sanity check passed")
+    assert np.allclose(
+        z_nabla4_e2_wp_gtfn.T,
+        random_validation_data.z_nabla4_e2_wp,
+    )
+    print("gtfn sanity check passed")
 
     print("Running unstructured cpu_ifirst sanity check")
     z_nabla4_e2_comp_unstructured_cpu_ifirst_gridtools = (
@@ -372,85 +344,85 @@ def run_benchmarks():
 
     runtimes = {}
 
-    # if args.backend in ["all", "gtfn"]:
-    #     runtimes["nabla4_benchmark_unstructured_gtfn"] = []
+    if args.backend in ["all", "gtfn"]:
+        runtimes["nabla4_benchmark_unstructured_gtfn"] = []
 
-    #     for _ in range(repetitions):
-    #         random_validation_data = (
-    #             icon_benchmark.get_nabla4_benchmark_validation_data(
-    #                 torus_grid.get_offset_provider("E2C2V").table,
-    #                 torus_grid.get_offset_provider("E2ECV").table,
-    #                 torus_grid.num_cells,
-    #                 torus_grid.num_vertices,
-    #                 torus_grid.num_edges,
-    #                 torus_grid.num_levels,
-    #                 torus_grid.size[E2C2VDim],
-    #             )
-    #         )
+        for _ in range(repetitions):
+            random_validation_data = (
+                icon_benchmark.get_nabla4_benchmark_validation_data(
+                    torus_grid.get_offset_provider("E2C2V").table,
+                    torus_grid.get_offset_provider("E2ECV").table,
+                    torus_grid.num_cells,
+                    torus_grid.num_vertices,
+                    torus_grid.num_edges,
+                    torus_grid.num_levels,
+                    torus_grid.size[E2C2VDim],
+                )
+            )
 
-    #         z_nabla4_e2_wp_gtfn = np.zeros(
-    #             shape=(torus_grid.num_edges, torus_grid.num_levels), dtype=np.float64
-    #         )
+            z_nabla4_e2_wp_gtfn = np.zeros(
+                shape=(len(filtered_e2c2v), torus_grid.num_levels), dtype=np.float64
+            )
 
-    #         runtimes["nabla4_benchmark_unstructured_gtfn"].append(
-    #             nabla4_gtfn.calculate_nabla4(
-    #                 (
-    #                     np.array(random_validation_data.u_vert, dtype=float).T.astype(
-    #                         np.float64
-    #                     ),
-    #                     (0, 0),
-    #                 ),
-    #                 (
-    #                     np.array(random_validation_data.v_vert, dtype=float).T.astype(
-    #                         np.float64
-    #                     ),
-    #                     (0, 0),
-    #                 ),
-    #                 (
-    #                     np.array(
-    #                         random_validation_data.primal_normal_vert_v1, dtype=float
-    #                     ).astype(np.float64),
-    #                     (0,),
-    #                 ),
-    #                 (
-    #                     np.array(
-    #                         random_validation_data.primal_normal_vert_v2, dtype=float
-    #                     ).astype(np.float64),
-    #                     (0,),
-    #                 ),
-    #                 (
-    #                     np.array(
-    #                         random_validation_data.z_nabla2_e, dtype=float
-    #                     ).T.astype(np.float64),
-    #                     (0, 0),
-    #                 ),
-    #                 (
-    #                     np.array(
-    #                         random_validation_data.inv_vert_vert_length, dtype=float
-    #                     ).astype(np.float64),
-    #                     (0,),
-    #                 ),
-    #                 (
-    #                     np.array(
-    #                         random_validation_data.inv_primal_edge_length, dtype=float
-    #                     ).astype(np.float64),
-    #                     (0,),
-    #                 ),
-    #                 (z_nabla4_e2_wp_gtfn, (0, 0)),
-    #                 0,
-    #                 torus_grid.num_edges,
-    #                 0,
-    #                 torus_grid.num_levels,
-    #                 (
-    #                     torus_grid.get_offset_provider("E2C2V").table.astype(np.int64),
-    #                     (0, 0),
-    #                 ),
-    #                 (
-    #                     torus_grid.get_offset_provider("E2ECV").table.astype(np.int64),
-    #                     (0, 0),
-    #                 ),
-    #             )
-    #         )
+            runtimes["nabla4_benchmark_unstructured_gtfn"].append(
+                nabla4_gtfn.calculate_nabla4(
+                    (
+                        np.array(random_validation_data.u_vert, dtype=float).T.astype(
+                            np.float64
+                        ),
+                        (0, 0),
+                    ),
+                    (
+                        np.array(random_validation_data.v_vert, dtype=float).T.astype(
+                            np.float64
+                        ),
+                        (0, 0),
+                    ),
+                    (
+                        np.array(
+                            random_validation_data.primal_normal_vert_v1, dtype=float
+                        ).astype(np.float64),
+                        (0,),
+                    ),
+                    (
+                        np.array(
+                            random_validation_data.primal_normal_vert_v2, dtype=float
+                        ).astype(np.float64),
+                        (0,),
+                    ),
+                    (
+                        np.array(
+                            random_validation_data.z_nabla2_e, dtype=float
+                        ).T.astype(np.float64),
+                        (0, 0),
+                    ),
+                    (
+                        np.array(
+                            random_validation_data.inv_vert_vert_length, dtype=float
+                        ).astype(np.float64),
+                        (0,),
+                    ),
+                    (
+                        np.array(
+                            random_validation_data.inv_primal_edge_length, dtype=float
+                        ).astype(np.float64),
+                        (0,),
+                    ),
+                    (z_nabla4_e2_wp_gtfn, (0, 0)),
+                    0,
+                    len(filtered_e2c2v),
+                    0,
+                    torus_grid.num_levels,
+                    (
+                        filtered_e2c2v.astype(np.int64),
+                        (0, 0),
+                    ),
+                    (
+                        filtered_e2ecv.astype(np.int64),
+                        (0, 0),
+                    ),
+                )
+            )
 
     if args.backend in ["all", "cpu_ifirst"]:
         runtimes[
