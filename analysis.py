@@ -6,12 +6,12 @@ import pandas as pd  # type: ignore [import-untyped]
 import seaborn as sns  # type: ignore [import-not-found]
 
 
-def create_output_directory(output_directory):
-    if not path.exists(output_directory):
-        makedirs(output_directory)
+def create_output_directory(output_dir):
+    if not path.exists(output_dir):
+        makedirs(output_dir)
     else:
         print(
-            f"Directory '{output_directory}' already exists. Make sure the correct directory is selected. To proceed with the same directory name delete the folder and rerun script"
+            f"Directory '{output_dir}' already exists. Make sure the correct directory is selected. To proceed with the same directory name delete the folder and rerun script"
         )
         quit(1)
 
@@ -26,7 +26,7 @@ def read_torus_results(directory, torus_filenames, klevels):
     return runtimes
 
 
-def print_median_runtimes(runtimes_output):
+def print_median_runtimes(runtimes_output, git_commit):
     for torus_file in runtimes_output.keys():
         print("=== Torus file: {} ===".format(torus_file))
         for k in klevels:
@@ -230,49 +230,50 @@ klevels = [1, 16, 65]
 
 edges_size = {"1024": 14208, "512": 58050, "256": 229758, "128": 915948, "64": 3663792}
 
-git_commit = "9ced41e"
+if __name__ == "__main__":
+    git_commit = "9ced41e"
 
-runtimes_output = read_torus_results(
-    "results/output_{}".format(git_commit), torus_files, klevels
-)
+    runtimes_output = read_torus_results(
+        "results/output_{}".format(git_commit), torus_files, klevels
+    )
 
-output_directory = "results/plot_output_{}".format(git_commit)
+    output_directory = "results/plot_output_{}".format(git_commit)
 
-create_output_directory(output_directory)
+    create_output_directory(output_directory)
 
-print_median_runtimes(runtimes_output)
+    print_median_runtimes(runtimes_output, git_commit)
 
-print_confidence_interval(runtimes_output, 85, 10)
+    print_confidence_interval(runtimes_output, 85, 10)
 
-print_median_acceleration_over_k(
-    filter_runtime_data(
-        runtimes_output,
-        "nabla4_benchmark_unstructured_naive",
-        "nabla4_benchmark_structured_torus_naive",
-    ),
-    "naive",
-    output_directory,
-)
-print_median_acceleration_over_k(
-    filter_runtime_data(
-        runtimes_output,
-        "nabla4_benchmark_unstructured_cpu_ifirst_gridtools",
-        "nabla4_benchmark_structured_torus_cpu_ifirst_gridtools",
-    ),
-    "cpu_ifirst",
-    output_directory,
-)
-print_median_acceleration_over_k(
-    filter_runtime_data(
-        runtimes_output,
-        "nabla4_benchmark_unstructured_cpu_kfirst_gridtools",
-        "nabla4_benchmark_structured_torus_cpu_kfirst_gridtools",
-    ),
-    "cpu_kfirst",
-    output_directory,
-)
+    print_median_acceleration_over_k(
+        filter_runtime_data(
+            runtimes_output,
+            "nabla4_benchmark_unstructured_naive",
+            "nabla4_benchmark_structured_torus_naive",
+        ),
+        "naive",
+        output_directory,
+    )
+    print_median_acceleration_over_k(
+        filter_runtime_data(
+            runtimes_output,
+            "nabla4_benchmark_unstructured_cpu_ifirst_gridtools",
+            "nabla4_benchmark_structured_torus_cpu_ifirst_gridtools",
+        ),
+        "cpu_ifirst",
+        output_directory,
+    )
+    print_median_acceleration_over_k(
+        filter_runtime_data(
+            runtimes_output,
+            "nabla4_benchmark_unstructured_cpu_kfirst_gridtools",
+            "nabla4_benchmark_structured_torus_cpu_kfirst_gridtools",
+        ),
+        "cpu_kfirst",
+        output_directory,
+    )
 
-# Generate violin plots for each torus size
-for torus_size, runtime_data in runtimes_output.items():
-    for k in runtime_data.keys():
-        generate_violin_plots(runtime_data[k], k, torus_size, output_directory)
+    # Generate violin plots for each torus size
+    for torus_size, runtime_data in runtimes_output.items():
+        for k in runtime_data.keys():
+            generate_violin_plots(runtime_data[k], k, torus_size, output_directory)

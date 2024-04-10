@@ -1,7 +1,14 @@
 import json
 import matplotlib.pyplot as plt  # type: ignore [import-not-found]
 import numpy as np
-from os import path, makedirs
+
+from analysis import (
+    create_output_directory,
+    print_median_runtimes,
+    print_confidence_interval,
+    edges_size,
+    klevels,
+)
 
 
 def read_torus_results(directory, torus_filenames, klevels):
@@ -27,21 +34,6 @@ def read_torus_results(directory, torus_filenames, klevels):
     return runtimes
 
 
-def test_ci_confidence(vector, ci_interval, mean_interval):
-    sorted_vec = np.sort(vector)
-    ci_interval_div_2 = (100 - ci_interval) / 100 / 2
-    ci_interval = sorted_vec[
-        int(len(sorted_vec) * ci_interval_div_2) : int(
-            len(sorted_vec) * (1 - ci_interval_div_2)
-        )
-    ]
-    mean = np.mean(vector)
-    mean_interval_div_2 = mean_interval / 100 / 2
-    return ci_interval[0] > mean * (1 - mean_interval_div_2) and ci_interval[
-        -1
-    ] < mean * (1 + mean_interval_div_2)
-
-
 def calculate_median_95_quantile(data):
     lower_bound = np.sort(data)[int(len(data) * 0.025)]
     upper_bound = np.sort(data)[int(len(data) * 0.975)]
@@ -49,7 +41,7 @@ def calculate_median_95_quantile(data):
 
 
 # Function to generate violin plots
-def generate_violin_plots_v4(runtime_data, k, torus_name, output_dir):
+def generate_violin_plots(runtime_data, k, torus_name, output_dir):
     torus_size = torus_name.split("_")[-1]
     plt.figure(figsize=(10, 10))
     plt.title(f"Runtime Distribution for {edges_size[torus_size]} Edges with k: {k}")
@@ -121,53 +113,22 @@ torus_files = [
     "torus_100000_100000_128",
 ]
 
-edges_size = {"1024": 14208, "512": 58050, "256": 229758, "128": 915948, "64": 3663792}
+if __name__ == "__main__":
+    git_commit = "9ced41e"
 
-klevels = [1, 16, 65]
-
-git_commit = "9ced41e"
-
-runtimes_output_multi = read_torus_results(
-    "results/output_{}_multi".format(git_commit), torus_files, klevels
-)
-
-output_directory = "results/plot_output_{}_multi".format(git_commit)
-if not path.exists(output_directory):
-    makedirs(output_directory)
-else:
-    print(
-        f"Directory '{output_directory}' already exists. Make sure the correct directory is selected. To proceed with the same directory name delete the folder and rerun script"
+    runtimes_output_multi = read_torus_results(
+        "results/output_{}_multi".format(git_commit), torus_files, klevels
     )
-    quit(1)
 
-for torus_file in runtimes_output_multi.keys():
-    print("=== Torus file: {} ===".format(torus_file))
-    for k in klevels:
-        print("= k levels: {} =".format(k))
-        for backend_impl in runtimes_output_multi[torus_file][k].keys():
-            print(
-                "{} median runtimes ({}_multi): {}".format(
-                    backend_impl,
-                    git_commit,
-                    np.median(runtimes_output_multi[torus_file][k][backend_impl]),
-                )
-            )
+    output_directory = "results/plot_output_{}_multi".format(git_commit)
 
-for torus_file in runtimes_output_multi.keys():
-    print("=== Torus file: {} ===".format(torus_file))
-    for k in klevels:
-        print("= k levels: {} =".format(k))
-        for backend_impl in runtimes_output_multi[torus_file][k].keys():
-            print(
-                "[{}] 85% CI within 10% of the mean: {}".format(
-                    backend_impl,
-                    test_ci_confidence(
-                        runtimes_output_multi[torus_file][k][backend_impl], 85, 10
-                    ),
-                )
-            )
+    create_output_directory(output_directory)
 
-# Generate violin plots for each torus size
-for torus_size, runtime_data in runtimes_output_multi.items():
-    for k in runtime_data.keys():
-        generate_violin_plots_v4(runtime_data[k], k, torus_size, output_directory)
+    print_median_runtimes(runtimes_output_multi, git_commit)
+
+    print_confidence_interval(runtimes_output_multi, 85, 10)
+
+    # Generate violin plots for each torus size
+    for torus_size, runtime_data in runtimes_output_multi.items():
+        for k in runtime_data.keys():
+            generate_violin_plots(runtime_data[k], k, torus_size, output_directory)
