@@ -23,8 +23,8 @@ class nabla4_unstructured : private nabla4_data<T> {
     using nabla4_data<T>::z_nabla4_e2_wp;
     using nabla4_data<T>::get_data;
 
-    std::vector<std::array<std::size_t, 4>> e2c2v;
-    std::vector<std::array<std::size_t, 4>> e2ecv;
+    const std::vector<std::array<std::size_t, 4>> e2c2v;
+    const std::vector<std::array<std::size_t, 4>> e2ecv;
 
   public:
     /// Constructor with all the necessary information for \c nabla4 compute
@@ -36,7 +36,7 @@ class nabla4_unstructured : private nabla4_data<T> {
         std::size_t EdgeDim,
         std::size_t KDim,
         std::size_t ECVDim)
-        : e2c2v(e2c2v), e2ecv(e2ecv), nabla4_data<T>(CellDim, VertexDim, EdgeDim, KDim, ECVDim){};
+        : e2c2v(e2c2v), e2ecv(e2ecv), nabla4_data<T>(CellDim, VertexDim, EdgeDim, KDim, ECVDim, e2c2v.size()){};
 
     /// Constructor for validation
     nabla4_unstructured(std::vector<std::array<std::size_t, 4>> &e2c2v,
@@ -58,6 +58,7 @@ class nabla4_unstructured : private nabla4_data<T> {
                                           EdgeDim,
                                           KDim,
                                           ECVDim,
+                                          e2c2v.size(),
                                           u_vert,
                                           v_vert,
                                           primal_normal_vert_v1,
@@ -72,7 +73,7 @@ class nabla4_unstructured : private nabla4_data<T> {
 
     void run_naive() {
         for (std::size_t k_index{}; k_index < KDim; ++k_index) {
-            for (std::size_t edge_index{}; edge_index < EdgeDim; ++edge_index) {
+            for (std::size_t edge_index{}; edge_index < e2c2v.size(); ++edge_index) {
                 const auto E2C2V_0 = e2c2v[edge_index][0];
                 const auto E2C2V_1 = e2c2v[edge_index][1];
                 const auto E2C2V_2 = e2c2v[edge_index][2];
@@ -100,8 +101,7 @@ class nabla4_unstructured : private nabla4_data<T> {
 
     void run_cpu_ifirst() {
         for (std::size_t k_index{}; k_index < KDim; ++k_index) {
-#pragma omp simd
-            for (std::size_t edge_index = 0; edge_index < EdgeDim; ++edge_index) {
+            for (std::size_t edge_index = 0; edge_index < e2c2v.size(); ++edge_index) {
                 const auto E2C2V_0 = e2c2v[edge_index][0];
                 const auto E2C2V_1 = e2c2v[edge_index][1];
                 const auto E2C2V_2 = e2c2v[edge_index][2];
@@ -128,7 +128,7 @@ class nabla4_unstructured : private nabla4_data<T> {
     };
 
     void run_cpu_kfirst() {
-        for (std::size_t edge_index{}; edge_index < EdgeDim; ++edge_index) {
+        for (std::size_t edge_index{}; edge_index < e2c2v.size(); ++edge_index) {
             const auto E2C2V_0 = e2c2v[edge_index][0];
             const auto E2C2V_1 = e2c2v[edge_index][1];
             const auto E2C2V_2 = e2c2v[edge_index][2];
@@ -137,7 +137,11 @@ class nabla4_unstructured : private nabla4_data<T> {
             const auto E2ECV_1 = e2ecv[edge_index][1];
             const auto E2ECV_2 = e2ecv[edge_index][2];
             const auto E2ECV_3 = e2ecv[edge_index][3];
-#pragma omp simd
+#ifdef __clang__
+#pragma clang loop unroll_count(8) vectorize(assume_safety) interleave(enable)
+#elif defined(__GNUC__)
+#pragma GCC ivdep
+#endif
             for (std::size_t k_index = 0; k_index < KDim; ++k_index) {
                 double nabv_tang_wp = u_vert[E2C2V_0][k_index] * primal_normal_vert_v1[E2ECV_0] +
                                       v_vert[E2C2V_0][k_index] * primal_normal_vert_v2[E2ECV_0] +

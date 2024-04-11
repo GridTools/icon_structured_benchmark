@@ -8,15 +8,15 @@ class RandomUniformUtils {
     std::mt19937 _gen{_rd()};
     std::uniform_real_distribution<double> _dist;
 
-    template <typename T>
-    T get() {
-        return static_cast<T>(_dist(_gen));
-    }
-
   public:
     RandomUniformUtils(double low = 0.0, double high = 10.0) {
         std::uniform_real_distribution<double>::param_type param(low, high);
         _dist.param(param);
+    }
+
+    template <typename T>
+    T get() {
+        return static_cast<T>(_dist(_gen));
     }
 
     template <typename T = double>

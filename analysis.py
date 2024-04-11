@@ -6,6 +6,16 @@ import pandas as pd  # type: ignore [import-untyped]
 import seaborn as sns  # type: ignore [import-not-found]
 
 
+def create_output_directory(output_dir):
+    if not path.exists(output_dir):
+        makedirs(output_dir)
+    else:
+        print(
+            f"Directory '{output_dir}' already exists. Make sure the correct directory is selected. To proceed with the same directory name delete the folder and rerun script"
+        )
+        quit(1)
+
+
 def read_torus_results(directory, torus_filenames, klevels):
     runtimes = {}
     for filename in torus_filenames:
@@ -14,6 +24,21 @@ def read_torus_results(directory, torus_filenames, klevels):
             with open("{}/{}_k{}.json".format(directory, filename, k)) as f:
                 runtimes[filename][k] = json.load(f)
     return runtimes
+
+
+def print_median_runtimes(runtimes_output, git_commit):
+    for torus_file in runtimes_output.keys():
+        print("=== Torus file: {} ===".format(torus_file))
+        for k in klevels:
+            print("= k levels: {} =".format(k))
+            for backend_impl in runtimes_output[torus_file][k].keys():
+                print(
+                    "{} median runtimes ({}): {}".format(
+                        backend_impl,
+                        git_commit,
+                        np.median(runtimes_output[torus_file][k][backend_impl]),
+                    )
+                )
 
 
 def test_ci_confidence(vector, ci_interval, mean_interval):
@@ -29,6 +54,26 @@ def test_ci_confidence(vector, ci_interval, mean_interval):
     return ci_interval[0] > mean * (1 - mean_interval_div_2) and ci_interval[
         -1
     ] < mean * (1 + mean_interval_div_2)
+
+
+def print_confidence_interval(runtimes_output, ci, mean_interval):
+    for torus_file in runtimes_output.keys():
+        print("=== Torus file: {} ===".format(torus_file))
+        for k in klevels:
+            print("= k levels: {} =".format(k))
+            for backend_impl in runtimes_output[torus_file][k].keys():
+                print(
+                    "[{}] {}% CI within {}% of the mean: {}".format(
+                        backend_impl,
+                        ci,
+                        mean_interval,
+                        test_ci_confidence(
+                            runtimes_output[torus_file][k][backend_impl],
+                            ci,
+                            mean_interval,
+                        ),
+                    )
+                )
 
 
 def print_median_acceleration_over_k(data, backend_title, output_dir):
@@ -67,7 +112,7 @@ def print_median_acceleration_over_k(data, backend_title, output_dir):
         x="Edges",
         y="Value",
         hue="K",
-        palette=sns.color_palette("tab10"),
+        palette=sns.color_palette("tab10")[0:3],
     )
     plt.title(
         "Acceleration of Structured over Unstructured for {} implementation (Median Runtimes)".format(
@@ -153,6 +198,26 @@ def generate_violin_plots(data, k, torus_name, output_dir):
     )
 
 
+def filter_runtime_data(runtimes_output, unstructured_key: str, structured_key: str):
+    torus_klevels_runtimes = {}  # type: ignore [var-annotated]
+    for torus_file in runtimes_output.keys():
+        torus_name = torus_file.split("_")[-1]
+        torus_klevels_runtimes[torus_name] = {}
+        for k in klevels:
+            torus_klevels_runtimes[torus_name][k] = {}
+            for backend_impl in [
+                unstructured_key,
+                structured_key,
+            ]:
+                name = (
+                    "unstructured" if backend_impl == unstructured_key else "structured"
+                )
+                torus_klevels_runtimes[torus_name][k][name] = runtimes_output[
+                    torus_file
+                ][k][backend_impl]
+    return torus_klevels_runtimes
+
+
 torus_files = [
     "torus_100000_100000_1024",
     "torus_100000_100000_512",
@@ -165,120 +230,50 @@ klevels = [1, 16, 65]
 
 edges_size = {"1024": 14208, "512": 58050, "256": 229758, "128": 915948, "64": 3663792}
 
-git_commit = "b6bc6f"
+if __name__ == "__main__":
+    git_commit = "9ced41e"
 
-runtimes_output = read_torus_results(
-    "results/output_{}".format(git_commit), torus_files, klevels
-)
-
-output_directory = "results/plot_output_{}".format(git_commit)
-if not path.exists(output_directory):
-    makedirs(output_directory)
-else:
-    print(
-        f"Directory '{output_directory}' already exists. Make sure the correct directory is selected. To proceed with the same directory name delete the folder and rerun script"
+    runtimes_output = read_torus_results(
+        "results/output_{}".format(git_commit), torus_files, klevels
     )
-    quit(1)
 
-for torus_file in runtimes_output.keys():
-    print("=== Torus file: {} ===".format(torus_file))
-    for k in klevels:
-        print("= k levels: {} =".format(k))
-        for backend_impl in runtimes_output[torus_file][k].keys():
-            print(
-                "{} median runtimes ({}): {}".format(
-                    backend_impl,
-                    git_commit,
-                    np.median(runtimes_output[torus_file][k][backend_impl]),
-                )
-            )
+    output_directory = "results/plot_output_{}".format(git_commit)
 
+    create_output_directory(output_directory)
 
-for torus_file in runtimes_output.keys():
-    print("=== Torus file: {} ===".format(torus_file))
-    for k in klevels:
-        print("= k levels: {} =".format(k))
-        for backend_impl in runtimes_output[torus_file][k].keys():
-            print(
-                "[{}] 85% CI within 10% of the mean: {}".format(
-                    backend_impl,
-                    test_ci_confidence(
-                        runtimes_output[torus_file][k][backend_impl], 85, 10
-                    ),
-                )
-            )
+    print_median_runtimes(runtimes_output, git_commit)
 
-naive_torus_klevels_runtimes = {}  # type: ignore [var-annotated]
+    print_confidence_interval(runtimes_output, 85, 10)
 
-for torus_file in runtimes_output.keys():
-    torus_name = torus_file.split("_")[-1]
-    naive_torus_klevels_runtimes[torus_name] = {}
-    for k in klevels:
-        naive_torus_klevels_runtimes[torus_name][k] = {}
-        for backend_impl in [
+    print_median_acceleration_over_k(
+        filter_runtime_data(
+            runtimes_output,
             "nabla4_benchmark_unstructured_naive",
             "nabla4_benchmark_structured_torus_naive",
-        ]:
-            name = (
-                "unstructured"
-                if backend_impl == "nabla4_benchmark_unstructured_naive"
-                else "structured"
-            )
-            naive_torus_klevels_runtimes[torus_name][k][name] = runtimes_output[
-                torus_file
-            ][k][backend_impl]
+        ),
+        "naive",
+        output_directory,
+    )
+    print_median_acceleration_over_k(
+        filter_runtime_data(
+            runtimes_output,
+            "nabla4_benchmark_unstructured_cpu_ifirst_gridtools",
+            "nabla4_benchmark_structured_torus_cpu_ifirst_gridtools",
+        ),
+        "cpu_ifirst",
+        output_directory,
+    )
+    print_median_acceleration_over_k(
+        filter_runtime_data(
+            runtimes_output,
+            "nabla4_benchmark_unstructured_cpu_kfirst_gridtools",
+            "nabla4_benchmark_structured_torus_cpu_kfirst_gridtools",
+        ),
+        "cpu_kfirst",
+        output_directory,
+    )
 
-ifirst_torus_klevels_runtimes = {}  # type: ignore [var-annotated]
-
-for torus_file in runtimes_output.keys():
-    torus_name = torus_file.split("_")[-1]
-    ifirst_torus_klevels_runtimes[torus_name] = {}
-    for k in klevels:
-        ifirst_torus_klevels_runtimes[torus_name][k] = {}
-        for backend_impl in [
-            "nabla4_benchmark_unstructured_cpu_ifirst",
-            "nabla4_benchmark_structured_torus_cpu_ifirst",
-        ]:
-            name = (
-                "unstructured"
-                if backend_impl == "nabla4_benchmark_unstructured_cpu_ifirst"
-                else "structured"
-            )
-            ifirst_torus_klevels_runtimes[torus_name][k][name] = runtimes_output[
-                torus_file
-            ][k][backend_impl]
-
-kfirst_torus_klevels_runtimes = {}  # type: ignore [var-annotated]
-
-for torus_file in runtimes_output.keys():
-    torus_name = torus_file.split("_")[-1]
-    kfirst_torus_klevels_runtimes[torus_name] = {}
-    for k in klevels:
-        kfirst_torus_klevels_runtimes[torus_name][k] = {}
-        for backend_impl in [
-            "nabla4_benchmark_unstructured_cpu_kfirst",
-            "nabla4_benchmark_structured_torus_cpu_kfirst",
-        ]:
-            name = (
-                "unstructured"
-                if backend_impl == "nabla4_benchmark_unstructured_cpu_kfirst"
-                else "structured"
-            )
-            kfirst_torus_klevels_runtimes[torus_name][k][name] = runtimes_output[
-                torus_file
-            ][k][backend_impl]
-
-print_median_acceleration_over_k(
-    naive_torus_klevels_runtimes, "naive", output_directory
-)
-print_median_acceleration_over_k(
-    ifirst_torus_klevels_runtimes, "cpu_ifirst", output_directory
-)
-print_median_acceleration_over_k(
-    kfirst_torus_klevels_runtimes, "cpu_kfirst", output_directory
-)
-
-# Generate violin plots for each torus size
-for torus_size, runtime_data in runtimes_output.items():
-    for k in runtime_data.keys():
-        generate_violin_plots(runtime_data[k], k, torus_size, output_directory)
+    # Generate violin plots for each torus size
+    for torus_size, runtime_data in runtimes_output.items():
+        for k in runtime_data.keys():
+            generate_violin_plots(runtime_data[k], k, torus_size, output_directory)

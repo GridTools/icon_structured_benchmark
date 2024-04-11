@@ -38,6 +38,26 @@ std::vector<double> nabla4_benchmark_unstructured_cpu_kfirst(std::vector<std::ar
     int repetitions = 101,
     int dry_runs = 1);
 
+std::vector<double> nabla4_benchmark_unstructured_cpu_ifirst_gridtools(std::vector<std::array<std::size_t, 4>> &e2c2v,
+    std::vector<std::array<std::size_t, 4>> &e2ecv,
+    std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    int repetitions = 101,
+    int dry_runs = 1);
+
+std::vector<double> nabla4_benchmark_unstructured_cpu_kfirst_gridtools(std::vector<std::array<std::size_t, 4>> &e2c2v,
+    std::vector<std::array<std::size_t, 4>> &e2ecv,
+    std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    int repetitions = 101,
+    int dry_runs = 1);
+
 std::vector<double> nabla4_benchmark_unstructured_gpu(std::vector<std::array<std::size_t, 4>> &e2c2v,
     std::vector<std::array<std::size_t, 4>> &e2ecv,
     std::size_t CellDim,
@@ -79,7 +99,39 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_ifirst(
     std::vector<WP_TYPE> &inv_vert_vert_length,
     std::vector<WP_TYPE> &inv_primal_edge_length);
 
+std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_ifirst_gridtools(
+    std::vector<std::array<std::size_t, 4>> &e2c2v,
+    std::vector<std::array<std::size_t, 4>> &e2ecv,
+    std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::vector<std::vector<VP_TYPE>> &u_vert,
+    std::vector<std::vector<VP_TYPE>> &v_vert,
+    std::vector<WP_TYPE> &primal_normal_vert_v1,
+    std::vector<WP_TYPE> &primal_normal_vert_v2,
+    std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+    std::vector<WP_TYPE> &inv_vert_vert_length,
+    std::vector<WP_TYPE> &inv_primal_edge_length);
+
 std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_kfirst(
+    std::vector<std::array<std::size_t, 4>> &e2c2v,
+    std::vector<std::array<std::size_t, 4>> &e2ecv,
+    std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::vector<std::vector<VP_TYPE>> &u_vert,
+    std::vector<std::vector<VP_TYPE>> &v_vert,
+    std::vector<WP_TYPE> &primal_normal_vert_v1,
+    std::vector<WP_TYPE> &primal_normal_vert_v2,
+    std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+    std::vector<WP_TYPE> &inv_vert_vert_length,
+    std::vector<WP_TYPE> &inv_primal_edge_length);
+
+std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_kfirst_gridtools(
     std::vector<std::array<std::size_t, 4>> &e2c2v,
     std::vector<std::array<std::size_t, 4>> &e2ecv,
     std::size_t CellDim,
@@ -214,6 +266,27 @@ std::vector<double> nabla4_benchmark_structured_torus_cpu_ifirst(std::size_t Cel
     int repetitions = 101,
     int dry_runs = 1);
 
+std::vector<double> nabla4_benchmark_structured_torus_cpu_ifirst_gridtools(std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::size_t longitude_dim,
+    std::size_t latitude_dim,
+    int repetitions = 101,
+    int dry_runs = 1);
+
+std::vector<double> nabla4_benchmark_structured_torus_cpu_ifirst_gridtools_halo(std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::size_t longitude_dim,
+    std::size_t latitude_dim,
+    std::size_t halo,
+    int repetitions = 101,
+    int dry_runs = 1);
+
 std::vector<double> nabla4_benchmark_structured_torus_cpu_kfirst(std::size_t CellDim,
     std::size_t VertexDim,
     std::size_t EdgeDim,
@@ -221,6 +294,27 @@ std::vector<double> nabla4_benchmark_structured_torus_cpu_kfirst(std::size_t Cel
     std::size_t ECVDim,
     std::size_t longitude_dim,
     std::size_t latitude_dim,
+    int repetitions = 101,
+    int dry_runs = 1);
+
+std::vector<double> nabla4_benchmark_structured_torus_cpu_kfirst_gridtools(std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::size_t longitude_dim,
+    std::size_t latitude_dim,
+    int repetitions = 101,
+    int dry_runs = 1);
+
+std::vector<double> nabla4_benchmark_structured_torus_cpu_kfirst_gridtools_halo(std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::size_t longitude_dim,
+    std::size_t latitude_dim,
+    std::size_t halo,
     int repetitions = 101,
     int dry_runs = 1);
 
@@ -279,6 +373,37 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_cpu_kfirst(st
     std::vector<WP_TYPE> &inv_vert_vert_length,
     std::vector<WP_TYPE> &inv_primal_edge_length);
 
+std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_cpu_ifirst_gridtools(std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::size_t longitude_dim,
+    std::size_t latitude_dim,
+    std::vector<std::vector<VP_TYPE>> &u_vert,
+    std::vector<std::vector<VP_TYPE>> &v_vert,
+    std::vector<WP_TYPE> &primal_normal_vert_v1,
+    std::vector<WP_TYPE> &primal_normal_vert_v2,
+    std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+    std::vector<WP_TYPE> &inv_vert_vert_length,
+    std::vector<WP_TYPE> &inv_primal_edge_length);
+
+std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_cpu_ifirst_gridtools_halo(std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::size_t longitude_dim,
+    std::size_t latitude_dim,
+    std::size_t halo,
+    std::vector<std::vector<VP_TYPE>> &u_vert,
+    std::vector<std::vector<VP_TYPE>> &v_vert,
+    std::vector<WP_TYPE> &primal_normal_vert_v1,
+    std::vector<WP_TYPE> &primal_normal_vert_v2,
+    std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+    std::vector<WP_TYPE> &inv_vert_vert_length,
+    std::vector<WP_TYPE> &inv_primal_edge_length);
+
 std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_gpu(std::size_t CellDim,
     std::size_t VertexDim,
     std::size_t EdgeDim,
@@ -286,6 +411,37 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_gpu(std::size
     std::size_t ECVDim,
     std::size_t longitude_dim,
     std::size_t latitude_dim,
+    std::vector<std::vector<VP_TYPE>> &u_vert,
+    std::vector<std::vector<VP_TYPE>> &v_vert,
+    std::vector<WP_TYPE> &primal_normal_vert_v1,
+    std::vector<WP_TYPE> &primal_normal_vert_v2,
+    std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+    std::vector<WP_TYPE> &inv_vert_vert_length,
+    std::vector<WP_TYPE> &inv_primal_edge_length);
+
+std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_cpu_kfirst_gridtools(std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::size_t longitude_dim,
+    std::size_t latitude_dim,
+    std::vector<std::vector<VP_TYPE>> &u_vert,
+    std::vector<std::vector<VP_TYPE>> &v_vert,
+    std::vector<WP_TYPE> &primal_normal_vert_v1,
+    std::vector<WP_TYPE> &primal_normal_vert_v2,
+    std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+    std::vector<WP_TYPE> &inv_vert_vert_length,
+    std::vector<WP_TYPE> &inv_primal_edge_length);
+
+std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_cpu_kfirst_gridtools_halo(std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::size_t longitude_dim,
+    std::size_t latitude_dim,
+    std::size_t halo,
     std::vector<std::vector<VP_TYPE>> &u_vert,
     std::vector<std::vector<VP_TYPE>> &v_vert,
     std::vector<WP_TYPE> &primal_normal_vert_v1,

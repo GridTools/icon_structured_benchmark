@@ -133,3 +133,121 @@ def test_validate_nabla4_structured_torus_naive(small_torus_grid_kernel_input):
         atol=1e-8,
         rtol=1e-4,
     )
+
+
+def test_validate_nabla4_structured_torus_cpu_ifirst(small_torus_grid_kernel_input):
+    z_nabla4_e2_comp = icon_benchmark.nabla4_validate_structured_torus_cpu_ifirst(
+        small_torus_grid_kernel_input.num_cells,
+        small_torus_grid_kernel_input.num_vertices,
+        small_torus_grid_kernel_input.num_edges,
+        small_torus_grid_kernel_input.num_levels,
+        small_torus_grid_kernel_input.E2C2VDim,
+        3,
+        4,
+        np.array(small_torus_grid_kernel_input.u_vert).T,
+        np.array(small_torus_grid_kernel_input.v_vert).T,
+        small_torus_grid_kernel_input.primal_normal_vert_v1,
+        small_torus_grid_kernel_input.primal_normal_vert_v2,
+        np.array(small_torus_grid_kernel_input.z_nabla2_e).T,
+        small_torus_grid_kernel_input.inv_vert_vert_length,
+        small_torus_grid_kernel_input.inv_primal_edge_length,
+    )
+
+    assert np.allclose(
+        np.array(z_nabla4_e2_comp).T,
+        small_torus_grid_kernel_input.ref_z_nabla4_e2,
+        equal_nan=True,
+        atol=1e-8,
+        rtol=1e-4,
+    )
+
+
+def test_validate_nabla4_structured_torus_cpu_kfirst(small_torus_grid_kernel_input):
+    z_nabla4_e2_comp = (
+        icon_benchmark.nabla4_validate_structured_torus_cpu_kfirst_gridtools(
+            small_torus_grid_kernel_input.num_cells,
+            small_torus_grid_kernel_input.num_vertices,
+            small_torus_grid_kernel_input.num_edges,
+            small_torus_grid_kernel_input.num_levels,
+            small_torus_grid_kernel_input.E2C2VDim,
+            3,
+            4,
+            small_torus_grid_kernel_input.u_vert,
+            small_torus_grid_kernel_input.v_vert,
+            small_torus_grid_kernel_input.primal_normal_vert_v1,
+            small_torus_grid_kernel_input.primal_normal_vert_v2,
+            small_torus_grid_kernel_input.z_nabla2_e,
+            small_torus_grid_kernel_input.inv_vert_vert_length,
+            small_torus_grid_kernel_input.inv_primal_edge_length,
+        )
+    )
+
+    assert np.allclose(
+        np.array(z_nabla4_e2_comp).T,
+        small_torus_grid_kernel_input.ref_z_nabla4_e2,
+        equal_nan=True,
+        atol=1e-8,
+        rtol=1e-4,
+    )
+
+
+def test_validate_nabla4_structured_torus_cpu_ifirst_gridtools(
+    small_torus_grid_kernel_input,
+):
+    z_nabla4_e2_comp = (
+        icon_benchmark.nabla4_validate_structured_torus_cpu_ifirst_gridtools(
+            small_torus_grid_kernel_input.num_cells,
+            small_torus_grid_kernel_input.num_vertices,
+            small_torus_grid_kernel_input.num_edges,
+            small_torus_grid_kernel_input.num_levels,
+            small_torus_grid_kernel_input.E2C2VDim,
+            3,
+            4,
+            small_torus_grid_kernel_input.u_vert,
+            small_torus_grid_kernel_input.v_vert,
+            small_torus_grid_kernel_input.primal_normal_vert_v1,
+            small_torus_grid_kernel_input.primal_normal_vert_v2,
+            small_torus_grid_kernel_input.z_nabla2_e,
+            small_torus_grid_kernel_input.inv_vert_vert_length,
+            small_torus_grid_kernel_input.inv_primal_edge_length,
+        )
+    )
+
+    assert np.allclose(
+        np.array(z_nabla4_e2_comp).T,
+        small_torus_grid_kernel_input.ref_z_nabla4_e2,
+        equal_nan=True,
+        atol=1e-8,
+        rtol=1e-4,
+    )
+
+
+def test_validate_nabla4_structured_torus_cpu_kfirst_gridtools(
+    small_torus_grid_kernel_input,
+):
+    z_nabla4_e2_comp = (
+        icon_benchmark.nabla4_validate_structured_torus_cpu_kfirst_gridtools(
+            small_torus_grid_kernel_input.num_cells,
+            small_torus_grid_kernel_input.num_vertices,
+            small_torus_grid_kernel_input.num_edges,
+            small_torus_grid_kernel_input.num_levels,
+            small_torus_grid_kernel_input.E2C2VDim,
+            3,
+            4,
+            small_torus_grid_kernel_input.u_vert,
+            small_torus_grid_kernel_input.v_vert,
+            small_torus_grid_kernel_input.primal_normal_vert_v1,
+            small_torus_grid_kernel_input.primal_normal_vert_v2,
+            small_torus_grid_kernel_input.z_nabla2_e,
+            small_torus_grid_kernel_input.inv_vert_vert_length,
+            small_torus_grid_kernel_input.inv_primal_edge_length,
+        )
+    )
+
+    assert np.allclose(
+        np.array(z_nabla4_e2_comp).T,
+        small_torus_grid_kernel_input.ref_z_nabla4_e2,
+        equal_nan=True,
+        atol=1e-8,
+        rtol=1e-4,
+    )

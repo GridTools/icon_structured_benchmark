@@ -93,7 +93,7 @@ repos:
     - pybind11==2.11.1
     - setuptools==69.1.1
     - tabulate==0.9.0
-    - typing-extensions==4.5.0
+    - typing-extensions==4.10.0
     - xxhash==3.0.0
     ##[[[end]]]
     # Add all type stubs from typeshed
@@ -117,6 +117,6 @@ repos:
       (?x)^(
       tests/data/simple_grid/.* |
       tests/data/torus_grid/.* |
-      results/output_b6bc6f/.*.json |
-      results/output_b6bc6f_multi/.*.json
+      results/output_.*/.*.json |
+      results/output_.*_multi/.*.json
       )$
