@@ -11,7 +11,7 @@ from analysis import (
 )
 
 if __name__ == "__main__":
-    git_commit = "b6bc6f"
+    git_commit = "890b981"
 
     runtimes_output = read_torus_results(
         "results/output_halo_{}".format(git_commit), torus_files, klevels
