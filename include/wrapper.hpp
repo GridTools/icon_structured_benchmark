@@ -68,6 +68,16 @@ std::vector<double> nabla4_benchmark_unstructured_gpu(std::vector<std::array<std
     int repetitions = 101,
     int dry_runs = 1);
 
+std::vector<double> nabla4_benchmark_unstructured_gpu_gridtools(std::vector<std::array<std::size_t, 4>> &e2c2v,
+    std::vector<std::array<std::size_t, 4>> &e2ecv,
+    std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    int repetitions = 101,
+    int dry_runs = 1);
+
 std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_naive(std::vector<std::array<std::size_t, 4>> &e2c2v,
     std::vector<std::array<std::size_t, 4>> &e2ecv,
     std::size_t CellDim,

@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.27.0)
 
 project(Nabla4Benchmark)
 
+option(IS_GPU "Enable GPU execution" OFF)
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -29,6 +31,18 @@ endif()
 add_library(benchmark src/wrapper.cpp)
 target_include_directories(benchmark PRIVATE include GridTools)
 target_link_libraries(benchmark PUBLIC GridTools::gridtools GridTools::stencil_naive GridTools::storage_cpu_ifirst GridTools::storage_cpu_kfirst)
+
+if(IS_GPU)
+  include(CheckLanguage)
+  check_language(CUDA)
+  if (CMAKE_CUDA_COMPILER)
+    enable_language(CUDA)
+    set(CMAKE_CUDA_STANDARD 20)
+    set(CMAKE_CUDA_EXTENSIONS OFF)
+  endif()
+  target_link_libraries(benchmark PUBLIC GridTools::storage_gpu)
+  set_source_files_properties(src/wrapper.cpp PROPERTIES LANGUAGE CUDA)
+endif()
 
 add_executable(nabla4_benchmark src/main.cpp)
 target_link_libraries(nabla4_benchmark PRIVATE benchmark)

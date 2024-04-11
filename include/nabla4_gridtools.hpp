@@ -7,6 +7,10 @@ using namespace gridtools;
 #include <gridtools/storage/cpu_ifirst.hpp>
 #include <gridtools/storage/cpu_kfirst.hpp>
 
+#ifdef __NVCC__
+#include <gridtools/storage/gpu.hpp>
+#endif
+
 #include "common.hpp"
 
 using namespace literals;

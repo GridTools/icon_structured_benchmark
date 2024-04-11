@@ -290,7 +290,7 @@ def parse_arguments():
     )
     parser.add_argument(
         "--backend",
-        choices=["all", "gtfn", "naive", "cpu_ifirst", "cpu_kfirst", "gridtools"],
+        choices=["all", "gtfn", "naive", "cpu_ifirst", "cpu_kfirst", "gpu"],
         default="all",
         help="Which backend to benchmark",
     )
@@ -480,6 +480,21 @@ def run_benchmarks():
             grid_cartesian_dimensions[0],
             grid_cartesian_dimensions[1],
             2,
+            repetitions,
+            dry_runs,
+        )
+
+    if args.backend in ["all", "gpu"]:
+        runtimes[
+            "nabla4_benchmark_unstructured_gpu_gridtools"
+        ] = icon_benchmark.nabla4_benchmark_unstructured_gpu_gridtools(
+            torus_grid.get_offset_provider("E2C2V").table,
+            torus_grid.get_offset_provider("E2ECV").table,
+            torus_grid.num_cells,
+            torus_grid.num_vertices,
+            torus_grid.num_edges,
+            torus_grid.num_levels,
+            torus_grid.size[E2C2VDim],
             repetitions,
             dry_runs,
         )
