@@ -1,3 +1,5 @@
+#include <tuple>
+
 #include "wrapper.hpp"
 
 #include "validation.hpp"
@@ -29,16 +31,16 @@ std::vector<double> nabla4_benchmark_unstructured(std::vector<std::array<std::si
     int dry_runs) {
     if constexpr (I == backend_impl::naive) {
         return run_benchmark<nabla4_unstructured<Data::ifirst>, I>(
-            e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim, repetitions, dry_runs);
+            std::make_tuple(e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
     } else if constexpr (I == backend_impl::cpu_ifirst) {
         return run_benchmark<nabla4_unstructured<Data::ifirst>, I>(
-            e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim, repetitions, dry_runs);
+            std::make_tuple(e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
     } else if constexpr (I == backend_impl::cpu_kfirst) {
         return run_benchmark<nabla4_unstructured<Data::kfirst>, I>(
-            e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim, repetitions, dry_runs);
+            std::make_tuple(e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
     } else if constexpr (I == backend_impl::gpu) {
         return run_benchmark<nabla4_unstructured<Data::kfirst>, I>(
-            e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim, repetitions, dry_runs);
+            std::make_tuple(e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
     } else {
         throw std::runtime_error("Undefined backend implementation");
     }
@@ -56,10 +58,10 @@ std::vector<double> nabla4_benchmark_unstructured_gridtools(std::vector<std::arr
     int dry_runs) {
     if constexpr (I == backend_impl::cpu_ifirst) {
         return run_benchmark<nabla4_unstructured_gt<storage::cpu_ifirst>, I>(
-            e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim, repetitions, dry_runs);
+            std::make_tuple(e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
     } else if constexpr (I == backend_impl::cpu_kfirst) {
         return run_benchmark<nabla4_unstructured_gt<storage::cpu_kfirst>, I>(
-            e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim, repetitions, dry_runs);
+            std::make_tuple(e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
     } else {
         throw std::runtime_error("Undefined backend implementation");
     }
@@ -343,16 +345,16 @@ std::vector<double> nabla4_benchmark_structured(std::size_t CellDim,
     int dry_runs) {
     if constexpr (I == backend_impl::naive) {
         return run_benchmark<nabla4_structured_simple<Data::ifirst>, I>(
-            CellDim, VertexDim, EdgeDim, KDim, ECVDim, repetitions, dry_runs);
+            std::make_tuple(CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
     } else if constexpr (I == backend_impl::cpu_ifirst) {
         return run_benchmark<nabla4_structured_simple<Data::ifirst>, I>(
-            CellDim, VertexDim, EdgeDim, KDim, ECVDim, repetitions, dry_runs);
+            std::make_tuple(CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
     } else if constexpr (I == backend_impl::cpu_kfirst) {
         return run_benchmark<nabla4_structured_simple<Data::kfirst>, I>(
-            CellDim, VertexDim, EdgeDim, KDim, ECVDim, repetitions, dry_runs);
+            std::make_tuple(CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
     } else if constexpr (I == backend_impl::gpu) {
         return run_benchmark<nabla4_structured_simple<Data::kfirst>, I>(
-            CellDim, VertexDim, EdgeDim, KDim, ECVDim, repetitions, dry_runs);
+            std::make_tuple(CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
     } else {
         throw std::runtime_error("Undefined backend implementation");
     }
@@ -518,16 +520,24 @@ std::vector<double> nabla4_benchmark_structured_torus(std::size_t CellDim,
     int dry_runs) {
     if constexpr (I == backend_impl::naive) {
         return run_benchmark<nabla4_structured_torus<Data::ifirst>, backend_impl::cpu_ifirst>(
-            CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, repetitions, dry_runs);
+            std::make_tuple(CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim),
+            repetitions,
+            dry_runs);
     } else if constexpr (I == backend_impl::cpu_ifirst) {
         return run_benchmark<nabla4_structured_torus<Data::ifirst>, backend_impl::cpu_ifirst>(
-            CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, repetitions, dry_runs);
+            std::make_tuple(CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim),
+            repetitions,
+            dry_runs);
     } else if constexpr (I == backend_impl::cpu_kfirst) {
         return run_benchmark<nabla4_structured_torus<Data::kfirst>, backend_impl::cpu_kfirst>(
-            CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, repetitions, dry_runs);
+            std::make_tuple(CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim),
+            repetitions,
+            dry_runs);
     } else if constexpr (I == backend_impl::gpu) {
         return run_benchmark<nabla4_structured_torus<Data::kfirst>, I>(
-            CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, repetitions, dry_runs);
+            std::make_tuple(CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim),
+            repetitions,
+            dry_runs);
     } else {
         throw std::runtime_error("Undefined backend implementation");
     }
@@ -545,16 +555,24 @@ std::vector<double> nabla4_benchmark_structured_torus_gridtools(std::size_t Cell
     int dry_runs) {
     if constexpr (I == backend_impl::naive) {
         return run_benchmark<nabla4_structured_torus_gt<storage::cpu_ifirst>, backend_impl::cpu_ifirst>(
-            CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, repetitions, dry_runs);
+            std::make_tuple(CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim),
+            repetitions,
+            dry_runs);
     } else if constexpr (I == backend_impl::cpu_ifirst) {
         return run_benchmark<nabla4_structured_torus_gt<storage::cpu_ifirst>, backend_impl::cpu_ifirst>(
-            CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, repetitions, dry_runs);
+            std::make_tuple(CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim),
+            repetitions,
+            dry_runs);
     } else if constexpr (I == backend_impl::cpu_kfirst) {
         return run_benchmark<nabla4_structured_torus_gt<storage::cpu_kfirst>, backend_impl::cpu_kfirst>(
-            CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, repetitions, dry_runs);
+            std::make_tuple(CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim),
+            repetitions,
+            dry_runs);
     } else if constexpr (I == backend_impl::gpu) {
         return run_benchmark<nabla4_structured_torus_gt<storage::cpu_kfirst>, I>(
-            CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, repetitions, dry_runs);
+            std::make_tuple(CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim),
+            repetitions,
+            dry_runs);
     } else {
         throw std::runtime_error("Undefined backend implementation");
     }
@@ -573,16 +591,24 @@ std::vector<double> nabla4_benchmark_structured_torus_gridtools_halo(std::size_t
     int dry_runs) {
     if constexpr (I == backend_impl::naive) {
         return run_benchmark<nabla4_structured_torus_halo_gt<storage::cpu_ifirst>, backend_impl::cpu_ifirst>(
-            CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, halo, repetitions, dry_runs);
+            std::make_tuple(CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, halo),
+            repetitions,
+            dry_runs);
     } else if constexpr (I == backend_impl::cpu_ifirst) {
         return run_benchmark<nabla4_structured_torus_halo_gt<storage::cpu_ifirst>, backend_impl::cpu_ifirst>(
-            CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, halo, repetitions, dry_runs);
+            std::make_tuple(CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, halo),
+            repetitions,
+            dry_runs);
     } else if constexpr (I == backend_impl::cpu_kfirst) {
         return run_benchmark<nabla4_structured_torus_halo_gt<storage::cpu_kfirst>, backend_impl::cpu_kfirst>(
-            CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, halo, repetitions, dry_runs);
+            std::make_tuple(CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, halo),
+            repetitions,
+            dry_runs);
     } else if constexpr (I == backend_impl::gpu) {
         return run_benchmark<nabla4_structured_torus_halo_gt<storage::cpu_kfirst>, I>(
-            CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, halo, repetitions, dry_runs);
+            std::make_tuple(CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, halo),
+            repetitions,
+            dry_runs);
     } else {
         throw std::runtime_error("Undefined backend implementation");
     }
