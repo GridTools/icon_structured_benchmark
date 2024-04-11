@@ -103,6 +103,11 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
 
     void run_cpu_ifirst() {
         for (std::size_t k_index{}; k_index < KDim; ++k_index) {
+#ifdef __clang__
+#pragma clang loop unroll(enable) vectorize(assume_safety) interleave(enable)
+#elif defined(__GNUC__)
+#pragma GCC ivdep
+#endif
             for (std::size_t edge_index = 0; edge_index < e2c2v_gt_hv.lengths()[0]; ++edge_index) {
                 const auto E2C2V_0 = e2c2v_gt_hv(edge_index, 0);
                 const auto E2C2V_1 = e2c2v_gt_hv(edge_index, 1);
