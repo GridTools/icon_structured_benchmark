@@ -104,7 +104,6 @@ struct nabla4_gt_data {
         z_nabla4_e2_wp_gt_tv(z_nabla4_e2_wp_gt->target_view())
     {};
 
-  public:
     std::vector<std::vector<VP_TYPE>> get_output() {
         const auto z_nabla4_e2_wp_gt_chv = z_nabla4_e2_wp_gt->const_host_view();
         std::vector<std::vector<VP_TYPE>> result;

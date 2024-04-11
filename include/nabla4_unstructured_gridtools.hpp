@@ -13,6 +13,14 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
     using nabla4_gt_data<T>::VertexDim;
     using nabla4_gt_data<T>::KDim;
     using nabla4_gt_data<T>::ECVDim;
+    using nabla4_gt_data<T>::u_vert_gt;
+    using nabla4_gt_data<T>::v_vert_gt;
+    using nabla4_gt_data<T>::primal_normal_vert_v1_gt;
+    using nabla4_gt_data<T>::primal_normal_vert_v2_gt;
+    using nabla4_gt_data<T>::z_nabla2_e_gt;
+    using nabla4_gt_data<T>::inv_vert_vert_length_gt;
+    using nabla4_gt_data<T>::inv_primal_edge_length_gt;
+    using nabla4_gt_data<T>::z_nabla4_e2_wp_gt;
     using nabla4_gt_data<T>::u_vert_gt_tv;
     using nabla4_gt_data<T>::v_vert_gt_tv;
     using nabla4_gt_data<T>::primal_normal_vert_v1_gt_tv;
@@ -22,6 +30,7 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
     using nabla4_gt_data<T>::inv_primal_edge_length_gt_tv;
     using nabla4_gt_data<T>::z_nabla4_e2_wp_gt_tv;
 
+  public:
     using neighbors_gt_t =
         decltype(gridtools::storage::builder<T>.dimensions(0, 4_c).template type<std::size_t>().build());
     using neighbors_gt_ctv_t =
@@ -31,7 +40,6 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
     neighbors_gt_t e2ecv_gt;
     neighbors_gt_ctv_t e2ecv_gt_tv;
 
-  public:
     /// Constructor with all the necessary information for \c nabla4 compute
     /// kernel execution
     nabla4_unstructured_gt(std::vector<std::array<std::size_t, 4>> e2c2v,
@@ -73,7 +81,6 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
                                           inv_vert_vert_length,
                                           inv_primal_edge_length){};
 
-  private:
     inline __attribute__((always_inline)) void inner_kernel(std::size_t edge_index,
         std::size_t k_index,
         const std::array<std::size_t, 4> &e2c2v_vec,
@@ -100,6 +107,8 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
                       (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(edge_index, k_index)) *
                           (inv_primal_edge_length_gt_tv(edge_index) * inv_primal_edge_length_gt_tv(edge_index)));
     };
+
+  private:
 
     void run_cpu_ifirst() {
         for (std::size_t k_index{}; k_index < KDim; ++k_index) {
@@ -144,29 +153,7 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
             };
         };
     };
-
-#ifdef __NVCC__
-    __global__ __device__ void run_gpu() {
-        const auto edge_index = blockIdx.x * blockDim.x + threadIdx.x;
-        const auto k_index = blockIdx.y * blockDim.y + threadIdx.y;
-        for (std::size_t edge_index{blockIdx.x * blockDim.x + threadIdx.x}; edge_index < e2c2v_gt_tv.lengths()[0];
-             edge_index += blockDim.x * gridDim.x) {
-            for (std::size_t k_index{blockIdx.y * blockDim.y + threadIdx.y}; k_index < KDim;
-                 k_index += blockDim.y * gridDim.y) {
-                const auto E2C2V_0 = e2c2v_gt_tv(edge_index, 0);
-                const auto E2C2V_1 = e2c2v_gt_tv(edge_index, 1);
-                const auto E2C2V_2 = e2c2v_gt_tv(edge_index, 2);
-                const auto E2C2V_3 = e2c2v_gt_tv(edge_index, 3);
-                const auto E2ECV_0 = e2ecv_gt_tv(edge_index, 0);
-                const auto E2ECV_1 = e2ecv_gt_tv(edge_index, 1);
-                const auto E2ECV_2 = e2ecv_gt_tv(edge_index, 2);
-                const auto E2ECV_3 = e2ecv_gt_tv(edge_index, 3);
-                inner_kernel(
-                    edge_index, k_index, {E2C2V_0, E2C2V_1, E2C2V_2, E2C2V_3}, {E2ECV_0, E2ECV_1, E2ECV_2, E2ECV_3});
-            };
-        };
-    };
-#endif
+    void run_gpu_helper();
 
   public:
     /// Compute function timed for benchmarking
@@ -176,14 +163,55 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
             run_cpu_ifirst();
         } else if constexpr (I == backend_impl::cpu_kfirst) {
             run_cpu_kfirst();
-#ifdef __NVCC__
         } else if constexpr (I == backend_impl::gpu) {
-            dim3 tblocks(32, 32, 1);
-            dim3 grid((e2c2v_gt_tv.lengths()[0] + tblocks.x - 1) / tblocks.x, (KDim + tblocks.y - 1) / tblocks.y, 1);
-            run_gpu<<<grid, tblocks>>>();
-#endif
+            run_gpu_helper();
         } else {
             throw std::runtime_error("Undefined backend implementation");
         }
+    }
+};
+#if defined(__CUDACC__)
+__global__ void run_gpu(std::size_t EdgeDim, std::size_t KDim, nabla4_unstructured_gt<storage::gpu>::neighbors_gt_ctv_t e2c2v_gt_tv, nabla4_unstructured_gt<storage::gpu>::neighbors_gt_ctv_t e2ecv_gt_tv, nabla4_unstructured_gt<storage::gpu>::data_store_2d_ctv_VP_t u_vert_gt_tv, nabla4_unstructured_gt<storage::gpu>::data_store_2d_ctv_VP_t v_vert_gt_tv, nabla4_unstructured_gt<storage::gpu>::data_store_1d_ctv_WP_t primal_normal_vert_v1_gt_tv, nabla4_unstructured_gt<storage::gpu>::data_store_1d_ctv_WP_t primal_normal_vert_v2_gt_tv, nabla4_unstructured_gt<storage::gpu>::data_store_2d_ctv_WP_t z_nabla2_e_gt_tv, nabla4_unstructured_gt<storage::gpu>::data_store_1d_ctv_WP_t inv_vert_vert_length_gt_tv, nabla4_unstructured_gt<storage::gpu>::data_store_1d_ctv_WP_t inv_primal_edge_length_gt_tv, nabla4_unstructured_gt<storage::gpu>::data_store_2d_tv_VP_t z_nabla4_e2_wp_gt_tv) {
+    const auto edge_index = blockIdx.x * blockDim.x + threadIdx.x;
+    const auto k_index = blockIdx.y * blockDim.y + threadIdx.y;
+    for (std::size_t edge_index{blockIdx.x * blockDim.x + threadIdx.x}; edge_index < EdgeDim;
+            edge_index += blockDim.x * gridDim.x) {
+        for (std::size_t k_index{blockIdx.y * blockDim.y + threadIdx.y}; k_index < KDim;
+                k_index += blockDim.y * gridDim.y) {
+            const auto E2C2V_0 = e2c2v_gt_tv(edge_index, 0);
+            const auto E2C2V_1 = e2c2v_gt_tv(edge_index, 1);
+            const auto E2C2V_2 = e2c2v_gt_tv(edge_index, 2);
+            const auto E2C2V_3 = e2c2v_gt_tv(edge_index, 3);
+            const auto E2ECV_0 = e2ecv_gt_tv(edge_index, 0);
+            const auto E2ECV_1 = e2ecv_gt_tv(edge_index, 1);
+            const auto E2ECV_2 = e2ecv_gt_tv(edge_index, 2);
+            const auto E2ECV_3 = e2ecv_gt_tv(edge_index, 3);
+            double nabv_tang_wp = u_vert_gt_tv(E2C2V_0, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_0) +
+                              v_vert_gt_tv(E2C2V_0, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_0) +
+                              u_vert_gt_tv(E2C2V_1, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_1) +
+                              v_vert_gt_tv(E2C2V_1, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_1);
+            double nabv_norm_wp = u_vert_gt_tv(E2C2V_2, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_2) +
+                                v_vert_gt_tv(E2C2V_2, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_2) +
+                                u_vert_gt_tv(E2C2V_3, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_3) +
+                                v_vert_gt_tv(E2C2V_3, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_3);
+            z_nabla4_e2_wp_gt_tv(edge_index, k_index) =
+                4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_tv(edge_index, k_index)) *
+                            (inv_vert_vert_length_gt_tv(edge_index) * inv_vert_vert_length_gt_tv(edge_index)) +
+                        (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(edge_index, k_index)) *
+                            (inv_primal_edge_length_gt_tv(edge_index) * inv_primal_edge_length_gt_tv(edge_index)));
+        };
     };
 };
+
+template<typename T>
+void nabla4_unstructured_gt<T>::run_gpu_helper() {
+    dim3 tblocks(32, 32, 1);
+    dim3 grid((e2c2v_gt->const_host_view().lengths()[0] + tblocks.x - 1) / tblocks.x, (KDim + tblocks.y - 1) / tblocks.y, 1);
+    run_gpu<<<grid, tblocks>>>(e2c2v_gt->const_host_view().lengths()[0], KDim, e2c2v_gt_tv, e2ecv_gt_tv, u_vert_gt_tv, v_vert_gt_tv, primal_normal_vert_v1_gt_tv, primal_normal_vert_v2_gt_tv, z_nabla2_e_gt_tv, inv_vert_vert_length_gt_tv, inv_primal_edge_length_gt_tv, z_nabla4_e2_wp_gt_tv);
+};
+#else
+template<typename T>
+void nabla4_unstructured_gt<T>::run_gpu_helper() {
+    throw std::runtime_error("GPU backend not enabled");
+};
+#endif
