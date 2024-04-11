@@ -10,7 +10,7 @@ The supported grids are `unstructured`, `structured_simple` and `structured_toru
 
 - `unstructured`: Can represent any type of grid and is using indirect accesses for accessing the necessary neighbors
 - `structured_simple`: Is based on the `SimpleGrid` from [icon4py](https://github.com/C2SM/icon4py/blob/main/model/common/src/icon4py/model/common/grid/simple.py)
-- `structured_torus`: Generated using the torus script from [mpim-sw/grid-generator](https://gitlab.dkrz.de/mpim-sw/grid-generator)
+- `structured_torus`: Generated using the torus script from [mpim-sw/grid-generator](https://gitlab.dkrz.de/mpim-sw/grid-generator). We have also experimented with benchmarking this grid with halo = 2 so that we can process it without taking care of the periodic boundaries. Instead of a torus we end up with a cartesian plain grid.
 
 ### Grids visualization
 
@@ -117,7 +117,7 @@ popd
 ### Running benchmark
 
 The benchmark driver is written in `python`.
-To run the benchmark and provide different options one can use the `run_simple_grid.py` for benchmarking the `SimpleGrid` and the `run_torus_grid.py` for the `torus` grid.
+To run the benchmark and provide different options one can use the `run_simple_grid.py` for benchmarking the `SimpleGrid`, the `run_torus_grid.py` for the `torus` grid and `run_filtered_torus_grid.py` for the torus grid with `halo = 2` (no periodic boundaries).
 To get the available options you can run the following:
 
 ```
@@ -134,7 +134,7 @@ options:
                         Number of repetitions
   --dry-run             Do a dry run or not
 
-$ python run_torus_grid.py --help
+$ python run_torus_grid.py --help  # (same as run_filtered_torus_grid.py)
 usage: run_torus_grid.py [-h] [--transformation {gt4py,index}] [--klevels KLEVELS] [--repetitions REPETITIONS] [--dry-run] [--output OUTPUT]
                          [--sanity-checks]
                          grid
@@ -158,8 +158,8 @@ options:
 
 ### Plotting torus results
 
-After running `run_torus_grid.py` the runtimes for every implementation will be dumped into a JSON file named based on the `OUTPUT` argument.
+After running `run_torus_grid.py` or `run_filtered_torus_grid.py` the runtimes for every implementation will be dumped into a JSON file named based on the `OUTPUT` argument.
 
 For gathering the data one can use a script like `run_grids.sh` that does a sweep to the different torus files and `k` levels.
-After dumping all the JSON files in a directory, one can read and create plots with the acceleration of `structured` over `unstructured` and violin plots with the actual runtimes using `analysis.py`.
-For runs with 1 output per rank, one can use `analysys_multi.py`.
+After dumping all the JSON files in a directory, one can read and create plots with the acceleration of `structured` over `unstructured` and violin plots with the actual runtimes using `analysis.py` for the torus grid with periodic boundaries or the `analysis_halo.py` for the same grid without periodic boundaries (halo = 2).
+For runs with 1 output per rank, one can use `analysis_multi.py` and `analysis_multi_halo.py`.
