@@ -102,12 +102,13 @@ struct nabla4_gt_data {
 
   public:
     std::vector<std::vector<VP_TYPE>> get_output() {
+        const auto z_nabla4_e2_wp_gt_chv = z_nabla4_e2_wp_gt->const_host_view();
         std::vector<std::vector<VP_TYPE>> result;
         result.resize(KDim);
         for (std::size_t k_index{}; k_index < KDim; ++k_index) {
             result[k_index].reserve(output_size);
             for (std::size_t edge_index{}; edge_index < output_size; ++edge_index) {
-                result[k_index].push_back(z_nabla4_e2_wp_gt_tv(edge_index, k_index));
+                result[k_index].push_back(z_nabla4_e2_wp_gt_chv(edge_index, k_index));
             }
         }
         return result;
