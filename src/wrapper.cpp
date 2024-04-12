@@ -62,11 +62,13 @@ std::vector<double> nabla4_benchmark_unstructured_gridtools(std::vector<std::arr
     } else if constexpr (I == backend_impl::cpu_kfirst) {
         return run_benchmark<nabla4_unstructured_gt<storage::cpu_kfirst>, I>(
             std::make_tuple(e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
+#ifdef __CUDACC__
     } else if constexpr (I == backend_impl::gpu) {
         return run_benchmark<nabla4_unstructured_gt<storage::gpu>, I>(
             std::make_tuple(e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
+#endif
     } else {
-        throw std::runtime_error("[wrapper.cpp] Undefined backend implementation");
+        throw std::runtime_error("[wrapper] Undefined backend implementation");
     }
 }
 
@@ -400,6 +402,7 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_gpu_gridtools(
     std::vector<WP_TYPE> &inv_vert_vert_length,
     std::vector<WP_TYPE> &inv_primal_edge_length) {
     throw std::runtime_error("GPU backend not enabled");
+    return {};
 }
 #endif
 

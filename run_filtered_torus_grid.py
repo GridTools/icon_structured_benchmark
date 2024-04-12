@@ -233,7 +233,7 @@ def run_sanity_checks(filtered_e2c2v, filtered_e2ecv, grid, lon_dim, lat_dim):
         )
         print("unstructured gpu sanity check passed")
     except RuntimeError as e:
-        print(e)
+        print("C++ runtime exception:", e)
 
     print("Running structured cpu_ifirst sanity check")
     z_nabla4_e2_comp_structured_cpu_ifirst_gridtools = (
@@ -513,19 +513,22 @@ def run_benchmarks():
         )
 
     if args.backend in ["all", "gpu"]:
-        runtimes[
-            "nabla4_benchmark_unstructured_gpu_gridtools"
-        ] = icon_benchmark.nabla4_benchmark_unstructured_gpu_gridtools(
-            torus_grid.get_offset_provider("E2C2V").table,
-            torus_grid.get_offset_provider("E2ECV").table,
-            torus_grid.num_cells,
-            torus_grid.num_vertices,
-            torus_grid.num_edges,
-            torus_grid.num_levels,
-            torus_grid.size[E2C2VDim],
-            repetitions,
-            dry_runs,
-        )
+        try:
+            runtimes[
+                "nabla4_benchmark_unstructured_gpu_gridtools"
+            ] = icon_benchmark.nabla4_benchmark_unstructured_gpu_gridtools(
+                torus_grid.get_offset_provider("E2C2V").table,
+                torus_grid.get_offset_provider("E2ECV").table,
+                torus_grid.num_cells,
+                torus_grid.num_vertices,
+                torus_grid.num_edges,
+                torus_grid.num_levels,
+                torus_grid.size[E2C2VDim],
+                repetitions,
+                dry_runs,
+            )
+        except RuntimeError as e:
+            print("C++ runtime exception:", e)
 
     print_median_runtimes(runtimes)
 
