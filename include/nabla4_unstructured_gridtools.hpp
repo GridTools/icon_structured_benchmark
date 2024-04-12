@@ -217,7 +217,7 @@ __global__ void run_gpu(std::size_t EdgeDim,
 template <typename T>
 void nabla4_unstructured_gt<T>::run_gpu_helper() {
     cudaError_t errSync, errAsync;
-    dim3 tblocks(32, 16, 1);
+    dim3 tblocks(16, 10, 1);
     dim3 grid(
         (e2c2v_gt->const_host_view().lengths()[0] + tblocks.x - 1) / tblocks.x, (KDim + tblocks.y - 1) / tblocks.y, 1);
     run_gpu<<<grid, tblocks>>>(e2c2v_gt->const_host_view().lengths()[0],
