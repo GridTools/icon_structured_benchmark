@@ -164,6 +164,7 @@ class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
             }
         }
     };
+    void run_gpu_helper();
 
   public:
     /// Compute function timed for benchmarking
@@ -173,8 +174,133 @@ class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
             run_cpu_ifirst();
         } else if constexpr (I == backend_impl::cpu_kfirst) {
             run_cpu_kfirst();
+        } else if constexpr (I == backend_impl::gpu) {
+            run_gpu_helper();
         } else {
             throw std::runtime_error("Undefined backend implementation");
         }
     };
 };
+
+#if defined(__CUDACC__)
+__global__ void run_gpu(std::size_t KDim,
+    std::size_t x_dim,
+    std::size_t y_dim,
+    std::size_t halo,
+    nabla4_structured_torus_halo_gt<storage::gpu>::data_store_2d_ctv_VP_t u_vert_gt_tv,
+    nabla4_structured_torus_halo_gt<storage::gpu>::data_store_2d_ctv_VP_t v_vert_gt_tv,
+    nabla4_structured_torus_halo_gt<storage::gpu>::data_store_1d_ctv_WP_t primal_normal_vert_v1_gt_tv,
+    nabla4_structured_torus_halo_gt<storage::gpu>::data_store_1d_ctv_WP_t primal_normal_vert_v2_gt_tv,
+    nabla4_structured_torus_halo_gt<storage::gpu>::data_store_2d_ctv_WP_t z_nabla2_e_gt_tv,
+    nabla4_structured_torus_halo_gt<storage::gpu>::data_store_1d_ctv_WP_t inv_vert_vert_length_gt_tv,
+    nabla4_structured_torus_halo_gt<storage::gpu>::data_store_1d_ctv_WP_t inv_primal_edge_length_gt_tv,
+    nabla4_structured_torus_halo_gt<storage::gpu>::data_store_2d_tv_VP_t z_nabla4_e2_wp_gt_tv) {
+    for (std::size_t i{blockIdx.x * blockDim.x + threadIdx.x + halo}; i < x_dim - halo; i += blockDim.x * gridDim.x) {
+        for (std::size_t j{blockIdx.y * blockDim.y + threadIdx.y + halo}; j < y_dim - halo;
+             j += blockDim.y * gridDim.y) {
+            for (std::size_t k_index{blockIdx.z * blockDim.z + threadIdx.z}; k_index < KDim;
+                 k_index += blockDim.z * gridDim.z) {
+                auto local_edge_index = ((j - halo) * (x_dim - 2 * halo) + (i - halo)) * 3;
+                const auto global_edge_index = (j * x_dim + i) * 3;
+                const auto i_j = j * x_dim + i;
+                const auto ip1_j = j * x_dim + i + 1;
+                const auto i_jp1 = (j + 1) * x_dim + i;
+                const auto i_jm1 = (j - 1) * x_dim + i;
+                const auto ip1_jm1 = (j - 1) * x_dim + i + 1;
+                const auto im1_jp1 = (j + 1) * x_dim + i - 1;
+                auto E2ECV_0 = global_edge_index * 4;
+                auto E2ECV_1 = global_edge_index * 4 + 1;
+                auto E2ECV_2 = global_edge_index * 4 + 2;
+                auto E2ECV_3 = global_edge_index * 4 + 3;
+                double nabv_tang_wp = u_vert_gt_tv(i_j, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_0) +
+                                      v_vert_gt_tv(i_j, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_0) +
+                                      u_vert_gt_tv(i_jp1, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_1) +
+                                      v_vert_gt_tv(i_jp1, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_1);
+                double nabv_norm_wp = u_vert_gt_tv(im1_jp1, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_2) +
+                                      v_vert_gt_tv(im1_jp1, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_2) +
+                                      u_vert_gt_tv(ip1_j, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_3) +
+                                      v_vert_gt_tv(ip1_j, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_3);
+                z_nabla4_e2_wp_gt_tv(local_edge_index, k_index) =
+                    4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_tv(local_edge_index, k_index)) *
+                                  (inv_vert_vert_length_gt_tv(local_edge_index) *
+                                      inv_vert_vert_length_gt_tv(local_edge_index)) +
+                              (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(local_edge_index, k_index)) *
+                                  (inv_primal_edge_length_gt_tv(local_edge_index) *
+                                      inv_primal_edge_length_gt_tv(local_edge_index)));
+                local_edge_index += 1;
+                E2ECV_0 += 4;
+                E2ECV_1 += 4;
+                E2ECV_2 += 4;
+                E2ECV_3 += 4;
+                nabv_tang_wp = u_vert_gt_tv(i_j, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_0) +
+                               v_vert_gt_tv(i_j, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_0) +
+                               u_vert_gt_tv(ip1_j, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_1) +
+                               v_vert_gt_tv(ip1_j, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_1);
+                nabv_norm_wp = u_vert_gt_tv(i_jp1, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_2) +
+                               v_vert_gt_tv(i_jp1, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_2) +
+                               u_vert_gt_tv(ip1_jm1, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_3) +
+                               v_vert_gt_tv(ip1_jm1, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_3);
+                z_nabla4_e2_wp_gt_tv(local_edge_index, k_index) =
+                    4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_tv(local_edge_index, k_index)) *
+                                  (inv_vert_vert_length_gt_tv(local_edge_index) *
+                                      inv_vert_vert_length_gt_tv(local_edge_index)) +
+                              (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(local_edge_index, k_index)) *
+                                  (inv_primal_edge_length_gt_tv(local_edge_index) *
+                                      inv_primal_edge_length_gt_tv(local_edge_index)));
+                local_edge_index += 1;
+                E2ECV_0 += 4;
+                E2ECV_1 += 4;
+                E2ECV_2 += 4;
+                E2ECV_3 += 4;
+                nabv_tang_wp = u_vert_gt_tv(i_j, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_0) +
+                               v_vert_gt_tv(i_j, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_0) +
+                               u_vert_gt_tv(ip1_jm1, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_1) +
+                               v_vert_gt_tv(ip1_jm1, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_1);
+                nabv_norm_wp = u_vert_gt_tv(ip1_j, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_2) +
+                               v_vert_gt_tv(ip1_j, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_2) +
+                               u_vert_gt_tv(i_jm1, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_3) +
+                               v_vert_gt_tv(i_jm1, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_3);
+                z_nabla4_e2_wp_gt_tv(local_edge_index, k_index) =
+                    4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_tv(local_edge_index, k_index)) *
+                                  (inv_vert_vert_length_gt_tv(local_edge_index) *
+                                      inv_vert_vert_length_gt_tv(local_edge_index)) +
+                              (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(local_edge_index, k_index)) *
+                                  (inv_primal_edge_length_gt_tv(local_edge_index) *
+                                      inv_primal_edge_length_gt_tv(local_edge_index)));
+            };
+        };
+    };
+};
+
+template <typename T>
+void nabla4_structured_torus_halo_gt<T>::run_gpu_helper() {
+    cudaError_t errSync, errAsync;
+    dim3 tblocks(32, 16, KDim);
+    dim3 grid((x_dim + tblocks.x - 1) / tblocks.x, (y_dim + tblocks.y - 1) / tblocks.y, 1);
+    run_gpu<<<grid, tblocks>>>(KDim,
+        x_dim,
+        y_dim,
+        halo,
+        u_vert_gt_tv,
+        v_vert_gt_tv,
+        primal_normal_vert_v1_gt_tv,
+        primal_normal_vert_v2_gt_tv,
+        z_nabla2_e_gt_tv,
+        inv_vert_vert_length_gt_tv,
+        inv_primal_edge_length_gt_tv,
+        z_nabla4_e2_wp_gt_tv);
+    errSync = cudaGetLastError();
+    errAsync = cudaDeviceSynchronize();
+    if (errSync != cudaSuccess) {
+        printf("Sync error: %s\n", cudaGetErrorString(errSync));
+    }
+    if (errAsync != cudaSuccess) {
+        printf("Async error: %s\n", cudaGetErrorString(errAsync));
+    }
+};
+#else
+template <typename T>
+void nabla4_structured_torus_halo_gt<T>::run_gpu_helper() {
+    throw std::runtime_error("GPU backend not enabled");
+};
+#endif
