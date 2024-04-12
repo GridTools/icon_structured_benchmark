@@ -53,7 +53,6 @@ def init_grid_manager(fname, num_levels=65, transformation=ToGt4PyTransformation
 
 def get_torus_grid(filename, num_levels, transformation):
     grid_manager = init_grid_manager(filename, num_levels, transformation)
-    grid_manager()
     simple_grid = grid_manager.get_grid()
     return simple_grid
 
