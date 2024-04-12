@@ -109,7 +109,6 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
     };
 
   private:
-
     void run_cpu_ifirst() {
         for (std::size_t k_index{}; k_index < KDim; ++k_index) {
 #ifdef __clang__
@@ -170,14 +169,26 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
         }
     }
 };
+
 #if defined(__CUDACC__)
-__global__ void run_gpu(std::size_t EdgeDim, std::size_t KDim, nabla4_unstructured_gt<storage::gpu>::neighbors_gt_ctv_t e2c2v_gt_tv, nabla4_unstructured_gt<storage::gpu>::neighbors_gt_ctv_t e2ecv_gt_tv, nabla4_unstructured_gt<storage::gpu>::data_store_2d_ctv_VP_t u_vert_gt_tv, nabla4_unstructured_gt<storage::gpu>::data_store_2d_ctv_VP_t v_vert_gt_tv, nabla4_unstructured_gt<storage::gpu>::data_store_1d_ctv_WP_t primal_normal_vert_v1_gt_tv, nabla4_unstructured_gt<storage::gpu>::data_store_1d_ctv_WP_t primal_normal_vert_v2_gt_tv, nabla4_unstructured_gt<storage::gpu>::data_store_2d_ctv_WP_t z_nabla2_e_gt_tv, nabla4_unstructured_gt<storage::gpu>::data_store_1d_ctv_WP_t inv_vert_vert_length_gt_tv, nabla4_unstructured_gt<storage::gpu>::data_store_1d_ctv_WP_t inv_primal_edge_length_gt_tv, nabla4_unstructured_gt<storage::gpu>::data_store_2d_tv_VP_t z_nabla4_e2_wp_gt_tv) {
+__global__ void run_gpu(std::size_t EdgeDim,
+    std::size_t KDim,
+    nabla4_unstructured_gt<storage::gpu>::neighbors_gt_ctv_t e2c2v_gt_tv,
+    nabla4_unstructured_gt<storage::gpu>::neighbors_gt_ctv_t e2ecv_gt_tv,
+    nabla4_unstructured_gt<storage::gpu>::data_store_2d_ctv_VP_t u_vert_gt_tv,
+    nabla4_unstructured_gt<storage::gpu>::data_store_2d_ctv_VP_t v_vert_gt_tv,
+    nabla4_unstructured_gt<storage::gpu>::data_store_1d_ctv_WP_t primal_normal_vert_v1_gt_tv,
+    nabla4_unstructured_gt<storage::gpu>::data_store_1d_ctv_WP_t primal_normal_vert_v2_gt_tv,
+    nabla4_unstructured_gt<storage::gpu>::data_store_2d_ctv_WP_t z_nabla2_e_gt_tv,
+    nabla4_unstructured_gt<storage::gpu>::data_store_1d_ctv_WP_t inv_vert_vert_length_gt_tv,
+    nabla4_unstructured_gt<storage::gpu>::data_store_1d_ctv_WP_t inv_primal_edge_length_gt_tv,
+    nabla4_unstructured_gt<storage::gpu>::data_store_2d_tv_VP_t z_nabla4_e2_wp_gt_tv) {
     const auto edge_index = blockIdx.x * blockDim.x + threadIdx.x;
     const auto k_index = blockIdx.y * blockDim.y + threadIdx.y;
     for (std::size_t edge_index{blockIdx.x * blockDim.x + threadIdx.x}; edge_index < EdgeDim;
-            edge_index += blockDim.x * gridDim.x) {
+         edge_index += blockDim.x * gridDim.x) {
         for (std::size_t k_index{blockIdx.y * blockDim.y + threadIdx.y}; k_index < KDim;
-                k_index += blockDim.y * gridDim.y) {
+             k_index += blockDim.y * gridDim.y) {
             const auto E2C2V_0 = e2c2v_gt_tv(edge_index, 0);
             const auto E2C2V_1 = e2c2v_gt_tv(edge_index, 1);
             const auto E2C2V_2 = e2c2v_gt_tv(edge_index, 2);
@@ -187,30 +198,51 @@ __global__ void run_gpu(std::size_t EdgeDim, std::size_t KDim, nabla4_unstructur
             const auto E2ECV_2 = e2ecv_gt_tv(edge_index, 2);
             const auto E2ECV_3 = e2ecv_gt_tv(edge_index, 3);
             double nabv_tang_wp = u_vert_gt_tv(E2C2V_0, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_0) +
-                              v_vert_gt_tv(E2C2V_0, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_0) +
-                              u_vert_gt_tv(E2C2V_1, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_1) +
-                              v_vert_gt_tv(E2C2V_1, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_1);
+                                  v_vert_gt_tv(E2C2V_0, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_0) +
+                                  u_vert_gt_tv(E2C2V_1, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_1) +
+                                  v_vert_gt_tv(E2C2V_1, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_1);
             double nabv_norm_wp = u_vert_gt_tv(E2C2V_2, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_2) +
-                                v_vert_gt_tv(E2C2V_2, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_2) +
-                                u_vert_gt_tv(E2C2V_3, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_3) +
-                                v_vert_gt_tv(E2C2V_3, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_3);
+                                  v_vert_gt_tv(E2C2V_2, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_2) +
+                                  u_vert_gt_tv(E2C2V_3, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_3) +
+                                  v_vert_gt_tv(E2C2V_3, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_3);
             z_nabla4_e2_wp_gt_tv(edge_index, k_index) =
                 4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_tv(edge_index, k_index)) *
-                            (inv_vert_vert_length_gt_tv(edge_index) * inv_vert_vert_length_gt_tv(edge_index)) +
-                        (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(edge_index, k_index)) *
-                            (inv_primal_edge_length_gt_tv(edge_index) * inv_primal_edge_length_gt_tv(edge_index)));
+                              (inv_vert_vert_length_gt_tv(edge_index) * inv_vert_vert_length_gt_tv(edge_index)) +
+                          (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(edge_index, k_index)) *
+                              (inv_primal_edge_length_gt_tv(edge_index) * inv_primal_edge_length_gt_tv(edge_index)));
         };
     };
 };
 
-template<typename T>
+template <typename T>
 void nabla4_unstructured_gt<T>::run_gpu_helper() {
-    dim3 tblocks(32, 32, 1);
-    dim3 grid((e2c2v_gt->const_host_view().lengths()[0] + tblocks.x - 1) / tblocks.x, (KDim + tblocks.y - 1) / tblocks.y, 1);
-    run_gpu<<<grid, tblocks>>>(e2c2v_gt->const_host_view().lengths()[0], KDim, e2c2v_gt_tv, e2ecv_gt_tv, u_vert_gt_tv, v_vert_gt_tv, primal_normal_vert_v1_gt_tv, primal_normal_vert_v2_gt_tv, z_nabla2_e_gt_tv, inv_vert_vert_length_gt_tv, inv_primal_edge_length_gt_tv, z_nabla4_e2_wp_gt_tv);
+    cudaError_t errSync, errAsync;
+    dim3 tblocks(32, 16, 1);
+    dim3 grid(
+        (e2c2v_gt->const_host_view().lengths()[0] + tblocks.x - 1) / tblocks.x, (KDim + tblocks.y - 1) / tblocks.y, 1);
+    run_gpu<<<grid, tblocks>>>(e2c2v_gt->const_host_view().lengths()[0],
+        KDim,
+        e2c2v_gt_tv,
+        e2ecv_gt_tv,
+        u_vert_gt_tv,
+        v_vert_gt_tv,
+        primal_normal_vert_v1_gt_tv,
+        primal_normal_vert_v2_gt_tv,
+        z_nabla2_e_gt_tv,
+        inv_vert_vert_length_gt_tv,
+        inv_primal_edge_length_gt_tv,
+        z_nabla4_e2_wp_gt_tv);
+    errSync = cudaGetLastError();
+    errAsync = cudaDeviceSynchronize();
+    if (errSync != cudaSuccess) {
+        printf("Sync error: %s\n", cudaGetErrorString(errSync));
+    }
+    if (errAsync != cudaSuccess) {
+        printf("Async error: %s\n", cudaGetErrorString(errAsync));
+    }
 };
 #else
-template<typename T>
+template <typename T>
 void nabla4_unstructured_gt<T>::run_gpu_helper() {
     throw std::runtime_error("GPU backend not enabled");
 };
