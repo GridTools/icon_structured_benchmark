@@ -311,7 +311,7 @@ def run_sanity_checks(filtered_e2c2v, filtered_e2ecv, grid, lon_dim, lat_dim):
             z_nabla4_e2_comp_structured_torus_gpu_gridtools_halo,
             random_validation_data.z_nabla4_e2_wp,
         )
-        print("unstructured gpu sanity check passed")
+        print("structured gpu sanity check passed")
     except RuntimeError as e:
         print("C++ runtime exception:", e)
     print("Sanity checks pass")
@@ -551,6 +551,20 @@ def run_benchmarks():
                 torus_grid.num_edges,
                 torus_grid.num_levels,
                 torus_grid.size[E2C2VDim],
+                repetitions,
+                dry_runs,
+            )
+            runtimes[
+                "nabla4_benchmark_structured_torus_gpu_gridtools_halo"
+            ] = icon_benchmark.nabla4_benchmark_structured_torus_gpu_gridtools_halo(
+                torus_grid.num_cells,
+                torus_grid.num_vertices,
+                torus_grid.num_edges,
+                torus_grid.num_levels,
+                torus_grid.size[E2C2VDim],
+                grid_cartesian_dimensions[0],
+                grid_cartesian_dimensions[1],
+                2,
                 repetitions,
                 dry_runs,
             )
