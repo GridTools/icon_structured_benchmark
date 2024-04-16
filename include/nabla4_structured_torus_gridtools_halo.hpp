@@ -276,9 +276,8 @@ __global__ void run_gpu(std::size_t KDim,
 template <typename T>
 void nabla4_structured_torus_halo_gt<T>::run_gpu_helper() {
     cudaError_t errSync, errAsync;
-    dim3 tblocks(16, 8, 1);
-    // dim3 grid((x_dim + tblocks.x - 1) / tblocks.x, (y_dim + tblocks.y - 1) / tblocks.y, KDim / 4);
-    dim3 grid(32, 32, 1);
+    dim3 tblocks(16, 10, 1);
+    dim3 grid((x_dim + tblocks.x - 1) / tblocks.x, (y_dim + tblocks.y - 1) / tblocks.y, 1);
     run_gpu<<<grid, tblocks>>>(KDim,
         x_dim,
         y_dim,
