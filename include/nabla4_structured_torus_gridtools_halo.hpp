@@ -197,10 +197,10 @@ __global__ void run_gpu(std::size_t KDim,
     nabla4_structured_torus_halo_gt<storage::gpu>::data_store_2d_tv_VP_t z_nabla4_e2_wp_gt_tv) {
     for (std::size_t k_index{blockIdx.z * blockDim.z + threadIdx.z}; k_index < KDim;
          k_index += blockDim.z * gridDim.z) {
-        for (std::size_t i{blockIdx.x * blockDim.x + threadIdx.x + halo}; i < x_dim - halo;
-             i += blockDim.x * gridDim.x) {
-            for (std::size_t j{blockIdx.y * blockDim.y + threadIdx.y + halo}; j < y_dim - halo;
-                 j += blockDim.y * gridDim.y) {
+        for (std::size_t j{blockIdx.y * blockDim.y + threadIdx.y + halo}; j < y_dim - halo;
+             j += blockDim.y * gridDim.y) {
+            for (std::size_t i{blockIdx.x * blockDim.x + threadIdx.x + halo}; i < x_dim - halo;
+                 i += blockDim.x * gridDim.x) {
                 auto local_edge_index = ((j - halo) * (x_dim - 2 * halo) + (i - halo)) * 3;
                 const auto global_edge_index = (j * x_dim + i) * 3;
                 const auto i_j = j * x_dim + i;
