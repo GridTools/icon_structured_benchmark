@@ -43,16 +43,27 @@ def get_torus_cartesian_dimensions(filename):
     return (longitude_dimension, latitude_dimension)
 
 
-def init_grid_manager(fname, num_levels=65, transformation=ToGt4PyTransformation()):
+def init_grid_manager(
+    fname,
+    num_levels=65,
+    transformation=ToGt4PyTransformation(),
+    e2c2v_ordering="per-vertex",
+):
     grid_manager = GridManager(
-        transformation, fname, VerticalGridSize(num_levels), True
+        transformation,
+        fname,
+        VerticalGridSize(num_levels),
+        True,
+        e2c2v_ordering == "per-orientation",
     )
     grid_manager()
     return grid_manager
 
 
-def get_torus_grid(filename, num_levels, transformation):
-    grid_manager = init_grid_manager(filename, num_levels, transformation)
+def get_torus_grid(filename, num_levels, transformation, e2c2v_ordering="per-vertex"):
+    grid_manager = init_grid_manager(
+        filename, num_levels, transformation, e2c2v_ordering
+    )
     simple_grid = grid_manager.get_grid()
     return simple_grid
 
@@ -349,6 +360,12 @@ def parse_arguments():
         default="all",
         help="Which backend to benchmark",
     )
+    parser.add_argument(
+        "--e2c2v-ordering",
+        choices=["per-vertex", "per-orientation"],
+        default="per-vertex",
+        help="E2C2V ordering",
+    )
 
     return parser.parse_args()
 
@@ -362,7 +379,9 @@ def run_benchmarks():
         else IndexTransformation()
     )
 
-    torus_grid = get_torus_grid(args.grid, args.klevels, transformation)
+    torus_grid = get_torus_grid(
+        args.grid, args.klevels, transformation, args.e2c2v_ordering
+    )
 
     repetitions = args.repetitions
     dry_runs = 1 if args.dry_run else 0
