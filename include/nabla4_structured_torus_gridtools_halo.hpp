@@ -275,8 +275,9 @@ __global__ void run_gpu(std::size_t KDim,
 template <typename T>
 void nabla4_structured_torus_halo_gt<T>::run_gpu_helper() {
     cudaError_t errSync, errAsync;
-    dim3 tblocks(32, 16, KDim);
-    dim3 grid((x_dim + tblocks.x - 1) / tblocks.x, (y_dim + tblocks.y - 1) / tblocks.y, 1);
+    dim3 tblocks(16, 8, 1);
+    //dim3 grid((x_dim + tblocks.x - 1) / tblocks.x, (y_dim + tblocks.y - 1) / tblocks.y, KDim / 4);
+    dim3 grid (32, 32, 1);
     run_gpu<<<grid, tblocks>>>(KDim,
         x_dim,
         y_dim,
@@ -292,10 +293,12 @@ void nabla4_structured_torus_halo_gt<T>::run_gpu_helper() {
     errSync = cudaGetLastError();
     errAsync = cudaDeviceSynchronize();
     if (errSync != cudaSuccess) {
-        printf("Sync error: %s\n", cudaGetErrorString(errSync));
+	const auto error_string = "Sync error: " + static_cast<std::string>(cudaGetErrorString(errSync));
+        throw std::runtime_error(error_string);
     }
     if (errAsync != cudaSuccess) {
-        printf("Async error: %s\n", cudaGetErrorString(errAsync));
+	const auto error_string = "Async error: " + static_cast<std::string>(cudaGetErrorString(errSync));
+        throw std::runtime_error(error_string);
     }
 };
 #else
