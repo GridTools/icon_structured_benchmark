@@ -183,7 +183,7 @@ class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
 };
 
 #if defined(__CUDACC__)
-__global__ void run_gpu(std::size_t KDim,
+__global__ void __launch_bounds__(192, 2) run_gpu(std::size_t KDim,
     std::size_t x_dim,
     std::size_t y_dim,
     std::size_t halo,
@@ -195,24 +195,26 @@ __global__ void run_gpu(std::size_t KDim,
     nabla4_structured_torus_halo_gt<storage::gpu>::data_store_1d_ctv_WP_t inv_vert_vert_length_gt_tv,
     nabla4_structured_torus_halo_gt<storage::gpu>::data_store_1d_ctv_WP_t inv_primal_edge_length_gt_tv,
     nabla4_structured_torus_halo_gt<storage::gpu>::data_store_2d_tv_VP_t z_nabla4_e2_wp_gt_tv) {
+    const auto edges_per_orientation = (x_dim - 2 * halo) * (y_dim - halo * 2);
+    const auto global_edges_per_orientation = x_dim * y_dim * 4;
     for (std::size_t k_index{blockIdx.z * blockDim.z + threadIdx.z}; k_index < KDim;
          k_index += blockDim.z * gridDim.z) {
-        for (std::size_t j{blockIdx.y * blockDim.y + threadIdx.y + halo}; j < y_dim - halo;
-             j += blockDim.y * gridDim.y) {
-            for (std::size_t i{blockIdx.x * blockDim.x + threadIdx.x + halo}; i < x_dim - halo;
-                 i += blockDim.x * gridDim.x) {
-                auto local_edge_index = ((j - halo) * (x_dim - 2 * halo) + (i - halo)) * 3;
-                const auto global_edge_index = (j * x_dim + i) * 3;
+        for (std::size_t j{blockIdx.x * blockDim.x + threadIdx.x + halo}; j < y_dim - halo;
+             j += blockDim.x * gridDim.x) {
+            for (std::size_t i{blockIdx.y * blockDim.y + threadIdx.y + halo}; i < x_dim - halo;
+                 i += blockDim.y * gridDim.y) {
+                auto local_edge_index = ((j - halo) * (x_dim - 2 * halo) + (i - halo));
+                const auto global_edge_index = (j * x_dim + i) * 4;
                 const auto i_j = j * x_dim + i;
                 const auto ip1_j = j * x_dim + i + 1;
                 const auto i_jp1 = (j + 1) * x_dim + i;
                 const auto i_jm1 = (j - 1) * x_dim + i;
                 const auto ip1_jm1 = (j - 1) * x_dim + i + 1;
                 const auto im1_jp1 = (j + 1) * x_dim + i - 1;
-                auto E2ECV_0 = global_edge_index * 4;
-                auto E2ECV_1 = global_edge_index * 4 + 1;
-                auto E2ECV_2 = global_edge_index * 4 + 2;
-                auto E2ECV_3 = global_edge_index * 4 + 3;
+                auto E2ECV_0 = global_edge_index;
+                auto E2ECV_1 = global_edge_index + 1;
+                auto E2ECV_2 = global_edge_index + 2;
+                auto E2ECV_3 = global_edge_index + 3;
                 double nabv_tang_wp = u_vert_gt_tv(i_j, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_0) +
                                       v_vert_gt_tv(i_j, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_0) +
                                       u_vert_gt_tv(i_jp1, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_1) +
@@ -228,11 +230,11 @@ __global__ void run_gpu(std::size_t KDim,
                               (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(local_edge_index, k_index)) *
                                   (inv_primal_edge_length_gt_tv(local_edge_index) *
                                       inv_primal_edge_length_gt_tv(local_edge_index)));
-                local_edge_index += 1;
-                E2ECV_0 += 4;
-                E2ECV_1 += 4;
-                E2ECV_2 += 4;
-                E2ECV_3 += 4;
+                local_edge_index += edges_per_orientation;
+                E2ECV_0 += global_edges_per_orientation;
+                E2ECV_1 += global_edges_per_orientation;
+                E2ECV_2 += global_edges_per_orientation;
+                E2ECV_3 += global_edges_per_orientation;
                 nabv_tang_wp = u_vert_gt_tv(i_j, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_0) +
                                v_vert_gt_tv(i_j, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_0) +
                                u_vert_gt_tv(ip1_j, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_1) +
@@ -248,11 +250,11 @@ __global__ void run_gpu(std::size_t KDim,
                               (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(local_edge_index, k_index)) *
                                   (inv_primal_edge_length_gt_tv(local_edge_index) *
                                       inv_primal_edge_length_gt_tv(local_edge_index)));
-                local_edge_index += 1;
-                E2ECV_0 += 4;
-                E2ECV_1 += 4;
-                E2ECV_2 += 4;
-                E2ECV_3 += 4;
+                local_edge_index += edges_per_orientation;
+                E2ECV_0 += global_edges_per_orientation;
+                E2ECV_1 += global_edges_per_orientation;
+                E2ECV_2 += global_edges_per_orientation;
+                E2ECV_3 += global_edges_per_orientation;
                 nabv_tang_wp = u_vert_gt_tv(i_j, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_0) +
                                v_vert_gt_tv(i_j, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_0) +
                                u_vert_gt_tv(ip1_jm1, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_1) +
@@ -276,8 +278,8 @@ __global__ void run_gpu(std::size_t KDim,
 template <typename T>
 void nabla4_structured_torus_halo_gt<T>::run_gpu_helper() {
     cudaError_t errSync, errAsync;
-    dim3 tblocks(16, 10, 1);
-    dim3 grid((x_dim + tblocks.x - 1) / tblocks.x, (y_dim + tblocks.y - 1) / tblocks.y, 1);
+    dim3 tblocks(16, 12, 1);
+    dim3 grid((x_dim + tblocks.x - 1) / tblocks.x, (y_dim + tblocks.y - 1) / tblocks.y, KDim);
     run_gpu<<<grid, tblocks>>>(KDim,
         x_dim,
         y_dim,
