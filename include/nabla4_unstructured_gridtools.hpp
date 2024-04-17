@@ -172,7 +172,7 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
 };
 
 #if defined(__CUDACC__)
-__global__ void run_gpu(std::size_t EdgeDim,
+__global__ void __launch_bounds__(160, 2) run_gpu(std::size_t EdgeDim,
     std::size_t KDim,
     nabla4_unstructured_gt<storage::gpu>::neighbors_gt_ctv_t e2c2v_gt_tv,
     nabla4_unstructured_gt<storage::gpu>::neighbors_gt_ctv_t e2ecv_gt_tv,
@@ -186,10 +186,10 @@ __global__ void run_gpu(std::size_t EdgeDim,
     nabla4_unstructured_gt<storage::gpu>::data_store_2d_tv_VP_t z_nabla4_e2_wp_gt_tv) {
     const auto edge_index = blockIdx.x * blockDim.x + threadIdx.x;
     const auto k_index = blockIdx.y * blockDim.y + threadIdx.y;
-    for (std::size_t edge_index{blockIdx.x * blockDim.x + threadIdx.x}; edge_index < EdgeDim;
-         edge_index += blockDim.x * gridDim.x) {
-        for (std::size_t k_index{blockIdx.y * blockDim.y + threadIdx.y}; k_index < KDim;
-             k_index += blockDim.y * gridDim.y) {
+    for (std::size_t k_index{blockIdx.y * blockDim.y + threadIdx.y}; k_index < KDim;
+         k_index += blockDim.y * gridDim.y) {
+        for (std::size_t edge_index{blockIdx.x * blockDim.x + threadIdx.x}; edge_index < EdgeDim;
+             edge_index += blockDim.x * gridDim.x) {
             const auto E2C2V_0 = e2c2v_gt_tv(edge_index, 0);
             const auto E2C2V_1 = e2c2v_gt_tv(edge_index, 1);
             const auto E2C2V_2 = e2c2v_gt_tv(edge_index, 2);
