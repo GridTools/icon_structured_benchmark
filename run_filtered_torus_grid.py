@@ -68,29 +68,77 @@ def get_torus_grid(filename, num_levels, transformation, e2c2v_ordering="per-ver
     return simple_grid
 
 
-def filter_edge_vector(vector, grid_cartesian_dimensions):
+def filter_edge_vector(vector, grid_cartesian_dimensions, e2c2v_ordering="per-vertex"):
     filtered_vector = []
-    for i in range(grid_cartesian_dimensions[0]):
-        for j in range(grid_cartesian_dimensions[1]):
-            if (
-                i > 1
-                and j > 1
-                and i < grid_cartesian_dimensions[0] - 2
-                and j < grid_cartesian_dimensions[1] - 2
-            ):
-                filtered_vector.append(
-                    vector[(i * grid_cartesian_dimensions[1] + j) * 3]
-                )
-                filtered_vector.append(
-                    vector[(i * grid_cartesian_dimensions[1] + j) * 3 + 1]
-                )
-                filtered_vector.append(
-                    vector[(i * grid_cartesian_dimensions[1] + j) * 3 + 2]
-                )
+    if e2c2v_ordering == "per-vertex":
+        for i in range(grid_cartesian_dimensions[0]):
+            for j in range(grid_cartesian_dimensions[1]):
+                if (
+                    i > 1
+                    and j > 1
+                    and i < grid_cartesian_dimensions[0] - 2
+                    and j < grid_cartesian_dimensions[1] - 2
+                ):
+                    filtered_vector.append(
+                        vector[(i * grid_cartesian_dimensions[1] + j) * 3]
+                    )
+                    filtered_vector.append(
+                        vector[(i * grid_cartesian_dimensions[1] + j) * 3 + 1]
+                    )
+                    filtered_vector.append(
+                        vector[(i * grid_cartesian_dimensions[1] + j) * 3 + 2]
+                    )
+    else:
+        for i in range(grid_cartesian_dimensions[0]):
+            for j in range(grid_cartesian_dimensions[1]):
+                if (
+                    i > 1
+                    and j > 1
+                    and i < grid_cartesian_dimensions[0] - 2
+                    and j < grid_cartesian_dimensions[1] - 2
+                ):
+                    filtered_vector.append(
+                        vector[(i * grid_cartesian_dimensions[1] + j)]
+                    )
+        for i in range(grid_cartesian_dimensions[0]):
+            for j in range(grid_cartesian_dimensions[1]):
+                if (
+                    i > 1
+                    and j > 1
+                    and i < grid_cartesian_dimensions[0] - 2
+                    and j < grid_cartesian_dimensions[1] - 2
+                ):
+                    filtered_vector.append(
+                        vector[
+                            (i * grid_cartesian_dimensions[1] + j)
+                            + grid_cartesian_dimensions[0]
+                            * grid_cartesian_dimensions[1]
+                        ]
+                    )
+        for i in range(grid_cartesian_dimensions[0]):
+            for j in range(grid_cartesian_dimensions[1]):
+                if (
+                    i > 1
+                    and j > 1
+                    and i < grid_cartesian_dimensions[0] - 2
+                    and j < grid_cartesian_dimensions[1] - 2
+                ):
+                    filtered_vector.append(
+                        vector[
+                            (i * grid_cartesian_dimensions[1] + j)
+                            + (
+                                grid_cartesian_dimensions[0]
+                                * grid_cartesian_dimensions[1]
+                            )
+                            * 2
+                        ]
+                    )
     return np.array(filtered_vector)
 
 
-def run_sanity_checks(filtered_e2c2v, filtered_e2ecv, grid, lon_dim, lat_dim):
+def run_sanity_checks(
+    filtered_e2c2v, filtered_e2ecv, grid, lon_dim, lat_dim, backend="all_cpu"
+):
     print("Generating validation data")
     random_validation_data = icon_benchmark.get_nabla4_benchmark_validation_data(
         filtered_e2c2v,
@@ -105,122 +153,76 @@ def run_sanity_checks(filtered_e2c2v, filtered_e2ecv, grid, lon_dim, lat_dim):
     z_nabla4_e2_wp_gtfn = np.zeros(
         shape=(len(filtered_e2c2v), grid.num_levels), dtype=np.float64
     )
-    print("Running gtfn sanity check")
-    nabla4_gtfn.calculate_nabla4(
-        (
-            np.array(random_validation_data.u_vert, dtype=float).T.astype(np.float64),
-            (0, 0),
-        ),
-        (
-            np.array(random_validation_data.v_vert, dtype=float).T.astype(np.float64),
-            (0, 0),
-        ),
-        (
-            np.array(random_validation_data.primal_normal_vert_v1, dtype=float).astype(
-                np.float64
+    if backend in ["all_cpu", "gtfn"]:
+        print("Running gtfn sanity check")
+        nabla4_gtfn.calculate_nabla4(
+            (
+                np.array(random_validation_data.u_vert, dtype=float).T.astype(
+                    np.float64
+                ),
+                (0, 0),
             ),
-            (0,),
-        ),
-        (
-            np.array(random_validation_data.primal_normal_vert_v2, dtype=float).astype(
-                np.float64
+            (
+                np.array(random_validation_data.v_vert, dtype=float).T.astype(
+                    np.float64
+                ),
+                (0, 0),
             ),
-            (0,),
-        ),
-        (
-            np.array(random_validation_data.z_nabla2_e, dtype=float).T.astype(
-                np.float64
+            (
+                np.array(
+                    random_validation_data.primal_normal_vert_v1, dtype=float
+                ).astype(np.float64),
+                (0,),
             ),
-            (0, 0),
-        ),
-        (
-            np.array(random_validation_data.inv_vert_vert_length, dtype=float).astype(
-                np.float64
+            (
+                np.array(
+                    random_validation_data.primal_normal_vert_v2, dtype=float
+                ).astype(np.float64),
+                (0,),
             ),
-            (0,),
-        ),
-        (
-            np.array(random_validation_data.inv_primal_edge_length, dtype=float).astype(
-                np.float64
+            (
+                np.array(random_validation_data.z_nabla2_e, dtype=float).T.astype(
+                    np.float64
+                ),
+                (0, 0),
             ),
-            (0,),
-        ),
-        (z_nabla4_e2_wp_gtfn, (0, 0)),
-        0,
-        len(filtered_e2c2v),
-        0,
-        grid.num_levels,
-        (
-            filtered_e2c2v.astype(np.int64),
-            (0, 0),
-        ),
-        (
-            filtered_e2ecv.astype(np.int64),
-            (0, 0),
-        ),
-    )
-
-    assert np.allclose(
-        z_nabla4_e2_wp_gtfn.T,
-        random_validation_data.z_nabla4_e2_wp,
-    )
-    print("gtfn sanity check passed")
-
-    print("Running unstructured cpu_ifirst sanity check")
-    z_nabla4_e2_comp_unstructured_cpu_ifirst_gridtools = (
-        icon_benchmark.nabla4_validate_unstructured_cpu_ifirst_gridtools(
-            filtered_e2c2v,
-            filtered_e2ecv,
-            random_validation_data.CellDim,
-            random_validation_data.VertexDim,
-            random_validation_data.EdgeDim,
-            random_validation_data.KDim,
-            random_validation_data.ECVDim,
-            np.array(random_validation_data.u_vert).T,
-            np.array(random_validation_data.v_vert).T,
-            random_validation_data.primal_normal_vert_v1,
-            random_validation_data.primal_normal_vert_v2,
-            np.array(random_validation_data.z_nabla2_e).T,
-            random_validation_data.inv_vert_vert_length,
-            random_validation_data.inv_primal_edge_length,
+            (
+                np.array(
+                    random_validation_data.inv_vert_vert_length, dtype=float
+                ).astype(np.float64),
+                (0,),
+            ),
+            (
+                np.array(
+                    random_validation_data.inv_primal_edge_length, dtype=float
+                ).astype(np.float64),
+                (0,),
+            ),
+            (z_nabla4_e2_wp_gtfn, (0, 0)),
+            0,
+            len(filtered_e2c2v),
+            0,
+            grid.num_levels,
+            (
+                filtered_e2c2v.astype(np.int64),
+                (0, 0),
+            ),
+            (
+                filtered_e2ecv.astype(np.int64),
+                (0, 0),
+            ),
         )
-    )
-    print("Run unstructured cpu_ifirst sanity check")
 
-    assert np.allclose(
-        z_nabla4_e2_comp_unstructured_cpu_ifirst_gridtools,
-        random_validation_data.z_nabla4_e2_wp,
-    )
-    print("unstructured cpu_ifirst sanity check passed")
-    print("Running unstructured cpu_kfirst sanity check")
-    z_nabla4_e2_comp_unstructured_cpu_kfirst_gridtools = (
-        icon_benchmark.nabla4_validate_unstructured_cpu_kfirst_gridtools(
-            filtered_e2c2v,
-            filtered_e2ecv,
-            random_validation_data.CellDim,
-            random_validation_data.VertexDim,
-            random_validation_data.EdgeDim,
-            random_validation_data.KDim,
-            random_validation_data.ECVDim,
-            np.array(random_validation_data.u_vert).T,
-            np.array(random_validation_data.v_vert).T,
-            random_validation_data.primal_normal_vert_v1,
-            random_validation_data.primal_normal_vert_v2,
-            np.array(random_validation_data.z_nabla2_e).T,
-            random_validation_data.inv_vert_vert_length,
-            random_validation_data.inv_primal_edge_length,
+        assert np.allclose(
+            z_nabla4_e2_wp_gtfn.T,
+            random_validation_data.z_nabla4_e2_wp,
         )
-    )
+        print("gtfn sanity check passed")
 
-    assert np.allclose(
-        z_nabla4_e2_comp_unstructured_cpu_kfirst_gridtools,
-        random_validation_data.z_nabla4_e2_wp,
-    )
-    print("unstructured cpu_kfirst sanity check passed")
-    print("Running unstructured gpu sanity check")
-    try:
-        z_nabla4_e2_comp_unstructured_gpu_gridtools = (
-            icon_benchmark.nabla4_validate_unstructured_gpu_gridtools(
+    if backend in ["all_cpu", "cpu_ifirst"]:
+        print("Running unstructured cpu_ifirst sanity check")
+        z_nabla4_e2_comp_unstructured_cpu_ifirst_gridtools = (
+            icon_benchmark.nabla4_validate_unstructured_cpu_ifirst_gridtools(
                 filtered_e2c2v,
                 filtered_e2ecv,
                 random_validation_data.CellDim,
@@ -237,70 +239,72 @@ def run_sanity_checks(filtered_e2c2v, filtered_e2ecv, grid, lon_dim, lat_dim):
                 random_validation_data.inv_primal_edge_length,
             )
         )
+        print("Run unstructured cpu_ifirst sanity check")
+
         assert np.allclose(
-            z_nabla4_e2_comp_unstructured_gpu_gridtools,
+            z_nabla4_e2_comp_unstructured_cpu_ifirst_gridtools,
             random_validation_data.z_nabla4_e2_wp,
         )
-        print("unstructured gpu sanity check passed")
-    except RuntimeError as e:
-        print("C++ runtime exception:", e)
-
-    print("Running structured cpu_ifirst sanity check")
-    z_nabla4_e2_comp_structured_cpu_ifirst_gridtools = (
-        icon_benchmark.nabla4_validate_structured_torus_cpu_ifirst_gridtools_halo(
-            random_validation_data.CellDim,
-            random_validation_data.VertexDim,
-            random_validation_data.EdgeDim,
-            random_validation_data.KDim,
-            random_validation_data.ECVDim,
-            lon_dim,
-            lat_dim,
-            2,
-            np.array(random_validation_data.u_vert).T,
-            np.array(random_validation_data.v_vert).T,
-            random_validation_data.primal_normal_vert_v1,
-            random_validation_data.primal_normal_vert_v2,
-            np.array(random_validation_data.z_nabla2_e).T,
-            random_validation_data.inv_vert_vert_length,
-            random_validation_data.inv_primal_edge_length,
+        print("unstructured cpu_ifirst sanity check passed")
+    if backend in ["all_cpu", "cpu_kfirst"]:
+        print("Running unstructured cpu_kfirst sanity check")
+        z_nabla4_e2_comp_unstructured_cpu_kfirst_gridtools = (
+            icon_benchmark.nabla4_validate_unstructured_cpu_kfirst_gridtools(
+                filtered_e2c2v,
+                filtered_e2ecv,
+                random_validation_data.CellDim,
+                random_validation_data.VertexDim,
+                random_validation_data.EdgeDim,
+                random_validation_data.KDim,
+                random_validation_data.ECVDim,
+                np.array(random_validation_data.u_vert).T,
+                np.array(random_validation_data.v_vert).T,
+                random_validation_data.primal_normal_vert_v1,
+                random_validation_data.primal_normal_vert_v2,
+                np.array(random_validation_data.z_nabla2_e).T,
+                random_validation_data.inv_vert_vert_length,
+                random_validation_data.inv_primal_edge_length,
+            )
         )
-    )
 
-    assert np.allclose(
-        z_nabla4_e2_comp_structured_cpu_ifirst_gridtools,
-        random_validation_data.z_nabla4_e2_wp,
-    )
-    print("structured cpu_ifirst sanity check passed")
-    print("Running structured cpu_kfirst sanity check")
-    z_nabla4_e2_comp_structured_cpu_kfirst_gridtools = (
-        icon_benchmark.nabla4_validate_structured_torus_cpu_kfirst_gridtools_halo(
-            random_validation_data.CellDim,
-            random_validation_data.VertexDim,
-            random_validation_data.EdgeDim,
-            random_validation_data.KDim,
-            random_validation_data.ECVDim,
-            lon_dim,
-            lat_dim,
-            2,
-            np.array(random_validation_data.u_vert).T,
-            np.array(random_validation_data.v_vert).T,
-            random_validation_data.primal_normal_vert_v1,
-            random_validation_data.primal_normal_vert_v2,
-            np.array(random_validation_data.z_nabla2_e).T,
-            random_validation_data.inv_vert_vert_length,
-            random_validation_data.inv_primal_edge_length,
+        assert np.allclose(
+            z_nabla4_e2_comp_unstructured_cpu_kfirst_gridtools,
+            random_validation_data.z_nabla4_e2_wp,
         )
-    )
+        print("unstructured cpu_kfirst sanity check passed")
+    if backend in ["all_cpu", "gpu"]:
+        print("Running unstructured gpu sanity check")
+        try:
+            z_nabla4_e2_comp_unstructured_gpu_gridtools = (
+                icon_benchmark.nabla4_validate_unstructured_gpu_gridtools(
+                    filtered_e2c2v,
+                    filtered_e2ecv,
+                    random_validation_data.CellDim,
+                    random_validation_data.VertexDim,
+                    random_validation_data.EdgeDim,
+                    random_validation_data.KDim,
+                    random_validation_data.ECVDim,
+                    np.array(random_validation_data.u_vert).T,
+                    np.array(random_validation_data.v_vert).T,
+                    random_validation_data.primal_normal_vert_v1,
+                    random_validation_data.primal_normal_vert_v2,
+                    np.array(random_validation_data.z_nabla2_e).T,
+                    random_validation_data.inv_vert_vert_length,
+                    random_validation_data.inv_primal_edge_length,
+                )
+            )
+            assert np.allclose(
+                z_nabla4_e2_comp_unstructured_gpu_gridtools,
+                random_validation_data.z_nabla4_e2_wp,
+            )
+            print("unstructured gpu sanity check passed")
+        except RuntimeError as e:
+            print("C++ runtime exception:", e)
 
-    assert np.allclose(
-        z_nabla4_e2_comp_structured_cpu_kfirst_gridtools,
-        random_validation_data.z_nabla4_e2_wp,
-    )
-    print("structured cpu_kfirst sanity check passed")
-    print("Running structured gpu sanity check")
-    try:
-        z_nabla4_e2_comp_structured_torus_gpu_gridtools_halo = (
-            icon_benchmark.nabla4_validate_structured_torus_gpu_gridtools_halo(
+    if backend in ["all_cpu", "cpu_ifirst"]:
+        print("Running structured cpu_ifirst sanity check")
+        z_nabla4_e2_comp_structured_cpu_ifirst_gridtools = (
+            icon_benchmark.nabla4_validate_structured_torus_cpu_ifirst_gridtools_halo(
                 random_validation_data.CellDim,
                 random_validation_data.VertexDim,
                 random_validation_data.EdgeDim,
@@ -319,12 +323,67 @@ def run_sanity_checks(filtered_e2c2v, filtered_e2ecv, grid, lon_dim, lat_dim):
             )
         )
         assert np.allclose(
-            z_nabla4_e2_comp_structured_torus_gpu_gridtools_halo,
+            z_nabla4_e2_comp_structured_cpu_ifirst_gridtools,
             random_validation_data.z_nabla4_e2_wp,
         )
-        print("structured gpu sanity check passed")
-    except RuntimeError as e:
-        print("C++ runtime exception:", e)
+        print("structured cpu_ifirst sanity check passed")
+    if backend in ["all_cpu", "cpu_kfirst"]:
+        print("Running structured cpu_kfirst sanity check")
+        z_nabla4_e2_comp_structured_cpu_kfirst_gridtools = (
+            icon_benchmark.nabla4_validate_structured_torus_cpu_kfirst_gridtools_halo(
+                random_validation_data.CellDim,
+                random_validation_data.VertexDim,
+                random_validation_data.EdgeDim,
+                random_validation_data.KDim,
+                random_validation_data.ECVDim,
+                lon_dim,
+                lat_dim,
+                2,
+                np.array(random_validation_data.u_vert).T,
+                np.array(random_validation_data.v_vert).T,
+                random_validation_data.primal_normal_vert_v1,
+                random_validation_data.primal_normal_vert_v2,
+                np.array(random_validation_data.z_nabla2_e).T,
+                random_validation_data.inv_vert_vert_length,
+                random_validation_data.inv_primal_edge_length,
+            )
+        )
+
+        assert np.allclose(
+            z_nabla4_e2_comp_structured_cpu_kfirst_gridtools,
+            random_validation_data.z_nabla4_e2_wp,
+        )
+        print("structured cpu_kfirst sanity check passed")
+    if backend in ["gpu"]:
+        print("Running structured gpu sanity check")
+        try:
+            z_nabla4_e2_comp_structured_torus_gpu_gridtools_halo = (
+                icon_benchmark.nabla4_validate_structured_torus_gpu_gridtools_halo(
+                    random_validation_data.CellDim,
+                    random_validation_data.VertexDim,
+                    random_validation_data.EdgeDim,
+                    random_validation_data.KDim,
+                    random_validation_data.ECVDim,
+                    lon_dim,
+                    lat_dim,
+                    2,
+                    np.array(random_validation_data.u_vert).T,
+                    np.array(random_validation_data.v_vert).T,
+                    random_validation_data.primal_normal_vert_v1,
+                    random_validation_data.primal_normal_vert_v2,
+                    np.array(random_validation_data.z_nabla2_e).T,
+                    random_validation_data.inv_vert_vert_length,
+                    random_validation_data.inv_primal_edge_length,
+                )
+            )
+
+            assert np.allclose(
+                z_nabla4_e2_comp_structured_torus_gpu_gridtools_halo,
+                random_validation_data.z_nabla4_e2_wp,
+            )
+            print("structured gpu sanity check passed")
+        except RuntimeError as e:
+            print("C++ runtime exception:", e)
     print("Sanity checks pass")
 
 
@@ -356,8 +415,8 @@ def parse_arguments():
     )
     parser.add_argument(
         "--backend",
-        choices=["all", "gtfn", "naive", "cpu_ifirst", "cpu_kfirst", "gpu"],
-        default="all",
+        choices=["all_cpu", "gtfn", "naive", "cpu_ifirst", "cpu_kfirst", "gpu"],
+        default="all_cpu",
         help="Which backend to benchmark",
     )
     parser.add_argument(
@@ -367,7 +426,12 @@ def parse_arguments():
         help="E2C2V ordering",
     )
 
-    return parser.parse_args()
+    args = parser.parse_args()
+    if args.backend == "gpu":
+        args.e2c2v_ordering = "per-orientation"
+    else:
+        args.e2c2v_ordering = "per-vertex"
+    return args
 
 
 def run_benchmarks():
@@ -389,10 +453,14 @@ def run_benchmarks():
     grid_cartesian_dimensions = get_torus_cartesian_dimensions(args.grid)
 
     filtered_e2c2v = filter_edge_vector(
-        torus_grid.get_offset_provider("E2C2V").table, grid_cartesian_dimensions
+        torus_grid.get_offset_provider("E2C2V").table,
+        grid_cartesian_dimensions,
+        args.e2c2v_ordering,
     )
     filtered_e2ecv = filter_edge_vector(
-        torus_grid.get_offset_provider("E2ECV").table, grid_cartesian_dimensions
+        torus_grid.get_offset_provider("E2ECV").table,
+        grid_cartesian_dimensions,
+        args.e2c2v_ordering,
     )
 
     print(
@@ -414,11 +482,12 @@ def run_benchmarks():
             torus_grid,
             grid_cartesian_dimensions[0],
             grid_cartesian_dimensions[1],
+            args.backend,
         )
 
     runtimes = {}
 
-    if args.backend in ["all", "gtfn"]:
+    if args.backend in ["all_cpu", "gtfn"]:
         runtimes["nabla4_benchmark_unstructured_gtfn"] = []
 
         for _ in range(repetitions):
@@ -498,7 +567,7 @@ def run_benchmarks():
                 )
             )
 
-    if args.backend in ["all", "cpu_ifirst"]:
+    if args.backend in ["all_cpu", "cpu_ifirst"]:
         runtimes[
             "nabla4_benchmark_unstructured_cpu_ifirst_gridtools"
         ] = icon_benchmark.nabla4_benchmark_unstructured_cpu_ifirst_gridtools(
@@ -528,7 +597,7 @@ def run_benchmarks():
             dry_runs,
         )
 
-    if args.backend in ["all", "cpu_kfirst"]:
+    if args.backend in ["all_cpu", "cpu_kfirst"]:
         runtimes[
             "nabla4_benchmark_unstructured_cpu_kfirst_gridtools"
         ] = icon_benchmark.nabla4_benchmark_unstructured_cpu_kfirst_gridtools(
@@ -558,7 +627,7 @@ def run_benchmarks():
             dry_runs,
         )
 
-    if args.backend in ["all", "gpu"]:
+    if args.backend in ["gpu"]:
         try:
             runtimes[
                 "nabla4_benchmark_unstructured_gpu_gridtools"
