@@ -183,7 +183,7 @@ class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
 };
 
 #if defined(__CUDACC__)
-__global__ void __launch_bounds__(192, 2) run_gpu(std::size_t KDim,
+__global__ void __launch_bounds__(64, 2) run_gpu(std::size_t KDim,
     std::size_t x_dim,
     std::size_t y_dim,
     std::size_t halo,
@@ -278,7 +278,7 @@ __global__ void __launch_bounds__(192, 2) run_gpu(std::size_t KDim,
 template <typename T>
 void nabla4_structured_torus_halo_gt<T>::run_gpu_helper() {
     cudaError_t errSync, errAsync;
-    dim3 tblocks(16, 12, 1);
+    dim3 tblocks(8, 8, 1);
     dim3 grid((x_dim + tblocks.x - 1) / tblocks.x, (y_dim + tblocks.y - 1) / tblocks.y, KDim);
     run_gpu<<<grid, tblocks>>>(KDim,
         x_dim,
