@@ -183,10 +183,11 @@ class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
 };
 
 #if defined(__CUDACC__)
-__global__ void __launch_bounds__(256, 2) run_gpu(std::size_t KDim,
+__global__ void __launch_bounds__(576, 2) run_gpu(std::size_t KDim,
     std::size_t x_dim,
     std::size_t y_dim,
     std::size_t halo,
+    std::size_t total_grid_size,
     nabla4_structured_torus_halo_gt<storage::gpu>::data_store_2d_ctv_VP_t u_vert_gt_tv,
     nabla4_structured_torus_halo_gt<storage::gpu>::data_store_2d_ctv_VP_t v_vert_gt_tv,
     nabla4_structured_torus_halo_gt<storage::gpu>::data_store_1d_ctv_WP_t primal_normal_vert_v1_gt_tv,
@@ -195,82 +196,60 @@ __global__ void __launch_bounds__(256, 2) run_gpu(std::size_t KDim,
     nabla4_structured_torus_halo_gt<storage::gpu>::data_store_1d_ctv_WP_t inv_vert_vert_length_gt_tv,
     nabla4_structured_torus_halo_gt<storage::gpu>::data_store_1d_ctv_WP_t inv_primal_edge_length_gt_tv,
     nabla4_structured_torus_halo_gt<storage::gpu>::data_store_2d_tv_VP_t z_nabla4_e2_wp_gt_tv) {
-    const auto edges_per_orientation = (x_dim - 2 * halo) * (y_dim - halo * 2);
     const auto global_edges_per_orientation = x_dim * y_dim * 4;
     for (std::size_t k_index{blockIdx.z * blockDim.z + threadIdx.z}; k_index < KDim;
          k_index += blockDim.z * gridDim.z) {
-        for (std::size_t j{blockIdx.x * blockDim.x + threadIdx.x + halo}; j < y_dim - halo;
-             j += blockDim.x * gridDim.x) {
-            for (std::size_t i{blockIdx.y * blockDim.y + threadIdx.y + halo}; i < x_dim - halo;
-                 i += blockDim.y * gridDim.y) {
-                const auto global_edge_index = (j * x_dim + i) * 4;
+        for (std::size_t orientation_id{blockIdx.y * blockDim.y + threadIdx.y}; orientation_id < 3;
+             orientation_id += blockDim.y * gridDim.y) {
+            for (std::size_t edge_index{blockIdx.x * blockDim.x + threadIdx.x}; edge_index < total_grid_size;
+                 edge_index += blockDim.x * gridDim.x) {
+                const auto x_dim_without_halo = x_dim - 2 * halo;
+                const auto i = edge_index % x_dim_without_halo + halo;
+                const auto j = (edge_index / x_dim_without_halo) + halo;
                 const auto i_j = j * x_dim + i;
                 const auto ip1_j = j * x_dim + i + 1;
                 const auto i_jp1 = (j + 1) * x_dim + i;
                 const auto i_jm1 = (j - 1) * x_dim + i;
                 const auto ip1_jm1 = (j - 1) * x_dim + i + 1;
                 const auto im1_jp1 = (j + 1) * x_dim + i - 1;
-                auto E2ECV_0 = global_edge_index;
-                auto E2ECV_1 = global_edge_index + 1;
-                auto E2ECV_2 = global_edge_index + 2;
-                auto E2ECV_3 = global_edge_index + 3;
-                double nabv_tang_wp[3];
-                double nabv_norm_wp[3];
-                nabv_tang_wp[0] = u_vert_gt_tv(i_j, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_0) +
-                                  v_vert_gt_tv(i_j, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_0) +
-                                  u_vert_gt_tv(i_jp1, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_1) +
-                                  v_vert_gt_tv(i_jp1, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_1);
-                nabv_norm_wp[0] = u_vert_gt_tv(im1_jp1, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_2) +
-                                  v_vert_gt_tv(im1_jp1, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_2) +
-                                  u_vert_gt_tv(ip1_j, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_3) +
-                                  v_vert_gt_tv(ip1_j, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_3);
-                E2ECV_0 += global_edges_per_orientation;
-                E2ECV_1 += global_edges_per_orientation;
-                E2ECV_2 += global_edges_per_orientation;
-                E2ECV_3 += global_edges_per_orientation;
-                nabv_tang_wp[1] = u_vert_gt_tv(i_j, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_0) +
-                                  v_vert_gt_tv(i_j, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_0) +
-                                  u_vert_gt_tv(ip1_j, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_1) +
-                                  v_vert_gt_tv(ip1_j, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_1);
-                nabv_norm_wp[1] = u_vert_gt_tv(i_jp1, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_2) +
-                                  v_vert_gt_tv(i_jp1, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_2) +
-                                  u_vert_gt_tv(ip1_jm1, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_3) +
-                                  v_vert_gt_tv(ip1_jm1, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_3);
-                E2ECV_0 += global_edges_per_orientation;
-                E2ECV_1 += global_edges_per_orientation;
-                E2ECV_2 += global_edges_per_orientation;
-                E2ECV_3 += global_edges_per_orientation;
-                nabv_tang_wp[2] = u_vert_gt_tv(i_j, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_0) +
-                                  v_vert_gt_tv(i_j, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_0) +
-                                  u_vert_gt_tv(ip1_jm1, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_1) +
-                                  v_vert_gt_tv(ip1_jm1, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_1);
-                nabv_norm_wp[2] = u_vert_gt_tv(ip1_j, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_2) +
-                                  v_vert_gt_tv(ip1_j, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_2) +
-                                  u_vert_gt_tv(i_jm1, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_3) +
-                                  v_vert_gt_tv(i_jm1, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_3);
-                __syncthreads();
-                auto local_edge_index = ((j - halo) * (x_dim - 2 * halo) + (i - halo));
+                std::size_t E2C2V[4];
+                if (orientation_id == 0) {
+                    E2C2V[0] = i_j;
+                    E2C2V[1] = i_jp1;
+                    E2C2V[2] = im1_jp1;
+                    E2C2V[3] = ip1_j;
+                } else if (orientation_id == 1) {
+                    E2C2V[0] = i_j;
+                    E2C2V[1] = ip1_j;
+                    E2C2V[2] = i_jp1;
+                    E2C2V[3] = ip1_jm1;
+                } else {
+                    E2C2V[0] = i_j;
+                    E2C2V[1] = ip1_jm1;
+                    E2C2V[2] = ip1_j;
+                    E2C2V[3] = i_jm1;
+                }
+                __syncwarp();
+                const auto global_edge_index = (j * x_dim + i) * 4;
+                const auto E2ECV_0 = global_edge_index + orientation_id * global_edges_per_orientation;
+                const auto E2ECV_1 = E2ECV_0 + 1;
+                const auto E2ECV_2 = E2ECV_0 + 2;
+                const auto E2ECV_3 = E2ECV_0 + 3;
+                const double nabv_tang_wp = u_vert_gt_tv(E2C2V[0], k_index) * primal_normal_vert_v1_gt_tv(E2ECV_0) +
+                                            v_vert_gt_tv(E2C2V[0], k_index) * primal_normal_vert_v2_gt_tv(E2ECV_0) +
+                                            u_vert_gt_tv(E2C2V[1], k_index) * primal_normal_vert_v1_gt_tv(E2ECV_1) +
+                                            v_vert_gt_tv(E2C2V[1], k_index) * primal_normal_vert_v2_gt_tv(E2ECV_1);
+                const double nabv_norm_wp = u_vert_gt_tv(E2C2V[2], k_index) * primal_normal_vert_v1_gt_tv(E2ECV_2) +
+                                            v_vert_gt_tv(E2C2V[2], k_index) * primal_normal_vert_v2_gt_tv(E2ECV_2) +
+                                            u_vert_gt_tv(E2C2V[3], k_index) * primal_normal_vert_v1_gt_tv(E2ECV_3) +
+                                            v_vert_gt_tv(E2C2V[3], k_index) * primal_normal_vert_v2_gt_tv(E2ECV_3);
+                const auto local_edge_index =
+                    ((j - halo) * x_dim_without_halo + (i - halo)) + orientation_id * total_grid_size;
                 z_nabla4_e2_wp_gt_tv(local_edge_index, k_index) =
-                    4.0 * ((nabv_norm_wp[0] - 2.0 * z_nabla2_e_gt_tv(local_edge_index, k_index)) *
+                    4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_tv(local_edge_index, k_index)) *
                                   (inv_vert_vert_length_gt_tv(local_edge_index) *
                                       inv_vert_vert_length_gt_tv(local_edge_index)) +
-                              (nabv_tang_wp[0] - 2.0 * z_nabla2_e_gt_tv(local_edge_index, k_index)) *
-                                  (inv_primal_edge_length_gt_tv(local_edge_index) *
-                                      inv_primal_edge_length_gt_tv(local_edge_index)));
-                local_edge_index += edges_per_orientation;
-                z_nabla4_e2_wp_gt_tv(local_edge_index, k_index) =
-                    4.0 * ((nabv_norm_wp[1] - 2.0 * z_nabla2_e_gt_tv(local_edge_index, k_index)) *
-                                  (inv_vert_vert_length_gt_tv(local_edge_index) *
-                                      inv_vert_vert_length_gt_tv(local_edge_index)) +
-                              (nabv_tang_wp[1] - 2.0 * z_nabla2_e_gt_tv(local_edge_index, k_index)) *
-                                  (inv_primal_edge_length_gt_tv(local_edge_index) *
-                                      inv_primal_edge_length_gt_tv(local_edge_index)));
-                local_edge_index += edges_per_orientation;
-                z_nabla4_e2_wp_gt_tv(local_edge_index, k_index) =
-                    4.0 * ((nabv_norm_wp[2] - 2.0 * z_nabla2_e_gt_tv(local_edge_index, k_index)) *
-                                  (inv_vert_vert_length_gt_tv(local_edge_index) *
-                                      inv_vert_vert_length_gt_tv(local_edge_index)) +
-                              (nabv_tang_wp[2] - 2.0 * z_nabla2_e_gt_tv(local_edge_index, k_index)) *
+                              (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(local_edge_index, k_index)) *
                                   (inv_primal_edge_length_gt_tv(local_edge_index) *
                                       inv_primal_edge_length_gt_tv(local_edge_index)));
             };
@@ -280,14 +259,15 @@ __global__ void __launch_bounds__(256, 2) run_gpu(std::size_t KDim,
 
 template <typename T>
 void nabla4_structured_torus_halo_gt<T>::run_gpu_helper() {
+    const std::size_t total_grid_size = (x_dim - 2 * halo) * (y_dim - halo * 2);
     cudaError_t errSync, errAsync;
-    dim3 tblocks(8, 4, 8);
-    dim3 grid(
-        (x_dim + tblocks.x - 1) / tblocks.x, (y_dim + tblocks.y - 1) / tblocks.y, (KDim + tblocks.z - 1) / tblocks.z);
+    dim3 tblocks(32, 3, 6);
+    dim3 grid((total_grid_size + tblocks.x - 1) / tblocks.x, 1, (KDim + tblocks.y - 1) / tblocks.y);
     run_gpu<<<grid, tblocks>>>(KDim,
         x_dim,
         y_dim,
         halo,
+        total_grid_size,
         u_vert_gt_tv,
         v_vert_gt_tv,
         primal_normal_vert_v1_gt_tv,
