@@ -172,7 +172,7 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
 };
 
 #if defined(__CUDACC__)
-__global__ void __launch_bounds__(160, 2) run_gpu(std::size_t EdgeDim,
+__global__ void __launch_bounds__(192, 2) run_gpu(std::size_t EdgeDim,
     std::size_t KDim,
     nabla4_unstructured_gt<storage::gpu>::neighbors_gt_ctv_t e2c2v_gt_tv,
     nabla4_unstructured_gt<storage::gpu>::neighbors_gt_ctv_t e2ecv_gt_tv,
@@ -218,7 +218,7 @@ __global__ void __launch_bounds__(160, 2) run_gpu(std::size_t EdgeDim,
 template <typename T>
 void nabla4_unstructured_gt<T>::run_gpu_helper() {
     cudaError_t errSync, errAsync;
-    dim3 tblocks(16, 10, 1);
+    dim3 tblocks(24, 8, 1);
     dim3 grid(
         (e2c2v_gt->const_host_view().lengths()[0] + tblocks.x - 1) / tblocks.x, (KDim + tblocks.y - 1) / tblocks.y, 1);
     run_gpu<<<grid, tblocks>>>(e2c2v_gt->const_host_view().lengths()[0],
