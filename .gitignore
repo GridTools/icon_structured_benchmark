@@ -12,3 +12,6 @@ build*
 *.json
 *.pdf
 
+# nvidia profiler files
+*.ncu-rep
+
