@@ -262,7 +262,7 @@ void nabla4_structured_torus_halo_gt<T>::run_gpu_helper() {
     const std::size_t total_grid_size = (x_dim - 2 * halo) * (y_dim - halo * 2);
     cudaError_t errSync, errAsync;
     dim3 tblocks(32, 3, 6);
-    dim3 grid((total_grid_size + tblocks.x - 1) / tblocks.x, 1, (KDim + tblocks.y - 1) / tblocks.y);
+    dim3 grid((total_grid_size + tblocks.x - 1) / tblocks.x, 1, (KDim + tblocks.z - 1) / tblocks.z);
     run_gpu<<<grid, tblocks>>>(KDim,
         x_dim,
         y_dim,
