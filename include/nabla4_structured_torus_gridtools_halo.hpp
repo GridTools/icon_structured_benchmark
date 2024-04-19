@@ -183,7 +183,8 @@ class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
 };
 
 #if defined(__CUDACC__)
-#define BLOCK_SIZE 384
+#define BLOCK_SIZE 576
+#define BLOCK_DIM_X 32
 __global__ void __launch_bounds__(BLOCK_SIZE, 2) run_gpu(std::size_t KDim,
     std::size_t x_dim,
     std::size_t y_dim,
@@ -197,9 +198,9 @@ __global__ void __launch_bounds__(BLOCK_SIZE, 2) run_gpu(std::size_t KDim,
     nabla4_structured_torus_halo_gt<storage::gpu>::data_store_1d_ctv_WP_t inv_vert_vert_length_gt_tv,
     nabla4_structured_torus_halo_gt<storage::gpu>::data_store_1d_ctv_WP_t inv_primal_edge_length_gt_tv,
     nabla4_structured_torus_halo_gt<storage::gpu>::data_store_2d_tv_VP_t z_nabla4_e2_wp_gt_tv) {
-    __shared__ std::size_t E2C2V[3][BLOCK_SIZE][5];
-    __shared__ std::size_t is[BLOCK_SIZE + 1];
-    __shared__ std::size_t js[BLOCK_SIZE + 1];
+    __shared__ std::size_t E2C2V[3][BLOCK_DIM_X][5];
+    __shared__ std::size_t is[BLOCK_DIM_X];
+    __shared__ std::size_t js[BLOCK_DIM_X];
     const auto x_dim_without_halo = x_dim - 2 * halo;
     for (std::size_t edge_index{blockIdx.x * blockDim.x + threadIdx.x}; edge_index < total_grid_size;
          edge_index += blockDim.x * gridDim.x) {
@@ -271,8 +272,8 @@ template <typename T>
 void nabla4_structured_torus_halo_gt<T>::run_gpu_helper() {
     const std::size_t total_grid_size = (x_dim - 2 * halo) * (y_dim - halo * 2);
     cudaError_t errSync, errAsync;
-    dim3 tblocks(64, 3, 2);
-    dim3 grid((total_grid_size + tblocks.x - 1) / tblocks.x, 1, (KDim + tblocks.y - 1) / tblocks.y);
+    dim3 tblocks(BLOCK_DIM_X, 3, 6);
+    dim3 grid((total_grid_size + tblocks.x - 1) / tblocks.x, 1, 6);
     run_gpu<<<grid, tblocks>>>(KDim,
         x_dim,
         y_dim,
