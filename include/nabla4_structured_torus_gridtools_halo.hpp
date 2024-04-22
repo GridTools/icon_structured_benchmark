@@ -258,8 +258,7 @@ __global__ void __launch_bounds__(BLOCK_SIZE, 2) run_gpu(std::size_t KDim,
                                             v_vert_gt_tv(E2C2V_2, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_2) +
                                             u_vert_gt_tv(E2C2V_3, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_3) +
                                             v_vert_gt_tv(E2C2V_3, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_3);
-                const auto local_edge_index =
-                    ((j - halo) * x_dim_without_halo + (i - halo)) + orientation_id * total_grid_size;
+                const auto local_edge_index = edge_index + orientation_id * total_grid_size;
                 z_nabla4_e2_wp_gt_tv(local_edge_index, k_index) =
                     4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_tv(local_edge_index, k_index)) *
                                   (inv_vert_vert_length_gt_tv(local_edge_index) *
