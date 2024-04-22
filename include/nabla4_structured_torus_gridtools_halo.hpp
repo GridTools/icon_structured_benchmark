@@ -209,22 +209,26 @@ __global__ void __launch_bounds__(BLOCK_SIZE, 2) run_gpu(std::size_t KDim,
         is[threadIdx.x] = i;
         js[threadIdx.x] = j;
         const auto i_j = j * x_dim + i;
-        const auto ip1_j = j * x_dim + i + 1;
-        const auto i_jp1 = (j + 1) * x_dim + i;
-        const auto i_jm1 = (j - 1) * x_dim + i;
-        const auto ip1_jm1 = (j - 1) * x_dim + i + 1;
-        const auto im1_jp1 = (j + 1) * x_dim + i - 1;
         if (threadIdx.y == 0) {
+            const auto i_jp1 = (j + 1) * x_dim + i;
+            const auto im1_jp1 = (j + 1) * x_dim + i - 1;
+            const auto ip1_j = j * x_dim + i + 1;
             E2C2V[0][threadIdx.x][0] = i_j;
             E2C2V[0][threadIdx.x][1] = i_jp1;
             E2C2V[0][threadIdx.x][2] = im1_jp1;
             E2C2V[0][threadIdx.x][3] = ip1_j;
         } else if (threadIdx.y == 1) {
+            const auto ip1_j = j * x_dim + i + 1;
+            const auto i_jp1 = (j + 1) * x_dim + i;
+            const auto ip1_jm1 = (j - 1) * x_dim + i + 1;
             E2C2V[1][threadIdx.x][0] = i_j;
             E2C2V[1][threadIdx.x][1] = ip1_j;
             E2C2V[1][threadIdx.x][2] = i_jp1;
             E2C2V[1][threadIdx.x][3] = ip1_jm1;
         } else {
+            const auto ip1_jm1 = (j - 1) * x_dim + i + 1;
+            const auto ip1_j = j * x_dim + i + 1;
+            const auto i_jm1 = (j - 1) * x_dim + i;
             E2C2V[2][threadIdx.x][0] = i_j;
             E2C2V[2][threadIdx.x][1] = ip1_jm1;
             E2C2V[2][threadIdx.x][2] = ip1_j;
