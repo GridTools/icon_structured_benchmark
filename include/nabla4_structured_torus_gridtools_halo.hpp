@@ -207,30 +207,34 @@ __global__ void __launch_bounds__(576, 2) run_gpu(std::size_t KDim,
                 const auto i = edge_index % x_dim_without_halo + halo;
                 const auto j = (edge_index / x_dim_without_halo) + halo;
                 const auto i_j = j * x_dim + i;
-                const auto ip1_j = j * x_dim + i + 1;
-                const auto i_jp1 = (j + 1) * x_dim + i;
-                const auto i_jm1 = (j - 1) * x_dim + i;
-                const auto ip1_jm1 = (j - 1) * x_dim + i + 1;
-                const auto im1_jp1 = (j + 1) * x_dim + i - 1;
                 std::size_t E2C2V[4];
                 if (orientation_id == 0) {
+                    const auto i_jp1 = (j + 1) * x_dim + i;
+                    const auto im1_jp1 = (j + 1) * x_dim + i - 1;
+                    const auto ip1_j = j * x_dim + i + 1;
                     E2C2V[0] = i_j;
                     E2C2V[1] = i_jp1;
                     E2C2V[2] = im1_jp1;
                     E2C2V[3] = ip1_j;
                 } else if (orientation_id == 1) {
+                    const auto ip1_j = j * x_dim + i + 1;
+                    const auto i_jp1 = (j + 1) * x_dim + i;
+                    const auto ip1_jm1 = (j - 1) * x_dim + i + 1;
                     E2C2V[0] = i_j;
                     E2C2V[1] = ip1_j;
                     E2C2V[2] = i_jp1;
                     E2C2V[3] = ip1_jm1;
                 } else {
+                    const auto ip1_jm1 = (j - 1) * x_dim + i + 1;
+                    const auto ip1_j = j * x_dim + i + 1;
+                    const auto i_jm1 = (j - 1) * x_dim + i;
                     E2C2V[0] = i_j;
                     E2C2V[1] = ip1_jm1;
                     E2C2V[2] = ip1_j;
                     E2C2V[3] = i_jm1;
                 }
                 __syncwarp();
-                const auto global_edge_index = (j * x_dim + i) * 4;
+                const auto global_edge_index = i_j * 4;
                 const auto E2ECV_0 = global_edge_index + orientation_id * global_edges_per_orientation;
                 const auto E2ECV_1 = E2ECV_0 + 1;
                 const auto E2ECV_2 = E2ECV_0 + 2;
@@ -243,8 +247,7 @@ __global__ void __launch_bounds__(576, 2) run_gpu(std::size_t KDim,
                                             v_vert_gt_tv(E2C2V[2], k_index) * primal_normal_vert_v2_gt_tv(E2ECV_2) +
                                             u_vert_gt_tv(E2C2V[3], k_index) * primal_normal_vert_v1_gt_tv(E2ECV_3) +
                                             v_vert_gt_tv(E2C2V[3], k_index) * primal_normal_vert_v2_gt_tv(E2ECV_3);
-                const auto local_edge_index =
-                    ((j - halo) * x_dim_without_halo + (i - halo)) + orientation_id * total_grid_size;
+                const auto local_edge_index = edge_index + orientation_id * total_grid_size;
                 z_nabla4_e2_wp_gt_tv(local_edge_index, k_index) =
                     4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_tv(local_edge_index, k_index)) *
                                   (inv_vert_vert_length_gt_tv(local_edge_index) *
