@@ -1,4 +1,7 @@
 #include <gridtools/fn/backend/naive.hpp>
+#if defined(IS_GPU)
+#include <gridtools/fn/backend/gpu.hpp>
+#endif
 #include <gridtools/sid/dimension_to_tuple_like.hpp>
 #include <gridtools/stencil/global_parameter.hpp>
 
@@ -132,7 +135,8 @@ template <class BufferT0,
     class BufferT6,
     class BufferT7,
     class BufferT12,
-    class BufferT13>
+    class BufferT13,
+    class backend>
 decltype(auto) calculate_nabla4(BufferT0 &&u_vert,
     BufferT1 &&v_vert,
     BufferT2 &&primal_normal_vert_v1,
@@ -146,14 +150,15 @@ decltype(auto) calculate_nabla4(BufferT0 &&u_vert,
     std::int32_t vertical_start,
     std::int32_t vertical_end,
     BufferT12 &&gt_conn_e2c2v,
-    BufferT13 &&gt_conn_e2ecv) {
+    BufferT13 &&gt_conn_e2ecv,
+    backend &&backend_instance) {
     return generated::calculate_nabla4(
         gridtools::hymap::keys<generated::E2C2V_t>::make_values(
             gridtools::fn::sid_neighbor_table::as_neighbor_table<generated::Edge_t, generated::E2C2V_t, 4>(
                 std::forward<decltype(gt_conn_e2c2v)>(gt_conn_e2c2v))),
         gridtools::hymap::keys<generated::E2ECV_t>::make_values(
             gridtools::fn::sid_neighbor_table::as_neighbor_table<generated::Edge_t, generated::E2ECV_t, 4>(
-                std::forward<decltype(gt_conn_e2ecv)>(gt_conn_e2ecv))))(gridtools::fn::backend::naive{},
+                std::forward<decltype(gt_conn_e2ecv)>(gt_conn_e2ecv))))(backend_instance,
         std::forward<decltype(u_vert)>(u_vert),
         std::forward<decltype(v_vert)>(v_vert),
         std::forward<decltype(primal_normal_vert_v1)>(primal_normal_vert_v1),
