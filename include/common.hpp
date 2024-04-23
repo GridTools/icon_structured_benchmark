@@ -2,7 +2,7 @@
 
 #include "random_init.hpp"
 
-#define ARRAY_TYPE std::size_t
+#define INDEX_TYPE std::size_t
 
 #define VP_TYPE double
 #define WP_TYPE double
@@ -16,12 +16,12 @@ static RandomUniformUtils rand_utils{-1.0, 1.0};
 
 template <Data T>
 struct nabla4_data {
-    std::size_t CellDim;
-    std::size_t VertexDim;
-    std::size_t EdgeDim;
-    std::size_t KDim;
-    std::size_t ECVDim;
-    std::size_t output_size;
+    INDEX_TYPE CellDim;
+    INDEX_TYPE VertexDim;
+    INDEX_TYPE EdgeDim;
+    INDEX_TYPE KDim;
+    INDEX_TYPE ECVDim;
+    INDEX_TYPE output_size;
     std::vector<std::vector<VP_TYPE>> u_vert;
     std::vector<std::vector<VP_TYPE>> v_vert;
     std::vector<WP_TYPE> primal_normal_vert_v1;
@@ -41,7 +41,7 @@ struct nabla4_data {
         inv_vert_vert_length = rand_utils.random_init_vec_1d(output_size);
         inv_primal_edge_length = rand_utils.random_init_vec_1d(output_size);
         z_nabla4_e2_wp.resize(KDim);
-        for (std::size_t i{}; i < KDim; ++i) {
+        for (INDEX_TYPE i{}; i < KDim; ++i) {
             z_nabla4_e2_wp[i].resize(output_size);
         }
     }
@@ -55,17 +55,17 @@ struct nabla4_data {
         inv_vert_vert_length = rand_utils.random_init_vec_1d(output_size);
         inv_primal_edge_length = rand_utils.random_init_vec_1d(output_size);
         z_nabla4_e2_wp.resize(output_size);
-        for (std::size_t i{}; i < output_size; ++i) {
+        for (INDEX_TYPE i{}; i < output_size; ++i) {
             z_nabla4_e2_wp[i].resize(KDim);
         }
     }
 
-    nabla4_data(std::size_t CellDim,
-        std::size_t VertexDim,
-        std::size_t EdgeDim,
-        std::size_t KDim,
-        std::size_t ECVDim,
-        std::size_t output_size)
+    nabla4_data(INDEX_TYPE CellDim,
+        INDEX_TYPE VertexDim,
+        INDEX_TYPE EdgeDim,
+        INDEX_TYPE KDim,
+        INDEX_TYPE ECVDim,
+        INDEX_TYPE output_size)
         : CellDim(CellDim), VertexDim(VertexDim), EdgeDim(EdgeDim), KDim(KDim), ECVDim(ECVDim),
           output_size(output_size) {
         if constexpr (T == Data::ifirst) {
@@ -78,12 +78,12 @@ struct nabla4_data {
     };
 
     /// Constructor for validation
-    nabla4_data(std::size_t CellDim,
-        std::size_t VertexDim,
-        std::size_t EdgeDim,
-        std::size_t KDim,
-        std::size_t ECVDim,
-        std::size_t output_size,
+    nabla4_data(INDEX_TYPE CellDim,
+        INDEX_TYPE VertexDim,
+        INDEX_TYPE EdgeDim,
+        INDEX_TYPE KDim,
+        INDEX_TYPE ECVDim,
+        INDEX_TYPE output_size,
         std::vector<std::vector<VP_TYPE>> &u_vert,
         std::vector<std::vector<VP_TYPE>> &v_vert,
         std::vector<WP_TYPE> &primal_normal_vert_v1,
@@ -97,12 +97,12 @@ struct nabla4_data {
           inv_vert_vert_length(inv_vert_vert_length), inv_primal_edge_length(inv_primal_edge_length) {
         if constexpr (T == Data::ifirst) {
             z_nabla4_e2_wp.resize(KDim);
-            for (std::size_t i{}; i < KDim; ++i) {
+            for (INDEX_TYPE i{}; i < KDim; ++i) {
                 z_nabla4_e2_wp[i].resize(EdgeDim);
             }
         } else if constexpr (T == Data::kfirst) {
             z_nabla4_e2_wp.resize(EdgeDim);
-            for (std::size_t i{}; i < EdgeDim; ++i) {
+            for (INDEX_TYPE i{}; i < EdgeDim; ++i) {
                 z_nabla4_e2_wp[i].resize(KDim);
             }
         } else {

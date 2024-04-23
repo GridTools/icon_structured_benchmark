@@ -32,9 +32,9 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
 
   public:
     using neighbors_gt_t =
-        decltype(gridtools::storage::builder<T>.dimensions(0, 4_c).template type<std::size_t>().build());
+        decltype(gridtools::storage::builder<T>.dimensions(0, 4_c).template type<INDEX_TYPE>().build());
     using neighbors_gt_ctv_t =
-        decltype(gridtools::storage::builder<T>.dimensions(0, 4_c).template type<std::size_t>().build()->const_target_view());
+        decltype(gridtools::storage::builder<T>.dimensions(0, 4_c).template type<INDEX_TYPE>().build()->const_target_view());
     neighbors_gt_t e2c2v_gt;
     neighbors_gt_ctv_t e2c2v_gt_tv;
     neighbors_gt_t e2ecv_gt;
@@ -42,26 +42,26 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
 
     /// Constructor with all the necessary information for \c nabla4 compute
     /// kernel execution
-    nabla4_unstructured_gt(std::vector<std::array<std::size_t, 4>> e2c2v,
-        std::vector<std::array<std::size_t, 4>> e2ecv,
-        std::size_t CellDim,
-        std::size_t VertexDim,
-        std::size_t EdgeDim,
-        std::size_t KDim,
-        std::size_t ECVDim)
-        : e2c2v_gt(storage::builder<T>.template type<std::size_t>().dimensions(e2c2v.size(), 4_c).initializer([&e2c2v](int i, int j) { return e2c2v[i][j]; }).build()),
-        e2ecv_gt(storage::builder<T>.template type<std::size_t>().dimensions(e2ecv.size(), 4_c).initializer([&e2ecv](int i, int j) { return e2ecv[i][j]; }).build()),
+    nabla4_unstructured_gt(std::vector<std::array<INDEX_TYPE, 4>> e2c2v,
+        std::vector<std::array<INDEX_TYPE, 4>> e2ecv,
+        INDEX_TYPE CellDim,
+        INDEX_TYPE VertexDim,
+        INDEX_TYPE EdgeDim,
+        INDEX_TYPE KDim,
+        INDEX_TYPE ECVDim)
+        : e2c2v_gt(storage::builder<T>.template type<INDEX_TYPE>().dimensions(e2c2v.size(), 4_c).initializer([&e2c2v](int i, int j) { return e2c2v[i][j]; }).build()),
+        e2ecv_gt(storage::builder<T>.template type<INDEX_TYPE>().dimensions(e2ecv.size(), 4_c).initializer([&e2ecv](int i, int j) { return e2ecv[i][j]; }).build()),
         e2c2v_gt_tv(e2c2v_gt->const_target_view()),
         e2ecv_gt_tv(e2ecv_gt->const_target_view()),
         nabla4_gt_data<T>(CellDim, VertexDim, EdgeDim, KDim, ECVDim, e2c2v.size()){};
 
-    nabla4_unstructured_gt(std::vector<std::array<std::size_t, 4>> e2c2v,
-        std::vector<std::array<std::size_t, 4>> e2ecv,
-        std::size_t CellDim,
-        std::size_t VertexDim,
-        std::size_t EdgeDim,
-        std::size_t KDim,
-        std::size_t ECVDim,
+    nabla4_unstructured_gt(std::vector<std::array<INDEX_TYPE, 4>> e2c2v,
+        std::vector<std::array<INDEX_TYPE, 4>> e2ecv,
+        INDEX_TYPE CellDim,
+        INDEX_TYPE VertexDim,
+        INDEX_TYPE EdgeDim,
+        INDEX_TYPE KDim,
+        INDEX_TYPE ECVDim,
         std::vector<std::vector<VP_TYPE>> &u_vert,
         std::vector<std::vector<VP_TYPE>> &v_vert,
         std::vector<WP_TYPE> &primal_normal_vert_v1,
@@ -69,8 +69,8 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
         std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
         std::vector<WP_TYPE> &inv_vert_vert_length,
         std::vector<WP_TYPE> &inv_primal_edge_length)
-        : e2c2v_gt(storage::builder<T>.template type<std::size_t>().dimensions(e2c2v.size(), 4_c).initializer([&e2c2v](int i, int j) { return e2c2v[i][j]; }).build()),
-        e2ecv_gt(storage::builder<T>.template type<std::size_t>().dimensions(e2ecv.size(), 4_c).initializer([&e2ecv](int i, int j) { return e2ecv[i][j]; }).build()),
+        : e2c2v_gt(storage::builder<T>.template type<INDEX_TYPE>().dimensions(e2c2v.size(), 4_c).initializer([&e2c2v](int i, int j) { return e2c2v[i][j]; }).build()),
+        e2ecv_gt(storage::builder<T>.template type<INDEX_TYPE>().dimensions(e2ecv.size(), 4_c).initializer([&e2ecv](int i, int j) { return e2ecv[i][j]; }).build()),
         e2c2v_gt_tv(e2c2v_gt->const_target_view()),
         e2ecv_gt_tv(e2ecv_gt->const_target_view()),
         nabla4_gt_data<T>(CellDim, VertexDim, EdgeDim, KDim, ECVDim, e2c2v.size(), u_vert,
@@ -81,10 +81,10 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
                                           inv_vert_vert_length,
                                           inv_primal_edge_length){};
 
-    inline __attribute__((always_inline)) void inner_kernel(std::size_t edge_index,
-        std::size_t k_index,
-        const std::array<std::size_t, 4> &e2c2v_vec,
-        const std::array<std::size_t, 4> &e2ecv_vec) {
+    inline __attribute__((always_inline)) void inner_kernel(INDEX_TYPE edge_index,
+        INDEX_TYPE k_index,
+        const std::array<INDEX_TYPE, 4> &e2c2v_vec,
+        const std::array<INDEX_TYPE, 4> &e2ecv_vec) {
         const auto E2C2V_0 = e2c2v_vec[0];
         const auto E2C2V_1 = e2c2v_vec[1];
         const auto E2C2V_2 = e2c2v_vec[2];
@@ -110,14 +110,14 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
 
   private:
     void run_cpu_ifirst() {
-        for (std::size_t k_index{}; k_index < KDim; ++k_index) {
+        for (INDEX_TYPE k_index{}; k_index < KDim; ++k_index) {
             const auto edges = e2c2v_gt_tv.lengths()[0];
 #ifdef __clang__
 #pragma clang loop unroll(enable) vectorize(assume_safety) interleave(enable)
 #elif defined(__GNUC__)
 #pragma GCC ivdep
 #endif
-            for (std::size_t edge_index = 0; edge_index < edges; ++edge_index) {
+            for (INDEX_TYPE edge_index = 0; edge_index < edges; ++edge_index) {
                 const auto E2C2V_0 = e2c2v_gt_tv(edge_index, 0);
                 const auto E2C2V_1 = e2c2v_gt_tv(edge_index, 1);
                 const auto E2C2V_2 = e2c2v_gt_tv(edge_index, 2);
@@ -133,7 +133,7 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
     };
 
     void run_cpu_kfirst() {
-        for (std::size_t edge_index{}; edge_index < e2c2v_gt_tv.lengths()[0]; ++edge_index) {
+        for (INDEX_TYPE edge_index{}; edge_index < e2c2v_gt_tv.lengths()[0]; ++edge_index) {
             const auto E2C2V_0 = e2c2v_gt_tv(edge_index, 0);
             const auto E2C2V_1 = e2c2v_gt_tv(edge_index, 1);
             const auto E2C2V_2 = e2c2v_gt_tv(edge_index, 2);
@@ -147,7 +147,7 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
 #elif defined(__GNUC__)
 #pragma GCC ivdep
 #endif
-            for (std::size_t k_index = 0; k_index < KDim; ++k_index) {
+            for (INDEX_TYPE k_index = 0; k_index < KDim; ++k_index) {
                 inner_kernel(
                     edge_index, k_index, {E2C2V_0, E2C2V_1, E2C2V_2, E2C2V_3}, {E2ECV_0, E2ECV_1, E2ECV_2, E2ECV_3});
             };
@@ -172,8 +172,8 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
 };
 
 #if defined(__CUDACC__)
-__global__ void __launch_bounds__(192, 2) run_gpu(std::size_t EdgeDim,
-    std::size_t KDim,
+__global__ void __launch_bounds__(192, 2) run_gpu(INDEX_TYPE EdgeDim,
+    INDEX_TYPE KDim,
     nabla4_unstructured_gt<storage::gpu>::neighbors_gt_ctv_t e2c2v_gt_tv,
     nabla4_unstructured_gt<storage::gpu>::neighbors_gt_ctv_t e2ecv_gt_tv,
     nabla4_unstructured_gt<storage::gpu>::data_store_2d_ctv_VP_t u_vert_gt_tv,
@@ -186,9 +186,9 @@ __global__ void __launch_bounds__(192, 2) run_gpu(std::size_t EdgeDim,
     nabla4_unstructured_gt<storage::gpu>::data_store_2d_tv_VP_t z_nabla4_e2_wp_gt_tv) {
     const auto edge_index = blockIdx.x * blockDim.x + threadIdx.x;
     const auto k_index = blockIdx.y * blockDim.y + threadIdx.y;
-    for (std::size_t k_index{blockIdx.y * blockDim.y + threadIdx.y}; k_index < KDim;
+    for (INDEX_TYPE k_index{blockIdx.y * blockDim.y + threadIdx.y}; k_index < KDim;
          k_index += blockDim.y * gridDim.y) {
-        for (std::size_t edge_index{blockIdx.x * blockDim.x + threadIdx.x}; edge_index < EdgeDim;
+        for (INDEX_TYPE edge_index{blockIdx.x * blockDim.x + threadIdx.x}; edge_index < EdgeDim;
              edge_index += blockDim.x * gridDim.x) {
             const auto E2C2V_0 = e2c2v_gt_tv(edge_index, 0);
             const auto E2C2V_1 = e2c2v_gt_tv(edge_index, 1);
