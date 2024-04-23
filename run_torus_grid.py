@@ -72,7 +72,7 @@ def run_sanity_checks(grid, lon_dim, lat_dim):
         shape=(grid.num_edges, grid.num_levels), dtype=np.float64
     )
 
-    nabla4_gtfn.calculate_nabla4(
+    nabla4_gtfn.calculate_nabla4_cpu(
         (
             np.array(random_validation_data.u_vert, dtype=float).T.astype(np.float64),
             (0, 0),
@@ -464,7 +464,7 @@ def run_benchmarks():
             )
 
             runtimes["nabla4_benchmark_unstructured_gtfn"].append(
-                nabla4_gtfn.calculate_nabla4(
+                nabla4_gtfn.calculate_nabla4_cpu(
                     (
                         np.array(random_validation_data.u_vert, dtype=float).T.astype(
                             np.float64
