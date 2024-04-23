@@ -14,4 +14,4 @@ build*
 
 # nvidia profiler files
 *.ncu-rep
-
+*.nsys-rep

@@ -16,12 +16,22 @@ def create_output_directory(output_dir):
         quit(1)
 
 
-def read_torus_results(directory, torus_filenames, klevels):
+def read_torus_results(directory, torus_filenames, k_levels):
     runtimes = {}
     for filename in torus_filenames:
         runtimes[filename] = {}
-        for k in klevels:
+        for k in k_levels:
             with open("{}/{}_k{}.json".format(directory, filename, k)) as f:
+                runtimes[filename][k] = json.load(f)
+    return runtimes
+
+
+def read_torus_results_commit(directory, torus_filenames, k_levels, commit):
+    runtimes = {}
+    for filename in torus_filenames:
+        runtimes[filename] = {}
+        for k in k_levels:
+            with open("{}/{}_k{}_{}.json".format(directory, filename, k, commit)) as f:
                 runtimes[filename][k] = json.load(f)
     return runtimes
 
@@ -29,7 +39,7 @@ def read_torus_results(directory, torus_filenames, klevels):
 def print_median_runtimes(runtimes_output, git_commit):
     for torus_file in runtimes_output.keys():
         print("=== Torus file: {} ===".format(torus_file))
-        for k in klevels:
+        for k in runtimes_output[torus_file].keys():
             print("= k levels: {} =".format(k))
             for backend_impl in runtimes_output[torus_file][k].keys():
                 print(
@@ -59,7 +69,7 @@ def test_ci_confidence(vector, ci_interval, mean_interval):
 def print_confidence_interval(runtimes_output, ci, mean_interval):
     for torus_file in runtimes_output.keys():
         print("=== Torus file: {} ===".format(torus_file))
-        for k in klevels:
+        for k in runtimes_output[torus_file].keys():
             print("= k levels: {} =".format(k))
             for backend_impl in runtimes_output[torus_file][k].keys():
                 print(
@@ -112,7 +122,7 @@ def print_median_acceleration_over_k(data, backend_title, output_dir):
         x="Edges",
         y="Value",
         hue="K",
-        palette=sns.color_palette("tab10")[0:3],
+        palette=sns.color_palette("tab10")[0:4],
     )
     plt.title(
         "Acceleration of Structured over Unstructured for {} implementation (Median Runtimes)".format(
@@ -153,7 +163,11 @@ def generate_violin_plots(data, k, torus_name, output_dir):
     medians = []  # To store medians
 
     for implementation, runtimes in data.items():
-        if "cpu_ifirst" in implementation or "cpu_kfirst" in implementation:
+        if (
+            "cpu_ifirst" in implementation
+            or "cpu_kfirst" in implementation
+            or "gpu" in implementation
+        ):
             violin_data.append(runtimes)
             labels.append(
                 "{}_{}_{}".format(
@@ -203,7 +217,7 @@ def filter_runtime_data(runtimes_output, unstructured_key: str, structured_key: 
     for torus_file in runtimes_output.keys():
         torus_name = torus_file.split("_")[-1]
         torus_klevels_runtimes[torus_name] = {}
-        for k in klevels:
+        for k in runtimes_output[torus_file].keys():
             torus_klevels_runtimes[torus_name][k] = {}
             for backend_impl in [
                 unstructured_key,
