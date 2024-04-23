@@ -6,8 +6,6 @@
 
 #include "common.hpp"
 
-#define ARRAY_TYPE std::size_t
-
 template <Data T>
 class nabla4_structured_simple : private nabla4_data<T> {
 
@@ -64,7 +62,7 @@ class nabla4_structured_simple : private nabla4_data<T> {
 
     std::vector<std::vector<VP_TYPE>> get_output() { return z_nabla4_e2_wp; }
 
-    inline std::array<ARRAY_TYPE, 4> get_e2c2v_vertices_east_edge(std::size_t edge_index,
+    inline std::array<INDEX_TYPE, 4> get_e2c2v_vertices_east_edge(std::size_t edge_index,
         std::size_t parent_vertex,
         std::size_t latitude,
         std::size_t longitude,
@@ -72,7 +70,7 @@ class nabla4_structured_simple : private nabla4_data<T> {
         std::size_t latitude_m1,
         std::size_t longitude_p1,
         std::size_t longitude_m1) {
-        std::array<ARRAY_TYPE, 4> e2c2v_ret{};
+        std::array<INDEX_TYPE, 4> e2c2v_ret{};
         e2c2v_ret[0] = parent_vertex;
         e2c2v_ret[1] = longitude * latitude_dim + latitude_p1;
         e2c2v_ret[2] = longitude_p1 * latitude_dim + latitude_p1;
@@ -80,7 +78,7 @@ class nabla4_structured_simple : private nabla4_data<T> {
         return e2c2v_ret;
     }
 
-    inline std::array<ARRAY_TYPE, 4> get_e2c2v_vertices_northeast_edge(std::size_t edge_index,
+    inline std::array<INDEX_TYPE, 4> get_e2c2v_vertices_northeast_edge(std::size_t edge_index,
         std::size_t parent_vertex,
         std::size_t latitude,
         std::size_t longitude,
@@ -88,7 +86,7 @@ class nabla4_structured_simple : private nabla4_data<T> {
         std::size_t latitude_m1,
         std::size_t longitude_p1,
         std::size_t longitude_m1) {
-        std::array<ARRAY_TYPE, 4> e2c2v_ret{};
+        std::array<INDEX_TYPE, 4> e2c2v_ret{};
         e2c2v_ret[0] = parent_vertex;
         e2c2v_ret[1] = longitude_p1 * latitude_dim + latitude_p1;
         e2c2v_ret[2] = longitude * latitude_dim + latitude_p1;
@@ -96,7 +94,7 @@ class nabla4_structured_simple : private nabla4_data<T> {
         return e2c2v_ret;
     }
 
-    inline std::array<ARRAY_TYPE, 4> get_e2c2v_vertices_north_edge(std::size_t edge_index,
+    inline std::array<INDEX_TYPE, 4> get_e2c2v_vertices_north_edge(std::size_t edge_index,
         std::size_t parent_vertex,
         std::size_t latitude,
         std::size_t longitude,
@@ -104,7 +102,7 @@ class nabla4_structured_simple : private nabla4_data<T> {
         std::size_t latitude_m1,
         std::size_t longitude_p1,
         std::size_t longitude_m1) {
-        std::array<ARRAY_TYPE, 4> e2c2v_ret{};
+        std::array<INDEX_TYPE, 4> e2c2v_ret{};
         e2c2v_ret[0] = parent_vertex;
         e2c2v_ret[1] = longitude_p1 * latitude_dim + latitude;
         e2c2v_ret[2] = longitude * latitude_dim + latitude_m1;
@@ -113,7 +111,7 @@ class nabla4_structured_simple : private nabla4_data<T> {
     }
 
     template <auto f>
-    inline const std::array<ARRAY_TYPE, 4> get_e2c2v(ARRAY_TYPE edge_index) {
+    inline const std::array<INDEX_TYPE, 4> get_e2c2v(INDEX_TYPE edge_index) {
         const std::size_t edges_per_index{3};
         const auto starting_vertex = edge_index / edges_per_index;
         const auto latitude = starting_vertex % latitude_dim;
@@ -128,7 +126,7 @@ class nabla4_structured_simple : private nabla4_data<T> {
     }
 
     inline void inner_kernel_ifirst(
-        const std::array<ARRAY_TYPE, 4> &e2c2v_vec, std::size_t edge_index, std::size_t k_index) {
+        const std::array<INDEX_TYPE, 4> &e2c2v_vec, std::size_t edge_index, std::size_t k_index) {
         const auto E2C2V_0 = e2c2v_vec[0];
         const auto E2C2V_1 = e2c2v_vec[1];
         const auto E2C2V_2 = e2c2v_vec[2];
@@ -153,7 +151,7 @@ class nabla4_structured_simple : private nabla4_data<T> {
     }
 
     inline void inner_kernel_kfirst(
-        const std::array<ARRAY_TYPE, 4> &e2c2v_vec, std::size_t edge_index, std::size_t k_index) {
+        const std::array<INDEX_TYPE, 4> &e2c2v_vec, std::size_t edge_index, std::size_t k_index) {
         const auto E2C2V_0 = e2c2v_vec[0];
         const auto E2C2V_1 = e2c2v_vec[1];
         const auto E2C2V_2 = e2c2v_vec[2];
