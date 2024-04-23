@@ -28,9 +28,7 @@ def print_median_runtimes(runtimes):
         print(
             "{} median runtime: {}".format(
                 key,
-                np.median(
-                    np.sort(values)[int(0.25 * len(values)) : int(0.75 * len(values))]
-                ),
+                np.median(values),
             )
         )
 
@@ -150,12 +148,13 @@ def run_sanity_checks(
         grid.size[E2C2VDim],
     )
     print("Generated validation data")
-    z_nabla4_e2_wp_gtfn = np.zeros(
-        shape=(len(filtered_e2c2v), grid.num_levels), dtype=np.float64
-    )
-    if backend in ["all_cpu", "gtfn"]:
-        print("Running gtfn sanity check")
-        nabla4_gtfn.calculate_nabla4(
+
+    if backend in ["all_cpu", "gtfn_cpu"]:
+        print("Running gtfn_cpu sanity check")
+        z_nabla4_e2_wp_gtfn = np.zeros(
+            shape=(len(filtered_e2c2v), grid.num_levels), dtype=np.float64
+        )
+        nabla4_gtfn.calculate_nabla4_cpu(
             (
                 np.array(random_validation_data.u_vert, dtype=float).T.astype(
                     np.float64
@@ -212,12 +211,81 @@ def run_sanity_checks(
                 (0, 0),
             ),
         )
-
         assert np.allclose(
             z_nabla4_e2_wp_gtfn.T,
             random_validation_data.z_nabla4_e2_wp,
         )
-        print("gtfn sanity check passed")
+        print("gtfn_cpu sanity check passed")
+
+    if backend in ["all_gpu", "gtfn_gpu"]:
+        print("Running gtfn_gpu sanity check")
+        import cupy as cp  # type: ignore [import-not-found]
+
+        z_nabla4_e2_wp_gtfn = cp.zeros(
+            shape=(len(filtered_e2c2v), grid.num_levels), dtype=cp.float64
+        )
+        nabla4_gtfn.calculate_nabla4_gpu(
+            (
+                cp.array(random_validation_data.u_vert, dtype=float).T.astype(
+                    cp.float64
+                ),
+                (0, 0),
+            ),
+            (
+                cp.array(random_validation_data.v_vert, dtype=float).T.astype(
+                    cp.float64
+                ),
+                (0, 0),
+            ),
+            (
+                cp.array(
+                    random_validation_data.primal_normal_vert_v1, dtype=float
+                ).astype(cp.float64),
+                (0,),
+            ),
+            (
+                cp.array(
+                    random_validation_data.primal_normal_vert_v2, dtype=float
+                ).astype(cp.float64),
+                (0,),
+            ),
+            (
+                cp.array(random_validation_data.z_nabla2_e, dtype=float).T.astype(
+                    cp.float64
+                ),
+                (0, 0),
+            ),
+            (
+                cp.array(
+                    random_validation_data.inv_vert_vert_length, dtype=float
+                ).astype(cp.float64),
+                (0,),
+            ),
+            (
+                cp.array(
+                    random_validation_data.inv_primal_edge_length, dtype=float
+                ).astype(cp.float64),
+                (0,),
+            ),
+            (z_nabla4_e2_wp_gtfn, (0, 0)),
+            0,
+            len(filtered_e2c2v),
+            0,
+            grid.num_levels,
+            (
+                cp.array(filtered_e2c2v).astype(cp.int64),
+                (0, 0),
+            ),
+            (
+                cp.array(filtered_e2ecv).astype(cp.int64),
+                (0, 0),
+            ),
+        )
+        assert np.allclose(
+            z_nabla4_e2_wp_gtfn.get().T,
+            random_validation_data.z_nabla4_e2_wp,
+        )
+        print("gtfn_gpu sanity check passed")
 
     if backend in ["all_cpu", "cpu_ifirst"]:
         print("Running unstructured cpu_ifirst sanity check")
@@ -239,13 +307,12 @@ def run_sanity_checks(
                 random_validation_data.inv_primal_edge_length,
             )
         )
-        print("Run unstructured cpu_ifirst sanity check")
-
         assert np.allclose(
             z_nabla4_e2_comp_unstructured_cpu_ifirst_gridtools,
             random_validation_data.z_nabla4_e2_wp,
         )
         print("unstructured cpu_ifirst sanity check passed")
+
     if backend in ["all_cpu", "cpu_kfirst"]:
         print("Running unstructured cpu_kfirst sanity check")
         z_nabla4_e2_comp_unstructured_cpu_kfirst_gridtools = (
@@ -266,13 +333,13 @@ def run_sanity_checks(
                 random_validation_data.inv_primal_edge_length,
             )
         )
-
         assert np.allclose(
             z_nabla4_e2_comp_unstructured_cpu_kfirst_gridtools,
             random_validation_data.z_nabla4_e2_wp,
         )
         print("unstructured cpu_kfirst sanity check passed")
-    if backend in ["gpu"]:
+
+    if backend in ["all_gpu", "gpu"]:
         print("Running unstructured gpu sanity check")
         z_nabla4_e2_comp_unstructured_gpu_gridtools = (
             icon_benchmark.nabla4_validate_unstructured_gpu_gridtools(
@@ -324,6 +391,7 @@ def run_sanity_checks(
             random_validation_data.z_nabla4_e2_wp,
         )
         print("structured cpu_ifirst sanity check passed")
+
     if backend in ["all_cpu", "cpu_kfirst"]:
         print("Running structured cpu_kfirst sanity check")
         z_nabla4_e2_comp_structured_cpu_kfirst_gridtools = (
@@ -345,13 +413,13 @@ def run_sanity_checks(
                 random_validation_data.inv_primal_edge_length,
             )
         )
-
         assert np.allclose(
             z_nabla4_e2_comp_structured_cpu_kfirst_gridtools,
             random_validation_data.z_nabla4_e2_wp,
         )
         print("structured cpu_kfirst sanity check passed")
-    if backend in ["gpu"]:
+
+    if backend in ["all_gpu", "gpu"]:
         print("Running structured gpu sanity check")
         z_nabla4_e2_comp_structured_torus_gpu_gridtools_halo = (
             icon_benchmark.nabla4_validate_structured_torus_gpu_gridtools_halo(
@@ -372,7 +440,6 @@ def run_sanity_checks(
                 random_validation_data.inv_primal_edge_length,
             )
         )
-
         assert np.allclose(
             z_nabla4_e2_comp_structured_torus_gpu_gridtools_halo,
             random_validation_data.z_nabla4_e2_wp,
@@ -410,7 +477,16 @@ def parse_arguments():
     )
     parser.add_argument(
         "--backend",
-        choices=["all_cpu", "gtfn", "naive", "cpu_ifirst", "cpu_kfirst", "gpu"],
+        choices=[
+            "all_cpu",
+            "all_gpu",
+            "gtfn_cpu",
+            "gtfn_gpu",
+            "naive",
+            "cpu_ifirst",
+            "cpu_kfirst",
+            "gpu",
+        ],
         default="all_cpu",
         help="Which backend to benchmark",
     )
@@ -422,7 +498,7 @@ def parse_arguments():
     )
 
     args = parser.parse_args()
-    if args.backend == "gpu":
+    if "gpu" in args.backend:
         args.e2c2v_ordering = "per-orientation"
     else:
         args.e2c2v_ordering = "per-vertex"
@@ -482,11 +558,11 @@ def run_benchmarks():
 
     runtimes = {}
 
-    if args.backend in ["all_cpu", "gtfn"]:
-        runtimes["nabla4_benchmark_unstructured_gtfn"] = []
+    if args.backend in ["all_cpu", "gtfn_cpu"]:
+        runtimes["nabla4_benchmark_unstructured_gtfn_cpu"] = []
 
         for _ in range(repetitions):
-            random_validation_data = (
+            random_validation_data_gtfn = (
                 icon_benchmark.get_nabla4_benchmark_validation_data(
                     torus_grid.get_offset_provider("E2C2V").table,
                     torus_grid.get_offset_provider("E2ECV").table,
@@ -502,47 +578,51 @@ def run_benchmarks():
                 shape=(len(filtered_e2c2v), torus_grid.num_levels), dtype=np.float64
             )
 
-            runtimes["nabla4_benchmark_unstructured_gtfn"].append(
-                nabla4_gtfn.calculate_nabla4(
-                    (
-                        np.array(random_validation_data.u_vert, dtype=float).T.astype(
-                            np.float64
-                        ),
-                        (0, 0),
-                    ),
-                    (
-                        np.array(random_validation_data.v_vert, dtype=float).T.astype(
-                            np.float64
-                        ),
-                        (0, 0),
-                    ),
+            runtimes["nabla4_benchmark_unstructured_gtfn_cpu"].append(
+                nabla4_gtfn.calculate_nabla4_cpu(
                     (
                         np.array(
-                            random_validation_data.primal_normal_vert_v1, dtype=float
-                        ).astype(np.float64),
-                        (0,),
-                    ),
-                    (
-                        np.array(
-                            random_validation_data.primal_normal_vert_v2, dtype=float
-                        ).astype(np.float64),
-                        (0,),
-                    ),
-                    (
-                        np.array(
-                            random_validation_data.z_nabla2_e, dtype=float
+                            random_validation_data_gtfn.u_vert, dtype=float
                         ).T.astype(np.float64),
                         (0, 0),
                     ),
                     (
                         np.array(
-                            random_validation_data.inv_vert_vert_length, dtype=float
+                            random_validation_data_gtfn.v_vert, dtype=float
+                        ).T.astype(np.float64),
+                        (0, 0),
+                    ),
+                    (
+                        np.array(
+                            random_validation_data_gtfn.primal_normal_vert_v1,
+                            dtype=float,
                         ).astype(np.float64),
                         (0,),
                     ),
                     (
                         np.array(
-                            random_validation_data.inv_primal_edge_length, dtype=float
+                            random_validation_data_gtfn.primal_normal_vert_v2,
+                            dtype=float,
+                        ).astype(np.float64),
+                        (0,),
+                    ),
+                    (
+                        np.array(
+                            random_validation_data_gtfn.z_nabla2_e, dtype=float
+                        ).T.astype(np.float64),
+                        (0, 0),
+                    ),
+                    (
+                        np.array(
+                            random_validation_data_gtfn.inv_vert_vert_length,
+                            dtype=float,
+                        ).astype(np.float64),
+                        (0,),
+                    ),
+                    (
+                        np.array(
+                            random_validation_data_gtfn.inv_primal_edge_length,
+                            dtype=float,
                         ).astype(np.float64),
                         (0,),
                     ),
@@ -557,6 +637,92 @@ def run_benchmarks():
                     ),
                     (
                         filtered_e2ecv.astype(np.int64),
+                        (0, 0),
+                    ),
+                )
+            )
+
+    if args.backend in ["all_gpu", "gtfn_gpu"]:
+        import cupy as cp  # type: ignore [import-not-found]
+
+        runtimes["nabla4_benchmark_unstructured_gtfn_gpu"] = []
+
+        for _ in range(repetitions):
+            random_validation_data_gtfn = (
+                icon_benchmark.get_nabla4_benchmark_validation_data(
+                    torus_grid.get_offset_provider("E2C2V").table,
+                    torus_grid.get_offset_provider("E2ECV").table,
+                    torus_grid.num_cells,
+                    torus_grid.num_vertices,
+                    torus_grid.num_edges,
+                    torus_grid.num_levels,
+                    torus_grid.size[E2C2VDim],
+                )
+            )
+
+            z_nabla4_e2_wp_gtfn = cp.zeros(
+                shape=(len(filtered_e2c2v), torus_grid.num_levels), dtype=cp.float64
+            )
+
+            runtimes["nabla4_benchmark_unstructured_gtfn_gpu"].append(
+                nabla4_gtfn.calculate_nabla4_gpu(
+                    (
+                        cp.array(
+                            random_validation_data_gtfn.u_vert, dtype=float
+                        ).T.astype(cp.float64),
+                        (0, 0),
+                    ),
+                    (
+                        cp.array(
+                            random_validation_data_gtfn.v_vert, dtype=float
+                        ).T.astype(cp.float64),
+                        (0, 0),
+                    ),
+                    (
+                        cp.array(
+                            random_validation_data_gtfn.primal_normal_vert_v1,
+                            dtype=float,
+                        ).astype(cp.float64),
+                        (0,),
+                    ),
+                    (
+                        cp.array(
+                            random_validation_data_gtfn.primal_normal_vert_v2,
+                            dtype=float,
+                        ).astype(cp.float64),
+                        (0,),
+                    ),
+                    (
+                        cp.array(
+                            random_validation_data_gtfn.z_nabla2_e, dtype=float
+                        ).T.astype(cp.float64),
+                        (0, 0),
+                    ),
+                    (
+                        cp.array(
+                            random_validation_data_gtfn.inv_vert_vert_length,
+                            dtype=float,
+                        ).astype(cp.float64),
+                        (0,),
+                    ),
+                    (
+                        cp.array(
+                            random_validation_data_gtfn.inv_primal_edge_length,
+                            dtype=float,
+                        ).astype(cp.float64),
+                        (0,),
+                    ),
+                    (z_nabla4_e2_wp_gtfn, (0, 0)),
+                    0,
+                    len(filtered_e2c2v),
+                    0,
+                    torus_grid.num_levels,
+                    (
+                        cp.array(filtered_e2c2v).astype(cp.int64),
+                        (0, 0),
+                    ),
+                    (
+                        cp.array(filtered_e2ecv).astype(cp.int64),
                         (0, 0),
                     ),
                 )
@@ -622,7 +788,7 @@ def run_benchmarks():
             dry_runs,
         )
 
-    if args.backend in ["gpu"]:
+    if args.backend in ["all_gpu", "gpu"]:
         runtimes[
             "nabla4_benchmark_unstructured_gpu_gridtools"
         ] = icon_benchmark.nabla4_benchmark_unstructured_gpu_gridtools(
