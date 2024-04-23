@@ -119,7 +119,7 @@ decltype(auto) calculate_nabla4_wrapper_gpu(
 
 NB_MODULE(nabla4_gtfn, module) {
     module.def("calculate_nabla4_cpu", &calculate_nabla4_wrapper_cpu);
-    #if defined(IS_GPU)
+#if defined(IS_GPU)
     module.def("calculate_nabla4_gpu", &calculate_nabla4_wrapper_gpu);
-    #endif
+#endif
 }
