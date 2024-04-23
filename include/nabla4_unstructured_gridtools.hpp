@@ -186,9 +186,9 @@ __global__ void __launch_bounds__(192, 2) run_gpu(INDEX_TYPE EdgeDim,
     nabla4_unstructured_gt<storage::gpu>::data_store_2d_tv_VP_t z_nabla4_e2_wp_gt_tv) {
     const auto edge_index = blockIdx.x * blockDim.x + threadIdx.x;
     const auto k_index = blockIdx.y * blockDim.y + threadIdx.y;
-    for (INDEX_TYPE k_index{blockIdx.y * blockDim.y + threadIdx.y}; k_index < KDim;
+    for (auto k_index{blockIdx.y * blockDim.y + threadIdx.y}; k_index < KDim;
          k_index += blockDim.y * gridDim.y) {
-        for (INDEX_TYPE edge_index{blockIdx.x * blockDim.x + threadIdx.x}; edge_index < EdgeDim;
+        for (auto edge_index{blockIdx.x * blockDim.x + threadIdx.x}; edge_index < EdgeDim;
              edge_index += blockDim.x * gridDim.x) {
             const auto E2C2V_0 = e2c2v_gt_tv(edge_index, 0);
             const auto E2C2V_1 = e2c2v_gt_tv(edge_index, 1);

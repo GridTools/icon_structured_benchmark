@@ -202,7 +202,7 @@ __global__ void __launch_bounds__(BLOCK_SIZE, 2) run_gpu(INDEX_TYPE KDim,
     __shared__ INDEX_TYPE is[BLOCK_DIM_X];
     __shared__ INDEX_TYPE js[BLOCK_DIM_X];
     const auto x_dim_without_halo = x_dim - 2 * halo;
-    for (INDEX_TYPE edge_index{blockIdx.x * blockDim.x + threadIdx.x}; edge_index < total_grid_size;
+    for (auto edge_index{blockIdx.x * blockDim.x + threadIdx.x}; edge_index < total_grid_size;
          edge_index += blockDim.x * gridDim.x) {
         const auto i = edge_index % x_dim_without_halo + halo;
         const auto j = (edge_index / x_dim_without_halo) + halo;
@@ -237,11 +237,11 @@ __global__ void __launch_bounds__(BLOCK_SIZE, 2) run_gpu(INDEX_TYPE KDim,
     };
     __syncthreads();
     const auto global_edges_per_orientation = x_dim * y_dim * 4;
-    for (INDEX_TYPE k_index{blockIdx.z * blockDim.z + threadIdx.z}; k_index < KDim;
+    for (auto k_index{blockIdx.z * blockDim.z + threadIdx.z}; k_index < KDim;
          k_index += blockDim.z * gridDim.z) {
-        for (INDEX_TYPE orientation_id{blockIdx.y * blockDim.y + threadIdx.y}; orientation_id < 3;
+        for (auto orientation_id{blockIdx.y * blockDim.y + threadIdx.y}; orientation_id < 3;
              orientation_id += blockDim.y * gridDim.y) {
-            for (INDEX_TYPE edge_index{blockIdx.x * blockDim.x + threadIdx.x}; edge_index < total_grid_size;
+            for (auto edge_index{blockIdx.x * blockDim.x + threadIdx.x}; edge_index < total_grid_size;
                  edge_index += blockDim.x * gridDim.x) {
                 const auto E2C2V_0 = E2C2V[orientation_id][threadIdx.x][0];
                 const auto E2C2V_1 = E2C2V[orientation_id][threadIdx.x][1];
