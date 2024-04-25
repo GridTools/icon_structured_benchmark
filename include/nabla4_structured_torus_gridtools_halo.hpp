@@ -72,10 +72,8 @@ class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
                                                       inv_primal_edge_length){};
 
   private:
-    inline __attribute__((always_inline)) void inner_kernel(const std::array<index_type, 4> &e2c2v_vec,
-        index_type edge_index,
-        index_type k_index,
-        index_type e2c2v_index) {
+    inline __attribute__((always_inline)) void inner_kernel(
+        const std::array<index_type, 4> &e2c2v_vec, index_type edge_index, index_type k_index, index_type e2c2v_index) {
         const auto E2C2V_0 = e2c2v_vec[0];
         const auto E2C2V_1 = e2c2v_vec[1];
         const auto E2C2V_2 = e2c2v_vec[2];
@@ -183,22 +181,22 @@ class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
 };
 
 #if defined(__CUDACC__)
-template<typename T>
+template <typename T>
 constexpr block_dims get_block_dims_structured() {
     throw std::runtime_error("Undefined block dimensions for type " + T::name + " in GPU backend");
 };
 
-template<>
+template <>
 constexpr block_dims get_block_dims_structured<std::size_t>() {
     return {32, 3, 6, 576};
 };
 
-template<>
+template <>
 constexpr block_dims get_block_dims_structured<std::uint32_t>() {
     return {32, 3, 7, 672};
 };
 
-template<>
+template <>
 constexpr block_dims get_block_dims_structured<int>() {
     return {32, 3, 7, 672};
 };
@@ -257,8 +255,7 @@ __global__ void __launch_bounds__(block_dims_structured.size, 2) run_gpu(index_t
     };
     __syncthreads();
     const auto global_edges_per_orientation = x_dim * y_dim * 4;
-    for (auto k_index{blockIdx.z * blockDim.z + threadIdx.z}; k_index < KDim;
-         k_index += blockDim.z * gridDim.z) {
+    for (auto k_index{blockIdx.z * blockDim.z + threadIdx.z}; k_index < KDim; k_index += blockDim.z * gridDim.z) {
         for (auto orientation_id{blockIdx.y * blockDim.y + threadIdx.y}; orientation_id < 3;
              orientation_id += blockDim.y * gridDim.y) {
             for (auto edge_index{blockIdx.x * blockDim.x + threadIdx.x}; edge_index < total_grid_size;

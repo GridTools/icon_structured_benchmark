@@ -172,22 +172,22 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
 };
 
 #if defined(__CUDACC__)
-template<typename T>
+template <typename T>
 constexpr block_dims get_block_dims_unstructured() {
     throw std::runtime_error("Undefined block dimensions for type " + T::name + " in GPU backend");
 };
 
-template<>
+template <>
 constexpr block_dims get_block_dims_unstructured<std::size_t>() {
     return {24, 8, 1, 192};
 };
 
-template<>
+template <>
 constexpr block_dims get_block_dims_unstructured<std::uint32_t>() {
     return {32, 10, 1, 320};
 };
 
-template<>
+template <>
 constexpr block_dims get_block_dims_unstructured<int>() {
     return {32, 14, 1, 448};
 };
@@ -208,8 +208,7 @@ __global__ void __launch_bounds__(block_dims_unstructured.size, 2) run_gpu(index
     nabla4_unstructured_gt<storage::gpu>::data_store_2d_tv_VP_t z_nabla4_e2_wp_gt_tv) {
     const auto edge_index = blockIdx.x * blockDim.x + threadIdx.x;
     const auto k_index = blockIdx.y * blockDim.y + threadIdx.y;
-    for (auto k_index{blockIdx.y * blockDim.y + threadIdx.y}; k_index < KDim;
-         k_index += blockDim.y * gridDim.y) {
+    for (auto k_index{blockIdx.y * blockDim.y + threadIdx.y}; k_index < KDim; k_index += blockDim.y * gridDim.y) {
         for (auto edge_index{blockIdx.x * blockDim.x + threadIdx.x}; edge_index < EdgeDim;
              edge_index += blockDim.x * gridDim.x) {
             const auto E2C2V_0 = e2c2v_gt_tv(edge_index, 0);
