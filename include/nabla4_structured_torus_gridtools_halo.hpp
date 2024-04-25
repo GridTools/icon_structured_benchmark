@@ -24,32 +24,32 @@ class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
     using nabla4_gt_data<T>::inv_primal_edge_length_gt_tv;
     using nabla4_gt_data<T>::z_nabla4_e2_wp_gt_tv;
 
-    const INDEX_TYPE y_dim;
-    const INDEX_TYPE x_dim;
-    const INDEX_TYPE halo;
+    const index_type y_dim;
+    const index_type x_dim;
+    const index_type halo;
 
   public:
     /// Constructor with all the necessary information for \c nabla4 compute
     /// kernel execution
-    nabla4_structured_torus_halo_gt(INDEX_TYPE CellDim,
-        INDEX_TYPE VertexDim,
-        INDEX_TYPE EdgeDim,
-        INDEX_TYPE KDim,
-        INDEX_TYPE ECVDim,
-        INDEX_TYPE y_dim,
-        INDEX_TYPE x_dim,
-        INDEX_TYPE halo)
+    nabla4_structured_torus_halo_gt(index_type CellDim,
+        index_type VertexDim,
+        index_type EdgeDim,
+        index_type KDim,
+        index_type ECVDim,
+        index_type y_dim,
+        index_type x_dim,
+        index_type halo)
         : y_dim(y_dim), x_dim(x_dim),
           halo(halo), nabla4_gt_data<T>(
                           CellDim, VertexDim, EdgeDim, KDim, ECVDim, (x_dim - 2 * halo) * (y_dim - halo * 2) * 3){};
-    nabla4_structured_torus_halo_gt(INDEX_TYPE CellDim,
-        INDEX_TYPE VertexDim,
-        INDEX_TYPE EdgeDim,
-        INDEX_TYPE KDim,
-        INDEX_TYPE ECVDim,
-        INDEX_TYPE y_dim,
-        INDEX_TYPE x_dim,
-        INDEX_TYPE halo,
+    nabla4_structured_torus_halo_gt(index_type CellDim,
+        index_type VertexDim,
+        index_type EdgeDim,
+        index_type KDim,
+        index_type ECVDim,
+        index_type y_dim,
+        index_type x_dim,
+        index_type halo,
         std::vector<std::vector<VP_TYPE>> &u_vert,
         std::vector<std::vector<VP_TYPE>> &v_vert,
         std::vector<WP_TYPE> &primal_normal_vert_v1,
@@ -72,10 +72,10 @@ class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
                                                       inv_primal_edge_length){};
 
   private:
-    inline __attribute__((always_inline)) void inner_kernel(const std::array<INDEX_TYPE, 4> &e2c2v_vec,
-        INDEX_TYPE edge_index,
-        INDEX_TYPE k_index,
-        INDEX_TYPE e2c2v_index) {
+    inline __attribute__((always_inline)) void inner_kernel(const std::array<index_type, 4> &e2c2v_vec,
+        index_type edge_index,
+        index_type k_index,
+        index_type e2c2v_index) {
         const auto E2C2V_0 = e2c2v_vec[0];
         const auto E2C2V_1 = e2c2v_vec[1];
         const auto E2C2V_2 = e2c2v_vec[2];
@@ -104,19 +104,19 @@ class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
 #endif
     void
     run_cpu_ifirst() {
-        for (INDEX_TYPE k_index{}; k_index < KDim; ++k_index) {
+        for (index_type k_index{}; k_index < KDim; ++k_index) {
 #ifdef __clang__
 #pragma clang loop unroll(enable) vectorize(assume_safety) interleave(enable)
 #elif defined(__GNUC__)
 #pragma GCC ivdep
 #endif
-            for (INDEX_TYPE j = halo; j < y_dim - halo; ++j) {
+            for (index_type j = halo; j < y_dim - halo; ++j) {
 #ifdef __clang__
 #pragma clang loop unroll(enable) vectorize(assume_safety) interleave(enable)
 #elif defined(__GNUC__)
 #pragma GCC ivdep
 #endif
-                for (INDEX_TYPE i = halo; i < x_dim - halo; ++i) {
+                for (index_type i = halo; i < x_dim - halo; ++i) {
                     const auto local_edge_index = ((j - halo) * (x_dim - 2 * halo) + (i - halo)) * 3;
                     const auto global_edge_index = (j * x_dim + i) * 3;
                     const auto i_j = j * x_dim + i;
@@ -138,11 +138,11 @@ class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
 #endif
     void
     run_cpu_kfirst() {
-        for (INDEX_TYPE j = halo; j < y_dim - halo; ++j) {
+        for (index_type j = halo; j < y_dim - halo; ++j) {
 #ifdef __clang__
 #pragma clang loop unroll(enable) vectorize(assume_safety) interleave(enable)
 #endif
-            for (INDEX_TYPE i = halo; i < x_dim - halo; ++i) {
+            for (index_type i = halo; i < x_dim - halo; ++i) {
                 const auto local_edge_index = ((j - halo) * (x_dim - 2 * halo) + (i - halo)) * 3;
                 const auto global_edge_index = (j * x_dim + i) * 3;
                 const auto i_j = j * x_dim + i;
@@ -156,7 +156,7 @@ class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
 #elif defined(__GNUC__)
 #pragma GCC ivdep
 #endif
-                for (INDEX_TYPE k_index{}; k_index < KDim; ++k_index) {
+                for (index_type k_index{}; k_index < KDim; ++k_index) {
                     inner_kernel({i_j, i_jp1, im1_jp1, ip1_j}, local_edge_index, k_index, global_edge_index);
                     inner_kernel({i_j, ip1_j, i_jp1, ip1_jm1}, local_edge_index + 1, k_index, global_edge_index + 1);
                     inner_kernel({i_j, ip1_jm1, ip1_j, i_jm1}, local_edge_index + 2, k_index, global_edge_index + 2);
@@ -183,13 +183,33 @@ class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
 };
 
 #if defined(__CUDACC__)
-#define BLOCK_SIZE 576
-#define BLOCK_DIM_X 32
-__global__ void __launch_bounds__(BLOCK_SIZE, 2) run_gpu(INDEX_TYPE KDim,
-    INDEX_TYPE x_dim,
-    INDEX_TYPE y_dim,
-    INDEX_TYPE halo,
-    INDEX_TYPE total_grid_size,
+template<typename T>
+constexpr block_dims get_block_dims_structured() {
+    throw std::runtime_error("Undefined block dimensions for type " + T::name + " in GPU backend");
+};
+
+template<>
+constexpr block_dims get_block_dims_structured<std::size_t>() {
+    return {32, 3, 6, 576};
+};
+
+template<>
+constexpr block_dims get_block_dims_structured<std::uint32_t>() {
+    return {32, 3, 7, 672};
+};
+
+template<>
+constexpr block_dims get_block_dims_structured<int>() {
+    return {32, 3, 7, 672};
+};
+
+constexpr block_dims block_dims_structured = get_block_dims_structured<index_type>();
+
+__global__ void __launch_bounds__(block_dims_structured.size, 2) run_gpu(index_type KDim,
+    index_type x_dim,
+    index_type y_dim,
+    index_type halo,
+    index_type total_grid_size,
     nabla4_structured_torus_halo_gt<storage::gpu>::data_store_2d_ctv_VP_t u_vert_gt_tv,
     nabla4_structured_torus_halo_gt<storage::gpu>::data_store_2d_ctv_VP_t v_vert_gt_tv,
     nabla4_structured_torus_halo_gt<storage::gpu>::data_store_1d_ctv_WP_t primal_normal_vert_v1_gt_tv,
@@ -198,9 +218,9 @@ __global__ void __launch_bounds__(BLOCK_SIZE, 2) run_gpu(INDEX_TYPE KDim,
     nabla4_structured_torus_halo_gt<storage::gpu>::data_store_1d_ctv_WP_t inv_vert_vert_length_gt_tv,
     nabla4_structured_torus_halo_gt<storage::gpu>::data_store_1d_ctv_WP_t inv_primal_edge_length_gt_tv,
     nabla4_structured_torus_halo_gt<storage::gpu>::data_store_2d_tv_VP_t z_nabla4_e2_wp_gt_tv) {
-    __shared__ INDEX_TYPE E2C2V[3][BLOCK_DIM_X][5];
-    __shared__ INDEX_TYPE is[BLOCK_DIM_X];
-    __shared__ INDEX_TYPE js[BLOCK_DIM_X];
+    __shared__ index_type E2C2V[3][block_dims_structured.x][5];
+    __shared__ index_type is[block_dims_structured.x];
+    __shared__ index_type js[block_dims_structured.x];
     const auto x_dim_without_halo = x_dim - 2 * halo;
     for (auto edge_index{blockIdx.x * blockDim.x + threadIdx.x}; edge_index < total_grid_size;
          edge_index += blockDim.x * gridDim.x) {
@@ -277,9 +297,9 @@ __global__ void __launch_bounds__(BLOCK_SIZE, 2) run_gpu(INDEX_TYPE KDim,
 
 template <typename T>
 void nabla4_structured_torus_halo_gt<T>::run_gpu_helper() {
-    const INDEX_TYPE total_grid_size = (x_dim - 2 * halo) * (y_dim - halo * 2);
+    const index_type total_grid_size = (x_dim - 2 * halo) * (y_dim - halo * 2);
     cudaError_t errSync, errAsync;
-    dim3 tblocks(BLOCK_DIM_X, 3, 6);
+    dim3 tblocks(block_dims_structured.x, block_dims_structured.y, block_dims_structured.z);
     dim3 grid((total_grid_size + tblocks.x - 1) / tblocks.x, 1, 1);
     run_gpu<<<grid, tblocks>>>(KDim,
         x_dim,

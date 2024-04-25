@@ -44,13 +44,13 @@ std::vector<double> nabla4_benchmark_unstructured(std::vector<std::array<T, 4>> 
 }
 
 template <backend_impl I>
-std::vector<double> nabla4_benchmark_unstructured_gridtools(std::vector<std::array<INDEX_TYPE, 4>> &e2c2v,
-    std::vector<std::array<INDEX_TYPE, 4>> &e2ecv,
-    INDEX_TYPE CellDim,
-    INDEX_TYPE VertexDim,
-    INDEX_TYPE EdgeDim,
-    INDEX_TYPE KDim,
-    INDEX_TYPE ECVDim,
+std::vector<double> nabla4_benchmark_unstructured_gridtools(std::vector<std::array<index_type, 4>> &e2c2v,
+    std::vector<std::array<index_type, 4>> &e2ecv,
+    index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
     int repetitions,
     int dry_runs) {
     if constexpr (I == backend_impl::cpu_ifirst) {
@@ -95,13 +95,13 @@ std::vector<double> nabla4_benchmark_unstructured_cpu_ifirst(std::vector<std::ar
         e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim, repetitions, dry_runs);
 }
 
-std::vector<double> nabla4_benchmark_unstructured_cpu_ifirst_gridtools(std::vector<std::array<INDEX_TYPE, 4>> &e2c2v,
-    std::vector<std::array<INDEX_TYPE, 4>> &e2ecv,
-    INDEX_TYPE CellDim,
-    INDEX_TYPE VertexDim,
-    INDEX_TYPE EdgeDim,
-    INDEX_TYPE KDim,
-    INDEX_TYPE ECVDim,
+std::vector<double> nabla4_benchmark_unstructured_cpu_ifirst_gridtools(std::vector<std::array<index_type, 4>> &e2c2v,
+    std::vector<std::array<index_type, 4>> &e2ecv,
+    index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
     int repetitions,
     int dry_runs) {
     return nabla4_benchmark_unstructured_gridtools<cpu_ifirst>(
@@ -121,26 +121,26 @@ std::vector<double> nabla4_benchmark_unstructured_cpu_kfirst(std::vector<std::ar
         e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim, repetitions, dry_runs);
 }
 
-std::vector<double> nabla4_benchmark_unstructured_cpu_kfirst_gridtools(std::vector<std::array<INDEX_TYPE, 4>> &e2c2v,
-    std::vector<std::array<INDEX_TYPE, 4>> &e2ecv,
-    INDEX_TYPE CellDim,
-    INDEX_TYPE VertexDim,
-    INDEX_TYPE EdgeDim,
-    INDEX_TYPE KDim,
-    INDEX_TYPE ECVDim,
+std::vector<double> nabla4_benchmark_unstructured_cpu_kfirst_gridtools(std::vector<std::array<index_type, 4>> &e2c2v,
+    std::vector<std::array<index_type, 4>> &e2ecv,
+    index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
     int repetitions,
     int dry_runs) {
     return nabla4_benchmark_unstructured_gridtools<cpu_kfirst>(
         e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim, repetitions, dry_runs);
 }
 
-std::vector<double> nabla4_benchmark_unstructured_gpu_gridtools(std::vector<std::array<INDEX_TYPE, 4>> &e2c2v,
-    std::vector<std::array<INDEX_TYPE, 4>> &e2ecv,
-    INDEX_TYPE CellDim,
-    INDEX_TYPE VertexDim,
-    INDEX_TYPE EdgeDim,
-    INDEX_TYPE KDim,
-    INDEX_TYPE ECVDim,
+std::vector<double> nabla4_benchmark_unstructured_gpu_gridtools(std::vector<std::array<index_type, 4>> &e2c2v,
+    std::vector<std::array<index_type, 4>> &e2ecv,
+    index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
     int repetitions,
     int dry_runs) {
     return nabla4_benchmark_unstructured_gridtools<gpu>(
@@ -211,13 +211,13 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_ifirst(
 }
 
 std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_ifirst_gridtools(
-    std::vector<std::array<INDEX_TYPE, 4>> &e2c2v,
-    std::vector<std::array<INDEX_TYPE, 4>> &e2ecv,
-    INDEX_TYPE CellDim,
-    INDEX_TYPE VertexDim,
-    INDEX_TYPE EdgeDim,
-    INDEX_TYPE KDim,
-    INDEX_TYPE ECVDim,
+    std::vector<std::array<index_type, 4>> &e2c2v,
+    std::vector<std::array<index_type, 4>> &e2ecv,
+    index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
     std::vector<std::vector<VP_TYPE>> &u_vert,
     std::vector<std::vector<VP_TYPE>> &v_vert,
     std::vector<WP_TYPE> &primal_normal_vert_v1,
@@ -275,13 +275,13 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_kfirst(
 }
 
 std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_kfirst_gridtools(
-    std::vector<std::array<INDEX_TYPE, 4>> &e2c2v,
-    std::vector<std::array<INDEX_TYPE, 4>> &e2ecv,
-    INDEX_TYPE CellDim,
-    INDEX_TYPE VertexDim,
-    INDEX_TYPE EdgeDim,
-    INDEX_TYPE KDim,
-    INDEX_TYPE ECVDim,
+    std::vector<std::array<index_type, 4>> &e2c2v,
+    std::vector<std::array<index_type, 4>> &e2ecv,
+    index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
     std::vector<std::vector<VP_TYPE>> &u_vert,
     std::vector<std::vector<VP_TYPE>> &v_vert,
     std::vector<WP_TYPE> &primal_normal_vert_v1,
@@ -308,13 +308,13 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_kfirst_gridto
 
 #ifdef __CUDACC__
 std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_gpu_gridtools(
-    std::vector<std::array<INDEX_TYPE, 4>> &e2c2v,
-    std::vector<std::array<INDEX_TYPE, 4>> &e2ecv,
-    INDEX_TYPE CellDim,
-    INDEX_TYPE VertexDim,
-    INDEX_TYPE EdgeDim,
-    INDEX_TYPE KDim,
-    INDEX_TYPE ECVDim,
+    std::vector<std::array<index_type, 4>> &e2c2v,
+    std::vector<std::array<index_type, 4>> &e2ecv,
+    index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
     std::vector<std::vector<VP_TYPE>> &u_vert,
     std::vector<std::vector<VP_TYPE>> &v_vert,
     std::vector<WP_TYPE> &primal_normal_vert_v1,
@@ -340,13 +340,13 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_gpu_gridtools(
 }
 #else
 std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_gpu_gridtools(
-    std::vector<std::array<INDEX_TYPE, 4>> &e2c2v,
-    std::vector<std::array<INDEX_TYPE, 4>> &e2ecv,
-    INDEX_TYPE CellDim,
-    INDEX_TYPE VertexDim,
-    INDEX_TYPE EdgeDim,
-    INDEX_TYPE KDim,
-    INDEX_TYPE ECVDim,
+    std::vector<std::array<index_type, 4>> &e2c2v,
+    std::vector<std::array<index_type, 4>> &e2ecv,
+    index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
     std::vector<std::vector<VP_TYPE>> &u_vert,
     std::vector<std::vector<VP_TYPE>> &v_vert,
     std::vector<WP_TYPE> &primal_normal_vert_v1,
@@ -553,14 +553,14 @@ std::vector<double> nabla4_benchmark_structured_torus_gridtools(std::size_t Cell
 }
 
 template <backend_impl I>
-std::vector<double> nabla4_benchmark_structured_torus_gridtools_halo(INDEX_TYPE CellDim,
-    INDEX_TYPE VertexDim,
-    INDEX_TYPE EdgeDim,
-    INDEX_TYPE KDim,
-    INDEX_TYPE ECVDim,
-    INDEX_TYPE longitude_dim,
-    INDEX_TYPE latitude_dim,
-    INDEX_TYPE halo,
+std::vector<double> nabla4_benchmark_structured_torus_gridtools_halo(index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    index_type longitude_dim,
+    index_type latitude_dim,
+    index_type halo,
     int repetitions,
     int dry_runs) {
     if constexpr (I == backend_impl::naive) {
@@ -629,14 +629,14 @@ std::vector<double> nabla4_benchmark_structured_torus_cpu_ifirst_gridtools(std::
         CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, repetitions, dry_runs);
 }
 
-std::vector<double> nabla4_benchmark_structured_torus_cpu_ifirst_gridtools_halo(INDEX_TYPE CellDim,
-    INDEX_TYPE VertexDim,
-    INDEX_TYPE EdgeDim,
-    INDEX_TYPE KDim,
-    INDEX_TYPE ECVDim,
-    INDEX_TYPE longitude_dim,
-    INDEX_TYPE latitude_dim,
-    INDEX_TYPE halo,
+std::vector<double> nabla4_benchmark_structured_torus_cpu_ifirst_gridtools_halo(index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    index_type longitude_dim,
+    index_type latitude_dim,
+    index_type halo,
     int repetitions,
     int dry_runs) {
     return nabla4_benchmark_structured_torus_gridtools_halo<cpu_ifirst>(
@@ -669,28 +669,28 @@ std::vector<double> nabla4_benchmark_structured_torus_cpu_kfirst_gridtools(std::
         CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, repetitions, dry_runs);
 }
 
-std::vector<double> nabla4_benchmark_structured_torus_cpu_kfirst_gridtools_halo(INDEX_TYPE CellDim,
-    INDEX_TYPE VertexDim,
-    INDEX_TYPE EdgeDim,
-    INDEX_TYPE KDim,
-    INDEX_TYPE ECVDim,
-    INDEX_TYPE longitude_dim,
-    INDEX_TYPE latitude_dim,
-    INDEX_TYPE halo,
+std::vector<double> nabla4_benchmark_structured_torus_cpu_kfirst_gridtools_halo(index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    index_type longitude_dim,
+    index_type latitude_dim,
+    index_type halo,
     int repetitions,
     int dry_runs) {
     return nabla4_benchmark_structured_torus_gridtools_halo<cpu_kfirst>(
         CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, halo, repetitions, dry_runs);
 }
 
-std::vector<double> nabla4_benchmark_structured_torus_gpu_gridtools_halo(INDEX_TYPE CellDim,
-    INDEX_TYPE VertexDim,
-    INDEX_TYPE EdgeDim,
-    INDEX_TYPE KDim,
-    INDEX_TYPE ECVDim,
-    INDEX_TYPE longitude_dim,
-    INDEX_TYPE latitude_dim,
-    INDEX_TYPE halo,
+std::vector<double> nabla4_benchmark_structured_torus_gpu_gridtools_halo(index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    index_type longitude_dim,
+    index_type latitude_dim,
+    index_type halo,
     int repetitions,
     int dry_runs) {
     return nabla4_benchmark_structured_torus_gridtools_halo<gpu>(
@@ -790,14 +790,14 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_cpu_ifirst_gr
     return run_validation<nabla4_structured_torus_gt<storage::cpu_ifirst>, cpu_ifirst>(nabla4_benchmark_object);
 }
 
-std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_cpu_ifirst_gridtools_halo(INDEX_TYPE CellDim,
-    INDEX_TYPE VertexDim,
-    INDEX_TYPE EdgeDim,
-    INDEX_TYPE KDim,
-    INDEX_TYPE ECVDim,
-    INDEX_TYPE longitude_dim,
-    INDEX_TYPE latitude_dim,
-    INDEX_TYPE halo,
+std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_cpu_ifirst_gridtools_halo(index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    index_type longitude_dim,
+    index_type latitude_dim,
+    index_type halo,
     std::vector<std::vector<VP_TYPE>> &u_vert,
     std::vector<std::vector<VP_TYPE>> &v_vert,
     std::vector<WP_TYPE> &primal_normal_vert_v1,
@@ -885,14 +885,14 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_cpu_kfirst_gr
     return run_validation<nabla4_structured_torus_gt<storage::cpu_kfirst>, cpu_kfirst>(nabla4_benchmark_object);
 }
 
-std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_cpu_kfirst_gridtools_halo(INDEX_TYPE CellDim,
-    INDEX_TYPE VertexDim,
-    INDEX_TYPE EdgeDim,
-    INDEX_TYPE KDim,
-    INDEX_TYPE ECVDim,
-    INDEX_TYPE longitude_dim,
-    INDEX_TYPE latitude_dim,
-    INDEX_TYPE halo,
+std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_cpu_kfirst_gridtools_halo(index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    index_type longitude_dim,
+    index_type latitude_dim,
+    index_type halo,
     std::vector<std::vector<VP_TYPE>> &u_vert,
     std::vector<std::vector<VP_TYPE>> &v_vert,
     std::vector<WP_TYPE> &primal_normal_vert_v1,
@@ -919,14 +919,14 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_cpu_kfirst_gr
 }
 
 #ifdef __CUDACC__
-std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_gpu_gridtools_halo(INDEX_TYPE CellDim,
-    INDEX_TYPE VertexDim,
-    INDEX_TYPE EdgeDim,
-    INDEX_TYPE KDim,
-    INDEX_TYPE ECVDim,
-    INDEX_TYPE longitude_dim,
-    INDEX_TYPE latitude_dim,
-    INDEX_TYPE halo,
+std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_gpu_gridtools_halo(index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    index_type longitude_dim,
+    index_type latitude_dim,
+    index_type halo,
     std::vector<std::vector<VP_TYPE>> &u_vert,
     std::vector<std::vector<VP_TYPE>> &v_vert,
     std::vector<WP_TYPE> &primal_normal_vert_v1,
@@ -952,14 +952,14 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_gpu_gridtools
     return run_validation<nabla4_structured_torus_halo_gt<storage::gpu>, gpu>(nabla4_benchmark_object);
 }
 #else
-std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_gpu_gridtools_halo(INDEX_TYPE CellDim,
-    INDEX_TYPE VertexDim,
-    INDEX_TYPE EdgeDim,
-    INDEX_TYPE KDim,
-    INDEX_TYPE ECVDim,
-    INDEX_TYPE longitude_dim,
-    INDEX_TYPE latitude_dim,
-    INDEX_TYPE halo,
+std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_gpu_gridtools_halo(index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    index_type longitude_dim,
+    index_type latitude_dim,
+    index_type halo,
     std::vector<std::vector<VP_TYPE>> &u_vert,
     std::vector<std::vector<VP_TYPE>> &v_vert,
     std::vector<WP_TYPE> &primal_normal_vert_v1,

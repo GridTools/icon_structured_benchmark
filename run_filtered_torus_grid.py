@@ -519,7 +519,7 @@ def run_benchmarks():
     )
 
     repetitions = args.repetitions
-    dry_runs = 1 if args.dry_run else 0
+    dry_runs = 10 if args.dry_run else 0
 
     grid_cartesian_dimensions = get_torus_cartesian_dimensions(args.grid)
 
