@@ -170,12 +170,15 @@ def generate_violin_plots(data, k, torus_name, output_dir):
         ):
             violin_data.append(runtimes)
             labels.append(
-                "{}_{}_{}".format(
+                "{}_{}".format(
                     "unstructured"
                     if "unstructured" in implementation
                     else "structured",
-                    implementation.split("_")[-2],
-                    implementation.split("_")[-1],
+                    "cpu_ifirst"
+                    if "cpu_ifirst" in implementation
+                    else "cpu_kfirst"
+                    if "cpu_kfirst" in implementation
+                    else "gpu",
                 )
             )
             median_value = np.median(runtimes)
