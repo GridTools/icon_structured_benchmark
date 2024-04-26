@@ -188,17 +188,17 @@ constexpr block_dims get_block_dims_structured() {
 
 template <>
 constexpr block_dims get_block_dims_structured<std::size_t>() {
-    return {32, 3, 6, 576};
+    return {32, 3, 4, 384};
 };
 
 template <>
 constexpr block_dims get_block_dims_structured<std::uint32_t>() {
-    return {32, 3, 7, 672};
+    return {32, 3, 4, 384};
 };
 
 template <>
 constexpr block_dims get_block_dims_structured<int>() {
-    return {32, 3, 7, 672};
+    return {32, 3, 4, 384};
 };
 
 constexpr block_dims block_dims_structured = get_block_dims_structured<index_type>();

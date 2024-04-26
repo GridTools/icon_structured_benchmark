@@ -179,17 +179,17 @@ constexpr block_dims get_block_dims_unstructured() {
 
 template <>
 constexpr block_dims get_block_dims_unstructured<std::size_t>() {
-    return {24, 8, 1, 192};
+    return {32, 8, 1, 256};
 };
 
 template <>
 constexpr block_dims get_block_dims_unstructured<std::uint32_t>() {
-    return {32, 10, 1, 320};
+    return {32, 9, 1, 288};
 };
 
 template <>
 constexpr block_dims get_block_dims_unstructured<int>() {
-    return {32, 14, 1, 448};
+    return {32, 9, 1, 288};
 };
 
 constexpr block_dims block_dims_unstructured = get_block_dims_unstructured<index_type>();
