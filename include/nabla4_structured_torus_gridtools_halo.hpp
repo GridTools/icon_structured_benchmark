@@ -4,8 +4,6 @@
 #include <iostream>
 #include <vector>
 
-#include "gridtools/common/cuda_util.hpp"
-
 #include "nabla4_gridtools.hpp"
 
 #if defined(__CUDACC__)
