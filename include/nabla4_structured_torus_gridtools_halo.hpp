@@ -18,6 +18,11 @@ constexpr block_dims get_block_dims_structured<std::size_t>() {
 };
 
 template <>
+constexpr block_dims get_block_dims_structured<std::int64_t>() {
+    return {32, 3, 4, 384};
+};
+
+template <>
 constexpr block_dims get_block_dims_structured<std::uint32_t>() {
     return {32, 3, 4, 384};
 };

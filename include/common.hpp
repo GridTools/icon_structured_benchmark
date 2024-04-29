@@ -4,6 +4,8 @@
 
 #if defined(INDEX_TYPE_SIZE_T)
 using index_type = std::size_t;
+#elif defined(INDEX_TYPE_INT64)
+using index_type = std::int64_t;
 #elif defined(INDEX_TYPE_UINT32_T)
 using index_type = std::uint32_t;
 #elif defined(INDEX_TYPE_INT)

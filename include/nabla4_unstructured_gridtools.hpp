@@ -17,6 +17,11 @@ constexpr block_dims get_block_dims_unstructured<std::size_t>() {
 };
 
 template <>
+constexpr block_dims get_block_dims_unstructured<std::int64_t>() {
+    return {32, 8, 1, 256};
+};
+
+template <>
 constexpr block_dims get_block_dims_unstructured<std::uint32_t>() {
     return {32, 9, 1, 288};
 };
