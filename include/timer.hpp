@@ -15,7 +15,7 @@ using std::chrono::high_resolution_clock;
 template <backend_impl I>
 class timer {
 #if not defined(__CUDACC__)
-    static_assert(I == backend_impl::gpu, "GPU backend not supported");
+    static_assert(I != backend_impl::gpu, "GPU backend not supported");
 #else
     cudaEvent_t start_event, stop_event;
 #endif
