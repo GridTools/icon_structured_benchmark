@@ -2,9 +2,9 @@
 
 #if defined(__CUDACC__)
 #include <cuda_runtime.h>
-#endif
 
 #include "gridtools/common/cuda_util.hpp"
+#endif
 
 #include "common.hpp"
 
