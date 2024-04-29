@@ -5,6 +5,30 @@
 
 #include "nabla4_gridtools.hpp"
 
+#if defined(__CUDACC__)
+template <typename T>
+constexpr block_dims get_block_dims_unstructured() {
+    throw std::runtime_error("Undefined block dimensions for type " + T::name + " in GPU backend");
+};
+
+template <>
+constexpr block_dims get_block_dims_unstructured<std::size_t>() {
+    return {32, 8, 1, 256};
+};
+
+template <>
+constexpr block_dims get_block_dims_unstructured<std::uint32_t>() {
+    return {32, 9, 1, 288};
+};
+
+template <>
+constexpr block_dims get_block_dims_unstructured<int>() {
+    return {32, 9, 1, 288};
+};
+
+constexpr block_dims block_dims_unstructured = get_block_dims_unstructured<index_type>();
+#endif
+
 template <typename T>
 class nabla4_unstructured_gt : public nabla4_gt_data<T> {
 
@@ -158,7 +182,7 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
   public:
     /// Compute function timed for benchmarking
     template <backend_impl I>
-    void run() {
+    inline void run() {
         if constexpr (I == backend_impl::cpu_ifirst) {
             run_cpu_ifirst();
         } else if constexpr (I == backend_impl::cpu_kfirst) {
@@ -172,28 +196,6 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
 };
 
 #if defined(__CUDACC__)
-template <typename T>
-constexpr block_dims get_block_dims_unstructured() {
-    throw std::runtime_error("Undefined block dimensions for type " + T::name + " in GPU backend");
-};
-
-template <>
-constexpr block_dims get_block_dims_unstructured<std::size_t>() {
-    return {32, 8, 1, 256};
-};
-
-template <>
-constexpr block_dims get_block_dims_unstructured<std::uint32_t>() {
-    return {32, 9, 1, 288};
-};
-
-template <>
-constexpr block_dims get_block_dims_unstructured<int>() {
-    return {32, 9, 1, 288};
-};
-
-constexpr block_dims block_dims_unstructured = get_block_dims_unstructured<index_type>();
-
 __global__ void __launch_bounds__(block_dims_unstructured.size, 2) run_gpu(index_type EdgeDim,
     index_type KDim,
     nabla4_unstructured_gt<storage::gpu>::neighbors_gt_ctv_t e2c2v_gt_tv,
@@ -237,8 +239,7 @@ __global__ void __launch_bounds__(block_dims_unstructured.size, 2) run_gpu(index
 };
 
 template <typename T>
-void nabla4_unstructured_gt<T>::run_gpu_helper() {
-    cudaError_t errSync, errAsync;
+inline void nabla4_unstructured_gt<T>::run_gpu_helper() {
     dim3 tblocks(block_dims_unstructured.x, block_dims_unstructured.y, block_dims_unstructured.z);
     dim3 grid(
         (e2c2v_gt->const_host_view().lengths()[0] + tblocks.x - 1) / tblocks.x, (KDim + tblocks.y - 1) / tblocks.y, 1);
@@ -254,18 +255,11 @@ void nabla4_unstructured_gt<T>::run_gpu_helper() {
         inv_vert_vert_length_gt_tv,
         inv_primal_edge_length_gt_tv,
         z_nabla4_e2_wp_gt_tv);
-    errSync = cudaGetLastError();
-    errAsync = cudaDeviceSynchronize();
-    if (errSync != cudaSuccess) {
-        printf("Sync error: %s\n", cudaGetErrorString(errSync));
-    }
-    if (errAsync != cudaSuccess) {
-        printf("Async error: %s\n", cudaGetErrorString(errAsync));
-    }
+    GT_CUDA_CHECK(cudaGetLastError());
 };
 #else
 template <typename T>
-void nabla4_unstructured_gt<T>::run_gpu_helper() {
+inline void nabla4_unstructured_gt<T>::run_gpu_helper() {
     throw std::runtime_error("GPU backend not enabled");
 };
 #endif

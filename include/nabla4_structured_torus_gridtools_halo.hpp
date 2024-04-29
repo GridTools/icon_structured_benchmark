@@ -4,8 +4,33 @@
 #include <iostream>
 #include <vector>
 
+#include "gridtools/common/cuda_util.hpp"
+
 #include "nabla4_gridtools.hpp"
-#include "random_init.hpp"
+
+#if defined(__CUDACC__)
+template <typename T>
+constexpr block_dims get_block_dims_structured() {
+    throw std::runtime_error("Undefined block dimensions for type " + T::name + " in GPU backend");
+};
+
+template <>
+constexpr block_dims get_block_dims_structured<std::size_t>() {
+    return {32, 3, 4, 384};
+};
+
+template <>
+constexpr block_dims get_block_dims_structured<std::uint32_t>() {
+    return {32, 3, 4, 384};
+};
+
+template <>
+constexpr block_dims get_block_dims_structured<int>() {
+    return {32, 3, 4, 384};
+};
+
+constexpr block_dims block_dims_structured = get_block_dims_structured<index_type>();
+#endif
 
 template <typename T>
 class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
@@ -167,7 +192,7 @@ class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
   public:
     /// Compute function timed for benchmarking
     template <backend_impl I>
-    void run() {
+    inline void run() {
         if constexpr (I == backend_impl::cpu_ifirst) {
             run_cpu_ifirst();
         } else if constexpr (I == backend_impl::cpu_kfirst) {
@@ -181,28 +206,6 @@ class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
 };
 
 #if defined(__CUDACC__)
-template <typename T>
-constexpr block_dims get_block_dims_structured() {
-    throw std::runtime_error("Undefined block dimensions for type " + T::name + " in GPU backend");
-};
-
-template <>
-constexpr block_dims get_block_dims_structured<std::size_t>() {
-    return {32, 3, 4, 384};
-};
-
-template <>
-constexpr block_dims get_block_dims_structured<std::uint32_t>() {
-    return {32, 3, 4, 384};
-};
-
-template <>
-constexpr block_dims get_block_dims_structured<int>() {
-    return {32, 3, 4, 384};
-};
-
-constexpr block_dims block_dims_structured = get_block_dims_structured<index_type>();
-
 __global__ void __launch_bounds__(block_dims_structured.size, 2) run_gpu(index_type KDim,
     index_type x_dim,
     index_type y_dim,
@@ -293,10 +296,9 @@ __global__ void __launch_bounds__(block_dims_structured.size, 2) run_gpu(index_t
 };
 
 template <typename T>
-void nabla4_structured_torus_halo_gt<T>::run_gpu_helper() {
-    const index_type total_grid_size = (x_dim - 2 * halo) * (y_dim - halo * 2);
-    cudaError_t errSync, errAsync;
+inline void nabla4_structured_torus_halo_gt<T>::run_gpu_helper() {
     dim3 tblocks(block_dims_structured.x, block_dims_structured.y, block_dims_structured.z);
+    const index_type total_grid_size = (x_dim - 2 * halo) * (y_dim - halo * 2);
     dim3 grid((total_grid_size + tblocks.x - 1) / tblocks.x, 1, 1);
     run_gpu<<<grid, tblocks>>>(KDim,
         x_dim,
@@ -311,20 +313,11 @@ void nabla4_structured_torus_halo_gt<T>::run_gpu_helper() {
         inv_vert_vert_length_gt_tv,
         inv_primal_edge_length_gt_tv,
         z_nabla4_e2_wp_gt_tv);
-    errSync = cudaGetLastError();
-    errAsync = cudaDeviceSynchronize();
-    if (errSync != cudaSuccess) {
-        const auto error_string = "Sync error: " + static_cast<std::string>(cudaGetErrorString(errSync));
-        throw std::runtime_error(error_string);
-    }
-    if (errAsync != cudaSuccess) {
-        const auto error_string = "Async error: " + static_cast<std::string>(cudaGetErrorString(errSync));
-        throw std::runtime_error(error_string);
-    }
+    GT_CUDA_CHECK(cudaGetLastError());
 };
 #else
 template <typename T>
-void nabla4_structured_torus_halo_gt<T>::run_gpu_helper() {
+inline void nabla4_structured_torus_halo_gt<T>::run_gpu_helper() {
     throw std::runtime_error("GPU backend not enabled");
 };
 #endif
