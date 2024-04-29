@@ -4,6 +4,8 @@
 #include <cuda_runtime.h>
 #endif
 
+#include "gridtools/common/cuda_util.hpp"
+
 #include "common.hpp"
 
 #include <chrono>
@@ -23,7 +25,7 @@ class timer {
     timer() {
 #if defined(__CUDACC__)
         if constexpr (I == backend_impl::gpu) {
-            cudaEventCreate(&start_event);
+            GT_CUDA_CHECK(cudaEventCreate(&start_event));
             cudaEventCreate(&stop_event);
         }
 #endif
@@ -31,7 +33,7 @@ class timer {
     inline void start() {
 #if defined(__CUDACC__)
         if constexpr (I == backend_impl::gpu) {
-            cudaEventRecord(start_event, 0);
+            GT_CUDA_CHECK(cudaEventRecord(start_event, 0));
         } else {
 #endif
             start_time = high_resolution_clock::now();
@@ -42,8 +44,8 @@ class timer {
     inline void stop() {
 #if defined(__CUDACC__)
         if constexpr (I == backend_impl::gpu) {
-            cudaEventRecord(stop_event, 0);
-            cudaEventSynchronize(stop_event);
+            GT_CUDA_CHECK(cudaEventRecord(stop_event, 0));
+            GT_CUDA_CHECK(cudaEventSynchronize(stop_event));
         } else {
 #endif
             stop_time = high_resolution_clock::now();
@@ -55,7 +57,7 @@ class timer {
 #if defined(__CUDACC__)
         if constexpr (I == backend_impl::gpu) {
             float elapsed_time{};
-            cudaEventElapsedTime(&elapsed_time, start_event, stop_event);
+            GT_CUDA_CHECK(cudaEventElapsedTime(&elapsed_time, start_event, stop_event));
             return static_cast<double>(elapsed_time / 1000.0);
         } else {
 #endif
@@ -67,8 +69,8 @@ class timer {
     ~timer() {
 #if defined(__CUDACC__)
         if constexpr (I == backend_impl::gpu) {
-            cudaEventDestroy(start_event);
-            cudaEventDestroy(stop_event);
+            GT_CUDA_CHECK(cudaEventDestroy(start_event));
+            GT_CUDA_CHECK(cudaEventDestroy(stop_event));
         }
 #endif
     }
