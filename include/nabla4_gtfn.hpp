@@ -11,11 +11,9 @@
 #include <gridtools/fn/sid_neighbor_table.hpp>
 #include <gridtools/fn/unstructured.hpp>
 
-#include <chrono>
 #include <iostream>
 
-using std::chrono::duration;
-using std::chrono::high_resolution_clock;
+#include "timer.hpp"
 
 namespace generated {
 
@@ -107,20 +105,39 @@ namespace generated {
                         ::gridtools::tuple((horizontal_end - horizontal_start), (vertical_end - vertical_start)),
                         ::gridtools::tuple(horizontal_start, vertical_start),
                         connectivities__...));
-                const auto start = high_resolution_clock::now();
-                gtfn_backend.stencil_executor()()
-                    .arg(z_nabla4_e2)
-                    .arg(u_vert)
-                    .arg(v_vert)
-                    .arg(primal_normal_vert_v1)
-                    .arg(primal_normal_vert_v2)
-                    .arg(z_nabla2_e)
-                    .arg(inv_vert_vert_length)
-                    .arg(inv_primal_edge_length)
-                    .assign(0_c, _fun_1(), 1_c, 2_c, 3_c, 4_c, 5_c, 6_c, 7_c)
-                    .execute();
-                const auto end = high_resolution_clock::now();
-                return duration<double>(end - start).count();
+                if constexpr (std::is_same_v<decltype(backend), gridtools::fn::backend::gpu<block_sizes_t>>) {
+                    timer<backend_impl::gpu> t;
+                    t.start();
+                    gtfn_backend.stencil_executor()()
+                        .arg(z_nabla4_e2)
+                        .arg(u_vert)
+                        .arg(v_vert)
+                        .arg(primal_normal_vert_v1)
+                        .arg(primal_normal_vert_v2)
+                        .arg(z_nabla2_e)
+                        .arg(inv_vert_vert_length)
+                        .arg(inv_primal_edge_length)
+                        .assign(0_c, _fun_1(), 1_c, 2_c, 3_c, 4_c, 5_c, 6_c, 7_c)
+                        .execute();
+                    t.stop();
+                    return t.elapsed();
+                } else {
+                    timer<backend_impl::cpu_ifirst> t;
+                    t.start();
+                    gtfn_backend.stencil_executor()()
+                        .arg(z_nabla4_e2)
+                        .arg(u_vert)
+                        .arg(v_vert)
+                        .arg(primal_normal_vert_v1)
+                        .arg(primal_normal_vert_v2)
+                        .arg(z_nabla2_e)
+                        .arg(inv_vert_vert_length)
+                        .arg(inv_primal_edge_length)
+                        .assign(0_c, _fun_1(), 1_c, 2_c, 3_c, 4_c, 5_c, 6_c, 7_c)
+                        .execute();
+                    t.stop();
+                    return t.elapsed();
+                }
             };
         };
     } // namespace

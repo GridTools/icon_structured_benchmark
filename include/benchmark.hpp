@@ -1,4 +1,3 @@
-#include <chrono>
 #include <vector>
 
 #include "nabla4_structured_simple.hpp"
@@ -7,9 +6,7 @@
 #include "nabla4_structured_torus_gridtools_halo.hpp"
 #include "nabla4_unstructured.hpp"
 #include "nabla4_unstructured_gridtools.hpp"
-
-using std::chrono::duration;
-using std::chrono::high_resolution_clock;
+#include "timer.hpp"
 
 template <typename T, backend_impl I>
 std::vector<double> run_benchmark(T &benchmark_object, int repetitions, int dry_runs) {
@@ -18,10 +15,11 @@ std::vector<double> run_benchmark(T &benchmark_object, int repetitions, int dry_
     }
     std::vector<double> runtimes;
     for (int rep{}; rep < repetitions; ++rep) {
-        const auto start = high_resolution_clock::now();
+        timer<I> t;
+        t.start();
         benchmark_object.template run<I>();
-        const auto end = high_resolution_clock::now();
-        runtimes.push_back(duration<double>(end - start).count());
+        t.stop();
+        runtimes.push_back(t.elapsed());
     }
     return runtimes;
 }
@@ -35,10 +33,11 @@ std::vector<double> run_benchmark(std::tuple<Args...> &&args, int repetitions, i
     std::vector<double> runtimes;
     for (int rep{}; rep < repetitions; ++rep) {
         T benchmark_object{std::apply([](auto &&...args) { return T{std::forward<decltype(args)>(args)...}; }, args)};
-        const auto start = high_resolution_clock::now();
+        timer<I> t;
+        t.start();
         benchmark_object.template run<I>();
-        const auto end = high_resolution_clock::now();
-        runtimes.push_back(duration<double>(end - start).count());
+        t.stop();
+        runtimes.push_back(t.elapsed());
     }
     return runtimes;
 }
