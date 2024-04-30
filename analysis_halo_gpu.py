@@ -1,5 +1,5 @@
 from analysis import (
-    read_torus_results_commit,
+    read_torus_results_commit_backend_index_type,
     create_output_directory,
     print_median_runtimes,
     print_confidence_interval,
@@ -9,21 +9,31 @@ from analysis import (
 )
 
 if __name__ == "__main__":
-    git_commit = "a7c5fd9"
+    git_commit = "473bf2d"
+
+    backend = "gpu"
+
+    index_type = "int64"
 
     torus_files = [
-        "torus_100000_100000_512",
-        "torus_100000_100000_256",
         "torus_100000_100000_128",
+        "torus_100000_100000_64",
     ]
 
-    klevels = [1, 16, 65, 180]
+    klevels = [1, 16, 65]
 
-    runtimes_output = read_torus_results_commit(
-        "results/output_{}".format(git_commit), torus_files, klevels, git_commit
+    runtimes_output = read_torus_results_commit_backend_index_type(
+        "results/output_{}_{}_{}".format(git_commit, backend, index_type),
+        torus_files,
+        klevels,
+        git_commit,
+        backend,
+        index_type,
     )
 
-    output_directory = "results/plot_output_halo_{}".format(git_commit)
+    output_directory = "results/plot_output_halo_{}_{}_{}".format(
+        git_commit, backend, index_type
+    )
 
     create_output_directory(output_directory)
 

@@ -36,6 +36,22 @@ def read_torus_results_commit(directory, torus_filenames, k_levels, commit):
     return runtimes
 
 
+def read_torus_results_commit_backend_index_type(
+    directory, torus_filenames, k_levels, commit, backend, index_type
+):
+    runtimes = {}
+    for filename in torus_filenames:
+        runtimes[filename] = {}
+        for k in k_levels:
+            with open(
+                "{}/{}_k{}_{}_{}_{}.json".format(
+                    directory, filename, k, commit, backend, index_type
+                )
+            ) as f:
+                runtimes[filename][k] = json.load(f)
+    return runtimes
+
+
 def print_median_runtimes(runtimes_output, git_commit):
     for torus_file in runtimes_output.keys():
         print("=== Torus file: {} ===".format(torus_file))
@@ -167,6 +183,7 @@ def generate_violin_plots(data, k, torus_name, output_dir):
             "cpu_ifirst" in implementation
             or "cpu_kfirst" in implementation
             or "gpu" in implementation
+            or "gtfn" in implementation
         ):
             violin_data.append(runtimes)
             labels.append(
@@ -178,7 +195,9 @@ def generate_violin_plots(data, k, torus_name, output_dir):
                     if "cpu_ifirst" in implementation
                     else "cpu_kfirst"
                     if "cpu_kfirst" in implementation
-                    else "gpu",
+                    else "gpu"
+                    if "gpu" in implementation
+                    else "gtfn",
                 )
             )
             median_value = np.median(runtimes)

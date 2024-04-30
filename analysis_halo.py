@@ -1,5 +1,5 @@
 from analysis import (
-    read_torus_results,
+    read_torus_results_commit_backend_index_type,
     create_output_directory,
     print_median_runtimes,
     print_confidence_interval,
@@ -11,13 +11,24 @@ from analysis import (
 )
 
 if __name__ == "__main__":
-    git_commit = "890b981"
+    git_commit = "473bf2d"
 
-    runtimes_output = read_torus_results(
-        "results/output_halo_{}".format(git_commit), torus_files, klevels
+    backend = "cpu"
+
+    index_type = "int64"
+
+    runtimes_output = read_torus_results_commit_backend_index_type(
+        "results/output_{}_{}_{}".format(git_commit, backend, index_type),
+        torus_files,
+        klevels,
+        git_commit,
+        backend,
+        index_type,
     )
 
-    output_directory = "results/plot_output_halo_{}".format(git_commit)
+    output_directory = "results/plot_output_halo_{}_{}_{}".format(
+        git_commit, backend, index_type
+    )
 
     create_output_directory(output_directory)
 

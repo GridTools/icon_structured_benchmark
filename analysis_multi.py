@@ -53,15 +53,24 @@ def generate_violin_plots(runtime_data, k, torus_name, output_dir):
     median_95_quantile = []  # To store median confidence intervals
 
     for implementation, runtimes in runtime_data.items():
-        if "cpu_ifirst" in implementation or "cpu_kfirst" in implementation:
+        if (
+            "cpu_ifirst" in implementation
+            or "cpu_kfirst" in implementation
+            or "gtfn" in implementation
+        ):
             violin_data.append(runtimes)
             labels.append(
-                "{}_{}_{}".format(
+                "{}_{}".format(
                     "unstructured"
                     if "unstructured" in implementation
-                    else "structured",
-                    implementation.split("_")[-2],
-                    implementation.split("_")[-1],
+                    else "structured"
+                    if "structured" in implementation
+                    else "gtfn",
+                    "cpu_ifirst"
+                    if "cpu_ifirst" in implementation
+                    else "cpu_kfirst"
+                    if "cpu_kfirst" in implementation
+                    else "gtfn",
                 )
             )
             median_value = np.median(runtimes)
