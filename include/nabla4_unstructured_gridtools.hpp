@@ -245,10 +245,43 @@ __global__ void __launch_bounds__(block_dims_unstructured.size, 2) run_gpu(index
 
 template <typename T>
 inline void nabla4_unstructured_gt<T>::run_gpu_helper() {
+    cudaDeviceProp device_prop{};
+    int current_device{0};
+    GT_CUDA_CHECK(cudaGetDevice(&current_device));
+    GT_CUDA_CHECK(cudaGetDeviceProperties(&device_prop, current_device));
+    std::cout << "GPU: " << device_prop.name << std::endl;
+    std::cout << "L2 Cache Size: " << device_prop.l2CacheSize / 1024 / 1024
+              << " MB" << std::endl;
+    std::cout << "Max Persistent L2 Cache Size: "
+              << device_prop.persistingL2CacheMaxSize / 1024 / 1024 << " MB"
+              << std::endl;
+    const auto neighbors_size = e2c2v_gt->const_host_view().lengths()[0] * 4 * sizeof(index_type);
+    std::cout << "Neighbors size: " << neighbors_size / 1024 << " KiB" << std::endl;
+    cudaStream_t stream_persistent_cache;
+    GT_CUDA_CHECK(cudaStreamCreate(&stream_persistent_cache));
+    GT_CUDA_CHECK(
+        cudaDeviceSetLimit(cudaLimitPersistingL2CacheSize,
+                           neighbors_size));
+    cudaStreamAttrValue stream_attribute_non_thrashing;
+    stream_attribute_non_thrashing.accessPolicyWindow.base_ptr =
+        reinterpret_cast<void*>(e2c2v_gt->get_target_ptr());
+    stream_attribute_non_thrashing.accessPolicyWindow.num_bytes =
+        neighbors_size;
+    stream_attribute_non_thrashing.accessPolicyWindow.hitRatio =
+                std::min(static_cast<double>(device_prop.persistingL2CacheMaxSize) /
+                static_cast<double>(neighbors_size),
+                         1.0);
+    stream_attribute_non_thrashing.accessPolicyWindow.hitProp =
+        cudaAccessPropertyPersisting;
+    stream_attribute_non_thrashing.accessPolicyWindow.missProp =
+        cudaAccessPropertyStreaming;
+    GT_CUDA_CHECK(cudaStreamSetAttribute(
+        stream_persistent_cache, cudaStreamAttributeAccessPolicyWindow,
+        &stream_attribute_non_thrashing));
     dim3 tblocks(block_dims_unstructured.x, block_dims_unstructured.y, block_dims_unstructured.z);
     dim3 grid(
         (e2c2v_gt->const_host_view().lengths()[0] + tblocks.x - 1) / tblocks.x, (KDim + tblocks.y - 1) / tblocks.y, 1);
-    run_gpu<<<grid, tblocks>>>(e2c2v_gt->const_host_view().lengths()[0],
+    run_gpu<<<grid, tblocks, 0, stream_persistent_cache>>>(e2c2v_gt->const_host_view().lengths()[0],
         KDim,
         e2c2v_gt_tv,
         e2ecv_gt_tv,
