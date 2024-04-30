@@ -4,11 +4,11 @@ set -e
 
 source venv_py311_icon4py/bin/activate
 
-COMMIT="473bf2d"
+COMMIT="6ad3dc2"
 
 BACKENDS="cpu gpu"
 
-INDEX_TYPES="int64"
+INDEX_TYPES="sizet int64 uint32 int"
 
 for backend in ${BACKENDS}; do
     for index_type in ${INDEX_TYPES}; do
