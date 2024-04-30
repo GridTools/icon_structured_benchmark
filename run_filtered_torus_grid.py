@@ -66,16 +66,18 @@ def get_torus_grid(filename, num_levels, transformation, e2c2v_ordering="per-ver
     return simple_grid
 
 
-def filter_edge_vector(vector, grid_cartesian_dimensions, e2c2v_ordering="per-vertex"):
+def filter_edge_vector(
+    vector, grid_cartesian_dimensions, e2c2v_ordering="per-vertex", halo=2
+):
     filtered_vector = []
     if e2c2v_ordering == "per-vertex":
         for i in range(grid_cartesian_dimensions[0]):
             for j in range(grid_cartesian_dimensions[1]):
                 if (
-                    i > 1
-                    and j > 1
-                    and i < grid_cartesian_dimensions[0] - 2
-                    and j < grid_cartesian_dimensions[1] - 2
+                    i > halo - 1
+                    and j > halo - 1
+                    and i < grid_cartesian_dimensions[0] - halo
+                    and j < grid_cartesian_dimensions[1] - halo
                 ):
                     filtered_vector.append(
                         vector[(i * grid_cartesian_dimensions[1] + j) * 3]
@@ -90,10 +92,10 @@ def filter_edge_vector(vector, grid_cartesian_dimensions, e2c2v_ordering="per-ve
         for i in range(grid_cartesian_dimensions[0]):
             for j in range(grid_cartesian_dimensions[1]):
                 if (
-                    i > 1
-                    and j > 1
-                    and i < grid_cartesian_dimensions[0] - 2
-                    and j < grid_cartesian_dimensions[1] - 2
+                    i > halo - 1
+                    and j > halo - 1
+                    and i < grid_cartesian_dimensions[0] - halo
+                    and j < grid_cartesian_dimensions[1] - halo
                 ):
                     filtered_vector.append(
                         vector[(i * grid_cartesian_dimensions[1] + j)]
@@ -101,10 +103,10 @@ def filter_edge_vector(vector, grid_cartesian_dimensions, e2c2v_ordering="per-ve
         for i in range(grid_cartesian_dimensions[0]):
             for j in range(grid_cartesian_dimensions[1]):
                 if (
-                    i > 1
-                    and j > 1
-                    and i < grid_cartesian_dimensions[0] - 2
-                    and j < grid_cartesian_dimensions[1] - 2
+                    i > halo - 1
+                    and j > halo - 1
+                    and i < grid_cartesian_dimensions[0] - halo
+                    and j < grid_cartesian_dimensions[1] - halo
                 ):
                     filtered_vector.append(
                         vector[
@@ -116,10 +118,10 @@ def filter_edge_vector(vector, grid_cartesian_dimensions, e2c2v_ordering="per-ve
         for i in range(grid_cartesian_dimensions[0]):
             for j in range(grid_cartesian_dimensions[1]):
                 if (
-                    i > 1
-                    and j > 1
-                    and i < grid_cartesian_dimensions[0] - 2
-                    and j < grid_cartesian_dimensions[1] - 2
+                    i > halo - 1
+                    and j > halo - 1
+                    and i < grid_cartesian_dimensions[0] - halo
+                    and j < grid_cartesian_dimensions[1] - halo
                 ):
                     filtered_vector.append(
                         vector[
@@ -135,7 +137,7 @@ def filter_edge_vector(vector, grid_cartesian_dimensions, e2c2v_ordering="per-ve
 
 
 def run_sanity_checks(
-    filtered_e2c2v, filtered_e2ecv, grid, lon_dim, lat_dim, backend="all_cpu"
+    filtered_e2c2v, filtered_e2ecv, grid, lon_dim, lat_dim, backend="all_cpu", halo=2
 ):
     print("Generating validation data")
     random_validation_data = icon_benchmark.get_nabla4_benchmark_validation_data(
@@ -376,7 +378,7 @@ def run_sanity_checks(
                 random_validation_data.ECVDim,
                 lon_dim,
                 lat_dim,
-                2,
+                halo,
                 np.array(random_validation_data.u_vert).T,
                 np.array(random_validation_data.v_vert).T,
                 random_validation_data.primal_normal_vert_v1,
@@ -403,7 +405,7 @@ def run_sanity_checks(
                 random_validation_data.ECVDim,
                 lon_dim,
                 lat_dim,
-                2,
+                halo,
                 np.array(random_validation_data.u_vert).T,
                 np.array(random_validation_data.v_vert).T,
                 random_validation_data.primal_normal_vert_v1,
@@ -430,7 +432,7 @@ def run_sanity_checks(
                 random_validation_data.ECVDim,
                 lon_dim,
                 lat_dim,
-                2,
+                halo,
                 np.array(random_validation_data.u_vert).T,
                 np.array(random_validation_data.v_vert).T,
                 random_validation_data.primal_normal_vert_v1,
@@ -496,6 +498,9 @@ def parse_arguments():
         default="per-vertex",
         help="E2C2V ordering",
     )
+    parser.add_argument(
+        "--halo", type=int, default=2, help="Halo size for structured grids"
+    )
 
     args = parser.parse_args()
     if "gpu" in args.backend:
@@ -527,15 +532,17 @@ def run_benchmarks():
         torus_grid.get_offset_provider("E2C2V").table,
         grid_cartesian_dimensions,
         args.e2c2v_ordering,
+        args.halo,
     )
     filtered_e2ecv = filter_edge_vector(
         torus_grid.get_offset_provider("E2ECV").table,
         grid_cartesian_dimensions,
         args.e2c2v_ordering,
+        args.halo,
     )
 
     print(
-        "CellsDim: {} VertexDim: {} EdgeDim: {} KDim: {} E2C2VDim: {} Longitude dimension: {} Latitude dimension: {}".format(
+        "CellsDim: {} VertexDim: {} EdgeDim: {} KDim: {} E2C2VDim: {} Longitude dimension: {} Latitude dimension: {} Halo: {}".format(
             torus_grid.num_cells,
             torus_grid.num_vertices,
             torus_grid.num_edges,
@@ -543,6 +550,7 @@ def run_benchmarks():
             torus_grid.size[E2C2VDim],
             grid_cartesian_dimensions[0],
             grid_cartesian_dimensions[1],
+            args.halo,
         )
     )
 
@@ -554,9 +562,12 @@ def run_benchmarks():
             grid_cartesian_dimensions[0],
             grid_cartesian_dimensions[1],
             args.backend,
+            args.halo,
         )
 
     runtimes = {}
+
+    halo = args.halo
 
     if args.backend in ["all_cpu", "gtfn_cpu"]:
         runtimes["nabla4_benchmark_unstructured_gtfn_cpu"] = []
@@ -753,7 +764,7 @@ def run_benchmarks():
             torus_grid.size[E2C2VDim],
             grid_cartesian_dimensions[0],
             grid_cartesian_dimensions[1],
-            2,
+            halo,
             repetitions,
             dry_runs,
         )
@@ -783,7 +794,7 @@ def run_benchmarks():
             torus_grid.size[E2C2VDim],
             grid_cartesian_dimensions[0],
             grid_cartesian_dimensions[1],
-            2,
+            halo,
             repetitions,
             dry_runs,
         )
@@ -812,7 +823,7 @@ def run_benchmarks():
             torus_grid.size[E2C2VDim],
             grid_cartesian_dimensions[0],
             grid_cartesian_dimensions[1],
-            2,
+            halo,
             repetitions,
             dry_runs,
         )
