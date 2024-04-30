@@ -33,7 +33,7 @@ print_lat_lon_dimensions(grid_file)
 print_torus_file_information(grid_file)
 
 
-def sort_e2v(e2v_table):
+def sort_e2v(e2v_table, per_orientation=False):
     out_of_order_edges = []
     for i in range(2, len(e2v_table), 3):
         out_of_order_edges.append(e2v_table[i])
@@ -44,12 +44,22 @@ def sort_e2v(e2v_table):
             sorted_e2v_table.append(e2v_table[i].tolist())
         else:
             sorted_e2v_table.append(out_of_order_edges[i // 3].tolist())
-    return np.array(sorted_e2v_table)
+    if per_orientation:
+        new_sorted_e2v_table = []
+        for i in range(0, len(sorted_e2v_table), 3):
+            new_sorted_e2v_table.append(sorted_e2v_table[i])
+        for i in range(1, len(sorted_e2v_table), 3):
+            new_sorted_e2v_table.append(sorted_e2v_table[i])
+        for i in range(2, len(sorted_e2v_table), 3):
+            new_sorted_e2v_table.append(sorted_e2v_table[i])
+        return np.array(new_sorted_e2v_table)
+    else:
+        return np.array(sorted_e2v_table)
 
 
 np.set_printoptions(threshold=np.inf)  # type: ignore [arg-type]
 
-sorted_e2v = sort_e2v(grid.get_offset_provider("E2V").table)
+sorted_e2v = sort_e2v(grid.get_offset_provider("E2V").table, per_orientation=True)
 
 plot_torus(
     vertice_coords,
