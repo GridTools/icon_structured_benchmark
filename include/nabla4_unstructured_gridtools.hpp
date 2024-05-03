@@ -288,6 +288,7 @@ inline void nabla4_unstructured_gt<T>::run_gpu_helper(cudaDeviceProp &device_pro
     std::cout << "window_size: " << window_size / 1024 / 1024 << " MiB" << std::endl;
     const auto predicted_hit_ratio =
         std::min(static_cast<double>(window_size) / static_cast<double>(neighbors_size), 1.0);
+    std::cout << "predicted_hit_ratio: " << predicted_hit_ratio << std::endl;
     auto get_stream_attr_perm = [&device_prop](void *ptr, index_type size, double hit_ratio = 1.0) {
         cudaStreamAttrValue stream_attribute_non_thrashing;
         stream_attribute_non_thrashing.accessPolicyWindow.base_ptr = ptr;
