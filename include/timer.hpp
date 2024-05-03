@@ -41,6 +41,13 @@ class timer {
         }
 #endif
     }
+#if defined(__CUDACC__)
+    inline void start(cudaStream_t &stream) {
+        if constexpr (I == backend_impl::gpu) {
+            GT_CUDA_CHECK(cudaEventRecord(start_event, stream));
+        }
+    }
+#endif
     inline void stop() {
 #if defined(__CUDACC__)
         if constexpr (I == backend_impl::gpu) {
@@ -53,6 +60,14 @@ class timer {
         }
 #endif
     }
+#if defined(__CUDACC__)
+    inline void stop(cudaStream_t &stream) {
+        if constexpr (I == backend_impl::gpu) {
+            GT_CUDA_CHECK(cudaEventRecord(stop_event, stream));
+            GT_CUDA_CHECK(cudaEventSynchronize(stop_event));
+        }
+    }
+#endif
     inline double elapsed() const {
 #if defined(__CUDACC__)
         if constexpr (I == backend_impl::gpu) {

@@ -206,6 +206,20 @@ class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
             throw std::runtime_error("Undefined backend implementation");
         }
     };
+#if defined(__CUDACC__)
+    template <backend_impl I>
+    inline void run(cudaDeviceProp &device_prop, cudaStream_t &stream) {
+        if constexpr (I == backend_impl::cpu_ifirst) {
+            run_cpu_ifirst();
+        } else if constexpr (I == backend_impl::cpu_kfirst) {
+            run_cpu_kfirst();
+        } else if constexpr (I == backend_impl::gpu) {
+            run_gpu_helper();
+        } else {
+            throw std::runtime_error("Undefined backend implementation");
+        }
+    }
+#endif
 };
 
 #if defined(__CUDACC__)

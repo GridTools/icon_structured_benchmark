@@ -61,13 +61,17 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
 
   public:
     using neighbors_gt_t =
-        decltype(gridtools::storage::builder<T>.dimensions(0, 4_c).template type<index_type>().build());
+        decltype(gridtools::storage::builder<T>.dimensions(0, 4_c, 2_c).template type<index_type>().build());
     using neighbors_gt_ctv_t =
-        decltype(gridtools::storage::builder<T>.dimensions(0, 4_c).template type<index_type>().build()->const_target_view());
+        decltype(gridtools::storage::builder<T>.dimensions(0, 4_c, 2_c).template type<index_type>().build()->const_target_view());
     neighbors_gt_t e2c2v_gt;
     neighbors_gt_ctv_t e2c2v_gt_tv;
     neighbors_gt_t e2ecv_gt;
     neighbors_gt_ctv_t e2ecv_gt_tv;
+#if defined(__CUDACC__)
+    void *e2c2v_gt_tv_vp;
+    void *e2ecv_gt_tv_vp;
+#endif
 
     /// Constructor with all the necessary information for \c nabla4 compute
     /// kernel execution
@@ -78,11 +82,16 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
         index_type EdgeDim,
         index_type KDim,
         index_type ECVDim)
-        : e2c2v_gt(storage::builder<T>.template type<index_type>().dimensions(e2c2v.size(), 4_c).initializer([&e2c2v](int i, int j) { return e2c2v[i][j]; }).build()),
-        e2ecv_gt(storage::builder<T>.template type<index_type>().dimensions(e2ecv.size(), 4_c).initializer([&e2ecv](int i, int j) { return e2ecv[i][j]; }).build()),
+        : e2c2v_gt(storage::builder<T>.template type<index_type>().dimensions(e2c2v.size(), 4_c, 2_c).initializer([&e2c2v, &e2ecv](int i, int j, int k) { return k == 0 ? e2c2v[i][j] : e2ecv[i][j]; }).build()),
+        e2ecv_gt(storage::builder<T>.template type<index_type>().dimensions(e2ecv.size(), 4_c, 2_c).initializer([&e2ecv](int i, int j, int k) { return e2ecv[i][j]; }).build()),
         e2c2v_gt_tv(e2c2v_gt->const_target_view()),
         e2ecv_gt_tv(e2ecv_gt->const_target_view()),
-        nabla4_gt_data<T>(CellDim, VertexDim, EdgeDim, KDim, ECVDim, e2c2v.size()){};
+        nabla4_gt_data<T>(CellDim, VertexDim, EdgeDim, KDim, ECVDim, e2c2v.size()){
+#if defined(__CUDACC__)
+        e2c2v_gt_tv_vp = static_cast<void *>(e2c2v_gt->get_target_ptr());
+        e2ecv_gt_tv_vp = static_cast<void *>(e2ecv_gt->get_target_ptr());
+#endif
+    };
 
     nabla4_unstructured_gt(std::vector<std::array<index_type, 4>> e2c2v,
         std::vector<std::array<index_type, 4>> e2ecv,
@@ -98,8 +107,8 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
         std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
         std::vector<WP_TYPE> &inv_vert_vert_length,
         std::vector<WP_TYPE> &inv_primal_edge_length)
-        : e2c2v_gt(storage::builder<T>.template type<index_type>().dimensions(e2c2v.size(), 4_c).initializer([&e2c2v](int i, int j) { return e2c2v[i][j]; }).build()),
-        e2ecv_gt(storage::builder<T>.template type<index_type>().dimensions(e2ecv.size(), 4_c).initializer([&e2ecv](int i, int j) { return e2ecv[i][j]; }).build()),
+        : e2c2v_gt(storage::builder<T>.template type<index_type>().dimensions(e2c2v.size(), 4_c, 2_c).initializer([&e2c2v, &e2ecv](int i, int j, int k) { return k == 0 ? e2c2v[i][j] : e2ecv[i][j]; }).build()),
+        e2ecv_gt(storage::builder<T>.template type<index_type>().dimensions(e2ecv.size(), 4_c, 2_c).initializer([&e2ecv](int i, int j, int k) { return e2ecv[i][j]; }).build()),
         e2c2v_gt_tv(e2c2v_gt->const_target_view()),
         e2ecv_gt_tv(e2ecv_gt->const_target_view()),
         nabla4_gt_data<T>(CellDim, VertexDim, EdgeDim, KDim, ECVDim, e2c2v.size(), u_vert,
@@ -108,7 +117,12 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
                                           primal_normal_vert_v2,
                                           z_nabla2_e,
                                           inv_vert_vert_length,
-                                          inv_primal_edge_length){};
+                                          inv_primal_edge_length){
+#if defined(__CUDACC__)
+        e2c2v_gt_tv_vp = static_cast<void *>(e2c2v_gt->get_target_ptr());
+        e2ecv_gt_tv_vp = static_cast<void *>(e2ecv_gt->get_target_ptr());
+#endif
+    };
 
     inline __attribute__((always_inline)) void inner_kernel(index_type edge_index,
         index_type k_index,
@@ -147,14 +161,14 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
 #pragma GCC ivdep
 #endif
             for (index_type edge_index = 0; edge_index < edges; ++edge_index) {
-                const auto E2C2V_0 = e2c2v_gt_tv(edge_index, 0);
-                const auto E2C2V_1 = e2c2v_gt_tv(edge_index, 1);
-                const auto E2C2V_2 = e2c2v_gt_tv(edge_index, 2);
-                const auto E2C2V_3 = e2c2v_gt_tv(edge_index, 3);
-                const auto E2ECV_0 = e2ecv_gt_tv(edge_index, 0);
-                const auto E2ECV_1 = e2ecv_gt_tv(edge_index, 1);
-                const auto E2ECV_2 = e2ecv_gt_tv(edge_index, 2);
-                const auto E2ECV_3 = e2ecv_gt_tv(edge_index, 3);
+                const auto E2C2V_0 = e2c2v_gt_tv(edge_index, 0, 0);
+                const auto E2C2V_1 = e2c2v_gt_tv(edge_index, 1, 0);
+                const auto E2C2V_2 = e2c2v_gt_tv(edge_index, 2, 0);
+                const auto E2C2V_3 = e2c2v_gt_tv(edge_index, 3, 0);
+                const auto E2ECV_0 = e2c2v_gt_tv(edge_index, 0, 1);
+                const auto E2ECV_1 = e2c2v_gt_tv(edge_index, 1, 1);
+                const auto E2ECV_2 = e2c2v_gt_tv(edge_index, 2, 1);
+                const auto E2ECV_3 = e2c2v_gt_tv(edge_index, 3, 1);
                 inner_kernel(
                     edge_index, k_index, {E2C2V_0, E2C2V_1, E2C2V_2, E2C2V_3}, {E2ECV_0, E2ECV_1, E2ECV_2, E2ECV_3});
             };
@@ -163,14 +177,14 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
 
     void run_cpu_kfirst() {
         for (index_type edge_index{}; edge_index < e2c2v_gt_tv.lengths()[0]; ++edge_index) {
-            const auto E2C2V_0 = e2c2v_gt_tv(edge_index, 0);
-            const auto E2C2V_1 = e2c2v_gt_tv(edge_index, 1);
-            const auto E2C2V_2 = e2c2v_gt_tv(edge_index, 2);
-            const auto E2C2V_3 = e2c2v_gt_tv(edge_index, 3);
-            const auto E2ECV_0 = e2ecv_gt_tv(edge_index, 0);
-            const auto E2ECV_1 = e2ecv_gt_tv(edge_index, 1);
-            const auto E2ECV_2 = e2ecv_gt_tv(edge_index, 2);
-            const auto E2ECV_3 = e2ecv_gt_tv(edge_index, 3);
+            const auto E2C2V_0 = e2c2v_gt_tv(edge_index, 0, 0);
+            const auto E2C2V_1 = e2c2v_gt_tv(edge_index, 1, 0);
+            const auto E2C2V_2 = e2c2v_gt_tv(edge_index, 2, 0);
+            const auto E2C2V_3 = e2c2v_gt_tv(edge_index, 3, 0);
+            const auto E2ECV_0 = e2c2v_gt_tv(edge_index, 0, 1);
+            const auto E2ECV_1 = e2c2v_gt_tv(edge_index, 1, 1);
+            const auto E2ECV_2 = e2c2v_gt_tv(edge_index, 2, 1);
+            const auto E2ECV_3 = e2c2v_gt_tv(edge_index, 3, 1);
 #ifdef __clang__
 #pragma clang loop unroll(enable) vectorize(assume_safety) interleave(enable)
 #elif defined(__GNUC__)
@@ -182,7 +196,11 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
             };
         };
     };
+#if defined(__CUDACC__)
+    void run_gpu_helper(cudaDeviceProp &device_prop, cudaStream_t &stream);
+#else
     void run_gpu_helper();
+#endif
 
   public:
     /// Compute function timed for benchmarking
@@ -192,12 +210,24 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
             run_cpu_ifirst();
         } else if constexpr (I == backend_impl::cpu_kfirst) {
             run_cpu_kfirst();
-        } else if constexpr (I == backend_impl::gpu) {
-            run_gpu_helper();
         } else {
-            throw std::runtime_error("Undefined backend implementation");
+            throw std::runtime_error("[Unstructured GridTools] Undefined backend implementation");
         }
     }
+#if defined(__CUDACC__)
+    template <backend_impl I>
+    inline void run(cudaDeviceProp &device_prop, cudaStream_t &stream) {
+        if constexpr (I == backend_impl::cpu_ifirst) {
+            run_cpu_ifirst();
+        } else if constexpr (I == backend_impl::cpu_kfirst) {
+            run_cpu_kfirst();
+        } else if constexpr (I == backend_impl::gpu) {
+            run_gpu_helper(device_prop, stream);
+        } else {
+            throw std::runtime_error("[Unstructured GridTools] Undefined backend implementation");
+        }
+    }
+#endif
 };
 
 #if defined(__CUDACC__)
@@ -218,14 +248,14 @@ __global__ void __launch_bounds__(block_dims_unstructured.size, 2) run_gpu(index
     for (auto k_index{blockIdx.y * blockDim.y + threadIdx.y}; k_index < KDim; k_index += blockDim.y * gridDim.y) {
         for (auto edge_index{blockIdx.x * blockDim.x + threadIdx.x}; edge_index < EdgeDim;
              edge_index += blockDim.x * gridDim.x) {
-            const auto E2C2V_0 = e2c2v_gt_tv(edge_index, 0);
-            const auto E2C2V_1 = e2c2v_gt_tv(edge_index, 1);
-            const auto E2C2V_2 = e2c2v_gt_tv(edge_index, 2);
-            const auto E2C2V_3 = e2c2v_gt_tv(edge_index, 3);
-            const auto E2ECV_0 = e2ecv_gt_tv(edge_index, 0);
-            const auto E2ECV_1 = e2ecv_gt_tv(edge_index, 1);
-            const auto E2ECV_2 = e2ecv_gt_tv(edge_index, 2);
-            const auto E2ECV_3 = e2ecv_gt_tv(edge_index, 3);
+            const auto E2C2V_0 = e2c2v_gt_tv(edge_index, 0, 0);
+            const auto E2C2V_1 = e2c2v_gt_tv(edge_index, 1, 0);
+            const auto E2C2V_2 = e2c2v_gt_tv(edge_index, 2, 0);
+            const auto E2C2V_3 = e2c2v_gt_tv(edge_index, 3, 0);
+            const auto E2ECV_0 = e2c2v_gt_tv(edge_index, 0, 1);
+            const auto E2ECV_1 = e2c2v_gt_tv(edge_index, 1, 1);
+            const auto E2ECV_2 = e2c2v_gt_tv(edge_index, 2, 1);
+            const auto E2ECV_3 = e2c2v_gt_tv(edge_index, 3, 1);
             double nabv_tang_wp = u_vert_gt_tv(E2C2V_0, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_0) +
                                   v_vert_gt_tv(E2C2V_0, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_0) +
                                   u_vert_gt_tv(E2C2V_1, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_1) +
@@ -244,44 +274,38 @@ __global__ void __launch_bounds__(block_dims_unstructured.size, 2) run_gpu(index
 };
 
 template <typename T>
-inline void nabla4_unstructured_gt<T>::run_gpu_helper() {
-    cudaDeviceProp device_prop{};
-    int current_device{0};
-    GT_CUDA_CHECK(cudaGetDevice(&current_device));
-    GT_CUDA_CHECK(cudaGetDeviceProperties(&device_prop, current_device));
-    std::cout << "GPU: " << device_prop.name << std::endl;
-    std::cout << "L2 Cache Size: " << device_prop.l2CacheSize / 1024 / 1024
-              << " MB" << std::endl;
-    std::cout << "Max Persistent L2 Cache Size: "
-              << device_prop.persistingL2CacheMaxSize / 1024 / 1024 << " MB"
+inline void nabla4_unstructured_gt<T>::run_gpu_helper(cudaDeviceProp &device_prop, cudaStream_t &stream) {
+    std::cout << "L2 Cache Size: " << device_prop.l2CacheSize / 1024 / 1024 << " MB" << std::endl;
+    std::cout << "Max Persistent L2 Cache Size: " << device_prop.persistingL2CacheMaxSize / 1024 / 1024 << " MiB"
               << std::endl;
-    const auto neighbors_size = e2c2v_gt->const_host_view().lengths()[0] * 4 * sizeof(index_type);
-    std::cout << "Neighbors size: " << neighbors_size / 1024 << " KiB" << std::endl;
-    cudaStream_t stream_persistent_cache;
-    GT_CUDA_CHECK(cudaStreamCreate(&stream_persistent_cache));
+    const auto neighbors_size = e2c2v_gt->const_host_view().lengths()[0] * 4 * sizeof(index_type) * 2;
+    std::cout << "Neighbors size: " << neighbors_size / 1024 / 1024 << " MiB" << std::endl;
+    GT_CUDA_CHECK(cudaDeviceSetLimit(cudaLimitPersistingL2CacheSize,
+        std::min(static_cast<int>(neighbors_size), device_prop.persistingL2CacheMaxSize)));
+    std::cout << "accessPolicyMaxWindowSize: " << device_prop.accessPolicyMaxWindowSize / 1024 / 1024 << " MiB"
+              << std::endl;
+    const auto window_size = std::min(device_prop.accessPolicyMaxWindowSize, static_cast<int>(neighbors_size));
+    std::cout << "window_size: " << window_size / 1024 / 1024 << " MiB" << std::endl;
+    const auto predicted_hit_ratio =
+        std::min(static_cast<double>(window_size) / static_cast<double>(neighbors_size), 1.0);
+    auto get_stream_attr_perm = [&device_prop](void *ptr, index_type size, double hit_ratio = 1.0) {
+        cudaStreamAttrValue stream_attribute_non_thrashing;
+        stream_attribute_non_thrashing.accessPolicyWindow.base_ptr = ptr;
+        stream_attribute_non_thrashing.accessPolicyWindow.num_bytes = size;
+        stream_attribute_non_thrashing.accessPolicyWindow.hitRatio = std::min(hit_ratio, 1.0);
+        stream_attribute_non_thrashing.accessPolicyWindow.hitProp = cudaAccessPropertyPersisting;
+        stream_attribute_non_thrashing.accessPolicyWindow.missProp = cudaAccessPropertyStreaming;
+        return stream_attribute_non_thrashing;
+    };
+    cudaStreamAttrValue stream_attribute_non_thrashing_e2c2v =
+        get_stream_attr_perm(e2c2v_gt_tv_vp, window_size, predicted_hit_ratio);
     GT_CUDA_CHECK(
-        cudaDeviceSetLimit(cudaLimitPersistingL2CacheSize,
-                           neighbors_size));
-    cudaStreamAttrValue stream_attribute_non_thrashing;
-    stream_attribute_non_thrashing.accessPolicyWindow.base_ptr =
-        reinterpret_cast<void*>(e2c2v_gt->get_target_ptr());
-    stream_attribute_non_thrashing.accessPolicyWindow.num_bytes =
-        neighbors_size;
-    stream_attribute_non_thrashing.accessPolicyWindow.hitRatio =
-                std::min(static_cast<double>(device_prop.persistingL2CacheMaxSize) /
-                static_cast<double>(neighbors_size),
-                         1.0);
-    stream_attribute_non_thrashing.accessPolicyWindow.hitProp =
-        cudaAccessPropertyPersisting;
-    stream_attribute_non_thrashing.accessPolicyWindow.missProp =
-        cudaAccessPropertyStreaming;
-    GT_CUDA_CHECK(cudaStreamSetAttribute(
-        stream_persistent_cache, cudaStreamAttributeAccessPolicyWindow,
-        &stream_attribute_non_thrashing));
+        cudaStreamSetAttribute(stream, cudaStreamAttributeAccessPolicyWindow, &stream_attribute_non_thrashing_e2c2v));
+
     dim3 tblocks(block_dims_unstructured.x, block_dims_unstructured.y, block_dims_unstructured.z);
     dim3 grid(
         (e2c2v_gt->const_host_view().lengths()[0] + tblocks.x - 1) / tblocks.x, (KDim + tblocks.y - 1) / tblocks.y, 1);
-    run_gpu<<<grid, tblocks, 0, stream_persistent_cache>>>(e2c2v_gt->const_host_view().lengths()[0],
+    run_gpu<<<grid, tblocks, 0, stream>>>(e2c2v_gt->const_host_view().lengths()[0],
         KDim,
         e2c2v_gt_tv,
         e2ecv_gt_tv,
