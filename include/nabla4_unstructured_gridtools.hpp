@@ -280,15 +280,14 @@ inline void nabla4_unstructured_gt<T>::run_gpu_helper(cudaDeviceProp &device_pro
               << std::endl;
     const auto neighbors_size = e2c2v_gt->const_host_view().lengths()[0] * 4 * sizeof(index_type) * 2;
     std::cout << "Neighbors size: " << neighbors_size / 1024 / 1024 << " MiB" << std::endl;
-    GT_CUDA_CHECK(cudaDeviceSetLimit(cudaLimitPersistingL2CacheSize,
-        std::min(static_cast<int>(neighbors_size), device_prop.persistingL2CacheMaxSize)));
     std::cout << "accessPolicyMaxWindowSize: " << device_prop.accessPolicyMaxWindowSize / 1024 / 1024 << " MiB"
               << std::endl;
     const auto window_size = std::min(device_prop.accessPolicyMaxWindowSize, static_cast<int>(neighbors_size));
-    const auto portion_fitting_l2_pers = std::min(window_size, device_prop.persistingL2CacheMaxSize);
-    std::cout << "portion_fitting_l2_pers: " << portion_fitting_l2_pers / 1024 / 1024 << " MiB" << std::endl;
+    const auto limit_l2_cache_size = std::min(window_size, device_prop.persistingL2CacheMaxSize);
+    GT_CUDA_CHECK(cudaDeviceSetLimit(cudaLimitPersistingL2CacheSize, limit_l2_cache_size));
+    std::cout << "limit_l2_cache_size: " << limit_l2_cache_size / 1024 / 1024 << " MiB" << std::endl;
     const auto predicted_hit_ratio =
-        std::min(static_cast<double>(portion_fitting_l2_pers) / static_cast<double>(neighbors_size), 1.0);
+        std::min(static_cast<double>(limit_l2_cache_size) / static_cast<double>(neighbors_size), 1.0);
     std::cout << "predicted_hit_ratio: " << predicted_hit_ratio << std::endl;
     auto get_stream_attr_perm = [&device_prop](void *ptr, index_type size, double hit_ratio = 1.0) {
         cudaStreamAttrValue stream_attribute_non_thrashing;
@@ -300,7 +299,7 @@ inline void nabla4_unstructured_gt<T>::run_gpu_helper(cudaDeviceProp &device_pro
         return stream_attribute_non_thrashing;
     };
     cudaStreamAttrValue stream_attribute_non_thrashing_e2c2v =
-        get_stream_attr_perm(e2c2v_gt_tv_vp, window_size, predicted_hit_ratio);
+        get_stream_attr_perm(e2c2v_gt_tv_vp, neighbors_size, predicted_hit_ratio);
     GT_CUDA_CHECK(
         cudaStreamSetAttribute(stream, cudaStreamAttributeAccessPolicyWindow, &stream_attribute_non_thrashing_e2c2v));
 
