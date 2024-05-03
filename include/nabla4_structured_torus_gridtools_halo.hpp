@@ -207,6 +207,7 @@ class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
         }
     };
 #if defined(__CUDACC__)
+    void set_stream_attributes(cudaDeviceProp &device_prop, cudaStream_t &stream){};
     template <backend_impl I>
     inline void run(cudaDeviceProp &device_prop, cudaStream_t &stream) {
         if constexpr (I == backend_impl::cpu_ifirst) {
