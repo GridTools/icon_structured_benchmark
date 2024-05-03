@@ -284,11 +284,11 @@ inline void nabla4_unstructured_gt<T>::run_gpu_helper(cudaDeviceProp &device_pro
         std::min(static_cast<int>(neighbors_size), device_prop.persistingL2CacheMaxSize)));
     std::cout << "accessPolicyMaxWindowSize: " << device_prop.accessPolicyMaxWindowSize / 1024 / 1024 << " MiB"
               << std::endl;
-    const auto window_size = std::min(std::min(device_prop.accessPolicyMaxWindowSize, static_cast<int>(neighbors_size)),
-        device_prop.persistingL2CacheMaxSize);
-    std::cout << "window_size: " << window_size / 1024 / 1024 << " MiB" << std::endl;
+    const auto window_size = std::min(device_prop.accessPolicyMaxWindowSize, static_cast<int>(neighbors_size));
+    const auto portion_fitting_l2_pers = std::min(window_size, device_prop.persistingL2CacheMaxSize);
+    std::cout << "portion_fitting_l2_pers: " << portion_fitting_l2_pers / 1024 / 1024 << " MiB" << std::endl;
     const auto predicted_hit_ratio =
-        std::min(static_cast<double>(window_size) / static_cast<double>(neighbors_size), 1.0);
+        std::min(static_cast<double>(portion_fitting_l2_pers) / static_cast<double>(neighbors_size), 1.0);
     std::cout << "predicted_hit_ratio: " << predicted_hit_ratio << std::endl;
     auto get_stream_attr_perm = [&device_prop](void *ptr, index_type size, double hit_ratio = 1.0) {
         cudaStreamAttrValue stream_attribute_non_thrashing;
