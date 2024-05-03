@@ -215,6 +215,36 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
         }
     }
 #if defined(__CUDACC__)
+    void set_stream_attributes(cudaDeviceProp &device_prop, cudaStream_t &stream) {
+        std::cout << "L2 Cache Size: " << device_prop.l2CacheSize / 1024 / 1024 << " MB" << std::endl;
+        std::cout << "Max Persistent L2 Cache Size: " << device_prop.persistingL2CacheMaxSize / 1024 / 1024 << " MiB"
+                  << std::endl;
+        const auto neighbors_size = e2c2v_gt->const_host_view().lengths()[0] * 4 * sizeof(index_type);
+        std::cout << "Neighbors size: " << neighbors_size / 1024 / 1024 << " MiB" << std::endl;
+        std::cout << "accessPolicyMaxWindowSize: " << device_prop.accessPolicyMaxWindowSize / 1024 / 1024 << " MiB"
+                  << std::endl;
+        const auto window_size = std::min(device_prop.accessPolicyMaxWindowSize, static_cast<int>(neighbors_size));
+        const auto limit_l2_cache_size = std::min(window_size, device_prop.persistingL2CacheMaxSize);
+        GT_CUDA_CHECK(cudaDeviceSetLimit(cudaLimitPersistingL2CacheSize, limit_l2_cache_size));
+        std::cout << "limit_l2_cache_size: " << limit_l2_cache_size / 1024 / 1024 << " MiB" << std::endl;
+        const auto predicted_hit_ratio =
+            std::min(static_cast<double>(limit_l2_cache_size) / static_cast<double>(neighbors_size), 1.0);
+        std::cout << "predicted_hit_ratio: " << predicted_hit_ratio << std::endl;
+        auto get_stream_attr_perm = [&device_prop](void *ptr, index_type size, double hit_ratio = 1.0) {
+            cudaStreamAttrValue stream_attribute_non_thrashing;
+            stream_attribute_non_thrashing.accessPolicyWindow.base_ptr = ptr;
+            stream_attribute_non_thrashing.accessPolicyWindow.num_bytes = size;
+            stream_attribute_non_thrashing.accessPolicyWindow.hitRatio = std::min(hit_ratio, 1.0);
+            stream_attribute_non_thrashing.accessPolicyWindow.hitProp = cudaAccessPropertyPersisting;
+            stream_attribute_non_thrashing.accessPolicyWindow.missProp = cudaAccessPropertyStreaming;
+            return stream_attribute_non_thrashing;
+        };
+        cudaStreamAttrValue stream_attribute_non_thrashing_e2c2v =
+            get_stream_attr_perm(e2c2v_gt_tv_vp, neighbors_size, predicted_hit_ratio);
+        GT_CUDA_CHECK(cudaStreamSetAttribute(
+            stream, cudaStreamAttributeAccessPolicyWindow, &stream_attribute_non_thrashing_e2c2v));
+    };
+
     template <backend_impl I>
     inline void run(cudaDeviceProp &device_prop, cudaStream_t &stream) {
         if constexpr (I == backend_impl::cpu_ifirst) {
@@ -275,34 +305,6 @@ __global__ void __launch_bounds__(block_dims_unstructured.size, 2) run_gpu(index
 
 template <typename T>
 inline void nabla4_unstructured_gt<T>::run_gpu_helper(cudaDeviceProp &device_prop, cudaStream_t &stream) {
-    std::cout << "L2 Cache Size: " << device_prop.l2CacheSize / 1024 / 1024 << " MB" << std::endl;
-    std::cout << "Max Persistent L2 Cache Size: " << device_prop.persistingL2CacheMaxSize / 1024 / 1024 << " MiB"
-              << std::endl;
-    const auto neighbors_size = e2c2v_gt->const_host_view().lengths()[0] * 4 * sizeof(index_type);
-    std::cout << "Neighbors size: " << neighbors_size / 1024 / 1024 << " MiB" << std::endl;
-    std::cout << "accessPolicyMaxWindowSize: " << device_prop.accessPolicyMaxWindowSize / 1024 / 1024 << " MiB"
-              << std::endl;
-    const auto window_size = std::min(device_prop.accessPolicyMaxWindowSize, static_cast<int>(neighbors_size));
-    const auto limit_l2_cache_size = std::min(window_size, device_prop.persistingL2CacheMaxSize);
-    GT_CUDA_CHECK(cudaDeviceSetLimit(cudaLimitPersistingL2CacheSize, limit_l2_cache_size));
-    std::cout << "limit_l2_cache_size: " << limit_l2_cache_size / 1024 / 1024 << " MiB" << std::endl;
-    const auto predicted_hit_ratio =
-        std::min(static_cast<double>(limit_l2_cache_size) / static_cast<double>(neighbors_size), 1.0);
-    std::cout << "predicted_hit_ratio: " << predicted_hit_ratio << std::endl;
-    auto get_stream_attr_perm = [&device_prop](void *ptr, index_type size, double hit_ratio = 1.0) {
-        cudaStreamAttrValue stream_attribute_non_thrashing;
-        stream_attribute_non_thrashing.accessPolicyWindow.base_ptr = ptr;
-        stream_attribute_non_thrashing.accessPolicyWindow.num_bytes = size;
-        stream_attribute_non_thrashing.accessPolicyWindow.hitRatio = std::min(hit_ratio, 1.0);
-        stream_attribute_non_thrashing.accessPolicyWindow.hitProp = cudaAccessPropertyPersisting;
-        stream_attribute_non_thrashing.accessPolicyWindow.missProp = cudaAccessPropertyStreaming;
-        return stream_attribute_non_thrashing;
-    };
-    cudaStreamAttrValue stream_attribute_non_thrashing_e2c2v =
-        get_stream_attr_perm(e2c2v_gt_tv_vp, neighbors_size, predicted_hit_ratio);
-    GT_CUDA_CHECK(
-        cudaStreamSetAttribute(stream, cudaStreamAttributeAccessPolicyWindow, &stream_attribute_non_thrashing_e2c2v));
-
     dim3 tblocks(block_dims_unstructured.x, block_dims_unstructured.y, block_dims_unstructured.z);
     dim3 grid(
         (e2c2v_gt->const_host_view().lengths()[0] + tblocks.x - 1) / tblocks.x, (KDim + tblocks.y - 1) / tblocks.y, 1);

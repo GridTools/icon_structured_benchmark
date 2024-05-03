@@ -60,6 +60,7 @@ std::vector<double> run_benchmark(std::tuple<Args...> &&args, int repetitions, i
             GT_CUDA_CHECK(cudaGetDeviceProperties(&device_prop, current_device));
             cudaStream_t stream_persistent_cache;
             GT_CUDA_CHECK(cudaStreamCreate(&stream_persistent_cache));
+            benchmark_object.set_stream_attributes(device_prop, stream_persistent_cache);
             timer<backend_impl::gpu> t;
             t.start(stream_persistent_cache);
             benchmark_object.template run<backend_impl::gpu>(device_prop, stream_persistent_cache);
