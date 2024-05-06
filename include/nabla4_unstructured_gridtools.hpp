@@ -69,8 +69,7 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
     neighbors_gt_t e2ecv_gt;
     neighbors_gt_ctv_t e2ecv_gt_tv;
 #if defined(__CUDACC__)
-    void *e2c2v_gt_tv_vp;
-    void *e2ecv_gt_tv_vp;
+    void *inv_vert_vert_length_gt_tv_vp;
 #endif
 
     /// Constructor with all the necessary information for \c nabla4 compute
@@ -88,8 +87,7 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
         e2ecv_gt_tv(e2ecv_gt->const_target_view()),
         nabla4_gt_data<T>(CellDim, VertexDim, EdgeDim, KDim, ECVDim, e2c2v.size()){
 #if defined(__CUDACC__)
-        e2c2v_gt_tv_vp = static_cast<void *>(e2c2v_gt->get_target_ptr());
-        e2ecv_gt_tv_vp = static_cast<void *>(e2ecv_gt->get_target_ptr());
+        inv_vert_vert_length_gt_tv_vp = static_cast<void *>(inv_vert_vert_length_gt->get_target_ptr());
 #endif
     };
 
@@ -119,8 +117,7 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
                                           inv_vert_vert_length,
                                           inv_primal_edge_length){
 #if defined(__CUDACC__)
-        e2c2v_gt_tv_vp = static_cast<void *>(e2c2v_gt->get_target_ptr());
-        e2ecv_gt_tv_vp = static_cast<void *>(e2ecv_gt->get_target_ptr());
+        inv_vert_vert_length_gt_tv_vp = static_cast<void *>(inv_vert_vert_length_gt->get_target_ptr());
 #endif
     };
 
@@ -219,16 +216,16 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
         std::cout << "L2 Cache Size: " << device_prop.l2CacheSize / 1024 / 1024 << " MB" << std::endl;
         std::cout << "Max Persistent L2 Cache Size: " << device_prop.persistingL2CacheMaxSize / 1024 / 1024 << " MiB"
                   << std::endl;
-        const auto neighbors_size = e2c2v_gt->const_host_view().lengths()[0] * 4 * sizeof(index_type);
-        std::cout << "Neighbors size: " << neighbors_size / 1024 / 1024 << " MiB" << std::endl;
+        const auto inv_vert_size = inv_vert_vert_length_gt->const_host_view().lengths()[0] * sizeof(WP_TYPE);
+        std::cout << "inv_vert_vert size: " << inv_vert_size / 1024 / 1024 << " MiB" << std::endl;
         std::cout << "accessPolicyMaxWindowSize: " << device_prop.accessPolicyMaxWindowSize / 1024 / 1024 << " MiB"
                   << std::endl;
-        const auto window_size = std::min(device_prop.accessPolicyMaxWindowSize, static_cast<int>(neighbors_size));
+        const auto window_size = std::min(device_prop.accessPolicyMaxWindowSize, static_cast<int>(inv_vert_size));
         const auto limit_l2_cache_size = std::min(window_size, device_prop.persistingL2CacheMaxSize);
         GT_CUDA_CHECK(cudaDeviceSetLimit(cudaLimitPersistingL2CacheSize, limit_l2_cache_size));
         std::cout << "limit_l2_cache_size: " << limit_l2_cache_size / 1024 / 1024 << " MiB" << std::endl;
         const auto predicted_hit_ratio =
-            std::min(static_cast<double>(limit_l2_cache_size) / static_cast<double>(neighbors_size), 1.0);
+            std::min(static_cast<double>(limit_l2_cache_size) / static_cast<double>(inv_vert_size), 1.0);
         std::cout << "predicted_hit_ratio: " << predicted_hit_ratio << std::endl;
         auto get_stream_attr_perm = [&device_prop](void *ptr, index_type size, double hit_ratio = 1.0) {
             cudaStreamAttrValue stream_attribute_non_thrashing;
@@ -240,7 +237,7 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
             return stream_attribute_non_thrashing;
         };
         cudaStreamAttrValue stream_attribute_non_thrashing_e2c2v =
-            get_stream_attr_perm(e2c2v_gt_tv_vp, neighbors_size, predicted_hit_ratio);
+            get_stream_attr_perm(inv_vert_vert_length_gt_tv_vp, inv_vert_size, predicted_hit_ratio);
         GT_CUDA_CHECK(cudaStreamSetAttribute(
             stream, cudaStreamAttributeAccessPolicyWindow, &stream_attribute_non_thrashing_e2c2v));
     };
