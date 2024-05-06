@@ -24,7 +24,7 @@ constexpr block_dims get_block_dims_structured<std::int64_t>() {
 
 template <>
 constexpr block_dims get_block_dims_structured<std::uint32_t>() {
-    return {32, 5, 3, 480};
+    return {32, 4, 2, 256};
 };
 
 template <>
@@ -209,7 +209,7 @@ class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
 };
 
 #if defined(__CUDACC__)
-__global__ void __launch_bounds__(block_dims_structured.size, 2) run_gpu(index_type KDim,
+__global__ void __launch_bounds__(block_dims_structured.size) run_gpu(index_type KDim,
     index_type x_dim,
     index_type x_dim_inner,
     index_type y_dim,
@@ -225,7 +225,7 @@ __global__ void __launch_bounds__(block_dims_structured.size, 2) run_gpu(index_t
     nabla4_structured_torus_halo_gt<storage::gpu>::data_store_1d_ctv_WP_t inv_vert_vert_length_gt_tv,
     nabla4_structured_torus_halo_gt<storage::gpu>::data_store_1d_ctv_WP_t inv_primal_edge_length_gt_tv,
     nabla4_structured_torus_halo_gt<storage::gpu>::data_store_2d_tv_VP_t z_nabla4_e2_wp_gt_tv) {
-    const int orientation_id = threadIdx.z;
+    const int orientation_id = blockIdx.z;
     __shared__ index_type E2C2V[3][block_dims_structured.y][block_dims_structured.x][5];
     for (auto j{blockIdx.y * blockDim.y + threadIdx.y + halo}; j < y_dim - halo; j += blockDim.y * gridDim.y) {
         for (auto i{blockIdx.x * blockDim.x + threadIdx.x + halo}; i < x_dim - halo; i += blockDim.x * gridDim.x) {
@@ -258,7 +258,7 @@ __global__ void __launch_bounds__(block_dims_structured.size, 2) run_gpu(index_t
         };
     };
     __syncthreads();
-    for (auto k_index{blockIdx.z}; k_index < KDim; k_index += gridDim.z) {
+    for (auto k_index{threadIdx.z}; k_index < KDim; k_index += blockDim.z) {
         for (auto j{blockIdx.y * blockDim.y + threadIdx.y + halo}; j < y_dim - halo; j += blockDim.y * gridDim.y) {
             for (auto i{blockIdx.x * blockDim.x + threadIdx.x + halo}; i < x_dim - halo; i += blockDim.x * gridDim.x) {
                 const auto E2C2V_0 = E2C2V[orientation_id][threadIdx.y][threadIdx.x][0];
@@ -295,7 +295,7 @@ template <typename T>
 inline void nabla4_structured_torus_halo_gt<T>::run_gpu_helper() {
     dim3 tblocks(block_dims_structured.x, block_dims_structured.y, block_dims_structured.z);
     const index_type total_grid_size = (x_dim - 2 * halo) * (y_dim - halo * 2);
-    dim3 grid((x_dim - 2 * halo + tblocks.x - 1) / tblocks.x, (y_dim - 2 * halo + tblocks.y - 1) / tblocks.y, 2);
+    dim3 grid((x_dim - 2 * halo + tblocks.x - 1) / tblocks.x, (y_dim - 2 * halo + tblocks.y - 1) / tblocks.y, 3);
     run_gpu<<<grid, tblocks>>>(KDim,
         x_dim,
         x_dim - 2 * halo,
