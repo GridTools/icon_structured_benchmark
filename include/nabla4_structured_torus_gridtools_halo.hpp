@@ -259,7 +259,6 @@ __global__ void __launch_bounds__(block_dims_structured.size, 2) run_gpu(index_t
             E2C2V[2][threadIdx.x][3] = i_jm1;
         };
     };
-    __syncthreads();
     const auto global_edges_per_orientation = x_dim * y_dim * 4;
     for (auto k_index{blockIdx.z * blockDim.z + threadIdx.z}; k_index < KDim; k_index += blockDim.z * gridDim.z) {
         for (auto orientation_id{blockIdx.y * blockDim.y + threadIdx.y}; orientation_id < 3;
