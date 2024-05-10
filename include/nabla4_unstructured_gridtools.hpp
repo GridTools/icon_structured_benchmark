@@ -335,23 +335,17 @@ __global__ void __launch_bounds__(block_dims_unstructured.size, 2) run_gpu(index
     for (auto k_index{blockIdx.y * blockDim.y + threadIdx.y}; k_index < KDim; k_index += blockDim.y * gridDim.y) {
         for (auto edge_index{blockIdx.x * blockDim.x + threadIdx.x}; edge_index < EdgeDim;
              edge_index += blockDim.x * gridDim.x) {
-            // printf("e2c2v_t_ptr[%d]: %d, e2c2v_t_ptr[%d]: %d, e2c2v_t_ptr[%d]: %d, e2c2v_t_ptr[%d]: %d\n", 4 *
-            // edge_index, e2c2v_t_ptr[4 * edge_index], 4 * edge_index + 1, e2c2v_t_ptr[4 * edge_index + 1], 4 *
-            // edge_index + 2, e2c2v_t_ptr[4 * edge_index + 2], 4 * edge_index + 3, e2c2v_t_ptr[4 * edge_index + 3]);
-            // const int4 E2C2V = reinterpret_cast<const int4*>(e2c2v_t_ptr)[4 * edge_index];
-            // const int4 E2ECV = reinterpret_cast<const int4*>(e2ecv_t_ptr)[4 * edge_index];
-            // printf("edge_index: %d , E2C2V: %d %d %d %d, E2ECV: %d %d %d %d\n", edge_index, E2C2V.x, E2C2V.y,
-            // E2C2V.z, E2C2V.w, E2ECV.x, E2ECV.y, E2ECV.z, E2ECV.w); double nabv_tang_wp = u_vert_gt_tv(E2C2V.x,
-            // k_index) * primal_normal_vert_v1_gt_tv(E2ECV.x) +
-            //                       v_vert_gt_tv(E2C2V.x, k_index) * primal_normal_vert_v2_gt_tv(E2ECV.x) +
-            //                       u_vert_gt_tv(E2C2V.y, k_index) * primal_normal_vert_v1_gt_tv(E2ECV.y) +
-            //                       v_vert_gt_tv(E2C2V.y, k_index) * primal_normal_vert_v2_gt_tv(E2ECV.y);
-            // double nabv_norm_wp = u_vert_gt_tv(E2C2V.z, k_index) * primal_normal_vert_v1_gt_tv(E2ECV.z) +
-            //                       v_vert_gt_tv(E2C2V.z, k_index) * primal_normal_vert_v2_gt_tv(E2ECV.z) +
-            //                       u_vert_gt_tv(E2C2V.w, k_index) * primal_normal_vert_v1_gt_tv(E2ECV.w) +
-            //                       v_vert_gt_tv(E2C2V.w, k_index) * primal_normal_vert_v2_gt_tv(E2ECV.w);
-            const int4 E2C2V = reinterpret_cast<const int4 *>(e2c2v_t_ptr)[edge_index];
-            const int4 E2ECV = reinterpret_cast<const int4 *>(e2ecv_t_ptr)[edge_index];
+#if defined(INDEX_TYPE_SIZE_T)
+            using vec_index_type = ulonglong4;
+#elif defined(INDEX_TYPE_INT64)
+            using vec_index_type = longlong4;
+#elif defined(INDEX_TYPE_UINT32_T)
+            using vec_index_type = uint4;
+#elif defined(INDEX_TYPE_INT)
+            using vec_index_type = int4;
+#endif
+            const vec_index_type E2C2V = reinterpret_cast<const vec_index_type *>(e2c2v_t_ptr)[edge_index];
+            const vec_index_type E2ECV = reinterpret_cast<const vec_index_type *>(e2ecv_t_ptr)[edge_index];
             // printf("edge_index: %d , E2C2V: %d %d %d %d, E2ECV: %d %d %d %d\n", edge_index, E2C2V.x, E2C2V.y,
             // E2C2V.z, E2C2V.w, E2ECV.x, E2ECV.y, E2ECV.z, E2ECV.w);
             double nabv_tang_wp = u_vert_gt_tv(E2C2V.x, k_index) * primal_normal_vert_v1_gt_tv(E2ECV.x) +
