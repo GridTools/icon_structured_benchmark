@@ -534,8 +534,24 @@ def run_benchmarks():
         args.e2c2v_ordering,
         args.halo,
     )
+
+    def _get_gpu_coalesced_permuted_e2ecv():
+        orientation_permuted_e2c2v = np.zeros_like(
+            torus_grid.get_offset_provider("E2ECV").table
+        )
+        edges_size = len(torus_grid.get_offset_provider("E2ECV").table)
+        for i in range(edges_size):
+            for j in range(4):
+                orientation_permuted_e2c2v[i][j] = j * edges_size + i
+        return orientation_permuted_e2c2v
+
+    permuted_e2c2v = (
+        torus_grid.get_offset_provider("E2ECV").table
+        if args.e2c2v_ordering == "per-vertex"
+        else _get_gpu_coalesced_permuted_e2ecv()
+    )
     filtered_e2ecv = filter_edge_vector(
-        torus_grid.get_offset_provider("E2ECV").table,
+        permuted_e2c2v,
         grid_cartesian_dimensions,
         args.e2c2v_ordering,
         args.halo,
