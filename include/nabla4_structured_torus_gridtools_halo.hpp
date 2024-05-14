@@ -14,8 +14,6 @@ constexpr block_dims get_block_dims_structured() {
 
 template <>
 constexpr block_dims get_block_dims_structured<std::size_t>() {
-    // For some reason setting the launch_bounds to 1024 but launching the kernel with 512 threads provides better
-    // performance
     return {32, 4, 4, 512};
 };
 
