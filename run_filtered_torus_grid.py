@@ -591,8 +591,8 @@ def run_benchmarks():
         for _ in range(repetitions):
             random_validation_data_gtfn = (
                 icon_benchmark.get_nabla4_benchmark_validation_data(
-                    torus_grid.get_offset_provider("E2C2V").table,
-                    torus_grid.get_offset_provider("E2ECV").table,
+                    filtered_e2c2v,
+                    filtered_e2ecv,
                     torus_grid.num_cells,
                     torus_grid.num_vertices,
                     torus_grid.num_edges,
@@ -677,8 +677,8 @@ def run_benchmarks():
         for _ in range(repetitions):
             random_validation_data_gtfn = (
                 icon_benchmark.get_nabla4_benchmark_validation_data(
-                    torus_grid.get_offset_provider("E2C2V").table,
-                    torus_grid.get_offset_provider("E2ECV").table,
+                    filtered_e2c2v,
+                    filtered_e2ecv,
                     torus_grid.num_cells,
                     torus_grid.num_vertices,
                     torus_grid.num_edges,
@@ -759,8 +759,8 @@ def run_benchmarks():
         runtimes[
             "nabla4_benchmark_unstructured_cpu_ifirst_gridtools"
         ] = icon_benchmark.nabla4_benchmark_unstructured_cpu_ifirst_gridtools(
-            torus_grid.get_offset_provider("E2C2V").table,
-            torus_grid.get_offset_provider("E2ECV").table,
+            filtered_e2c2v,
+            filtered_e2ecv,
             torus_grid.num_cells,
             torus_grid.num_vertices,
             torus_grid.num_edges,
@@ -789,8 +789,8 @@ def run_benchmarks():
         runtimes[
             "nabla4_benchmark_unstructured_cpu_kfirst_gridtools"
         ] = icon_benchmark.nabla4_benchmark_unstructured_cpu_kfirst_gridtools(
-            torus_grid.get_offset_provider("E2C2V").table,
-            torus_grid.get_offset_provider("E2ECV").table,
+            filtered_e2c2v,
+            filtered_e2ecv,
             torus_grid.num_cells,
             torus_grid.num_vertices,
             torus_grid.num_edges,
@@ -819,8 +819,8 @@ def run_benchmarks():
         runtimes[
             "nabla4_benchmark_unstructured_gpu_gridtools"
         ] = icon_benchmark.nabla4_benchmark_unstructured_gpu_gridtools(
-            torus_grid.get_offset_provider("E2C2V").table,
-            torus_grid.get_offset_provider("E2ECV").table,
+            filtered_e2c2v,
+            filtered_e2ecv,
             torus_grid.num_cells,
             torus_grid.num_vertices,
             torus_grid.num_edges,
