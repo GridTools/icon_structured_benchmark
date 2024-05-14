@@ -14,7 +14,9 @@ constexpr block_dims get_block_dims_structured() {
 
 template <>
 constexpr block_dims get_block_dims_structured<std::size_t>() {
-    return {32, 4, 3, 384};
+    // For some reason setting the launch_bounds to 1024 but launching the kernel with 512 threads provides better
+    // performance
+    return {32, 4, 4, 1024};
 };
 
 template <>
@@ -209,7 +211,7 @@ class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
 };
 
 #if defined(__CUDACC__)
-__global__ void __launch_bounds__(block_dims_structured.size) run_gpu(index_type KDim,
+__global__ void run_gpu(index_type KDim,
     index_type x_dim,
     index_type x_dim_inner,
     index_type y_dim,
@@ -240,32 +242,36 @@ __global__ void __launch_bounds__(block_dims_structured.size) run_gpu(index_type
     const index_type E2C2V_1[3] = {i_jp1, ip1_j, ip1_jm1};
     const index_type E2C2V_2[3] = {im1_jp1, i_jp1, ip1_j};
     const index_type E2C2V_3[3] = {ip1_j, ip1_jm1, i_jm1};
-    const int orientation_id = blockIdx.z;
-    for (auto k_index{threadIdx.z}; k_index < KDim; k_index += blockDim.z) {
-        const auto E2C2V_0_c = E2C2V_0[orientation_id];
-        const auto E2C2V_1_c = E2C2V_1[orientation_id];
-        const auto E2C2V_2_c = E2C2V_2[orientation_id];
-        const auto E2C2V_3_c = E2C2V_3[orientation_id];
-        const auto global_edge_index = (j * x_dim + i) * 4;
-        const auto E2ECV_0 = global_edge_index + orientation_id * global_edges_per_orientation;
-        const auto E2ECV_1 = E2ECV_0 + 1;
-        const auto E2ECV_2 = E2ECV_0 + 2;
-        const auto E2ECV_3 = E2ECV_0 + 3;
-        const double nabv_tang_wp = u_vert_gt_tv(E2C2V_0_c, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_0) +
-                                    v_vert_gt_tv(E2C2V_0_c, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_0) +
-                                    u_vert_gt_tv(E2C2V_1_c, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_1) +
-                                    v_vert_gt_tv(E2C2V_1_c, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_1);
-        const double nabv_norm_wp = u_vert_gt_tv(E2C2V_2_c, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_2) +
-                                    v_vert_gt_tv(E2C2V_2_c, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_2) +
-                                    u_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_3) +
-                                    v_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_3);
-        const auto local_edge_index = (j - halo) * x_dim_inner + i - halo + orientation_id * total_grid_size;
-        z_nabla4_e2_wp_gt_tv(local_edge_index, k_index) =
-            4.0 *
-            ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_tv(local_edge_index, k_index)) *
-                    (inv_vert_vert_length_gt_tv(local_edge_index) * inv_vert_vert_length_gt_tv(local_edge_index)) +
-                (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(local_edge_index, k_index)) *
-                    (inv_primal_edge_length_gt_tv(local_edge_index) * inv_primal_edge_length_gt_tv(local_edge_index)));
+    const auto global_edge_index = (j * x_dim + i) * 4;
+    const auto local_edge_index_start = (j - halo) * x_dim_inner + i - halo;
+    for (auto k_index{blockIdx.z * blockDim.z + threadIdx.z}; k_index < KDim; k_index += blockDim.z * gridDim.z) {
+#pragma unroll
+        for (auto color{0}; color < 3; ++color) {
+            const auto E2C2V_0_c = E2C2V_0[color];
+            const auto E2C2V_1_c = E2C2V_1[color];
+            const auto E2C2V_2_c = E2C2V_2[color];
+            const auto E2C2V_3_c = E2C2V_3[color];
+            const auto E2ECV_0 = global_edge_index + color * global_edges_per_orientation;
+            const auto E2ECV_1 = E2ECV_0 + 1;
+            const auto E2ECV_2 = E2ECV_0 + 2;
+            const auto E2ECV_3 = E2ECV_0 + 3;
+            const double nabv_tang_wp = u_vert_gt_tv(E2C2V_0_c, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_0) +
+                                        v_vert_gt_tv(E2C2V_0_c, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_0) +
+                                        u_vert_gt_tv(E2C2V_1_c, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_1) +
+                                        v_vert_gt_tv(E2C2V_1_c, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_1);
+            const double nabv_norm_wp = u_vert_gt_tv(E2C2V_2_c, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_2) +
+                                        v_vert_gt_tv(E2C2V_2_c, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_2) +
+                                        u_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_3) +
+                                        v_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_3);
+            const auto local_edge_index = local_edge_index_start + color * total_grid_size;
+            z_nabla4_e2_wp_gt_tv(local_edge_index, k_index) =
+                4.0 *
+                ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_tv(local_edge_index, k_index)) *
+                        (inv_vert_vert_length_gt_tv(local_edge_index) * inv_vert_vert_length_gt_tv(local_edge_index)) +
+                    (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(local_edge_index, k_index)) *
+                        (inv_primal_edge_length_gt_tv(local_edge_index) *
+                            inv_primal_edge_length_gt_tv(local_edge_index)));
+        };
     };
 };
 
@@ -273,7 +279,9 @@ template <typename T>
 inline void nabla4_structured_torus_halo_gt<T>::run_gpu_helper() {
     dim3 tblocks(block_dims_structured.x, block_dims_structured.y, block_dims_structured.z);
     const index_type total_grid_size = (x_dim - 2 * halo) * (y_dim - halo * 2);
-    dim3 grid((x_dim - 2 * halo + tblocks.x - 1) / tblocks.x, (y_dim - 2 * halo + tblocks.y - 1) / tblocks.y, 3);
+    dim3 grid((x_dim - 2 * halo + tblocks.x - 1) / tblocks.x,
+        (y_dim - 2 * halo + tblocks.y - 1) / tblocks.y,
+        (KDim + tblocks.z - 1) / tblocks.z);
     run_gpu<<<grid, tblocks>>>(KDim,
         x_dim,
         x_dim - 2 * halo,
