@@ -250,7 +250,7 @@ template <typename T>
 inline void nabla4_unstructured_gt<T>::run_gpu_helper() {
     dim3 tblocks(block_dims_unstructured.x, block_dims_unstructured.y, block_dims_unstructured.z);
     dim3 grid((e2c2v_gt->const_host_view().lengths()[0] + tblocks.x - 1) / tblocks.x,
-        (((KDim + k_blocks - 1) / k_blocks) + tblocks.y - 1) / tblocks.y,
+        (((KDim + k_blocks_unstructured - 1) / k_blocks_unstructured) + tblocks.y - 1) / tblocks.y,
         1);
     run_gpu<<<grid, tblocks>>>(e2c2v_gt->const_host_view().lengths()[0],
         KDim,
