@@ -195,9 +195,9 @@ def generate_violin_plots(data, k, torus_name, output_dir):
                     if "cpu_ifirst" in implementation
                     else "cpu_kfirst"
                     if "cpu_kfirst" in implementation
-                    else "gpu"
-                    if "gpu" in implementation
-                    else "gtfn",
+                    else "gtfn"
+                    if "gtfn" in implementation
+                    else "cuda",
                 )
             )
             median_value = np.median(runtimes)
