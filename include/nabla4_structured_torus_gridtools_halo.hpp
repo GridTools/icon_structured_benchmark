@@ -14,7 +14,8 @@ constexpr block_dims get_block_dims_structured() {
 
 template <>
 constexpr block_dims get_block_dims_structured<std::size_t>() {
-    return {32, 4, 5, 640};
+    // Increased thread block size to limit register usage and increase occupancy
+    return {32, 1, 8, 768};
 };
 
 template <>
