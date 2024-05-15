@@ -7,11 +7,19 @@ build*
 # debug temporary files
 *.txt
 *.out
+*.swp
 
 # output files
 *.json
 *.pdf
 
+# scripts
+run_grids_*_*.sh
+run_grids_[0-9a-z]*.sh
+
 # nvidia profiler files
 *.ncu-rep
 *.nsys-rep
+*.sqlite
+*.qdstrm
+
