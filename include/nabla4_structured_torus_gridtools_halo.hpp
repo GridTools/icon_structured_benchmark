@@ -210,9 +210,6 @@ class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
 };
 
 #if defined(__CUDACC__)
-
-constexpr auto k_blocks_structured = 4;
-
 __global__ void __launch_bounds__(block_dims_structured.size) run_gpu(index_type KDim,
     index_type x_dim,
     index_type x_dim_inner,
@@ -232,8 +229,7 @@ __global__ void __launch_bounds__(block_dims_structured.size) run_gpu(index_type
     nabla4_structured_torus_halo_gt<storage::gpu>::data_store_2d_tv_VP_t z_nabla4_e2_wp_gt_tv) {
     const auto i{blockIdx.x * blockDim.x + threadIdx.x + halo};
     const auto j{blockIdx.y * blockDim.y + threadIdx.y + halo};
-    const auto k{(blockIdx.z * blockDim.z + threadIdx.z) * k_blocks_structured};
-    if (i >= x_dim - halo || j >= y_dim - halo || k >= KDim) {
+    if (i >= x_dim - halo || j >= y_dim - halo) {
         return;
     }
     const auto i_j = j * x_dim + i;
@@ -257,7 +253,7 @@ __global__ void __launch_bounds__(block_dims_structured.size) run_gpu(index_type
     const index_type E2ECV_3[3] = {E2ECV_2[0] + global_edges_per_orientation,
         E2ECV_2[1] + global_edges_per_orientation,
         E2ECV_2[2] + global_edges_per_orientation};
-    for (auto k_index{k}; k_index < k_blocks_structured + k && k_index < KDim; ++k_index) {
+    for (auto k_index{blockIdx.z * blockDim.z + threadIdx.z}; k_index < KDim; k_index += gridDim.z * blockDim.z) {
         for (auto color{0}; color < 3; ++color) {
             const auto E2C2V_0_c = E2C2V_0[color];
             const auto E2C2V_1_c = E2C2V_1[color];
@@ -291,9 +287,7 @@ template <typename T>
 inline void nabla4_structured_torus_halo_gt<T>::run_gpu_helper() {
     dim3 tblocks(block_dims_structured.x, block_dims_structured.y, block_dims_structured.z);
     const index_type inner_grid_size = (x_dim - 2 * halo) * (y_dim - halo * 2);
-    dim3 grid((x_dim - 2 * halo + tblocks.x - 1) / tblocks.x,
-        (y_dim - 2 * halo + tblocks.y - 1) / tblocks.y,
-        (((KDim + k_blocks_structured - 1) / k_blocks_structured) + tblocks.z - 1) / tblocks.z);
+    dim3 grid((x_dim - 2 * halo + tblocks.x - 1) / tblocks.x, (y_dim - 2 * halo + tblocks.y - 1) / tblocks.y, 1);
     run_gpu<<<grid, tblocks>>>(KDim,
         x_dim,
         x_dim - 2 * halo,
