@@ -1,5 +1,6 @@
 #include <vector>
 
+#include "copy_gridtools.hpp"
 #include "nabla4_structured_simple.hpp"
 #include "nabla4_structured_torus.hpp"
 #include "nabla4_structured_torus_gridtools.hpp"

@@ -15,8 +15,37 @@ nabla4_data<Data::ifirst> get_nabla4_benchmark_validation_data(std::vector<std::
     std::size_t KDim,
     std::size_t ECVDim) {
     nabla4_unstructured<Data::ifirst> nabla4_benchmark_object{e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim};
-    run_benchmark<nabla4_unstructured<Data::ifirst>, naive>(nabla4_benchmark_object, 1, 0);
+    // run_benchmark<nabla4_unstructured<Data::ifirst>, naive>(nabla4_benchmark_object, 1, 0);
     return nabla4_benchmark_object.get_validation_data();
+}
+
+template <backend_impl I>
+std::vector<double> copy_benchmark(index_type EdgeDim, index_type KDim, int repetitions, int dry_runs) {
+    if constexpr (I == backend_impl::cpu_ifirst) {
+        return run_benchmark<copy_kernel<storage::cpu_ifirst>, I>(
+            std::make_tuple(EdgeDim, KDim), repetitions, dry_runs);
+    } else if constexpr (I == backend_impl::cpu_kfirst) {
+        return run_benchmark<copy_kernel<storage::cpu_kfirst>, I>(
+            std::make_tuple(EdgeDim, KDim), repetitions, dry_runs);
+#ifdef __CUDACC__
+    } else if constexpr (I == backend_impl::gpu) {
+        return run_benchmark<copy_kernel<storage::gpu>, I>(std::make_tuple(EdgeDim, KDim), repetitions, dry_runs);
+#endif
+    } else {
+        throw std::runtime_error("[wrapper] Undefined backend implementation");
+    }
+}
+
+std::vector<double> copy_benchmark_cpu_ifirst(index_type EdgeDim, index_type KDim, int repetitions, int dry_runs) {
+    return copy_benchmark<cpu_ifirst>(EdgeDim, KDim, repetitions, dry_runs);
+}
+
+std::vector<double> copy_benchmark_cpu_kfirst(index_type EdgeDim, index_type KDim, int repetitions, int dry_runs) {
+    return copy_benchmark<cpu_kfirst>(EdgeDim, KDim, repetitions, dry_runs);
+}
+
+std::vector<double> copy_benchmark_gpu(index_type EdgeDim, index_type KDim, int repetitions, int dry_runs) {
+    return copy_benchmark<gpu>(EdgeDim, KDim, repetitions, dry_runs);
 }
 
 template <typename T, backend_impl I>

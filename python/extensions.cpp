@@ -20,6 +20,9 @@ NB_MODULE(icon_benchmark, m) {
         .def_ro("inv_primal_edge_length", &nabla4_data<Data::ifirst>::inv_primal_edge_length)
         .def_ro("z_nabla4_e2_wp", &nabla4_data<Data::ifirst>::z_nabla4_e2_wp);
     m.def("get_nabla4_benchmark_validation_data", &get_nabla4_benchmark_validation_data);
+    m.def("copy_benchmark_cpu_ifirst", &copy_benchmark_cpu_ifirst);
+    m.def("copy_benchmark_cpu_kfirst", &copy_benchmark_cpu_kfirst);
+    m.def("copy_benchmark_gpu", &copy_benchmark_gpu);
     /// Unstructured
     m.def("nabla4_benchmark_unstructured_naive", &nabla4_benchmark_unstructured_naive);
     m.def("nabla4_benchmark_unstructured_cpu_ifirst", &nabla4_benchmark_unstructured_cpu_ifirst);
