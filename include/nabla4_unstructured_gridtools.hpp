@@ -13,7 +13,7 @@ constexpr block_dims get_block_dims_unstructured() {
 
 template <>
 constexpr block_dims get_block_dims_unstructured<std::size_t>() {
-    return {32, 4, 1, 128};
+    return {32, 8, 1, 256};
 };
 
 template <>
@@ -217,48 +217,45 @@ __global__ void __launch_bounds__(block_dims_unstructured.size, 2) run_gpu(index
     nabla4_unstructured_gt<storage::gpu>::data_store_1d_ctv_WP_t inv_primal_edge_length_gt_tv,
     nabla4_unstructured_gt<storage::gpu>::data_store_2d_tv_VP_t z_nabla4_e2_wp_gt_tv) {
     const auto edge_index = blockIdx.x * blockDim.x + threadIdx.x;
-    if (edge_index >= EdgeDim) {
+    const auto k_index = blockIdx.y * blockDim.y + threadIdx.y;
+    if (edge_index >= EdgeDim || k_index >= KDim) {
         return;
     }
-    const auto E2C2V_0 = e2c2v_gt_tv(edge_index, 0);
-    const auto E2C2V_1 = e2c2v_gt_tv(edge_index, 1);
-    const auto E2C2V_2 = e2c2v_gt_tv(edge_index, 2);
-    const auto E2C2V_3 = e2c2v_gt_tv(edge_index, 3);
-    const auto E2ECV_0 = e2ecv_gt_tv(edge_index, 0);
-    const auto E2ECV_1 = e2ecv_gt_tv(edge_index, 1);
-    const auto E2ECV_2 = e2ecv_gt_tv(edge_index, 2);
-    const auto E2ECV_3 = e2ecv_gt_tv(edge_index, 3);
-    const WP_TYPE primal_normal_vert_v1_0 = primal_normal_vert_v1_gt_tv(E2ECV_0);
-    const WP_TYPE primal_normal_vert_v2_0 = primal_normal_vert_v2_gt_tv(E2ECV_0);
-    const WP_TYPE primal_normal_vert_v1_1 = primal_normal_vert_v1_gt_tv(E2ECV_1);
-    const WP_TYPE primal_normal_vert_v2_1 = primal_normal_vert_v2_gt_tv(E2ECV_1);
-    const WP_TYPE primal_normal_vert_v1_2 = primal_normal_vert_v1_gt_tv(E2ECV_2);
-    const WP_TYPE primal_normal_vert_v2_2 = primal_normal_vert_v2_gt_tv(E2ECV_2);
-    const WP_TYPE primal_normal_vert_v1_3 = primal_normal_vert_v1_gt_tv(E2ECV_3);
-    const WP_TYPE primal_normal_vert_v2_3 = primal_normal_vert_v2_gt_tv(E2ECV_3);
-    const WP_TYPE inv_vert_vert_length_sqr =
-        inv_vert_vert_length_gt_tv(edge_index) * inv_vert_vert_length_gt_tv(edge_index);
-    const WP_TYPE inv_primal_edge_length_sqr =
-        inv_primal_edge_length_gt_tv(edge_index) * inv_primal_edge_length_gt_tv(edge_index);
-    for (auto k_index{blockIdx.y * blockDim.y + threadIdx.y}; k_index < KDim; k_index += gridDim.y * blockDim.y) {
-        double nabv_tang_wp = u_vert_gt_tv(E2C2V_0, k_index) * primal_normal_vert_v1_0 +
-                              v_vert_gt_tv(E2C2V_0, k_index) * primal_normal_vert_v2_0 +
-                              u_vert_gt_tv(E2C2V_1, k_index) * primal_normal_vert_v1_1 +
-                              v_vert_gt_tv(E2C2V_1, k_index) * primal_normal_vert_v2_1;
-        double nabv_norm_wp = u_vert_gt_tv(E2C2V_2, k_index) * primal_normal_vert_v1_2 +
-                              v_vert_gt_tv(E2C2V_2, k_index) * primal_normal_vert_v2_2 +
-                              u_vert_gt_tv(E2C2V_3, k_index) * primal_normal_vert_v1_3 +
-                              v_vert_gt_tv(E2C2V_3, k_index) * primal_normal_vert_v2_3;
-        z_nabla4_e2_wp_gt_tv(edge_index, k_index) =
-            4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_tv(edge_index, k_index)) * inv_vert_vert_length_sqr +
-                      (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(edge_index, k_index)) * inv_primal_edge_length_sqr);
-    };
+#define E2C2V_0 e2c2v_gt_tv(edge_index, 0)
+#define E2C2V_1 e2c2v_gt_tv(edge_index, 1)
+#define E2C2V_2 e2c2v_gt_tv(edge_index, 2)
+#define E2C2V_3 e2c2v_gt_tv(edge_index, 3)
+#define E2ECV_0 e2ecv_gt_tv(edge_index, 0)
+#define E2ECV_1 e2ecv_gt_tv(edge_index, 1)
+#define E2ECV_2 e2ecv_gt_tv(edge_index, 2)
+#define E2ECV_3 e2ecv_gt_tv(edge_index, 3)
+    double nabv_tang_wp = u_vert_gt_tv(E2C2V_0, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_0) +
+                          v_vert_gt_tv(E2C2V_0, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_0) +
+                          u_vert_gt_tv(E2C2V_1, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_1) +
+                          v_vert_gt_tv(E2C2V_1, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_1);
+    double nabv_norm_wp = u_vert_gt_tv(E2C2V_2, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_2) +
+                          v_vert_gt_tv(E2C2V_2, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_2) +
+                          u_vert_gt_tv(E2C2V_3, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_3) +
+                          v_vert_gt_tv(E2C2V_3, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_3);
+    z_nabla4_e2_wp_gt_tv(edge_index, k_index) =
+        4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_tv(edge_index, k_index)) *
+                      (inv_vert_vert_length_gt_tv(edge_index) * inv_vert_vert_length_gt_tv(edge_index)) +
+                  (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(edge_index, k_index)) *
+                      (inv_primal_edge_length_gt_tv(edge_index) * inv_primal_edge_length_gt_tv(edge_index)));
 };
 
 template <typename T>
 inline void nabla4_unstructured_gt<T>::run_gpu_helper() {
+    // const auto u_vert_gt_chv = u_vert_gt->const_host_view();
+    // std::cout << "u_vert_gt_chv strides[0] " << u_vert_gt_chv.strides()[0] << " strides[1] " <<
+    // u_vert_gt_chv.strides()[1] << std::endl; std::cout << "u_vert_gt_chv lengths[0] " << u_vert_gt_chv.lengths()[0]
+    // << " lengths[1] " << u_vert_gt_chv.lengths()[1] << std::endl; const auto e2c2v_gt_chv =
+    // e2c2v_gt->const_host_view(); std::cout << "e2c2v_gt_chv strides[0] " << e2c2v_gt_chv.strides()[0] << " strides[1]
+    // " << e2c2v_gt_chv.strides()[1] << std::endl; std::cout << "e2c2v_gt_chv lengths[0] " << e2c2v_gt_chv.lengths()[0]
+    // << " lengths[1] " << e2c2v_gt_chv.lengths()[1] << std::endl;
     dim3 tblocks(block_dims_unstructured.x, block_dims_unstructured.y, block_dims_unstructured.z);
-    dim3 grid((e2c2v_gt->const_host_view().lengths()[0] + tblocks.x - 1) / tblocks.x, 1, 1);
+    dim3 grid(
+        (e2c2v_gt->const_host_view().lengths()[0] + tblocks.x - 1) / tblocks.x, (KDim + tblocks.y - 1) / tblocks.y, 1);
     run_gpu<<<grid, tblocks>>>(e2c2v_gt->const_host_view().lengths()[0],
         KDim,
         e2c2v_gt_tv,
