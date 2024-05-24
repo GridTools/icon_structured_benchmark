@@ -52,7 +52,7 @@ decltype(auto) calculate_copy_neighbor_wrapper_gpu(int repetitions,
     std::int32_t horizontal_end,
     std::int32_t vertical_start,
     std::int32_t vertical_end,
-    std::pair<nanobind::ndarray<int, nanobind::shape<nanobind::any, nanobind::any>>, std::tuple<ptrdiff_t, ptrdiff_t>>
+    std::pair<nanobind::ndarray<std::int64_t, nanobind::shape<nanobind::any, nanobind::any>>, std::tuple<ptrdiff_t, ptrdiff_t>>
         gt_conn_e2c2v) {
     return calculate_copy_neighbor(repetitions,
         gridtools::sid::rename_numbered_dimensions<generated::Edge_t, generated::K_t>(

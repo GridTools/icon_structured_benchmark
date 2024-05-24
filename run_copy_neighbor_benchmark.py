@@ -38,11 +38,11 @@ def run_gtfn(repetitions, e2c2v, EdgeDim, KDim, nabla4_data, backend):
         import cupy as cp  # type: ignore [import-not-found]
 
         ds_dtype = cp.float64
-        int_dtype = cp.int32
+        int_dtype = cp.int64
     else:
         ds_dtype = np.float64
         # from ctypes import c_uint64
-        int_dtype = np.int32
+        int_dtype = np.int64
 
     from gt4py.storage import zeros, from_array  # type: ignore [import-not-found]
 
