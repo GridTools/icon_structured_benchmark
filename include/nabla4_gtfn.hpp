@@ -105,7 +105,7 @@ namespace generated {
                         ::gridtools::tuple((horizontal_end - horizontal_start), (vertical_end - vertical_start)),
                         ::gridtools::tuple(horizontal_start, vertical_start),
                         connectivities__...));
-                #if defined(IS_GPU)
+#if defined(IS_GPU)
                 if constexpr (std::is_same_v<decltype(backend), gridtools::fn::backend::gpu<block_sizes_t>>) {
                     timer<backend_impl::gpu> t;
                     t.start();
@@ -123,7 +123,7 @@ namespace generated {
                     t.stop();
                     return t.elapsed();
                 } else {
-                #endif
+#endif
                     timer<backend_impl::cpu_ifirst> t;
                     t.start();
                     gtfn_backend.stencil_executor()()
@@ -139,9 +139,9 @@ namespace generated {
                         .execute();
                     t.stop();
                     return t.elapsed();
-                #if defined(IS_GPU)
+#if defined(IS_GPU)
                 }
-                #endif
+#endif
             };
         };
     } // namespace

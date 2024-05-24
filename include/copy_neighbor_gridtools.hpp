@@ -55,9 +55,7 @@ class copy_neighbor_kernel : public nabla4_gt_data<T> {
   public:
     /// Constructor with all the necessary information for \c nabla4 compute
     /// kernel execution
-    copy_neighbor_kernel(std::vector<std::array<index_type, 4>> e2c2v, index_type EdgeDim, index_type KDim) : e2c2v_gt(storage::builder<T>.template type<index_type>().dimensions(e2c2v.size(), 4_c).initializer([&e2c2v](int i, int j) { return e2c2v[i][j]; }).build()), e2c2v_gt_tv(e2c2v_gt->const_target_view()), nabla4_gt_data<T>(0, 0, EdgeDim, KDim, 0, EdgeDim){
-        std::cout << typeid(index_type).name() << std::endl;
-    };
+    copy_neighbor_kernel(std::vector<std::array<index_type, 4>> e2c2v, index_type EdgeDim, index_type KDim) : e2c2v_gt(storage::builder<T>.template type<index_type>().dimensions(e2c2v.size(), 4_c).initializer([&e2c2v](int i, int j) { return e2c2v[i][j]; }).build()), e2c2v_gt_tv(e2c2v_gt->const_target_view()), nabla4_gt_data<T>(0, 0, EdgeDim, KDim, 0, EdgeDim){};
 
     inline __attribute__((always_inline)) void inner_kernel(index_type edge_index, index_type k_index) {
         z_nabla4_e2_wp_gt_tv(edge_index, k_index) = z_nabla2_e_gt_tv(edge_index, k_index);
