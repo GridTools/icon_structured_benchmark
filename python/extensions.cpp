@@ -23,6 +23,9 @@ NB_MODULE(icon_benchmark, m) {
     m.def("copy_benchmark_cpu_ifirst", &copy_benchmark_cpu_ifirst);
     m.def("copy_benchmark_cpu_kfirst", &copy_benchmark_cpu_kfirst);
     m.def("copy_benchmark_gpu", &copy_benchmark_gpu);
+    m.def("copy_neighbor_benchmark_cpu_ifirst", &copy_neighbor_benchmark_cpu_ifirst);
+    m.def("copy_neighbor_benchmark_cpu_kfirst", &copy_neighbor_benchmark_cpu_kfirst);
+    m.def("copy_neighbor_benchmark_gpu", &copy_neighbor_benchmark_gpu);
     /// Unstructured
     m.def("nabla4_benchmark_unstructured_naive", &nabla4_benchmark_unstructured_naive);
     m.def("nabla4_benchmark_unstructured_cpu_ifirst", &nabla4_benchmark_unstructured_cpu_ifirst);

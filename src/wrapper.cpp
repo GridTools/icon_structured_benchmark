@@ -48,6 +48,40 @@ std::vector<double> copy_benchmark_gpu(index_type EdgeDim, index_type KDim, int 
     return copy_benchmark<gpu>(EdgeDim, KDim, repetitions, dry_runs);
 }
 
+template <backend_impl I>
+std::vector<double> copy_neighbor_benchmark(
+    std::vector<std::array<index_type, 4>> &e2c2v, index_type EdgeDim, index_type KDim, int repetitions, int dry_runs) {
+    if constexpr (I == backend_impl::cpu_ifirst) {
+        return run_benchmark<copy_neighbor_kernel<storage::cpu_ifirst>, I>(
+            std::make_tuple(e2c2v, EdgeDim, KDim), repetitions, dry_runs);
+    } else if constexpr (I == backend_impl::cpu_kfirst) {
+        return run_benchmark<copy_neighbor_kernel<storage::cpu_kfirst>, I>(
+            std::make_tuple(e2c2v, EdgeDim, KDim), repetitions, dry_runs);
+#ifdef __CUDACC__
+    } else if constexpr (I == backend_impl::gpu) {
+        return run_benchmark<copy_neighbor_kernel<storage::gpu>, I>(
+            std::make_tuple(e2c2v, EdgeDim, KDim), repetitions, dry_runs);
+#endif
+    } else {
+        throw std::runtime_error("[wrapper] Undefined backend implementation");
+    }
+}
+
+std::vector<double> copy_neighbor_benchmark_cpu_ifirst(
+    std::vector<std::array<index_type, 4>> &e2c2v, index_type EdgeDim, index_type KDim, int repetitions, int dry_runs) {
+    return copy_neighbor_benchmark<cpu_ifirst>(e2c2v, EdgeDim, KDim, repetitions, dry_runs);
+}
+
+std::vector<double> copy_neighbor_benchmark_cpu_kfirst(
+    std::vector<std::array<index_type, 4>> &e2c2v, index_type EdgeDim, index_type KDim, int repetitions, int dry_runs) {
+    return copy_neighbor_benchmark<cpu_kfirst>(e2c2v, EdgeDim, KDim, repetitions, dry_runs);
+}
+
+std::vector<double> copy_neighbor_benchmark_gpu(
+    std::vector<std::array<index_type, 4>> &e2c2v, index_type EdgeDim, index_type KDim, int repetitions, int dry_runs) {
+    return copy_neighbor_benchmark<gpu>(e2c2v, EdgeDim, KDim, repetitions, dry_runs);
+}
+
 template <typename T, backend_impl I>
 std::vector<double> nabla4_benchmark_unstructured(std::vector<std::array<T, 4>> &e2c2v,
     std::vector<std::array<T, 4>> &e2ecv,

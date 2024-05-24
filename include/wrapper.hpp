@@ -16,6 +16,24 @@ std::vector<double> copy_benchmark_cpu_kfirst(
 
 std::vector<double> copy_benchmark_gpu(index_type EdgeDim, index_type KDim, int repetitions = 101, int dry_runs = 1);
 
+std::vector<double> copy_neighbor_benchmark_cpu_ifirst(std::vector<std::array<index_type, 4>> &e2c2v,
+    index_type EdgeDim,
+    index_type KDim,
+    int repetitions = 101,
+    int dry_runs = 1);
+
+std::vector<double> copy_neighbor_benchmark_cpu_kfirst(std::vector<std::array<index_type, 4>> &e2c2v,
+    index_type EdgeDim,
+    index_type KDim,
+    int repetitions = 101,
+    int dry_runs = 1);
+
+std::vector<double> copy_neighbor_benchmark_gpu(std::vector<std::array<index_type, 4>> &e2c2v,
+    index_type EdgeDim,
+    index_type KDim,
+    int repetitions = 101,
+    int dry_runs = 1);
+
 std::vector<double> nabla4_benchmark_unstructured_naive(std::vector<std::array<std::size_t, 4>> &e2c2v,
     std::vector<std::array<std::size_t, 4>> &e2ecv,
     std::size_t CellDim,
