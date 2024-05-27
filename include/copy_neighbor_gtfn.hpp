@@ -36,8 +36,25 @@ namespace generated {
 
         struct _fun_1 {
             constexpr auto operator()() const {
-                return [](auto const &__stencil_arg0) {
-                    return [=]() { return gtfn::deref(gtfn::shift(__stencil_arg0, E2C2V, 0_c)); }();
+                return [](auto const &__stencil_arg0, auto const &__stencil_arg1) {
+                    return [=]() {
+                        double E2C2V_0 = gtfn::deref(gtfn::shift(__stencil_arg0, E2C2V, 0_c));
+                        double E2C2V_1 = gtfn::deref(gtfn::shift(__stencil_arg0, E2C2V, 1_c));
+                        double E2C2V_2 = gtfn::deref(gtfn::shift(__stencil_arg0, E2C2V, 2_c));
+                        double E2C2V_3 = gtfn::deref(gtfn::shift(__stencil_arg0, E2C2V, 3_c));
+                        double E2C2V_0_p1 = (E2C2V_0 + 42.0) * Koff;
+                        double E2C2V_1_m1 = (E2C2V_1 - 42.0) * Koff;
+                        double E2C2V_2_p1 = (E2C2V_2 + 42.0) * Koff;
+                        double E2C2V_3_m1 = (E2C2V_3 - 42.0) * Koff;
+                        double dummy_0 = gtfn::deref(gtfn::shift(__stencil_arg1, E2C2V, 0_c));
+                        double dummy_1 = gtfn::deref(gtfn::shift(__stencil_arg1, E2C2V, 1_c));
+                        double dummy_2 = gtfn::deref(gtfn::shift(__stencil_arg1, E2C2V, 2_c));
+                        double dummy_3 = gtfn::deref(gtfn::shift(__stencil_arg1, E2C2V, 3_c));
+                        double avg = ((E2C2V_0_p1 + E2C2V_1_m1 + E2C2V_2_p1 + E2C2V_3_m1) / (4.0 * Koff) + dummy_0 +
+                                         dummy_1 + dummy_2 + dummy_3) /
+                                     5.0;
+                        return avg;
+                    }();
                 };
             }
         };
@@ -50,6 +67,7 @@ namespace generated {
             return [connectivities__...](int repetitions,
                        auto backend,
                        auto &&z_nabla2_e,
+                       auto &&dummy_field,
                        auto &&z_nabla4_e2,
                        auto &&horizontal_start,
                        auto &&horizontal_end,
@@ -70,7 +88,8 @@ namespace generated {
                         gtfn_backend.stencil_executor()()
                             .arg(z_nabla4_e2)
                             .arg(z_nabla2_e)
-                            .assign(0_c, _fun_1(), 1_c)
+                            .arg(dummy_field)
+                            .assign(0_c, _fun_1(), 1_c, 2_c)
                             .execute();
                         t.stop();
                         times.push_back(t.elapsed());
@@ -85,7 +104,8 @@ namespace generated {
                         gtfn_backend.stencil_executor()()
                             .arg(z_nabla4_e2)
                             .arg(z_nabla2_e)
-                            .assign(0_c, _fun_1(), 1_c)
+                            .arg(dummy_field)
+                            .assign(0_c, _fun_1(), 1_c, 2_c)
                             .execute();
                         t.stop();
                         times.push_back(t.elapsed());
@@ -99,21 +119,23 @@ namespace generated {
     } // namespace
 } // namespace generated
 
-template <class BufferT0, class BufferT1, class BufferT2, class backend>
+template <class BufferT0, class BufferT1, class BufferT2, class BufferT3, class backend>
 decltype(auto) calculate_copy_neighbor(int repetitions,
     BufferT0 &&z_nabla2_e,
-    BufferT1 &&z_nabla4_e2,
+    BufferT1 &&dummy_field,
+    BufferT2 &&z_nabla4_e2,
     std::int32_t horizontal_start,
     std::int32_t horizontal_end,
     std::int32_t vertical_start,
     std::int32_t vertical_end,
-    BufferT2 &&gt_conn_e2c2v,
+    BufferT3 &&gt_conn_e2c2v,
     backend &&backend_instance) {
     return generated::calculate_copy_neighbor_kernel(gridtools::hymap::keys<generated::E2C2V_t>::make_values(
         gridtools::fn::sid_neighbor_table::as_neighbor_table<generated::Edge_t, generated::E2C2V_t, 4>(
             std::forward<decltype(gt_conn_e2c2v)>(gt_conn_e2c2v))))(repetitions,
         backend_instance,
         std::forward<decltype(z_nabla2_e)>(z_nabla2_e),
+        std::forward<decltype(dummy_field)>(dummy_field),
         std::forward<decltype(z_nabla4_e2)>(z_nabla4_e2),
         std::forward<decltype(horizontal_start)>(horizontal_start),
         std::forward<decltype(horizontal_end)>(horizontal_end),

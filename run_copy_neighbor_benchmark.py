@@ -38,11 +38,11 @@ def run_gtfn(repetitions, e2c2v, EdgeDim, KDim, nabla4_data, backend):
         import cupy as cp  # type: ignore [import-not-found]
 
         ds_dtype = cp.float64
-        int_dtype = cp.int64
+        int_dtype = cp.int32
     else:
         ds_dtype = np.float64
         # from ctypes import c_uint64
-        int_dtype = np.int64
+        int_dtype = np.int32
 
     from gt4py.storage import zeros, from_array  # type: ignore [import-not-found]
 
@@ -50,6 +50,12 @@ def run_gtfn(repetitions, e2c2v, EdgeDim, KDim, nabla4_data, backend):
     if backend == "gt:gpu":
         runtimes = copy_neighbor_gtfn.calculate_copy_neighbor_gpu(
             repetitions,
+            (
+                from_array(
+                    np.array(nabla4_data.z_nabla2_e).T, dtype=ds_dtype, backend=backend
+                ),
+                (0, 0),
+            ),
             (
                 from_array(
                     np.array(nabla4_data.z_nabla2_e).T, dtype=ds_dtype, backend=backend
@@ -68,6 +74,13 @@ def run_gtfn(repetitions, e2c2v, EdgeDim, KDim, nabla4_data, backend):
         )
     else:
         runtimes = copy_neighbor_gtfn.calculate_copy_neighbor_cpu(
+            repetitions,
+            (
+                from_array(
+                    np.array(nabla4_data.z_nabla2_e).T, dtype=ds_dtype, backend=backend
+                ),
+                (0, 0),
+            ),
             repetitions,
             (
                 from_array(
@@ -164,56 +177,54 @@ def run_benchmarks():
     if args.backend in ["all_cpu", "gtfn_cpu"]:
         runtimes["copy_neighbor_benchmark_gtfn_cpu"] = []
 
-        for _ in range(repetitions):
-            random_validation_data_gtfn = (
-                icon_benchmark.get_nabla4_benchmark_validation_data(
-                    dummy_neighbor_list,
-                    dummy_neighbor_list,
-                    0,
-                    0,
-                    args.edges,
-                    args.klevels,
-                    0,
-                )
-            )
-
-            _, runtimes_gtfn = run_gtfn(
-                1,
+        random_validation_data_gtfn = (
+            icon_benchmark.get_nabla4_benchmark_validation_data(
                 dummy_neighbor_list,
+                dummy_neighbor_list,
+                0,
+                0,
                 args.edges,
                 args.klevels,
-                random_validation_data_gtfn,
-                "gt:cpu_ifirst",
+                0,
             )
-        runtimes["copy_neighbor_benchmark_gtfn_cpu"].append(runtimes_gtfn)
+        )
+
+        _, runtimes_gtfn = run_gtfn(
+            repetitions,
+            dummy_neighbor_list,
+            args.edges,
+            args.klevels,
+            random_validation_data_gtfn,
+            "gt:cpu_ifirst",
+        )
+        runtimes["copy_neighbor_benchmark_gtfn_cpu"] = runtimes_gtfn
         print("gtfn cpu done")
 
     if args.backend in ["all_gpu", "gtfn_gpu"]:
         import cupy as cp  # type: ignore [import-not-found]
 
         runtimes["copy_neighbor_benchmark_gtfn_gpu"] = []
-        for _ in range(repetitions):
-            random_validation_data_gtfn = (
-                icon_benchmark.get_nabla4_benchmark_validation_data(
-                    dummy_neighbor_list,
-                    dummy_neighbor_list,
-                    0,
-                    0,
-                    args.edges,
-                    args.klevels,
-                    0,
-                )
-            )
-
-            _, runtimes_gtfn = run_gtfn(
-                1,
+        random_validation_data_gtfn = (
+            icon_benchmark.get_nabla4_benchmark_validation_data(
                 dummy_neighbor_list,
+                dummy_neighbor_list,
+                0,
+                0,
                 args.edges,
                 args.klevels,
-                random_validation_data_gtfn,
-                "gt:gpu",
+                0,
             )
-        runtimes["copy_neighbor_benchmark_gtfn_gpu"].append(runtimes_gtfn)
+        )
+
+        _, runtimes_gtfn = run_gtfn(
+            repetitions,
+            dummy_neighbor_list,
+            args.edges,
+            args.klevels,
+            random_validation_data_gtfn,
+            "gt:gpu",
+        )
+        runtimes["copy_neighbor_benchmark_gtfn_gpu"] = runtimes_gtfn
         print("gtfn gpu done")
 
     if args.backend in ["all_cpu", "cpu_ifirst"]:

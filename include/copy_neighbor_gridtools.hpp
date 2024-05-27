@@ -47,6 +47,7 @@ class copy_neighbor_kernel : public nabla4_gt_data<T> {
     using nabla4_gt_data<T>::EdgeDim;
     using nabla4_gt_data<T>::KDim;
     using nabla4_gt_data<T>::z_nabla2_e_gt_tv;
+    using nabla4_gt_data<T>::dummy_field_gt_tv;
     using nabla4_gt_data<T>::z_nabla4_e2_wp_gt_tv;
 
     neighbors_gt_t e2c2v_gt;
@@ -110,6 +111,7 @@ __global__ void __launch_bounds__(block_dims_copy.size) run_gpu(index_type EdgeD
     index_type KDim,
     copy_neighbor_kernel<storage::gpu>::neighbors_gt_ctv_t e2c2v_gt_tv,
     copy_neighbor_kernel<storage::gpu>::data_store_2d_ctv_WP_t z_nabla2_e_gt_tv,
+    copy_neighbor_kernel<storage::gpu>::data_store_2d_ctv_WP_t dummy_field_gt_tv,
     copy_neighbor_kernel<storage::gpu>::data_store_2d_tv_VP_t z_nabla4_e2_wp_gt_tv) {
     const auto edge_index = blockIdx.x * blockDim.x + threadIdx.x;
     const auto k_index = blockIdx.y * blockDim.y + threadIdx.y;
@@ -126,7 +128,22 @@ __global__ void __launch_bounds__(block_dims_copy.size) run_gpu(index_type EdgeD
     // z_nabla4_e2_wp_gt_tv(edge_index, k_index): %p, z_nabla2_e_gt_tv(e2c2v_gt_tv(edge_index, 0), k_index): %p\n",
     // threadIdx.x, threadIdx.y, blockIdx.x, blockIdx.y, edge_index, k_index, &(z_nabla4_e2_wp_gt_tv(edge_index,
     // k_index)), &(z_nabla2_e_gt_tv(e2c2v_gt_tv(edge_index, 0), k_index)));
-    z_nabla4_e2_wp_gt_tv(edge_index, k_index) = z_nabla2_e_gt_tv(e2c2v_gt_tv(edge_index, 0), k_index);
+    double E2C2V_0 = z_nabla2_e_gt_tv(e2c2v_gt_tv(edge_index, 0), k_index);
+    double E2C2V_1 = z_nabla2_e_gt_tv(e2c2v_gt_tv(edge_index, 1), k_index);
+    double E2C2V_2 = z_nabla2_e_gt_tv(e2c2v_gt_tv(edge_index, 2), k_index);
+    double E2C2V_3 = z_nabla2_e_gt_tv(e2c2v_gt_tv(edge_index, 3), k_index);
+    double E2C2V_0_p42 = (E2C2V_0 + 42.0) * k_index;
+    double E2C2V_1_m42 = (E2C2V_1 - 42.0) * k_index;
+    double E2C2V_2_p42 = (E2C2V_2 + 42.0) * k_index;
+    double E2C2V_3_m42 = (E2C2V_3 - 42.0) * k_index;
+    double dummy_0 = dummy_field_gt_tv(e2c2v_gt_tv(edge_index, 0), k_index);
+    double dummy_1 = dummy_field_gt_tv(e2c2v_gt_tv(edge_index, 1), k_index);
+    double dummy_2 = dummy_field_gt_tv(e2c2v_gt_tv(edge_index, 2), k_index);
+    double dummy_3 = dummy_field_gt_tv(e2c2v_gt_tv(edge_index, 3), k_index);
+    z_nabla4_e2_wp_gt_tv(edge_index, k_index) =
+        ((E2C2V_0_p42 + E2C2V_1_m42 + E2C2V_2_p42 + E2C2V_3_m42) / (4.0 * k_index) + dummy_0 + dummy_1 + dummy_2 +
+            dummy_3) /
+        5.0;
 };
 
 template <typename T>
@@ -141,7 +158,7 @@ inline void copy_neighbor_kernel<T>::run_gpu_helper() {
     // lengths[1] " << e2c2v_gt_chv.lengths()[1] << std::endl;
     dim3 tblocks(block_dims_copy_neighbor.x, block_dims_copy_neighbor.y, block_dims_copy_neighbor.z);
     dim3 grid((EdgeDim + tblocks.x - 1) / tblocks.x, (KDim + tblocks.y - 1) / tblocks.y, 1);
-    run_gpu<<<grid, tblocks>>>(EdgeDim, KDim, e2c2v_gt_tv, z_nabla2_e_gt_tv, z_nabla4_e2_wp_gt_tv);
+    run_gpu<<<grid, tblocks>>>(EdgeDim, KDim, e2c2v_gt_tv, z_nabla2_e_gt_tv, dummy_field_gt_tv, z_nabla4_e2_wp_gt_tv);
     GT_CUDA_CHECK(cudaGetLastError());
 };
 #else

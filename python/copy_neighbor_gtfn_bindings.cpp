@@ -21,16 +21,20 @@ decltype(auto) calculate_copy_neighbor_wrapper_cpu(int repetitions,
     std::pair<nanobind::ndarray<double, nanobind::shape<nanobind::any, nanobind::any>>,
         std::tuple<ptrdiff_t, ptrdiff_t>> z_nabla2_e,
     std::pair<nanobind::ndarray<double, nanobind::shape<nanobind::any, nanobind::any>>,
+        std::tuple<ptrdiff_t, ptrdiff_t>> dummy_field,
+    std::pair<nanobind::ndarray<double, nanobind::shape<nanobind::any, nanobind::any>>,
         std::tuple<ptrdiff_t, ptrdiff_t>> z_nabla4_e2,
     std::int32_t horizontal_start,
     std::int32_t horizontal_end,
     std::int32_t vertical_start,
     std::int32_t vertical_end,
-    std::pair<nanobind::ndarray<std::int64_t, nanobind::shape<nanobind::any, nanobind::any>>,
+    std::pair<nanobind::ndarray<index_type, nanobind::shape<nanobind::any, nanobind::any>>,
         std::tuple<ptrdiff_t, ptrdiff_t>> gt_conn_e2c2v) {
     return calculate_copy_neighbor(repetitions,
         gridtools::sid::rename_numbered_dimensions<generated::Edge_t, generated::K_t>( // strides: (1, 72)
             gridtools::sid::shift_sid_origin(gridtools::nanobind::as_sid(z_nabla2_e.first), z_nabla2_e.second)),
+        gridtools::sid::rename_numbered_dimensions<generated::Edge_t, generated::K_t>( // strides: (1, 72)
+            gridtools::sid::shift_sid_origin(gridtools::nanobind::as_sid(dummy_field.first), dummy_field.second)),
         gridtools::sid::rename_numbered_dimensions<generated::Edge_t, generated::K_t>( // strides: (1, 72)
             gridtools::sid::shift_sid_origin(gridtools::nanobind::as_sid(z_nabla4_e2.first), z_nabla4_e2.second)),
         horizontal_start,
@@ -47,16 +51,20 @@ decltype(auto) calculate_copy_neighbor_wrapper_gpu(int repetitions,
     std::pair<nanobind::ndarray<double, nanobind::shape<nanobind::any, nanobind::any>>,
         std::tuple<ptrdiff_t, ptrdiff_t>> z_nabla2_e,
     std::pair<nanobind::ndarray<double, nanobind::shape<nanobind::any, nanobind::any>>,
+        std::tuple<ptrdiff_t, ptrdiff_t>> dummy_field,
+    std::pair<nanobind::ndarray<double, nanobind::shape<nanobind::any, nanobind::any>>,
         std::tuple<ptrdiff_t, ptrdiff_t>> z_nabla4_e2,
     std::int32_t horizontal_start,
     std::int32_t horizontal_end,
     std::int32_t vertical_start,
     std::int32_t vertical_end,
-    std::pair<nanobind::ndarray<std::int64_t, nanobind::shape<nanobind::any, nanobind::any>>,
+    std::pair<nanobind::ndarray<index_type, nanobind::shape<nanobind::any, nanobind::any>>,
         std::tuple<ptrdiff_t, ptrdiff_t>> gt_conn_e2c2v) {
     return calculate_copy_neighbor(repetitions,
         gridtools::sid::rename_numbered_dimensions<generated::Edge_t, generated::K_t>(
             gridtools::sid::shift_sid_origin(gridtools::nanobind::as_sid(z_nabla2_e.first), z_nabla2_e.second)),
+        gridtools::sid::rename_numbered_dimensions<generated::Edge_t, generated::K_t>(
+            gridtools::sid::shift_sid_origin(gridtools::nanobind::as_sid(dummy_field.first), dummy_field.second)),
         gridtools::sid::rename_numbered_dimensions<generated::Edge_t, generated::K_t>(
             gridtools::sid::shift_sid_origin(gridtools::nanobind::as_sid(z_nabla4_e2.first), z_nabla4_e2.second)),
         horizontal_start,
