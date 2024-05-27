@@ -25,12 +25,12 @@ constexpr block_dims get_block_dims_structured<std::int64_t>() {
 
 template <>
 constexpr block_dims get_block_dims_structured<std::uint32_t>() {
-    return {32, 4, 2, 256};
+    return {32, 2, 4, 672};
 };
 
 template <>
 constexpr block_dims get_block_dims_structured<int>() {
-    return {32, 5, 3, 480};
+    return {32, 2, 4, 672};
 };
 
 constexpr block_dims block_dims_structured = get_block_dims_structured<index_type>();
