@@ -136,79 +136,179 @@ def filter_edge_vector(
     return np.array(filtered_vector)
 
 
-def run_gtfn_gpu(e2c2v, e2ecv, nabla4_data, grid):
-    import cupy as cp  # type: ignore [import-not-found]
+def compare_ndarrays(a, b):
+    same = True
+    if a.shape != b.shape:
+        same = False
+
+    for i in range(a.shape[0]):
+        for j in range(a.shape[1]):
+            if not np.isclose(a[i][j], b[i][j]):
+                print(
+                    "Difference at index ({}, {}) is {}".format(i, j, a[i][j] - b[i][j])
+                )
+                same = False
+    if not same:
+        print("Arrays are not the same")
+        import sys
+
+        sys.exit(1)
+
+
+def run_gtfn(repetitions, e2c2v, e2ecv, nabla4_data, grid, backend):
+    if backend == "gt:gpu":
+        import cupy as cp  # type: ignore [import-not-found]
+
+        float_dtype = cp.float64
+        int_dtype = cp.int32
+    else:
+        float_dtype = np.float64
+        int_dtype = np.int32
 
     from gt4py.storage import zeros, from_array  # type: ignore [import-not-found]
 
     z_nabla4_e2_wp_gtfn = zeros(
-        shape=(len(e2c2v), grid.num_levels), dtype=cp.float64, backend="gt:gpu"
+        shape=(len(e2c2v), grid.num_levels), dtype=float_dtype, backend=backend
     )
-    runtime = nabla4_gtfn.calculate_nabla4_gpu(
-        (
-            from_array(
-                np.array(nabla4_data.u_vert).T, dtype=cp.float64, backend="gt:gpu"
+
+    if backend == "gt:gpu":
+        runtime = nabla4_gtfn.calculate_nabla4_gpu(
+            repetitions,
+            (
+                from_array(
+                    np.array(nabla4_data.u_vert).T, dtype=float_dtype, backend=backend
+                ),
+                (0, 0),
             ),
-            (0, 0),
-        ),
-        (
-            from_array(
-                np.array(nabla4_data.v_vert).T, dtype=cp.float64, backend="gt:gpu"
+            (
+                from_array(
+                    np.array(nabla4_data.v_vert).T, dtype=float_dtype, backend=backend
+                ),
+                (0, 0),
             ),
-            (0, 0),
-        ),
-        (
-            from_array(
-                np.array(nabla4_data.primal_normal_vert_v1),
-                dtype=cp.float64,
-                backend="gt:gpu",
+            (
+                from_array(
+                    np.array(nabla4_data.primal_normal_vert_v1),
+                    dtype=float_dtype,
+                    backend=backend,
+                ),
+                (0,),
             ),
-            (0,),
-        ),
-        (
-            from_array(
-                np.array(nabla4_data.primal_normal_vert_v2),
-                dtype=cp.float64,
-                backend="gt:gpu",
+            (
+                from_array(
+                    np.array(nabla4_data.primal_normal_vert_v2),
+                    dtype=float_dtype,
+                    backend=backend,
+                ),
+                (0,),
             ),
-            (0,),
-        ),
-        (
-            from_array(
-                np.array(nabla4_data.z_nabla2_e).T, dtype=cp.float64, backend="gt:gpu"
+            (
+                from_array(
+                    np.array(nabla4_data.z_nabla2_e).T,
+                    dtype=float_dtype,
+                    backend=backend,
+                ),
+                (0, 0),
             ),
-            (0, 0),
-        ),
-        (
-            from_array(
-                np.array(nabla4_data.inv_vert_vert_length),
-                dtype=cp.float64,
-                backend="gt:gpu",
+            (
+                from_array(
+                    np.array(nabla4_data.inv_vert_vert_length),
+                    dtype=float_dtype,
+                    backend=backend,
+                ),
+                (0,),
             ),
-            (0,),
-        ),
-        (
-            from_array(
-                np.array(nabla4_data.inv_primal_edge_length),
-                dtype=cp.float64,
-                backend="gt:gpu",
+            (
+                from_array(
+                    np.array(nabla4_data.inv_primal_edge_length),
+                    dtype=float_dtype,
+                    backend=backend,
+                ),
+                (0,),
             ),
-            (0,),
-        ),
-        (z_nabla4_e2_wp_gtfn, (0, 0)),
-        0,
-        len(e2c2v),
-        0,
-        grid.num_levels,
-        (
-            from_array(np.array(e2c2v), dtype=cp.int64, backend="gt:gpu"),
-            (0, 0),
-        ),
-        (
-            from_array(np.array(e2ecv), dtype=cp.int64, backend="gt:gpu"),
-            (0, 0),
-        ),
-    )
+            (z_nabla4_e2_wp_gtfn, (0, 0)),
+            0,
+            len(e2c2v),
+            0,
+            grid.num_levels,
+            (
+                from_array(np.array(e2c2v), dtype=int_dtype, backend=backend),
+                (0, 0),
+            ),
+            (
+                from_array(np.array(e2ecv), dtype=int_dtype, backend=backend),
+                (0, 0),
+            ),
+        )
+    else:
+        runtime = nabla4_gtfn.calculate_nabla4_cpu(
+            repetitions,
+            (
+                from_array(
+                    np.array(nabla4_data.u_vert).T, dtype=float_dtype, backend=backend
+                ),
+                (0, 0),
+            ),
+            (
+                from_array(
+                    np.array(nabla4_data.v_vert).T, dtype=float_dtype, backend=backend
+                ),
+                (0, 0),
+            ),
+            (
+                from_array(
+                    np.array(nabla4_data.primal_normal_vert_v1),
+                    dtype=float_dtype,
+                    backend=backend,
+                ),
+                (0,),
+            ),
+            (
+                from_array(
+                    np.array(nabla4_data.primal_normal_vert_v2),
+                    dtype=float_dtype,
+                    backend=backend,
+                ),
+                (0,),
+            ),
+            (
+                from_array(
+                    np.array(nabla4_data.z_nabla2_e).T,
+                    dtype=float_dtype,
+                    backend=backend,
+                ),
+                (0, 0),
+            ),
+            (
+                from_array(
+                    np.array(nabla4_data.inv_vert_vert_length),
+                    dtype=float_dtype,
+                    backend=backend,
+                ),
+                (0,),
+            ),
+            (
+                from_array(
+                    np.array(nabla4_data.inv_primal_edge_length),
+                    dtype=float_dtype,
+                    backend=backend,
+                ),
+                (0,),
+            ),
+            (z_nabla4_e2_wp_gtfn, (0, 0)),
+            0,
+            len(e2c2v),
+            0,
+            grid.num_levels,
+            (
+                from_array(np.array(e2c2v), dtype=int_dtype, backend=backend),
+                (0, 0),
+            ),
+            (
+                from_array(np.array(e2ecv), dtype=int_dtype, backend=backend),
+                (0, 0),
+            ),
+        )
     return z_nabla4_e2_wp_gtfn, runtime
 
 
@@ -229,102 +329,26 @@ def run_sanity_checks(
 
     if backend in ["all_cpu", "gtfn_cpu"]:
         print("Running gtfn_cpu sanity check")
-        z_nabla4_e2_wp_gtfn = np.zeros(
-            shape=(len(filtered_e2c2v), grid.num_levels), dtype=np.float64
+        z_nabla4_e2_wp_gtfn, _ = run_gtfn(
+            1,
+            filtered_e2c2v,
+            filtered_e2ecv,
+            random_validation_data,
+            grid,
+            "gt:cpu_ifirst",
         )
-        nabla4_gtfn.calculate_nabla4_cpu(
-            (
-                np.array(random_validation_data.u_vert, dtype=float).T.astype(
-                    np.float64
-                ),
-                (0, 0),
-            ),
-            (
-                np.array(random_validation_data.v_vert, dtype=float).T.astype(
-                    np.float64
-                ),
-                (0, 0),
-            ),
-            (
-                np.array(
-                    random_validation_data.primal_normal_vert_v1, dtype=float
-                ).astype(np.float64),
-                (0,),
-            ),
-            (
-                np.array(
-                    random_validation_data.primal_normal_vert_v2, dtype=float
-                ).astype(np.float64),
-                (0,),
-            ),
-            (
-                np.array(random_validation_data.z_nabla2_e, dtype=float).T.astype(
-                    np.float64
-                ),
-                (0, 0),
-            ),
-            (
-                np.array(
-                    random_validation_data.inv_vert_vert_length, dtype=float
-                ).astype(np.float64),
-                (0,),
-            ),
-            (
-                np.array(
-                    random_validation_data.inv_primal_edge_length, dtype=float
-                ).astype(np.float64),
-                (0,),
-            ),
-            (z_nabla4_e2_wp_gtfn, (0, 0)),
-            0,
-            len(filtered_e2c2v),
-            0,
-            grid.num_levels,
-            (
-                filtered_e2c2v.astype(np.int64),
-                (0, 0),
-            ),
-            (
-                filtered_e2ecv.astype(np.int64),
-                (0, 0),
-            ),
-        )
-        assert np.allclose(
-            z_nabla4_e2_wp_gtfn.T,
-            random_validation_data.z_nabla4_e2_wp,
+        compare_ndarrays(
+            z_nabla4_e2_wp_gtfn, np.array(random_validation_data.z_nabla4_e2_wp).T
         )
         print("gtfn_cpu sanity check passed")
 
     if backend in ["all_gpu", "gtfn_gpu"]:
         print("Running gtfn_gpu sanity check")
-        z_nabla4_e2_wp_gtfn, _ = run_gtfn_gpu(
-            filtered_e2c2v, filtered_e2ecv, random_validation_data, grid
+        z_nabla4_e2_wp_gtfn, _ = run_gtfn(
+            1, filtered_e2c2v, filtered_e2ecv, random_validation_data, grid, "gt:gpu"
         )
-        print(z_nabla4_e2_wp_gtfn.T)
-        print(np.array(random_validation_data.z_nabla4_e2_wp))
-
-        def compare_ndarrays(a, b):
-            same = True
-            if a.shape != b.shape:
-                same = False
-
-            for i in range(a.shape[0]):
-                for j in range(a.shape[1]):
-                    if not np.isclose(a[i][j], b[i][j]):
-                        print(
-                            "Difference at index ({}, {}) is {}".format(
-                                i, j, a[i][j] - b[i][j]
-                            )
-                        )
-                        same = False
-            if not same:
-                print("Arrays are not the same")
-                import sys
-
-                sys.exit(1)
-
         compare_ndarrays(
-            z_nabla4_e2_wp_gtfn.T, np.array(random_validation_data.z_nabla4_e2_wp)
+            z_nabla4_e2_wp_gtfn, np.array(random_validation_data.z_nabla4_e2_wp).T
         )
         print("gtfn_gpu sanity check passed")
 
@@ -625,111 +649,51 @@ def run_benchmarks():
     halo = args.halo
 
     if args.backend in ["all_cpu", "gtfn_cpu"]:
-        runtimes["nabla4_benchmark_unstructured_gtfn_cpu"] = []
-
-        for _ in range(repetitions):
-            random_validation_data_gtfn = (
-                icon_benchmark.get_nabla4_benchmark_validation_data(
-                    filtered_e2c2v,
-                    filtered_e2ecv,
-                    torus_grid.num_cells,
-                    torus_grid.num_vertices,
-                    torus_grid.num_edges,
-                    torus_grid.num_levels,
-                    torus_grid.size[E2C2VDim],
-                )
+        random_validation_data_gtfn = (
+            icon_benchmark.get_nabla4_benchmark_validation_data(
+                filtered_e2c2v,
+                filtered_e2ecv,
+                torus_grid.num_cells,
+                torus_grid.num_vertices,
+                torus_grid.num_edges,
+                torus_grid.num_levels,
+                torus_grid.size[E2C2VDim],
             )
+        )
 
-            z_nabla4_e2_wp_gtfn = np.zeros(
-                shape=(len(filtered_e2c2v), torus_grid.num_levels), dtype=np.float64
-            )
+        _, runtimes_gtfn = run_gtfn(
+            repetitions,
+            filtered_e2c2v,
+            filtered_e2ecv,
+            random_validation_data_gtfn,
+            torus_grid,
+            "gt:cpu_ifirst",
+        )
 
-            runtimes["nabla4_benchmark_unstructured_gtfn_cpu"].append(
-                nabla4_gtfn.calculate_nabla4_cpu(
-                    (
-                        np.array(
-                            random_validation_data_gtfn.u_vert, dtype=float
-                        ).T.astype(np.float64),
-                        (0, 0),
-                    ),
-                    (
-                        np.array(
-                            random_validation_data_gtfn.v_vert, dtype=float
-                        ).T.astype(np.float64),
-                        (0, 0),
-                    ),
-                    (
-                        np.array(
-                            random_validation_data_gtfn.primal_normal_vert_v1,
-                            dtype=float,
-                        ).astype(np.float64),
-                        (0,),
-                    ),
-                    (
-                        np.array(
-                            random_validation_data_gtfn.primal_normal_vert_v2,
-                            dtype=float,
-                        ).astype(np.float64),
-                        (0,),
-                    ),
-                    (
-                        np.array(
-                            random_validation_data_gtfn.z_nabla2_e, dtype=float
-                        ).T.astype(np.float64),
-                        (0, 0),
-                    ),
-                    (
-                        np.array(
-                            random_validation_data_gtfn.inv_vert_vert_length,
-                            dtype=float,
-                        ).astype(np.float64),
-                        (0,),
-                    ),
-                    (
-                        np.array(
-                            random_validation_data_gtfn.inv_primal_edge_length,
-                            dtype=float,
-                        ).astype(np.float64),
-                        (0,),
-                    ),
-                    (z_nabla4_e2_wp_gtfn, (0, 0)),
-                    0,
-                    len(filtered_e2c2v),
-                    0,
-                    torus_grid.num_levels,
-                    (
-                        filtered_e2c2v.astype(np.int64),
-                        (0, 0),
-                    ),
-                    (
-                        filtered_e2ecv.astype(np.int64),
-                        (0, 0),
-                    ),
-                )
-            )
+        runtimes["nabla4_benchmark_unstructured_gtfn_cpu"] = runtimes_gtfn
 
     if args.backend in ["all_gpu", "gtfn_gpu"]:
-        import cupy as cp  # type: ignore [import-not-found]
-
-        runtimes["nabla4_benchmark_unstructured_gtfn_gpu"] = []
-
-        for _ in range(repetitions):
-            random_validation_data_gtfn = (
-                icon_benchmark.get_nabla4_benchmark_validation_data(
-                    filtered_e2c2v,
-                    filtered_e2ecv,
-                    torus_grid.num_cells,
-                    torus_grid.num_vertices,
-                    torus_grid.num_edges,
-                    torus_grid.num_levels,
-                    torus_grid.size[E2C2VDim],
-                )
+        random_validation_data_gtfn = (
+            icon_benchmark.get_nabla4_benchmark_validation_data(
+                filtered_e2c2v,
+                filtered_e2ecv,
+                torus_grid.num_cells,
+                torus_grid.num_vertices,
+                torus_grid.num_edges,
+                torus_grid.num_levels,
+                torus_grid.size[E2C2VDim],
             )
+        )
 
-            _, runtime = run_gtfn_gpu(
-                filtered_e2c2v, filtered_e2ecv, random_validation_data_gtfn, torus_grid
-            )
-            runtimes["nabla4_benchmark_unstructured_gtfn_gpu"].append(runtime)
+        _, runtimes_gtfn = run_gtfn(
+            repetitions,
+            filtered_e2c2v,
+            filtered_e2ecv,
+            random_validation_data_gtfn,
+            torus_grid,
+            "gt:gpu",
+        )
+        runtimes["nabla4_benchmark_unstructured_gtfn_gpu"] = runtimes_gtfn
 
     if args.backend in ["all_cpu", "cpu_ifirst"]:
         runtimes[

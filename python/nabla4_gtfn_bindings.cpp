@@ -17,7 +17,7 @@
 #include <nanobind/stl/tuple.h>
 #include <nanobind/stl/vector.h>
 
-decltype(auto) calculate_nabla4_wrapper_cpu(
+decltype(auto) calculate_nabla4_wrapper_cpu(int repetitions,
     std::pair<nanobind::ndarray<double, nanobind::shape<nanobind::any, nanobind::any>>,
         std::tuple<ptrdiff_t, ptrdiff_t>> u_vert,
     std::pair<nanobind::ndarray<double, nanobind::shape<nanobind::any, nanobind::any>>,
@@ -38,9 +38,10 @@ decltype(auto) calculate_nabla4_wrapper_cpu(
         std::tuple<ptrdiff_t, ptrdiff_t>> gt_conn_e2c2v,
     std::pair<nanobind::ndarray<std::int64_t, nanobind::shape<nanobind::any, nanobind::any>>,
         std::tuple<ptrdiff_t, ptrdiff_t>> gt_conn_e2ecv) {
-    return calculate_nabla4(gridtools::sid::rename_numbered_dimensions<generated::Vertex_t, generated::K_t>(
-                                gridtools::sid::shift_sid_origin(
-                                    gridtools::nanobind::as_sid(u_vert.first), u_vert.second)), // strides: (1, 80)
+    return calculate_nabla4(repetitions,
+        gridtools::sid::rename_numbered_dimensions<generated::Vertex_t, generated::K_t>(
+            gridtools::sid::shift_sid_origin(
+                gridtools::nanobind::as_sid(u_vert.first), u_vert.second)), // strides: (1, 80)
         gridtools::sid::rename_numbered_dimensions<generated::Vertex_t, generated::K_t>(
             gridtools::sid::shift_sid_origin(
                 gridtools::nanobind::as_sid(v_vert.first), v_vert.second)), // strides: (1, 80)
@@ -72,7 +73,7 @@ decltype(auto) calculate_nabla4_wrapper_cpu(
 }
 
 #if defined(IS_GPU)
-decltype(auto) calculate_nabla4_wrapper_gpu(
+decltype(auto) calculate_nabla4_wrapper_gpu(int repetitions,
     std::pair<nanobind::ndarray<double, nanobind::shape<nanobind::any, nanobind::any>>,
         std::tuple<ptrdiff_t, ptrdiff_t>> u_vert,
     std::pair<nanobind::ndarray<double, nanobind::shape<nanobind::any, nanobind::any>>,
@@ -89,11 +90,11 @@ decltype(auto) calculate_nabla4_wrapper_gpu(
     std::int32_t horizontal_end,
     std::int32_t vertical_start,
     std::int32_t vertical_end,
-    std::pair<nanobind::ndarray<std::int64_t, nanobind::shape<nanobind::any, nanobind::any>>,
+    std::pair<nanobind::ndarray<index_type, nanobind::shape<nanobind::any, nanobind::any>>,
         std::tuple<ptrdiff_t, ptrdiff_t>> gt_conn_e2c2v,
-    std::pair<nanobind::ndarray<std::int64_t, nanobind::shape<nanobind::any, nanobind::any>>,
+    std::pair<nanobind::ndarray<index_type, nanobind::shape<nanobind::any, nanobind::any>>,
         std::tuple<ptrdiff_t, ptrdiff_t>> gt_conn_e2ecv) {
-    return calculate_nabla4(
+    return calculate_nabla4(repetitions,
         gridtools::sid::rename_numbered_dimensions<generated::Vertex_t, generated::K_t>(
             gridtools::sid::shift_sid_origin(gridtools::nanobind::as_sid(u_vert.first), u_vert.second)),
         gridtools::sid::rename_numbered_dimensions<generated::Vertex_t, generated::K_t>(
