@@ -34,9 +34,9 @@ decltype(auto) calculate_nabla4_wrapper_cpu(int repetitions,
     std::int32_t horizontal_end,
     std::int32_t vertical_start,
     std::int32_t vertical_end,
-    std::pair<nanobind::ndarray<std::int64_t, nanobind::shape<nanobind::any, nanobind::any>>,
+    std::pair<nanobind::ndarray<index_type, nanobind::shape<nanobind::any, nanobind::any>>,
         std::tuple<ptrdiff_t, ptrdiff_t>> gt_conn_e2c2v,
-    std::pair<nanobind::ndarray<std::int64_t, nanobind::shape<nanobind::any, nanobind::any>>,
+    std::pair<nanobind::ndarray<index_type, nanobind::shape<nanobind::any, nanobind::any>>,
         std::tuple<ptrdiff_t, ptrdiff_t>> gt_conn_e2ecv) {
     return calculate_nabla4(repetitions,
         gridtools::sid::rename_numbered_dimensions<generated::Vertex_t, generated::K_t>(
