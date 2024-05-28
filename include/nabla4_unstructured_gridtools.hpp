@@ -28,7 +28,7 @@ constexpr block_dims get_block_dims_unstructured<std::uint32_t>() {
 
 template <>
 constexpr block_dims get_block_dims_unstructured<int>() {
-    return {32, 4, 2, 256};
+    return {32, 8, 1, 256};
 };
 
 constexpr block_dims block_dims_unstructured = get_block_dims_unstructured<index_type>();
