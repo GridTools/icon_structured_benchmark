@@ -201,9 +201,6 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
 };
 
 #if defined(__CUDACC__)
-
-constexpr auto k_blocks_unstructured = 8;
-
 __global__ void __launch_bounds__(block_dims_unstructured.size, 2) run_gpu(index_type EdgeDim,
     index_type KDim,
     nabla4_unstructured_gt<storage::gpu>::neighbors_gt_ctv_t e2c2v_gt_tv,
@@ -257,13 +254,6 @@ __global__ void __launch_bounds__(block_dims_unstructured.size, 2) run_gpu(index
 
 template <typename T>
 inline void nabla4_unstructured_gt<T>::run_gpu_helper() {
-    // const auto u_vert_gt_chv = u_vert_gt->const_host_view();
-    // std::cout << "u_vert_gt_chv strides[0] " << u_vert_gt_chv.strides()[0] << " strides[1] " <<
-    // u_vert_gt_chv.strides()[1] << std::endl; std::cout << "u_vert_gt_chv lengths[0] " << u_vert_gt_chv.lengths()[0]
-    // << " lengths[1] " << u_vert_gt_chv.lengths()[1] << std::endl; const auto e2c2v_gt_chv =
-    // e2c2v_gt->const_host_view(); std::cout << "e2c2v_gt_chv strides[0] " << e2c2v_gt_chv.strides()[0] << " strides[1]
-    // " << e2c2v_gt_chv.strides()[1] << std::endl; std::cout << "e2c2v_gt_chv lengths[0] " << e2c2v_gt_chv.lengths()[0]
-    // << " lengths[1] " << e2c2v_gt_chv.lengths()[1] << std::endl;
     dim3 tblocks(block_dims_unstructured.x, block_dims_unstructured.y, block_dims_unstructured.z);
     dim3 grid((e2c2v_gt->const_host_view().lengths()[0] + tblocks.x - 1) / tblocks.x, 1, 1);
     run_gpu<<<grid, tblocks>>>(e2c2v_gt->const_host_view().lengths()[0],

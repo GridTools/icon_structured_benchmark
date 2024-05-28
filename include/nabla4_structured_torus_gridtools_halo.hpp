@@ -212,9 +212,6 @@ class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
 };
 
 #if defined(__CUDACC__)
-
-constexpr auto k_blocks_structured = 8;
-
 __global__ void __launch_bounds__(block_dims_structured.size) run_gpu(index_type KDim,
     index_type x_dim,
     index_type x_dim_inner,
