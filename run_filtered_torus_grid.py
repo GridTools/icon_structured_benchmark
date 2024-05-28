@@ -155,7 +155,7 @@ def compare_ndarrays(a, b):
         sys.exit(1)
 
 
-def run_gtfn(repetitions, e2c2v, e2ecv, nabla4_data, grid, backend):
+def run_gtfn(repetitions, dry_runs, e2c2v, e2ecv, nabla4_data, grid, backend):
     if backend == "gt:gpu":
         import cupy as cp  # type: ignore [import-not-found]
 
@@ -174,6 +174,7 @@ def run_gtfn(repetitions, e2c2v, e2ecv, nabla4_data, grid, backend):
     if backend == "gt:gpu":
         runtime = nabla4_gtfn.calculate_nabla4_gpu(
             repetitions,
+            dry_runs,
             (
                 from_array(
                     np.array(nabla4_data.u_vert).T, dtype=float_dtype, backend=backend
@@ -243,6 +244,7 @@ def run_gtfn(repetitions, e2c2v, e2ecv, nabla4_data, grid, backend):
     else:
         runtime = nabla4_gtfn.calculate_nabla4_cpu(
             repetitions,
+            dry_runs,
             (
                 from_array(
                     np.array(nabla4_data.u_vert).T, dtype=float_dtype, backend=backend
@@ -331,6 +333,7 @@ def run_sanity_checks(
         print("Running gtfn_cpu sanity check")
         z_nabla4_e2_wp_gtfn, _ = run_gtfn(
             1,
+            0,
             filtered_e2c2v,
             filtered_e2ecv,
             random_validation_data,
@@ -345,7 +348,7 @@ def run_sanity_checks(
     if backend in ["all_gpu", "gtfn_gpu"]:
         print("Running gtfn_gpu sanity check")
         z_nabla4_e2_wp_gtfn, _ = run_gtfn(
-            1, filtered_e2c2v, filtered_e2ecv, random_validation_data, grid, "gt:gpu"
+            1, 0, filtered_e2c2v, filtered_e2ecv, random_validation_data, grid, "gt:gpu"
         )
         compare_ndarrays(
             z_nabla4_e2_wp_gtfn, np.array(random_validation_data.z_nabla4_e2_wp).T
@@ -663,6 +666,7 @@ def run_benchmarks():
 
         _, runtimes_gtfn = run_gtfn(
             repetitions,
+            dry_runs,
             filtered_e2c2v,
             filtered_e2ecv,
             random_validation_data_gtfn,
@@ -687,6 +691,7 @@ def run_benchmarks():
 
         _, runtimes_gtfn = run_gtfn(
             repetitions,
+            dry_runs,
             filtered_e2c2v,
             filtered_e2ecv,
             random_validation_data_gtfn,
