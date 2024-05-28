@@ -46,7 +46,6 @@ struct nabla4_gt_data {
     const data_store_1d_WP_t primal_normal_vert_v1_gt;
     const data_store_1d_WP_t primal_normal_vert_v2_gt;
     const data_store_2d_WP_t z_nabla2_e_gt;
-    const data_store_2d_WP_t dummy_field_gt;
     const data_store_1d_WP_t inv_vert_vert_length_gt;
     const data_store_1d_WP_t inv_primal_edge_length_gt;
     const data_store_2d_VP_t z_nabla4_e2_wp_gt;
@@ -55,7 +54,6 @@ struct nabla4_gt_data {
     const data_store_1d_ctv_WP_t primal_normal_vert_v1_gt_tv;
     const data_store_1d_ctv_WP_t primal_normal_vert_v2_gt_tv;
     const data_store_2d_ctv_WP_t z_nabla2_e_gt_tv;
-    const data_store_2d_ctv_WP_t dummy_field_gt_tv;
     const data_store_1d_ctv_WP_t inv_vert_vert_length_gt_tv;
     const data_store_1d_ctv_WP_t inv_primal_edge_length_gt_tv;
     const data_store_2d_tv_VP_t z_nabla4_e2_wp_gt_tv;
@@ -67,7 +65,6 @@ struct nabla4_gt_data {
         primal_normal_vert_v1_gt(storage::builder<T>.template type<WP_TYPE>().dimensions(EdgeDim * ECVDim).initializer([](int i) { return rand_utils.template get<WP_TYPE>(); }).build()),
         primal_normal_vert_v2_gt(storage::builder<T>.template type<WP_TYPE>().dimensions(EdgeDim * ECVDim).initializer([](int i) { return rand_utils.template get<WP_TYPE>(); }).build()),
         z_nabla2_e_gt(storage::builder<T>.template type<WP_TYPE>().dimensions(output_size, KDim).initializer([](int i, int j) { return rand_utils.template get<WP_TYPE>(); }).build()),
-        dummy_field_gt(storage::builder<T>.template type<WP_TYPE>().dimensions(output_size, KDim).initializer([](int i, int j) { return rand_utils.template get<WP_TYPE>(); }).build()),
         inv_vert_vert_length_gt(storage::builder<T>.template type<WP_TYPE>().dimensions(output_size).initializer([](int i) { return rand_utils.template get<WP_TYPE>(); }).build()),
         inv_primal_edge_length_gt(storage::builder<T>.template type<WP_TYPE>().dimensions(output_size).initializer([](int i) { return rand_utils.template get<WP_TYPE>(); }).build()),
         z_nabla4_e2_wp_gt(storage::builder<T>.template type<VP_TYPE>().dimensions(output_size, KDim).initializer([](int i, int j) { return 0; }).build()),
@@ -76,7 +73,6 @@ struct nabla4_gt_data {
         primal_normal_vert_v1_gt_tv(primal_normal_vert_v1_gt->const_target_view()),
         primal_normal_vert_v2_gt_tv(primal_normal_vert_v2_gt->const_target_view()),
         z_nabla2_e_gt_tv(z_nabla2_e_gt->const_target_view()),
-        dummy_field_gt_tv(z_nabla2_e_gt->const_target_view()),
         inv_vert_vert_length_gt_tv(inv_vert_vert_length_gt->const_target_view()),
         inv_primal_edge_length_gt_tv(inv_primal_edge_length_gt->const_target_view()),
         z_nabla4_e2_wp_gt_tv(z_nabla4_e2_wp_gt->target_view())
@@ -95,7 +91,6 @@ struct nabla4_gt_data {
         primal_normal_vert_v1_gt(storage::builder<T>.template type<WP_TYPE>().dimensions(EdgeDim * ECVDim).initializer([&primal_normal_vert_v1](int i) { return primal_normal_vert_v1[i]; }).build()),
         primal_normal_vert_v2_gt(storage::builder<T>.template type<WP_TYPE>().dimensions(EdgeDim * ECVDim).initializer([&primal_normal_vert_v2](int i) { return primal_normal_vert_v2[i]; }).build()),
         z_nabla2_e_gt(storage::builder<T>.template type<WP_TYPE>().dimensions(output_size, KDim).initializer([&z_nabla2_e](int i, int j) { return z_nabla2_e[i][j]; }).build()),
-        dummy_field_gt(storage::builder<T>.template type<WP_TYPE>().dimensions(output_size, KDim).initializer([&z_nabla2_e](int i, int j) { return z_nabla2_e[i][j]; }).build()),
         inv_vert_vert_length_gt(storage::builder<T>.template type<WP_TYPE>().dimensions(output_size).initializer([&inv_vert_vert_length](int i) { return inv_vert_vert_length[i]; }).build()),
         inv_primal_edge_length_gt(storage::builder<T>.template type<WP_TYPE>().dimensions(output_size).initializer([&inv_primal_edge_length](int i) { return inv_primal_edge_length[i]; }).build()),
         z_nabla4_e2_wp_gt(storage::builder<T>.template type<VP_TYPE>().dimensions(output_size, KDim).initializer([](int i, int j) { return 0; }).build()),
@@ -104,7 +99,6 @@ struct nabla4_gt_data {
         primal_normal_vert_v1_gt_tv(primal_normal_vert_v1_gt->const_target_view()),
         primal_normal_vert_v2_gt_tv(primal_normal_vert_v2_gt->const_target_view()),
         z_nabla2_e_gt_tv(z_nabla2_e_gt->const_target_view()),
-        dummy_field_gt_tv(dummy_field_gt->const_target_view()),
         inv_vert_vert_length_gt_tv(inv_vert_vert_length_gt->const_target_view()),
         inv_primal_edge_length_gt_tv(inv_primal_edge_length_gt->const_target_view()),
         z_nabla4_e2_wp_gt_tv(z_nabla4_e2_wp_gt->target_view())

@@ -88,23 +88,3 @@ if(IS_GPU)
   target_link_libraries(nabla4_gtfn PUBLIC GridTools::storage_gpu)
   set_source_files_properties(python/nabla4_gtfn_bindings.cpp PROPERTIES LANGUAGE CUDA)
 endif()
-
-nanobind_add_module(copy_gtfn python/copy_gtfn_bindings.cpp)
-target_include_directories(copy_gtfn PRIVATE include GridTools)
-target_link_libraries(copy_gtfn PRIVATE benchmark GridTools::gridtools GridTools::stencil_naive GridTools::storage_cpu_ifirst GridTools::storage_cpu_kfirst)
-
-if(IS_GPU)
-  target_compile_definitions(copy_gtfn PRIVATE IS_GPU)
-  target_link_libraries(copy_gtfn PUBLIC GridTools::storage_gpu)
-  set_source_files_properties(python/copy_gtfn_bindings.cpp PROPERTIES LANGUAGE CUDA)
-endif()
-
-nanobind_add_module(copy_neighbor_gtfn python/copy_neighbor_gtfn_bindings.cpp)
-target_include_directories(copy_neighbor_gtfn PRIVATE include GridTools)
-target_link_libraries(copy_neighbor_gtfn PRIVATE benchmark GridTools::gridtools GridTools::stencil_naive GridTools::storage_cpu_ifirst GridTools::storage_cpu_kfirst)
-
-if(IS_GPU)
-  target_compile_definitions(copy_neighbor_gtfn PRIVATE IS_GPU)
-  target_link_libraries(copy_neighbor_gtfn PUBLIC GridTools::storage_gpu)
-  set_source_files_properties(python/copy_neighbor_gtfn_bindings.cpp PROPERTIES LANGUAGE CUDA)
-endif()
