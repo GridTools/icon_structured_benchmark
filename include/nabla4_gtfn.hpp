@@ -86,7 +86,9 @@ namespace generated {
             gridtools::meta::list<gtfn::unstructured::dim::vertical, gridtools::integral_constant<int, 8>>>;
 
         inline auto calculate_nabla4 = [](auto... connectivities__) {
-            return [connectivities__...](auto backend,
+            return [connectivities__...](int repetitions,
+                       int dry_runs,
+                       auto backend,
                        auto &&u_vert,
                        auto &&v_vert,
                        auto &&primal_normal_vert_v1,
@@ -105,43 +107,64 @@ namespace generated {
                         ::gridtools::tuple((horizontal_end - horizontal_start), (vertical_end - vertical_start)),
                         ::gridtools::tuple(horizontal_start, vertical_start),
                         connectivities__...));
-                #if defined(IS_GPU)
+                for (int i{0}; i < dry_runs; ++i) {
+                    gtfn_backend.stencil_executor()()
+                        .arg(z_nabla4_e2)
+                        .arg(u_vert)
+                        .arg(v_vert)
+                        .arg(primal_normal_vert_v1)
+                        .arg(primal_normal_vert_v2)
+                        .arg(z_nabla2_e)
+                        .arg(inv_vert_vert_length)
+                        .arg(inv_primal_edge_length)
+                        .assign(0_c, _fun_1(), 1_c, 2_c, 3_c, 4_c, 5_c, 6_c, 7_c)
+                        .execute();
+                }
+#if defined(IS_GPU)
                 if constexpr (std::is_same_v<decltype(backend), gridtools::fn::backend::gpu<block_sizes_t>>) {
                     timer<backend_impl::gpu> t;
-                    t.start();
-                    gtfn_backend.stencil_executor()()
-                        .arg(z_nabla4_e2)
-                        .arg(u_vert)
-                        .arg(v_vert)
-                        .arg(primal_normal_vert_v1)
-                        .arg(primal_normal_vert_v2)
-                        .arg(z_nabla2_e)
-                        .arg(inv_vert_vert_length)
-                        .arg(inv_primal_edge_length)
-                        .assign(0_c, _fun_1(), 1_c, 2_c, 3_c, 4_c, 5_c, 6_c, 7_c)
-                        .execute();
-                    t.stop();
-                    return t.elapsed();
+                    std::vector<double> runtimes;
+                    for (int i{0}; i < repetitions; ++i) {
+                        t.start();
+                        gtfn_backend.stencil_executor()()
+                            .arg(z_nabla4_e2)
+                            .arg(u_vert)
+                            .arg(v_vert)
+                            .arg(primal_normal_vert_v1)
+                            .arg(primal_normal_vert_v2)
+                            .arg(z_nabla2_e)
+                            .arg(inv_vert_vert_length)
+                            .arg(inv_primal_edge_length)
+                            .assign(0_c, _fun_1(), 1_c, 2_c, 3_c, 4_c, 5_c, 6_c, 7_c)
+                            .execute();
+                        t.stop();
+                        runtimes.push_back(t.elapsed());
+                    }
+                    return runtimes;
                 } else {
-                #endif
+#endif
                     timer<backend_impl::cpu_ifirst> t;
-                    t.start();
-                    gtfn_backend.stencil_executor()()
-                        .arg(z_nabla4_e2)
-                        .arg(u_vert)
-                        .arg(v_vert)
-                        .arg(primal_normal_vert_v1)
-                        .arg(primal_normal_vert_v2)
-                        .arg(z_nabla2_e)
-                        .arg(inv_vert_vert_length)
-                        .arg(inv_primal_edge_length)
-                        .assign(0_c, _fun_1(), 1_c, 2_c, 3_c, 4_c, 5_c, 6_c, 7_c)
-                        .execute();
-                    t.stop();
-                    return t.elapsed();
-                #if defined(IS_GPU)
+                    std::vector<double> runtimes;
+                    for (int i{0}; i < repetitions; ++i) {
+                        t.start();
+                        gtfn_backend.stencil_executor()()
+                            .arg(z_nabla4_e2)
+                            .arg(u_vert)
+                            .arg(v_vert)
+                            .arg(primal_normal_vert_v1)
+                            .arg(primal_normal_vert_v2)
+                            .arg(z_nabla2_e)
+                            .arg(inv_vert_vert_length)
+                            .arg(inv_primal_edge_length)
+                            .assign(0_c, _fun_1(), 1_c, 2_c, 3_c, 4_c, 5_c, 6_c, 7_c)
+                            .execute();
+                        t.stop();
+                        runtimes.push_back(t.elapsed());
+                    }
+                    return runtimes;
+#if defined(IS_GPU)
                 }
-                #endif
+#endif
             };
         };
     } // namespace
@@ -158,7 +181,9 @@ template <class BufferT0,
     class BufferT12,
     class BufferT13,
     class backend>
-decltype(auto) calculate_nabla4(BufferT0 &&u_vert,
+decltype(auto) calculate_nabla4(int repetitions,
+    int dry_runs,
+    BufferT0 &&u_vert,
     BufferT1 &&v_vert,
     BufferT2 &&primal_normal_vert_v1,
     BufferT3 &&primal_normal_vert_v2,
@@ -179,7 +204,9 @@ decltype(auto) calculate_nabla4(BufferT0 &&u_vert,
                 std::forward<decltype(gt_conn_e2c2v)>(gt_conn_e2c2v))),
         gridtools::hymap::keys<generated::E2ECV_t>::make_values(
             gridtools::fn::sid_neighbor_table::as_neighbor_table<generated::Edge_t, generated::E2ECV_t, 4>(
-                std::forward<decltype(gt_conn_e2ecv)>(gt_conn_e2ecv))))(backend_instance,
+                std::forward<decltype(gt_conn_e2ecv)>(gt_conn_e2ecv))))(repetitions,
+        dry_runs,
+        backend_instance,
         std::forward<decltype(u_vert)>(u_vert),
         std::forward<decltype(v_vert)>(v_vert),
         std::forward<decltype(primal_normal_vert_v1)>(primal_normal_vert_v1),
