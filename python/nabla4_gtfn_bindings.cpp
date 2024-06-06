@@ -100,29 +100,43 @@ decltype(auto) calculate_nabla4_wrapper_gpu(int repetitions,
     return calculate_nabla4(repetitions,
         dry_runs,
         gridtools::sid::rename_numbered_dimensions<generated::Vertex_t, generated::K_t>(
-            gridtools::sid::shift_sid_origin(gridtools::nanobind::as_sid(u_vert.first), u_vert.second)),
+            gridtools::sid::shift_sid_origin(
+                gridtools::nanobind::as_sid(u_vert.first, gridtools::nanobind::stride_spec<1, nanobind::any>{}),
+                u_vert.second)),
         gridtools::sid::rename_numbered_dimensions<generated::Vertex_t, generated::K_t>(
-            gridtools::sid::shift_sid_origin(gridtools::nanobind::as_sid(v_vert.first), v_vert.second)),
+            gridtools::sid::shift_sid_origin(
+                gridtools::nanobind::as_sid(v_vert.first, gridtools::nanobind::stride_spec<1, nanobind::any>{}),
+                v_vert.second)),
         gridtools::sid::rename_numbered_dimensions<generated::ECV_t>(gridtools::sid::shift_sid_origin(
-            gridtools::nanobind::as_sid(primal_normal_vert_v1.first), primal_normal_vert_v1.second)),
+            gridtools::nanobind::as_sid(primal_normal_vert_v1.first, gridtools::nanobind::stride_spec<1>{}),
+            primal_normal_vert_v1.second)),
         gridtools::sid::rename_numbered_dimensions<generated::ECV_t>(gridtools::sid::shift_sid_origin(
-            gridtools::nanobind::as_sid(primal_normal_vert_v2.first), primal_normal_vert_v2.second)),
-        gridtools::sid::rename_numbered_dimensions<generated::Edge_t, generated::K_t>(
-            gridtools::sid::shift_sid_origin(gridtools::nanobind::as_sid(z_nabla2_e.first), z_nabla2_e.second)),
+            gridtools::nanobind::as_sid(primal_normal_vert_v2.first, gridtools::nanobind::stride_spec<1>{}),
+            primal_normal_vert_v2.second)),
+        gridtools::sid::rename_numbered_dimensions<generated::Edge_t, generated::K_t>(gridtools::sid::shift_sid_origin(
+            gridtools::nanobind::as_sid(z_nabla2_e.first, gridtools::nanobind::stride_spec<1, nanobind::any>{}),
+            z_nabla2_e.second)),
         gridtools::sid::rename_numbered_dimensions<generated::Edge_t>(gridtools::sid::shift_sid_origin(
-            gridtools::nanobind::as_sid(inv_vert_vert_length.first), inv_vert_vert_length.second)),
+            gridtools::nanobind::as_sid(inv_vert_vert_length.first, gridtools::nanobind::stride_spec<1>{}),
+            inv_vert_vert_length.second)),
         gridtools::sid::rename_numbered_dimensions<generated::Edge_t>(gridtools::sid::shift_sid_origin(
-            gridtools::nanobind::as_sid(inv_primal_edge_length.first), inv_primal_edge_length.second)),
-        gridtools::sid::rename_numbered_dimensions<generated::Edge_t, generated::K_t>(
-            gridtools::sid::shift_sid_origin(gridtools::nanobind::as_sid(z_nabla4_e2.first), z_nabla4_e2.second)),
+            gridtools::nanobind::as_sid(inv_primal_edge_length.first, gridtools::nanobind::stride_spec<1>{}),
+            inv_primal_edge_length.second)),
+        gridtools::sid::rename_numbered_dimensions<generated::Edge_t, generated::K_t>(gridtools::sid::shift_sid_origin(
+            gridtools::nanobind::as_sid(z_nabla4_e2.first, gridtools::nanobind::stride_spec<1, nanobind::any>{}),
+            z_nabla4_e2.second)),
         horizontal_start,
         horizontal_end,
         vertical_start,
         vertical_end,
         gridtools::sid::rename_numbered_dimensions<generated::Edge_t, generated::E2C2V_t>(
-            gridtools::sid::shift_sid_origin(gridtools::nanobind::as_sid(gt_conn_e2c2v.first), gt_conn_e2c2v.second)),
+            gridtools::sid::shift_sid_origin(
+                gridtools::nanobind::as_sid(gt_conn_e2c2v.first, gridtools::nanobind::stride_spec<1, nanobind::any>{}),
+                gt_conn_e2c2v.second)),
         gridtools::sid::rename_numbered_dimensions<generated::Edge_t, generated::E2ECV_t>(
-            gridtools::sid::shift_sid_origin(gridtools::nanobind::as_sid(gt_conn_e2ecv.first), gt_conn_e2ecv.second)),
+            gridtools::sid::shift_sid_origin(
+                gridtools::nanobind::as_sid(gt_conn_e2ecv.first, gridtools::nanobind::stride_spec<1, nanobind::any>{}),
+                gt_conn_e2ecv.second)),
         gridtools::fn::backend::gpu<generated::block_sizes_t>{});
 }
 #endif
