@@ -197,6 +197,8 @@ def generate_violin_plots(data, k, torus_name, output_dir):
                     if "cpu_kfirst" in implementation
                     else "gtfn"
                     if "gtfn" in implementation
+                    else "cuda_naive"
+                    if "naive" in implementation
                     else "cuda",
                 )
             )

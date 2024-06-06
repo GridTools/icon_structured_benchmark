@@ -9,11 +9,11 @@ from analysis import (
 )
 
 if __name__ == "__main__":
-    git_commit = "473bf2d"
+    git_commit = "3ad077a"
 
     backend = "gpu"
 
-    index_type = "int64"
+    index_type = "int"
 
     torus_files = [
         "torus_100000_100000_128",
@@ -48,6 +48,16 @@ if __name__ == "__main__":
             "nabla4_benchmark_structured_torus_gpu_gridtools_halo",
         ),
         "gpu",
+        output_directory,
+    )
+
+    print_median_acceleration_over_k(
+        filter_runtime_data(
+            runtimes_output,
+            "nabla4_benchmark_unstructured_gpu_gridtools_naive",
+            "nabla4_benchmark_structured_torus_gpu_gridtools_halo_naive",
+        ),
+        "gpu_naive",
         output_directory,
     )
 
