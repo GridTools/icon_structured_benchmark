@@ -69,6 +69,32 @@ std::vector<double> nabla4_benchmark_unstructured_gridtools(std::vector<std::arr
     }
 }
 
+template <backend_impl I>
+std::vector<double> nabla4_benchmark_unstructured_gridtools_naive(std::vector<std::array<index_type, 4>> &e2c2v,
+    std::vector<std::array<index_type, 4>> &e2ecv,
+    index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    int repetitions,
+    int dry_runs) {
+    if constexpr (I == backend_impl::cpu_ifirst) {
+        return run_benchmark<nabla4_unstructured_gt_naive<storage::cpu_ifirst>, I>(
+            std::make_tuple(e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
+    } else if constexpr (I == backend_impl::cpu_kfirst) {
+        return run_benchmark<nabla4_unstructured_gt_naive<storage::cpu_kfirst>, I>(
+            std::make_tuple(e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
+#ifdef __CUDACC__
+    } else if constexpr (I == backend_impl::gpu) {
+        return run_benchmark<nabla4_unstructured_gt_naive<storage::gpu>, I>(
+            std::make_tuple(e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
+#endif
+    } else {
+        throw std::runtime_error("[wrapper] Undefined backend implementation");
+    }
+}
+
 std::vector<double> nabla4_benchmark_unstructured_naive(std::vector<std::array<std::size_t, 4>> &e2c2v,
     std::vector<std::array<std::size_t, 4>> &e2ecv,
     std::size_t CellDim,
@@ -144,6 +170,19 @@ std::vector<double> nabla4_benchmark_unstructured_gpu_gridtools(std::vector<std:
     int repetitions,
     int dry_runs) {
     return nabla4_benchmark_unstructured_gridtools<gpu>(
+        e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim, repetitions, dry_runs);
+}
+
+std::vector<double> nabla4_benchmark_unstructured_gpu_gridtools_naive(std::vector<std::array<index_type, 4>> &e2c2v,
+    std::vector<std::array<index_type, 4>> &e2ecv,
+    index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    int repetitions,
+    int dry_runs) {
+    return nabla4_benchmark_unstructured_gridtools_naive<gpu>(
         e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim, repetitions, dry_runs);
 }
 
@@ -338,8 +377,59 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_gpu_gridtools(
         inv_primal_edge_length};
     return run_validation<nabla4_unstructured_gt<storage::gpu>, gpu>(nabla4_benchmark_object);
 }
+
+std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_gpu_gridtools_naive(
+    std::vector<std::array<index_type, 4>> &e2c2v,
+    std::vector<std::array<index_type, 4>> &e2ecv,
+    index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    std::vector<std::vector<VP_TYPE>> &u_vert,
+    std::vector<std::vector<VP_TYPE>> &v_vert,
+    std::vector<WP_TYPE> &primal_normal_vert_v1,
+    std::vector<WP_TYPE> &primal_normal_vert_v2,
+    std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+    std::vector<WP_TYPE> &inv_vert_vert_length,
+    std::vector<WP_TYPE> &inv_primal_edge_length) {
+    nabla4_unstructured_gt_naive<storage::gpu> nabla4_benchmark_object{e2c2v,
+        e2ecv,
+        CellDim,
+        VertexDim,
+        EdgeDim,
+        KDim,
+        ECVDim,
+        u_vert,
+        v_vert,
+        primal_normal_vert_v1,
+        primal_normal_vert_v2,
+        z_nabla2_e,
+        inv_vert_vert_length,
+        inv_primal_edge_length};
+    return run_validation<nabla4_unstructured_gt_naive<storage::gpu>, gpu>(nabla4_benchmark_object);
+}
 #else
 std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_gpu_gridtools(
+    std::vector<std::array<index_type, 4>> &e2c2v,
+    std::vector<std::array<index_type, 4>> &e2ecv,
+    index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    std::vector<std::vector<VP_TYPE>> &u_vert,
+    std::vector<std::vector<VP_TYPE>> &v_vert,
+    std::vector<WP_TYPE> &primal_normal_vert_v1,
+    std::vector<WP_TYPE> &primal_normal_vert_v2,
+    std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+    std::vector<WP_TYPE> &inv_vert_vert_length,
+    std::vector<WP_TYPE> &inv_primal_edge_length) {
+    throw std::runtime_error("GPU backend not enabled");
+    return {};
+}
+
+std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_gpu_gridtools_naive(
     std::vector<std::array<index_type, 4>> &e2c2v,
     std::vector<std::array<index_type, 4>> &e2ecv,
     index_type CellDim,
@@ -590,6 +680,44 @@ std::vector<double> nabla4_benchmark_structured_torus_gridtools_halo(index_type 
     }
 }
 
+template <backend_impl I>
+std::vector<double> nabla4_benchmark_structured_torus_gridtools_halo_naive(index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    index_type longitude_dim,
+    index_type latitude_dim,
+    index_type halo,
+    int repetitions,
+    int dry_runs) {
+    if constexpr (I == backend_impl::naive) {
+        return run_benchmark<nabla4_structured_torus_halo_gt_naive<storage::cpu_ifirst>, backend_impl::cpu_ifirst>(
+            std::make_tuple(CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, halo),
+            repetitions,
+            dry_runs);
+    } else if constexpr (I == backend_impl::cpu_ifirst) {
+        return run_benchmark<nabla4_structured_torus_halo_gt_naive<storage::cpu_ifirst>, backend_impl::cpu_ifirst>(
+            std::make_tuple(CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, halo),
+            repetitions,
+            dry_runs);
+    } else if constexpr (I == backend_impl::cpu_kfirst) {
+        return run_benchmark<nabla4_structured_torus_halo_gt_naive<storage::cpu_kfirst>, backend_impl::cpu_kfirst>(
+            std::make_tuple(CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, halo),
+            repetitions,
+            dry_runs);
+#ifdef __CUDACC__
+    } else if constexpr (I == backend_impl::gpu) {
+        return run_benchmark<nabla4_structured_torus_halo_gt_naive<storage::gpu>, I>(
+            std::make_tuple(CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, halo),
+            repetitions,
+            dry_runs);
+#endif
+    } else {
+        throw std::runtime_error("Undefined backend implementation");
+    }
+}
+
 std::vector<double> nabla4_benchmark_structured_torus_naive(std::size_t CellDim,
     std::size_t VertexDim,
     std::size_t EdgeDim,
@@ -694,6 +822,20 @@ std::vector<double> nabla4_benchmark_structured_torus_gpu_gridtools_halo(index_t
     int repetitions,
     int dry_runs) {
     return nabla4_benchmark_structured_torus_gridtools_halo<gpu>(
+        CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, halo, repetitions, dry_runs);
+}
+
+std::vector<double> nabla4_benchmark_structured_torus_gpu_gridtools_halo_naive(index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    index_type longitude_dim,
+    index_type latitude_dim,
+    index_type halo,
+    int repetitions,
+    int dry_runs) {
+    return nabla4_benchmark_structured_torus_gridtools_halo_naive<gpu>(
         CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, halo, repetitions, dry_runs);
 }
 
@@ -951,8 +1093,60 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_gpu_gridtools
         inv_primal_edge_length};
     return run_validation<nabla4_structured_torus_halo_gt<storage::gpu>, gpu>(nabla4_benchmark_object);
 }
+
+std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_gpu_gridtools_halo_naive(index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    index_type longitude_dim,
+    index_type latitude_dim,
+    index_type halo,
+    std::vector<std::vector<VP_TYPE>> &u_vert,
+    std::vector<std::vector<VP_TYPE>> &v_vert,
+    std::vector<WP_TYPE> &primal_normal_vert_v1,
+    std::vector<WP_TYPE> &primal_normal_vert_v2,
+    std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+    std::vector<WP_TYPE> &inv_vert_vert_length,
+    std::vector<WP_TYPE> &inv_primal_edge_length) {
+    nabla4_structured_torus_halo_gt_naive<storage::gpu> nabla4_benchmark_object{CellDim,
+        VertexDim,
+        EdgeDim,
+        KDim,
+        ECVDim,
+        longitude_dim,
+        latitude_dim,
+        halo,
+        u_vert,
+        v_vert,
+        primal_normal_vert_v1,
+        primal_normal_vert_v2,
+        z_nabla2_e,
+        inv_vert_vert_length,
+        inv_primal_edge_length};
+    return run_validation<nabla4_structured_torus_halo_gt_naive<storage::gpu>, gpu>(nabla4_benchmark_object);
+}
 #else
 std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_gpu_gridtools_halo(index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    index_type longitude_dim,
+    index_type latitude_dim,
+    index_type halo,
+    std::vector<std::vector<VP_TYPE>> &u_vert,
+    std::vector<std::vector<VP_TYPE>> &v_vert,
+    std::vector<WP_TYPE> &primal_normal_vert_v1,
+    std::vector<WP_TYPE> &primal_normal_vert_v2,
+    std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+    std::vector<WP_TYPE> &inv_vert_vert_length,
+    std::vector<WP_TYPE> &inv_primal_edge_length) {
+    throw std::runtime_error("GPU backend not enabled");
+    return {};
+}
+
+std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_gpu_gridtools_halo_naive(index_type CellDim,
     index_type VertexDim,
     index_type EdgeDim,
     index_type KDim,

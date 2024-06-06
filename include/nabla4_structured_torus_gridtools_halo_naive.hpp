@@ -8,36 +8,36 @@
 
 #if defined(__CUDACC__)
 template <typename T>
-constexpr block_dims get_block_dims_structured() {
+constexpr block_dims get_block_dims_structured_naive() {
     throw std::runtime_error("Undefined block dimensions for type " + T::name + " in GPU backend");
 };
 
 template <>
-constexpr block_dims get_block_dims_structured<std::size_t>() {
+constexpr block_dims get_block_dims_structured_naive<std::size_t>() {
     // Increased thread block size to limit register usage and increase occupancy
     return {32, 2, 4, 672};
 };
 
 template <>
-constexpr block_dims get_block_dims_structured<std::int64_t>() {
+constexpr block_dims get_block_dims_structured_naive<std::int64_t>() {
     return {32, 4, 3, 384};
 };
 
 template <>
-constexpr block_dims get_block_dims_structured<std::uint32_t>() {
+constexpr block_dims get_block_dims_structured_naive<std::uint32_t>() {
     return {32, 2, 4, 672};
 };
 
 template <>
-constexpr block_dims get_block_dims_structured<int>() {
+constexpr block_dims get_block_dims_structured_naive<int>() {
     return {32, 2, 4, 672};
 };
 
-constexpr block_dims block_dims_structured = get_block_dims_structured<index_type>();
+constexpr block_dims block_dims_structured_naive = get_block_dims_structured_naive<index_type>();
 #endif
 
 template <typename T>
-class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
+class nabla4_structured_torus_halo_gt_naive : public nabla4_gt_data<T> {
 
     using nabla4_gt_data<T>::CellDim;
     using nabla4_gt_data<T>::EdgeDim;
@@ -60,7 +60,7 @@ class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
   public:
     /// Constructor with all the necessary information for \c nabla4 compute
     /// kernel execution
-    nabla4_structured_torus_halo_gt(index_type CellDim,
+    nabla4_structured_torus_halo_gt_naive(index_type CellDim,
         index_type VertexDim,
         index_type EdgeDim,
         index_type KDim,
@@ -71,7 +71,7 @@ class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
         : y_dim(y_dim), x_dim(x_dim),
           halo(halo), nabla4_gt_data<T>(
                           CellDim, VertexDim, EdgeDim, KDim, ECVDim, (x_dim - 2 * halo) * (y_dim - halo * 2) * 3){};
-    nabla4_structured_torus_halo_gt(index_type CellDim,
+    nabla4_structured_torus_halo_gt_naive(index_type CellDim,
         index_type VertexDim,
         index_type EdgeDim,
         index_type KDim,
@@ -212,7 +212,7 @@ class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
 };
 
 #if defined(__CUDACC__)
-__global__ void __launch_bounds__(block_dims_structured.size) run_gpu(index_type KDim,
+__global__ void __launch_bounds__(block_dims_structured_naive.size) run_gpu_naive(index_type KDim,
     index_type x_dim,
     index_type x_dim_inner,
     index_type y_dim,
@@ -221,17 +221,18 @@ __global__ void __launch_bounds__(block_dims_structured.size) run_gpu(index_type
     index_type total_grid_size,
     index_type inner_grid_size,
     index_type global_edges_per_orientation,
-    nabla4_structured_torus_halo_gt<storage::gpu>::data_store_2d_ctv_VP_t u_vert_gt_tv,
-    nabla4_structured_torus_halo_gt<storage::gpu>::data_store_2d_ctv_VP_t v_vert_gt_tv,
-    nabla4_structured_torus_halo_gt<storage::gpu>::data_store_1d_ctv_WP_t primal_normal_vert_v1_gt_tv,
-    nabla4_structured_torus_halo_gt<storage::gpu>::data_store_1d_ctv_WP_t primal_normal_vert_v2_gt_tv,
-    nabla4_structured_torus_halo_gt<storage::gpu>::data_store_2d_ctv_WP_t z_nabla2_e_gt_tv,
-    nabla4_structured_torus_halo_gt<storage::gpu>::data_store_1d_ctv_WP_t inv_vert_vert_length_gt_tv,
-    nabla4_structured_torus_halo_gt<storage::gpu>::data_store_1d_ctv_WP_t inv_primal_edge_length_gt_tv,
-    nabla4_structured_torus_halo_gt<storage::gpu>::data_store_2d_tv_VP_t z_nabla4_e2_wp_gt_tv) {
+    nabla4_structured_torus_halo_gt_naive<storage::gpu>::data_store_2d_ctv_VP_t u_vert_gt_tv,
+    nabla4_structured_torus_halo_gt_naive<storage::gpu>::data_store_2d_ctv_VP_t v_vert_gt_tv,
+    nabla4_structured_torus_halo_gt_naive<storage::gpu>::data_store_1d_ctv_WP_t primal_normal_vert_v1_gt_tv,
+    nabla4_structured_torus_halo_gt_naive<storage::gpu>::data_store_1d_ctv_WP_t primal_normal_vert_v2_gt_tv,
+    nabla4_structured_torus_halo_gt_naive<storage::gpu>::data_store_2d_ctv_WP_t z_nabla2_e_gt_tv,
+    nabla4_structured_torus_halo_gt_naive<storage::gpu>::data_store_1d_ctv_WP_t inv_vert_vert_length_gt_tv,
+    nabla4_structured_torus_halo_gt_naive<storage::gpu>::data_store_1d_ctv_WP_t inv_primal_edge_length_gt_tv,
+    nabla4_structured_torus_halo_gt_naive<storage::gpu>::data_store_2d_tv_VP_t z_nabla4_e2_wp_gt_tv) {
     const auto i{blockIdx.x * blockDim.x + threadIdx.x + halo};
     const auto j{blockIdx.y * blockDim.y + threadIdx.y + halo};
-    if (i >= x_dim - halo || j >= y_dim - halo) {
+    const auto k_index{blockIdx.z * blockDim.z + threadIdx.z};
+    if (i >= x_dim - halo || j >= y_dim - halo || k_index >= KDim) {
         return;
     }
     const auto i_j = j * x_dim + i;
@@ -291,37 +292,36 @@ __global__ void __launch_bounds__(block_dims_structured.size) run_gpu(index_type
             inv_primal_edge_length_gt_tv(local_edge_index_start + inner_grid_size),
         inv_primal_edge_length_gt_tv(local_edge_index_start + inner_grid_size + inner_grid_size) *
             inv_primal_edge_length_gt_tv(local_edge_index_start + inner_grid_size + inner_grid_size)};
-    for (auto k_index{blockIdx.z * blockDim.z + threadIdx.z}; k_index < KDim; k_index += gridDim.z * blockDim.z) {
 #pragma unroll
-        for (auto color{0}; color < 3; ++color) {
-            const auto E2C2V_0_c = E2C2V_0[color];
-            const auto E2C2V_1_c = E2C2V_1[color];
-            const auto E2C2V_2_c = E2C2V_2[color];
-            const auto E2C2V_3_c = E2C2V_3[color];
-            const double nabv_tang_wp = u_vert_gt_tv(E2C2V_0_c, k_index) * primal_normal_vert_v1_0[color] +
-                                        v_vert_gt_tv(E2C2V_0_c, k_index) * primal_normal_vert_v2_0[color] +
-                                        u_vert_gt_tv(E2C2V_1_c, k_index) * primal_normal_vert_v1_1[color] +
-                                        v_vert_gt_tv(E2C2V_1_c, k_index) * primal_normal_vert_v2_1[color];
-            const double nabv_norm_wp = u_vert_gt_tv(E2C2V_2_c, k_index) * primal_normal_vert_v1_2[color] +
-                                        v_vert_gt_tv(E2C2V_2_c, k_index) * primal_normal_vert_v2_2[color] +
-                                        u_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v1_3[color] +
-                                        v_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v2_3[color];
-            const auto local_edge_index = local_edge_index_start + color * inner_grid_size;
-            z_nabla4_e2_wp_gt_tv(local_edge_index, k_index) =
-                4.0 *
-                ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_tv(local_edge_index, k_index)) * inv_vert_vert_length_sqr[color] +
-                    (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(local_edge_index, k_index)) *
-                        inv_primal_edge_length_sqr[color]);
-        };
+    for (auto color{0}; color < 3; ++color) {
+        const auto E2C2V_0_c = E2C2V_0[color];
+        const auto E2C2V_1_c = E2C2V_1[color];
+        const auto E2C2V_2_c = E2C2V_2[color];
+        const auto E2C2V_3_c = E2C2V_3[color];
+        const double nabv_tang_wp = u_vert_gt_tv(E2C2V_0_c, k_index) * primal_normal_vert_v1_0[color] +
+                                    v_vert_gt_tv(E2C2V_0_c, k_index) * primal_normal_vert_v2_0[color] +
+                                    u_vert_gt_tv(E2C2V_1_c, k_index) * primal_normal_vert_v1_1[color] +
+                                    v_vert_gt_tv(E2C2V_1_c, k_index) * primal_normal_vert_v2_1[color];
+        const double nabv_norm_wp = u_vert_gt_tv(E2C2V_2_c, k_index) * primal_normal_vert_v1_2[color] +
+                                    v_vert_gt_tv(E2C2V_2_c, k_index) * primal_normal_vert_v2_2[color] +
+                                    u_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v1_3[color] +
+                                    v_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v2_3[color];
+        const auto local_edge_index = local_edge_index_start + color * inner_grid_size;
+        z_nabla4_e2_wp_gt_tv(local_edge_index, k_index) =
+            4.0 *
+            ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_tv(local_edge_index, k_index)) * inv_vert_vert_length_sqr[color] +
+                (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(local_edge_index, k_index)) * inv_primal_edge_length_sqr[color]);
     };
 };
 
 template <typename T>
-inline void nabla4_structured_torus_halo_gt<T>::run_gpu_helper() {
-    dim3 tblocks(block_dims_structured.x, block_dims_structured.y, block_dims_structured.z);
+inline void nabla4_structured_torus_halo_gt_naive<T>::run_gpu_helper() {
+    dim3 tblocks(block_dims_structured_naive.x, block_dims_structured_naive.y, block_dims_structured_naive.z);
     const index_type inner_grid_size = (x_dim - 2 * halo) * (y_dim - halo * 2);
-    dim3 grid((x_dim - 2 * halo + tblocks.x - 1) / tblocks.x, (y_dim - 2 * halo + tblocks.y - 1) / tblocks.y, 1);
-    run_gpu<<<grid, tblocks>>>(KDim,
+    dim3 grid((x_dim - 2 * halo + tblocks.x - 1) / tblocks.x,
+        (y_dim - 2 * halo + tblocks.y - 1) / tblocks.y,
+        (KDim + tblocks.z - 1) / tblocks.z);
+    run_gpu_naive<<<grid, tblocks>>>(KDim,
         x_dim,
         x_dim - 2 * halo,
         y_dim,
@@ -342,7 +342,7 @@ inline void nabla4_structured_torus_halo_gt<T>::run_gpu_helper() {
 };
 #else
 template <typename T>
-inline void nabla4_structured_torus_halo_gt<T>::run_gpu_helper() {
+inline void nabla4_structured_torus_halo_gt_naive<T>::run_gpu_helper() {
     throw std::runtime_error("GPU backend not enabled");
 };
 #endif
