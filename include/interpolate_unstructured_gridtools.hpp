@@ -33,6 +33,15 @@ constexpr block_dims block_dims_unstructured = get_block_dims_unstructured<index
 
 template <typename T>
 class interpolate_unstructured : public mo_intp_rbf_rbf_vec_interpol_vertex<T> {
+    using mo_intp_rbf_rbf_vec_interpol_vertex<T>::KDim;
+    using mo_intp_rbf_rbf_vec_interpol_vertex<T>::VertexDim;
+    using mo_intp_rbf_rbf_vec_interpol_vertex<T>::EdgeDim;
+    using mo_intp_rbf_rbf_vec_interpol_vertex<T>::p_e_in_gt_ctv;
+    using mo_intp_rbf_rbf_vec_interpol_vertex<T>::ptr_coeff_1_gt_ctv;
+    using mo_intp_rbf_rbf_vec_interpol_vertex<T>::ptr_coeff_2_gt_ctv;
+    using mo_intp_rbf_rbf_vec_interpol_vertex<T>::p_u_out_gt_ctv;
+    using mo_intp_rbf_rbf_vec_interpol_vertex<T>::p_v_out_gt_ctv;
+
   public:
     using neighbors_gt_t =
         decltype(gridtools::storage::builder<T>.dimensions(0, 6_c).template type<index_type>().build());
@@ -43,7 +52,7 @@ class interpolate_unstructured : public mo_intp_rbf_rbf_vec_interpol_vertex<T> {
 
     interpolate_unstructured(std::vector<std::array<index_type, 6>> v2e,
         std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim)
-        : mo_intp_rbf_rbf_vec_interpol_vertex(VertexDim, EdgeDim, KDim),
+        : mo_intp_rbf_rbf_vec_interpol_vertex<T>(VertexDim, EdgeDim, KDim),
         v2e_gt(storage::builder<T>.template type<index_type>().dimensions(v2e.size(), 6_c).initializer([&v2e](int i, int j) { return v2e[i][j]; }).build()),
         v2e_gt_ctv(v2e_gt->const_target_view())
     {};
@@ -52,7 +61,7 @@ class interpolate_unstructured : public mo_intp_rbf_rbf_vec_interpol_vertex<T> {
         std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim,
         std::vector<std::vector<WP_TYPE>> &p_e_in,
         std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
-        std::vector<std::vector<WP_TYPE>> &ptr_coeff_2) : mo_intp_rbf_rbf_vec_interpol_vertex(VertexDim, EdgeDim, KDim, p_e_in, ptr_coeff_1, ptr_coeff_2),
+        std::vector<std::vector<WP_TYPE>> &ptr_coeff_2) : mo_intp_rbf_rbf_vec_interpol_vertex<T>(VertexDim, EdgeDim, KDim, p_e_in, ptr_coeff_1, ptr_coeff_2),
         v2e_gt(storage::builder<T>.template type<index_type>().dimensions(v2e.size(), 6_c).initializer([&v2e](int i, int j) { return v2e[i][j]; }).build()),
         v2e_gt_ctv(v2e_gt->const_target_view())
     {};
@@ -125,6 +134,7 @@ class interpolate_unstructured : public mo_intp_rbf_rbf_vec_interpol_vertex<T> {
             };
         };
     };
+    void run_gpu_helper();
 
   public:
     /// Compute function timed for benchmarking

@@ -1,5 +1,7 @@
 #include <vector>
 
+#include "interpolate_structured_gridtools.hpp"
+#include "interpolate_unstructured_gridtools.hpp"
 #include "nabla4_structured_simple.hpp"
 #include "nabla4_structured_torus.hpp"
 #include "nabla4_structured_torus_gridtools.hpp"

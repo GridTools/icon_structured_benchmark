@@ -1,5 +1,6 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>
+#include <nanobind/stl/pair.h>
 #include <nanobind/stl/vector.h>
 
 #include "wrapper.hpp"
@@ -72,4 +73,7 @@ NB_MODULE(icon_benchmark, m) {
     m.def("nabla4_validate_structured_torus_gpu_gridtools_halo", &nabla4_validate_structured_torus_gpu_gridtools_halo);
     m.def("nabla4_validate_structured_torus_gpu_gridtools_halo_naive",
         &nabla4_validate_structured_torus_gpu_gridtools_halo_naive);
+    /// Interpolate
+    m.def("interpolate_validate_unstructured_cpu_ifirst", &interpolate_validate_unstructured_cpu_ifirst);
+    m.def("interpolate_validate_unstructured_cpu_kfirst", &interpolate_validate_unstructured_cpu_kfirst);
 }

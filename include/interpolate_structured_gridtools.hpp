@@ -35,7 +35,7 @@ template <typename T>
 class interpolate_structured : public mo_intp_rbf_rbf_vec_interpol_vertex<T> {
   public:
     interpolate_structured(std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim)
-        : mo_intp_rbf_rbf_vec_interpol_vertex(VertexDim, EdgeDim, KDim){};
+        : mo_intp_rbf_rbf_vec_interpol_vertex<T>(VertexDim, EdgeDim, KDim){};
 
     interpolate_structured(std::size_t VertexDim,
         std::size_t EdgeDim,
@@ -43,11 +43,12 @@ class interpolate_structured : public mo_intp_rbf_rbf_vec_interpol_vertex<T> {
         std::vector<std::vector<WP_TYPE>> &p_e_in,
         std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
         std::vector<std::vector<WP_TYPE>> &ptr_coeff_2)
-        : mo_intp_rbf_rbf_vec_interpol_vertex(VertexDim, EdgeDim, KDim, p_e_in, ptr_coeff_1, ptr_coeff_2){};
+        : mo_intp_rbf_rbf_vec_interpol_vertex<T>(VertexDim, EdgeDim, KDim, p_e_in, ptr_coeff_1, ptr_coeff_2){};
 
   private:
     void run_cpu_ifirst(){};
     void run_cpu_kfirst(){};
+    void run_gpu_helper();
 
   public:
     /// Compute function timed for benchmarking

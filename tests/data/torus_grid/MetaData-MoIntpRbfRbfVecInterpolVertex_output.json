@@ -1,0 +1,38 @@
+{
+  "field_map": {
+    "p_u_out": {
+      "dims": [12, 65],
+      "meta_info": null,
+      "type_id": 5
+    },
+    "p_v_out": {
+      "dims": [12, 65],
+      "meta_info": null,
+      "type_id": 5
+    }
+  },
+  "global_meta_info": null,
+  "prefix": "MoIntpRbfRbfVecInterpolVertex_output",
+  "savepoint_vector": {
+    "fields_per_savepoint": [
+      {
+        "OutputValidationTest": {
+          "p_u_out": 0,
+          "p_v_out": 0
+        }
+      }
+    ],
+    "savepoints": [
+      {
+        "meta_info": {
+          "time": {
+            "type_id": 2,
+            "value": 1
+          }
+        },
+        "name": "OutputValidationTest"
+      }
+    ]
+  },
+  "serialbox_version": 261
+}

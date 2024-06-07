@@ -1,0 +1,14 @@
+{
+  "archive_name": "Binary",
+  "archive_version": 0,
+  "fields_table": {
+    "p_u_out": [
+      [0, "77EC8D85392C230882ABD2A7A5A89EFA01FA754DE97B4E6ABFDE2F61FD92C1E"]
+    ],
+    "p_v_out": [
+      [0, "3E451723CD7953770C34457B69EA465E6C78BD33F9F355792A016271DB9A"]
+    ]
+  },
+  "hash_algorithm": "SHA256",
+  "serialbox_version": 261
+}

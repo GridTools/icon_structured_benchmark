@@ -1,0 +1,44 @@
+{
+  "field_map": {
+    "p_e_in": {
+      "dims": [36, 65],
+      "meta_info": null,
+      "type_id": 5
+    },
+    "ptr_coeff_1": {
+      "dims": [12, 6],
+      "meta_info": null,
+      "type_id": 5
+    },
+    "ptr_coeff_2": {
+      "dims": [12, 6],
+      "meta_info": null,
+      "type_id": 5
+    }
+  },
+  "global_meta_info": null,
+  "prefix": "MoIntpRbfRbfVecInterpolVertex_fields",
+  "savepoint_vector": {
+    "fields_per_savepoint": [
+      {
+        "ValidationTest": {
+          "p_e_in": 0,
+          "ptr_coeff_1": 0,
+          "ptr_coeff_2": 0
+        }
+      }
+    ],
+    "savepoints": [
+      {
+        "meta_info": {
+          "time": {
+            "type_id": 2,
+            "value": 1
+          }
+        },
+        "name": "ValidationTest"
+      }
+    ]
+  },
+  "serialbox_version": 261
+}

@@ -214,7 +214,8 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_naive(std::vector
         z_nabla2_e,
         inv_vert_vert_length,
         inv_primal_edge_length};
-    return run_validation<nabla4_unstructured<Data::ifirst>, naive>(nabla4_benchmark_object);
+    return run_validation<std::vector<std::vector<VP_TYPE>>, nabla4_unstructured<Data::ifirst>, naive>(
+        nabla4_benchmark_object);
 }
 
 std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_ifirst(
@@ -246,7 +247,8 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_ifirst(
         z_nabla2_e,
         inv_vert_vert_length,
         inv_primal_edge_length};
-    return run_validation<nabla4_unstructured<Data::ifirst>, cpu_ifirst>(nabla4_benchmark_object);
+    return run_validation<std::vector<std::vector<VP_TYPE>>, nabla4_unstructured<Data::ifirst>, cpu_ifirst>(
+        nabla4_benchmark_object);
 }
 
 std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_ifirst_gridtools(
@@ -278,7 +280,8 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_ifirst_gridto
         z_nabla2_e,
         inv_vert_vert_length,
         inv_primal_edge_length};
-    return run_validation<nabla4_unstructured_gt<storage::cpu_ifirst>, cpu_ifirst>(nabla4_benchmark_object);
+    return run_validation<std::vector<std::vector<VP_TYPE>>, nabla4_unstructured_gt<storage::cpu_ifirst>, cpu_ifirst>(
+        nabla4_benchmark_object);
 }
 
 std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_kfirst(
@@ -310,7 +313,8 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_kfirst(
         z_nabla2_e,
         inv_vert_vert_length,
         inv_primal_edge_length};
-    return run_validation<nabla4_unstructured<Data::kfirst>, cpu_kfirst>(nabla4_benchmark_object);
+    return run_validation<std::vector<std::vector<VP_TYPE>>, nabla4_unstructured<Data::kfirst>, cpu_kfirst>(
+        nabla4_benchmark_object);
 }
 
 std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_kfirst_gridtools(
@@ -342,7 +346,8 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_kfirst_gridto
         z_nabla2_e,
         inv_vert_vert_length,
         inv_primal_edge_length};
-    return run_validation<nabla4_unstructured_gt<storage::cpu_kfirst>, cpu_kfirst>(nabla4_benchmark_object);
+    return run_validation<std::vector<std::vector<VP_TYPE>>, nabla4_unstructured_gt<storage::cpu_kfirst>, cpu_kfirst>(
+        nabla4_benchmark_object);
 }
 
 #ifdef __CUDACC__
@@ -375,7 +380,8 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_gpu_gridtools(
         z_nabla2_e,
         inv_vert_vert_length,
         inv_primal_edge_length};
-    return run_validation<nabla4_unstructured_gt<storage::gpu>, gpu>(nabla4_benchmark_object);
+    return run_validation<std::vector<std::vector<VP_TYPE>>, nabla4_unstructured_gt<storage::gpu>, gpu>(
+        nabla4_benchmark_object);
 }
 
 std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_gpu_gridtools_naive(
@@ -407,7 +413,8 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_gpu_gridtools_nai
         z_nabla2_e,
         inv_vert_vert_length,
         inv_primal_edge_length};
-    return run_validation<nabla4_unstructured_gt_naive<storage::gpu>, gpu>(nabla4_benchmark_object);
+    return run_validation<std::vector<std::vector<VP_TYPE>>, nabla4_unstructured_gt_naive<storage::gpu>, gpu>(
+        nabla4_benchmark_object);
 }
 #else
 std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_gpu_gridtools(
@@ -525,7 +532,8 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_simple_naive(std::s
         z_nabla2_e,
         inv_vert_vert_length,
         inv_primal_edge_length};
-    return run_validation<nabla4_structured_simple<Data::ifirst>, naive>(nabla4_benchmark_object);
+    return run_validation<std::vector<std::vector<VP_TYPE>>, nabla4_structured_simple<Data::ifirst>, naive>(
+        nabla4_benchmark_object);
 }
 
 std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_simple_cpu_ifirst(std::size_t CellDim,
@@ -552,7 +560,8 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_simple_cpu_ifirst(s
         z_nabla2_e,
         inv_vert_vert_length,
         inv_primal_edge_length};
-    return run_validation<nabla4_structured_simple<Data::ifirst>, cpu_ifirst>(nabla4_benchmark_object);
+    return run_validation<std::vector<std::vector<VP_TYPE>>, nabla4_structured_simple<Data::ifirst>, cpu_ifirst>(
+        nabla4_benchmark_object);
 }
 
 std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_simple_cpu_kfirst(std::size_t CellDim,
@@ -579,7 +588,8 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_simple_cpu_kfirst(s
         z_nabla2_e,
         inv_vert_vert_length,
         inv_primal_edge_length};
-    return run_validation<nabla4_structured_simple<Data::kfirst>, cpu_kfirst>(nabla4_benchmark_object);
+    return run_validation<std::vector<std::vector<VP_TYPE>>, nabla4_structured_simple<Data::kfirst>, cpu_kfirst>(
+        nabla4_benchmark_object);
 }
 
 template <backend_impl I>
@@ -867,7 +877,8 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_naive(std::si
         z_nabla2_e,
         inv_vert_vert_length,
         inv_primal_edge_length};
-    return run_validation<nabla4_structured_torus<Data::ifirst>, naive>(nabla4_benchmark_object);
+    return run_validation<std::vector<std::vector<VP_TYPE>>, nabla4_structured_torus<Data::ifirst>, naive>(
+        nabla4_benchmark_object);
 }
 
 std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_cpu_ifirst(std::size_t CellDim,
@@ -898,7 +909,8 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_cpu_ifirst(st
         z_nabla2_e,
         inv_vert_vert_length,
         inv_primal_edge_length};
-    return run_validation<nabla4_structured_torus<Data::ifirst>, cpu_ifirst>(nabla4_benchmark_object);
+    return run_validation<std::vector<std::vector<VP_TYPE>>, nabla4_structured_torus<Data::ifirst>, cpu_ifirst>(
+        nabla4_benchmark_object);
 }
 
 std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_cpu_ifirst_gridtools(std::size_t CellDim,
@@ -929,7 +941,9 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_cpu_ifirst_gr
         z_nabla2_e,
         inv_vert_vert_length,
         inv_primal_edge_length};
-    return run_validation<nabla4_structured_torus_gt<storage::cpu_ifirst>, cpu_ifirst>(nabla4_benchmark_object);
+    return run_validation<std::vector<std::vector<VP_TYPE>>,
+        nabla4_structured_torus_gt<storage::cpu_ifirst>,
+        cpu_ifirst>(nabla4_benchmark_object);
 }
 
 std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_cpu_ifirst_gridtools_halo(index_type CellDim,
@@ -962,7 +976,9 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_cpu_ifirst_gr
         z_nabla2_e,
         inv_vert_vert_length,
         inv_primal_edge_length};
-    return run_validation<nabla4_structured_torus_halo_gt<storage::cpu_ifirst>, cpu_ifirst>(nabla4_benchmark_object);
+    return run_validation<std::vector<std::vector<VP_TYPE>>,
+        nabla4_structured_torus_halo_gt<storage::cpu_ifirst>,
+        cpu_ifirst>(nabla4_benchmark_object);
 }
 
 std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_cpu_kfirst(std::size_t CellDim,
@@ -993,7 +1009,8 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_cpu_kfirst(st
         z_nabla2_e,
         inv_vert_vert_length,
         inv_primal_edge_length};
-    return run_validation<nabla4_structured_torus<Data::kfirst>, cpu_kfirst>(nabla4_benchmark_object);
+    return run_validation<std::vector<std::vector<VP_TYPE>>, nabla4_structured_torus<Data::kfirst>, cpu_kfirst>(
+        nabla4_benchmark_object);
 }
 
 std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_cpu_kfirst_gridtools(std::size_t CellDim,
@@ -1024,7 +1041,9 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_cpu_kfirst_gr
         z_nabla2_e,
         inv_vert_vert_length,
         inv_primal_edge_length};
-    return run_validation<nabla4_structured_torus_gt<storage::cpu_kfirst>, cpu_kfirst>(nabla4_benchmark_object);
+    return run_validation<std::vector<std::vector<VP_TYPE>>,
+        nabla4_structured_torus_gt<storage::cpu_kfirst>,
+        cpu_kfirst>(nabla4_benchmark_object);
 }
 
 std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_cpu_kfirst_gridtools_halo(index_type CellDim,
@@ -1057,7 +1076,9 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_cpu_kfirst_gr
         z_nabla2_e,
         inv_vert_vert_length,
         inv_primal_edge_length};
-    return run_validation<nabla4_structured_torus_halo_gt<storage::cpu_kfirst>, cpu_kfirst>(nabla4_benchmark_object);
+    return run_validation<std::vector<std::vector<VP_TYPE>>,
+        nabla4_structured_torus_halo_gt<storage::cpu_kfirst>,
+        cpu_kfirst>(nabla4_benchmark_object);
 }
 
 #ifdef __CUDACC__
@@ -1091,7 +1112,8 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_gpu_gridtools
         z_nabla2_e,
         inv_vert_vert_length,
         inv_primal_edge_length};
-    return run_validation<nabla4_structured_torus_halo_gt<storage::gpu>, gpu>(nabla4_benchmark_object);
+    return run_validation<std::vector<std::vector<VP_TYPE>>, nabla4_structured_torus_halo_gt<storage::gpu>, gpu>(
+        nabla4_benchmark_object);
 }
 
 std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_gpu_gridtools_halo_naive(index_type CellDim,
@@ -1124,7 +1146,8 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_gpu_gridtools
         z_nabla2_e,
         inv_vert_vert_length,
         inv_primal_edge_length};
-    return run_validation<nabla4_structured_torus_halo_gt_naive<storage::gpu>, gpu>(nabla4_benchmark_object);
+    return run_validation<std::vector<std::vector<VP_TYPE>>, nabla4_structured_torus_halo_gt_naive<storage::gpu>, gpu>(
+        nabla4_benchmark_object);
 }
 #else
 std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_gpu_gridtools_halo(index_type CellDim,
@@ -1165,3 +1188,74 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_gpu_gridtools
     return {};
 }
 #endif
+
+std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>
+interpolate_validate_unstructured_cpu_ifirst(std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::vector<std::array<index_type, 6>> &v2e,
+    std::vector<std::vector<WP_TYPE>> &p_e_in,
+    std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
+    std::vector<std::vector<WP_TYPE>> &ptr_coeff_2) {
+    interpolate_unstructured<storage::cpu_ifirst> interpolate_benchmark_object{
+        v2e, VertexDim, EdgeDim, KDim, p_e_in, ptr_coeff_1, ptr_coeff_2};
+    return run_validation<std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>,
+        interpolate_unstructured<storage::cpu_ifirst>,
+        cpu_ifirst>(interpolate_benchmark_object);
+}
+
+std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>
+interpolate_validate_unstructured_cpu_kfirst(std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::vector<std::array<index_type, 6>> &v2e,
+    std::vector<std::vector<WP_TYPE>> &p_e_in,
+    std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
+    std::vector<std::vector<WP_TYPE>> &ptr_coeff_2) {
+    interpolate_unstructured<storage::cpu_kfirst> interpolate_benchmark_object{
+        v2e, VertexDim, EdgeDim, KDim, p_e_in, ptr_coeff_1, ptr_coeff_2};
+    return run_validation<std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>,
+        interpolate_unstructured<storage::cpu_kfirst>,
+        cpu_kfirst>(interpolate_benchmark_object);
+}
+
+template <backend_impl I>
+std::vector<double> interpolate_benchmark_unstructured(std::vector<std::array<index_type, 6>> &v2e,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    int repetitions,
+    int dry_runs) {
+    if constexpr (I == backend_impl::cpu_ifirst) {
+        return run_benchmark<interpolate_unstructured<storage::cpu_ifirst>, I>(
+            std::make_tuple(v2e, VertexDim, EdgeDim, KDim), repetitions, dry_runs);
+    } else if constexpr (I == backend_impl::cpu_kfirst) {
+        return run_benchmark<interpolate_unstructured<storage::cpu_kfirst>, I>(
+            std::make_tuple(v2e, VertexDim, EdgeDim, KDim), repetitions, dry_runs);
+#if defined(__CUDACC__)
+    } else if constexpr (I == backend_impl::gpu) {
+        return run_benchmark<interpolate_unstructured<storage::gpu>, I>(
+            std::make_tuple(v2e, VertexDim, EdgeDim, KDim), repetitions, dry_runs);
+#endif
+    } else {
+        throw std::runtime_error("Undefined backend implementation");
+    }
+}
+
+std::vector<double> interpolate_benchmark_unstructured_cpu_ifirst(std::vector<std::array<index_type, 6>> &v2e,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    int repetitions,
+    int dry_runs) {
+    return interpolate_benchmark_unstructured<cpu_ifirst>(v2e, VertexDim, EdgeDim, KDim, repetitions, dry_runs);
+}
+
+std::vector<double> interpolate_benchmark_unstructured_cpu_kfirst(std::vector<std::array<index_type, 6>> &v2e,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    int repetitions,
+    int dry_runs) {
+    return interpolate_benchmark_unstructured<cpu_kfirst>(v2e, VertexDim, EdgeDim, KDim, repetitions, dry_runs);
+}

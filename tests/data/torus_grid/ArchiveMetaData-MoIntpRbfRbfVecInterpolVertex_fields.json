@@ -1,0 +1,17 @@
+{
+  "archive_name": "Binary",
+  "archive_version": 0,
+  "fields_table": {
+    "p_e_in": [
+      [0, "4E1FD4E49541B4664AE165F0B92A1EBC8CAF955DC3EF3D521D283E6745BDDD2"]
+    ],
+    "ptr_coeff_1": [
+      [0, "554DE988A1B25668F58753C55A1B17C7775BE5BEF713C5266447126A39C12"]
+    ],
+    "ptr_coeff_2": [
+      [0, "BAAC6CEFA76092225CE0E955C741817A3C23B8462C8066587F1D5C1879C09EBB"]
+    ]
+  },
+  "hash_algorithm": "SHA256",
+  "serialbox_version": 261
+}
