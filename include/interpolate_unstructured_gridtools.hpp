@@ -76,7 +76,6 @@ class interpolate_unstructured : public mo_intp_rbf_rbf_vec_interpol_vertex<T> {
 #pragma GCC ivdep
 #endif
             for (index_type vertex_index = 0; vertex_index < vertices; ++vertex_index) {
-                const auto p_e_in_val = p_e_in_gt_ctv(vertex_index, k_index);
                 std::array<WP_TYPE, 6> u;
                 std::array<WP_TYPE, 6> v;
 #ifdef __clang__
@@ -85,8 +84,8 @@ class interpolate_unstructured : public mo_intp_rbf_rbf_vec_interpol_vertex<T> {
 #pragma GCC ivdep
 #endif
                 for (auto i{0}; i < 6; ++i) {
-                    u[i] = p_e_in_val * ptr_coeff_1_gt_ctv(vertex_index, i);
-                    v[i] = p_e_in_val * ptr_coeff_2_gt_ctv(vertex_index, i);
+                    u[i] = p_e_in_gt_ctv(v2e_gt_ctv(vertex_index, i), k_index) * ptr_coeff_1_gt_ctv(vertex_index, i);
+                    v[i] = p_e_in_gt_ctv(v2e_gt_ctv(vertex_index, i), k_index) * ptr_coeff_2_gt_ctv(vertex_index, i);
                 }
                 p_u_out_gt_ctv(vertex_index, k_index) = std::accumulate(u.begin(), u.end(), 0.0);
                 p_v_out_gt_ctv(vertex_index, k_index) = std::accumulate(v.begin(), v.end(), 0.0);
@@ -102,6 +101,7 @@ class interpolate_unstructured : public mo_intp_rbf_rbf_vec_interpol_vertex<T> {
         for (index_type vertex_index = 0; vertex_index < v2e_gt_ctv.lengths()[0]; ++vertex_index) {
             std::array<WP_TYPE, 6> coeff1;
             std::array<WP_TYPE, 6> coeff2;
+            std::array<index_type, 6> v2e;
 #ifdef __clang__
 #pragma clang loop unroll(enable) vectorize(assume_safety) interleave(enable)
 #elif defined(__GNUC__)
@@ -110,6 +110,7 @@ class interpolate_unstructured : public mo_intp_rbf_rbf_vec_interpol_vertex<T> {
             for (auto i{0}; i < 6; ++i) {
                 coeff1[i] = ptr_coeff_1_gt_ctv(vertex_index, i);
                 coeff2[i] = ptr_coeff_2_gt_ctv(vertex_index, i);
+                v2e[i] = v2e_gt_ctv(vertex_index, i);
             }
 #ifdef __clang__
 #pragma clang loop unroll(enable) vectorize(assume_safety) interleave(enable)
@@ -117,7 +118,6 @@ class interpolate_unstructured : public mo_intp_rbf_rbf_vec_interpol_vertex<T> {
 #pragma GCC ivdep
 #endif
             for (index_type k_index{}; k_index < KDim; ++k_index) {
-                const auto p_e_in_val = p_e_in_gt_ctv(vertex_index, k_index);
                 std::array<WP_TYPE, 6> u;
                 std::array<WP_TYPE, 6> v;
 #ifdef __clang__
@@ -126,8 +126,8 @@ class interpolate_unstructured : public mo_intp_rbf_rbf_vec_interpol_vertex<T> {
 #pragma GCC ivdep
 #endif
                 for (auto i{0}; i < 6; ++i) {
-                    u[i] = p_e_in_val * coeff1[i];
-                    v[i] = p_e_in_val * coeff2[i];
+                    u[i] = p_e_in_gt_ctv(v2e[i], k_index) * coeff1[i];
+                    v[i] = p_e_in_gt_ctv(v2e[i], k_index) * coeff2[i];
                 }
                 p_u_out_gt_ctv(vertex_index, k_index) = std::accumulate(u.begin(), u.end(), 0.0);
                 p_v_out_gt_ctv(vertex_index, k_index) = std::accumulate(v.begin(), v.end(), 0.0);
