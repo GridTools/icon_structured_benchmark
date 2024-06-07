@@ -234,17 +234,17 @@ __global__ void __launch_bounds__(block_dims_structured.size) run_gpu(index_type
     if (i >= x_dim - halo || j >= y_dim - halo) {
         return;
     }
-    const auto i_j = j * x_dim + i;
-    const auto i_jp1 = (j + 1) * x_dim + i;
-    const auto im1_jp1 = (j + 1) * x_dim + i - 1;
-    const auto ip1_j = j * x_dim + i + 1;
-    const auto ip1_jm1 = (j - 1) * x_dim + i + 1;
-    const auto i_jm1 = (j - 1) * x_dim + i;
+    const index_type i_j = j * x_dim + i;
+    const index_type i_jp1 = (j + 1) * x_dim + i;
+    const index_type im1_jp1 = (j + 1) * x_dim + i - 1;
+    const index_type ip1_j = j * x_dim + i + 1;
+    const index_type ip1_jm1 = (j - 1) * x_dim + i + 1;
+    const index_type i_jm1 = (j - 1) * x_dim + i;
     const index_type E2C2V_0[3] = {i_j, i_j, i_j};
     const index_type E2C2V_1[3] = {i_jp1, ip1_j, ip1_jm1};
     const index_type E2C2V_2[3] = {im1_jp1, i_jp1, ip1_j};
     const index_type E2C2V_3[3] = {ip1_j, ip1_jm1, i_jm1};
-    const auto local_edge_index_start = (j - halo) * x_dim_inner + i - halo;
+    const index_type local_edge_index_start = (j - halo) * x_dim_inner + i - halo;
     const index_type E2ECV_0[3] = {i_j, i_j + total_grid_size, i_j + 2 * total_grid_size};
     const index_type E2ECV_1[3] = {E2ECV_0[0] + global_edges_per_orientation,
         E2ECV_0[1] + global_edges_per_orientation,
