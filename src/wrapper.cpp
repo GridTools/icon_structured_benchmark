@@ -1219,6 +1219,21 @@ interpolate_validate_unstructured_cpu_kfirst(std::size_t VertexDim,
         cpu_kfirst>(interpolate_benchmark_object);
 }
 
+std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>
+interpolate_validate_unstructured_gpu(std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::vector<std::array<index_type, 6>> &v2e,
+    std::vector<std::vector<WP_TYPE>> &p_e_in,
+    std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
+    std::vector<std::vector<WP_TYPE>> &ptr_coeff_2) {
+    interpolate_unstructured<storage::gpu> interpolate_benchmark_object{
+        v2e, VertexDim, EdgeDim, KDim, p_e_in, ptr_coeff_1, ptr_coeff_2};
+    return run_validation<std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>,
+        interpolate_unstructured<storage::gpu>,
+        gpu>(interpolate_benchmark_object);
+}
+
 template <backend_impl I>
 std::vector<double> interpolate_benchmark_unstructured(std::vector<std::array<index_type, 6>> &v2e,
     std::size_t VertexDim,
@@ -1258,4 +1273,13 @@ std::vector<double> interpolate_benchmark_unstructured_cpu_kfirst(std::vector<st
     int repetitions,
     int dry_runs) {
     return interpolate_benchmark_unstructured<cpu_kfirst>(v2e, VertexDim, EdgeDim, KDim, repetitions, dry_runs);
+}
+
+std::vector<double> interpolate_benchmark_unstructured_gpu(std::vector<std::array<index_type, 6>> &v2e,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    int repetitions,
+    int dry_runs) {
+    return interpolate_benchmark_unstructured<gpu>(v2e, VertexDim, EdgeDim, KDim, repetitions, dry_runs);
 }

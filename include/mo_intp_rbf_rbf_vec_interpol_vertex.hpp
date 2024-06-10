@@ -44,8 +44,8 @@ struct mo_intp_rbf_rbf_vec_interpol_vertex {
     const data_store_2d_ctv_WP_t p_e_in_gt_ctv;
     const data_store_2d_coef_ctv_WP_t ptr_coeff_1_gt_ctv;
     const data_store_2d_coef_ctv_WP_t ptr_coeff_2_gt_ctv;
-    const data_store_2d_tv_WP_t p_u_out_gt_ctv;
-    const data_store_2d_tv_WP_t p_v_out_gt_ctv;
+    const data_store_2d_tv_WP_t p_u_out_gt_tv;
+    const data_store_2d_tv_WP_t p_v_out_gt_tv;
 
   public:
     mo_intp_rbf_rbf_vec_interpol_vertex(std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim)
@@ -58,8 +58,8 @@ struct mo_intp_rbf_rbf_vec_interpol_vertex {
         p_e_in_gt_ctv(p_e_in_gt->const_target_view()),
         ptr_coeff_1_gt_ctv(ptr_coeff_1_gt->const_target_view()),
         ptr_coeff_2_gt_ctv(ptr_coeff_2_gt->const_target_view()),
-        p_u_out_gt_ctv(p_u_out_gt->target_view()),
-        p_v_out_gt_ctv(p_v_out_gt->target_view())
+        p_u_out_gt_tv(p_u_out_gt->target_view()),
+        p_v_out_gt_tv(p_v_out_gt->target_view())
     {};
 
     mo_intp_rbf_rbf_vec_interpol_vertex(std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim,
@@ -74,8 +74,8 @@ struct mo_intp_rbf_rbf_vec_interpol_vertex {
         p_e_in_gt_ctv(p_e_in_gt->const_target_view()),
         ptr_coeff_1_gt_ctv(ptr_coeff_1_gt->const_target_view()),
         ptr_coeff_2_gt_ctv(ptr_coeff_2_gt->const_target_view()),
-        p_u_out_gt_ctv(p_u_out_gt->target_view()),
-        p_v_out_gt_ctv(p_v_out_gt->target_view())
+        p_u_out_gt_tv(p_u_out_gt->target_view()),
+        p_v_out_gt_tv(p_v_out_gt->target_view())
     {};
 
     std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>> get_output() {
