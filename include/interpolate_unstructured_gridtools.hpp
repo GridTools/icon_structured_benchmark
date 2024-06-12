@@ -4,31 +4,31 @@
 
 #if defined(__CUDACC__)
 template <typename T>
-constexpr block_dims get_block_dims_unstructured() {
+constexpr block_dims get_block_dims_unstructured_interpol() {
     throw std::runtime_error("Undefined block dimensions for type " + T::name + " in GPU backend");
 };
 
 template <>
-constexpr block_dims get_block_dims_unstructured<std::size_t>() {
+constexpr block_dims get_block_dims_unstructured_interpol<std::size_t>() {
     return {32, 4, 1, 128};
 };
 
 template <>
-constexpr block_dims get_block_dims_unstructured<std::int64_t>() {
+constexpr block_dims get_block_dims_unstructured_interpol<std::int64_t>() {
     return {32, 8, 1, 256};
 };
 
 template <>
-constexpr block_dims get_block_dims_unstructured<std::uint32_t>() {
+constexpr block_dims get_block_dims_unstructured_interpol<std::uint32_t>() {
     return {32, 9, 1, 288};
 };
 
 template <>
-constexpr block_dims get_block_dims_unstructured<int>() {
+constexpr block_dims get_block_dims_unstructured_interpol<int>() {
     return {32, 9, 1, 288};
 };
 
-constexpr block_dims block_dims_unstructured = get_block_dims_unstructured<index_type>();
+constexpr block_dims block_dims_unstructured_interpol = get_block_dims_unstructured_interpol<index_type>();
 #endif
 
 template <typename T>
@@ -39,8 +39,8 @@ class interpolate_unstructured : public mo_intp_rbf_rbf_vec_interpol_vertex<T> {
     using mo_intp_rbf_rbf_vec_interpol_vertex<T>::p_e_in_gt_ctv;
     using mo_intp_rbf_rbf_vec_interpol_vertex<T>::ptr_coeff_1_gt_ctv;
     using mo_intp_rbf_rbf_vec_interpol_vertex<T>::ptr_coeff_2_gt_ctv;
-    using mo_intp_rbf_rbf_vec_interpol_vertex<T>::p_u_out_gt_ctv;
-    using mo_intp_rbf_rbf_vec_interpol_vertex<T>::p_v_out_gt_ctv;
+    using mo_intp_rbf_rbf_vec_interpol_vertex<T>::p_u_out_gt_tv;
+    using mo_intp_rbf_rbf_vec_interpol_vertex<T>::p_v_out_gt_tv;
 
   public:
     using neighbors_gt_t =
@@ -87,8 +87,8 @@ class interpolate_unstructured : public mo_intp_rbf_rbf_vec_interpol_vertex<T> {
                     u[i] = p_e_in_gt_ctv(v2e_gt_ctv(vertex_index, i), k_index) * ptr_coeff_1_gt_ctv(vertex_index, i);
                     v[i] = p_e_in_gt_ctv(v2e_gt_ctv(vertex_index, i), k_index) * ptr_coeff_2_gt_ctv(vertex_index, i);
                 }
-                p_u_out_gt_ctv(vertex_index, k_index) = std::accumulate(u.begin(), u.end(), 0.0);
-                p_v_out_gt_ctv(vertex_index, k_index) = std::accumulate(v.begin(), v.end(), 0.0);
+                p_u_out_gt_tv(vertex_index, k_index) = std::accumulate(u.begin(), u.end(), 0.0);
+                p_v_out_gt_tv(vertex_index, k_index) = std::accumulate(v.begin(), v.end(), 0.0);
             };
         };
     };
@@ -129,8 +129,8 @@ class interpolate_unstructured : public mo_intp_rbf_rbf_vec_interpol_vertex<T> {
                     u[i] = p_e_in_gt_ctv(v2e[i], k_index) * coeff1[i];
                     v[i] = p_e_in_gt_ctv(v2e[i], k_index) * coeff2[i];
                 }
-                p_u_out_gt_ctv(vertex_index, k_index) = std::accumulate(u.begin(), u.end(), 0.0);
-                p_v_out_gt_ctv(vertex_index, k_index) = std::accumulate(v.begin(), v.end(), 0.0);
+                p_u_out_gt_tv(vertex_index, k_index) = std::accumulate(u.begin(), u.end(), 0.0);
+                p_v_out_gt_tv(vertex_index, k_index) = std::accumulate(v.begin(), v.end(), 0.0);
             };
         };
     };
@@ -153,13 +153,36 @@ class interpolate_unstructured : public mo_intp_rbf_rbf_vec_interpol_vertex<T> {
 };
 
 #if defined(__CUDACC__)
-__global__ void __launch_bounds__(block_dims_unstructured.size, 2) run_gpu(){};
+__global__ void __launch_bounds__(block_dims_unstructured_interpol.size) run_gpu_interpol(index_type VertexDim,
+    index_type KDim,
+    interpolate_unstructured<storage::gpu>::neighbors_gt_ctv_t v2e_gt_ctv,
+    interpolate_unstructured<storage::gpu>::data_store_2d_ctv_WP_t p_e_in_gt_ctv,
+    interpolate_unstructured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_1_gt_ctv,
+    interpolate_unstructured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_2_gt_ctv,
+    interpolate_unstructured<storage::gpu>::data_store_2d_tv_WP_t p_u_out_gt_tv,
+    interpolate_unstructured<storage::gpu>::data_store_2d_tv_WP_t p_v_out_gt_tv) {
+    const auto vertex_index = blockIdx.x * blockDim.x + threadIdx.x;
+    const auto k_index = blockIdx.y * blockDim.y + threadIdx.y;
+    if (vertex_index >= VertexDim || k_index >= KDim)
+        return;
+    for (int i{0}; i < 6; ++i) {
+        p_u_out_gt_tv(vertex_index, k_index) += p_e_in_gt_ctv(v2e_gt_ctv(vertex_index, i), k_index) * ptr_coeff_1_gt_ctv(vertex_index, i);
+        p_v_out_gt_tv(vertex_index, k_index) += p_e_in_gt_ctv(v2e_gt_ctv(vertex_index, i), k_index) * ptr_coeff_2_gt_ctv(vertex_index, i);
+    }
+};
 
 template <typename T>
 inline void interpolate_unstructured<T>::run_gpu_helper() {
-    dim3 tblocks(block_dims_unstructured.x, block_dims_unstructured.y, block_dims_unstructured.z);
-    dim3 grid((e2c2v_gt->const_host_view().lengths()[0] + tblocks.x - 1) / tblocks.x, 1, 1);
-    run_gpu<<<grid, tblocks>>>();
+    dim3 tblocks(block_dims_unstructured_interpol.x, block_dims_unstructured_interpol.y, block_dims_unstructured_interpol.z);
+    dim3 grid((v2e_gt->const_host_view().lengths()[0] + tblocks.x - 1) / tblocks.x, (KDim + tblocks.y - 1) / tblocks.y, 1);
+    run_gpu_interpol<<<grid, tblocks>>>(v2e_gt->const_host_view().lengths()[0],
+        KDim,
+        v2e_gt_ctv,
+        p_e_in_gt_ctv,
+        ptr_coeff_1_gt_ctv,
+        ptr_coeff_2_gt_ctv,
+        p_u_out_gt_tv,
+        p_v_out_gt_tv);
     GT_CUDA_CHECK(cudaGetLastError());
 };
 #else
