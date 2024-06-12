@@ -64,4 +64,22 @@ if __name__ == "__main__":
     # Generate violin plots for each torus size
     for torus_size, runtime_data in runtimes_output.items():
         for k in runtime_data.keys():
+            # sort runtime_data[k] in the following order: nabla4_benchmark_unstructured_gtfn_gpu, nabla4_benchmark_unstructured_gpu_gridtools_naive, nabla4_benchmark_structured_torus_gpu_gridtools_halo_naive, nabla4_benchmark_unstructured_gpu_gridtools, nabla4_benchmark_structured_torus_gpu_gridtools_halo
+            runtime_data[k] = {
+                "nabla4_benchmark_unstructured_gtfn_gpu": runtime_data[k][
+                    "nabla4_benchmark_unstructured_gtfn_gpu"
+                ],
+                "nabla4_benchmark_unstructured_gpu_gridtools_naive": runtime_data[k][
+                    "nabla4_benchmark_unstructured_gpu_gridtools_naive"
+                ],
+                "nabla4_benchmark_structured_torus_gpu_gridtools_halo_naive": runtime_data[
+                    k
+                ]["nabla4_benchmark_structured_torus_gpu_gridtools_halo_naive"],
+                "nabla4_benchmark_unstructured_gpu_gridtools": runtime_data[k][
+                    "nabla4_benchmark_unstructured_gpu_gridtools"
+                ],
+                "nabla4_benchmark_structured_torus_gpu_gridtools_halo": runtime_data[k][
+                    "nabla4_benchmark_structured_torus_gpu_gridtools_halo"
+                ],
+            }
             generate_violin_plots(runtime_data[k], k, torus_size, output_directory)

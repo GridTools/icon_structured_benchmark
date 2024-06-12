@@ -199,7 +199,7 @@ def generate_violin_plots(data, k, torus_name, output_dir):
                     if "gtfn" in implementation
                     else "cuda_naive"
                     if "naive" in implementation
-                    else "cuda",
+                    else "cuda_kblock",
                 )
             )
             median_value = np.median(runtimes)
