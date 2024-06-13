@@ -73,7 +73,6 @@ def generate_v2e(x_dim, y_dim):
     v2e = np.zeros((y_dim_internal * x_dim_internal, 6), dtype=np.int32)
     for i in range(internal_halo, x_dim - internal_halo):
         for j in range(internal_halo, y_dim - internal_halo):
-            print("i: {} j: {}".format(i, j))
             i_internal = i - internal_halo
             j_internal = j - internal_halo
             i_j = i + j * x_dim
@@ -321,8 +320,7 @@ def run_benchmarks():
     v2e_generated = generate_v2e(
         grid_cartesian_dimensions[1], grid_cartesian_dimensions[0]
     )
-    print("v2e_filtered: {}".format(v2e_filtered))
-    print("v2e_generated: {}".format(v2e_generated))
+
     assert np.allclose(v2e_filtered, v2e_generated)
 
     if args.sanity_checks:
