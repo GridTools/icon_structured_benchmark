@@ -66,74 +66,75 @@ def get_torus_grid(filename, num_levels, transformation, e2c2v_ordering="per-ver
     return simple_grid
 
 
-def filter_edge_vector(
-    vector, grid_cartesian_dimensions, e2c2v_ordering="per-vertex", halo=2
-):
-    filtered_vector = []
-    if e2c2v_ordering == "per-vertex":
-        for i in range(grid_cartesian_dimensions[0]):
-            for j in range(grid_cartesian_dimensions[1]):
-                if (
-                    i > halo - 1
-                    and j > halo - 1
-                    and i < grid_cartesian_dimensions[0] - halo
-                    and j < grid_cartesian_dimensions[1] - halo
-                ):
-                    filtered_vector.append(
-                        vector[(i * grid_cartesian_dimensions[1] + j) * 3]
-                    )
-                    filtered_vector.append(
-                        vector[(i * grid_cartesian_dimensions[1] + j) * 3 + 1]
-                    )
-                    filtered_vector.append(
-                        vector[(i * grid_cartesian_dimensions[1] + j) * 3 + 2]
-                    )
-    else:
-        for i in range(grid_cartesian_dimensions[0]):
-            for j in range(grid_cartesian_dimensions[1]):
-                if (
-                    i > halo - 1
-                    and j > halo - 1
-                    and i < grid_cartesian_dimensions[0] - halo
-                    and j < grid_cartesian_dimensions[1] - halo
-                ):
-                    filtered_vector.append(
-                        vector[(i * grid_cartesian_dimensions[1] + j)]
-                    )
-        for i in range(grid_cartesian_dimensions[0]):
-            for j in range(grid_cartesian_dimensions[1]):
-                if (
-                    i > halo - 1
-                    and j > halo - 1
-                    and i < grid_cartesian_dimensions[0] - halo
-                    and j < grid_cartesian_dimensions[1] - halo
-                ):
-                    filtered_vector.append(
-                        vector[
-                            (i * grid_cartesian_dimensions[1] + j)
-                            + grid_cartesian_dimensions[0]
-                            * grid_cartesian_dimensions[1]
-                        ]
-                    )
-        for i in range(grid_cartesian_dimensions[0]):
-            for j in range(grid_cartesian_dimensions[1]):
-                if (
-                    i > halo - 1
-                    and j > halo - 1
-                    and i < grid_cartesian_dimensions[0] - halo
-                    and j < grid_cartesian_dimensions[1] - halo
-                ):
-                    filtered_vector.append(
-                        vector[
-                            (i * grid_cartesian_dimensions[1] + j)
-                            + (
-                                grid_cartesian_dimensions[0]
-                                * grid_cartesian_dimensions[1]
-                            )
-                            * 2
-                        ]
-                    )
-    return np.array(filtered_vector)
+def generate_v2e(x_dim, y_dim):
+    internal_halo = 1
+    y_dim_internal = y_dim - 2 * internal_halo
+    x_dim_internal = x_dim - 2 * internal_halo
+    v2e = np.zeros((y_dim_internal * x_dim_internal, 6), dtype=np.int32)
+    for i in range(internal_halo, x_dim - internal_halo):
+        for j in range(internal_halo, y_dim - internal_halo):
+            print("i: {} j: {}".format(i, j))
+            i_internal = i - internal_halo
+            j_internal = j - internal_halo
+            i_j = i + j * x_dim
+            i_jm1 = i + (j - 1) * x_dim
+            v2e[j_internal * x_dim_internal + i_internal][0] = (x_dim * y_dim) + i_j - 1
+            v2e[j_internal * x_dim_internal + i_internal][1] = (x_dim * y_dim) + i_j
+            v2e[j_internal * x_dim_internal + i_internal][2] = i_jm1
+            v2e[j_internal * x_dim_internal + i_internal][3] = i_j
+            v2e[j_internal * x_dim_internal + i_internal][4] = 2 * (x_dim * y_dim) + i_j
+            v2e[j_internal * x_dim_internal + i_internal][5] = (
+                2 * (x_dim * y_dim) + i_j + x_dim - 1
+            )
+    return v2e
+
+
+def filter_v2e(v2e_table, x_dim, y_dim):
+    e2e_table = []
+    for i in range(x_dim * y_dim):
+        e2e_table.append(i * 3)
+        e2e_table.append(i * 3 + 1)
+        e2e_table.append(
+            i * 3 + 3 * x_dim + 2
+            if i * 3 + 2 + 3 * x_dim < x_dim * y_dim * 3
+            else i * 3 + 3 * x_dim + 2 - x_dim * y_dim * 3
+        )
+
+    for edges in v2e_table:
+        for edge_id in range(6):
+            edges[edge_id] = e2e_table[edges[edge_id]]
+
+    e2e_table_orientation_sorting = []
+    for i in range(0, x_dim * y_dim * 3):
+        e2e_table_orientation_sorting.append(i // 3 + (i % 3) * x_dim * y_dim)
+
+    for edges in v2e_table:
+        for edge_id in range(6):
+            edges[edge_id] = e2e_table_orientation_sorting[edges[edge_id]]
+    return v2e_table
+
+
+def halo_filter(v2e_table, halo, x_dim, y_dim):
+    filtered_v2e_table = []
+    for i in range(x_dim):
+        for j in range(y_dim):
+            if i >= halo and i < x_dim - halo and j >= halo and j < y_dim - halo:
+                vertex_id = i + j * x_dim
+                filtered_v2e_table.append(v2e_table[vertex_id])
+    filtered_v2e_table = np.array(filtered_v2e_table)
+    assert filtered_v2e_table.shape == ((x_dim - 2 * halo) * (y_dim - 2 * halo), 6)
+    return filtered_v2e_table
+
+
+def transpose_ij(v2e_table, x_dim, y_dim):
+    transposed_v2e_table = []
+    for j in range(y_dim):
+        for i in range(x_dim):
+            vertex_id = i * y_dim + j
+            transposed_v2e_table.append(v2e_table[vertex_id])
+    transposed_v2e_table = np.array(transposed_v2e_table)
+    assert transposed_v2e_table.shape == (x_dim * y_dim, 6)
+    return transposed_v2e_table
 
 
 def compare_ndarrays(a, b):
@@ -155,165 +156,6 @@ def compare_ndarrays(a, b):
         sys.exit(1)
 
 
-def run_gtfn(repetitions, dry_runs, e2c2v, e2ecv, nabla4_data, grid, backend):
-    if backend == "gt:gpu":
-        import cupy as cp  # type: ignore [import-not-found]
-
-        float_dtype = cp.float64
-        int_dtype = cp.int32
-    else:
-        float_dtype = np.float64
-        int_dtype = np.int32
-
-    from gt4py.storage import zeros, from_array  # type: ignore [import-not-found]
-
-    z_nabla4_e2_wp_gtfn = zeros(
-        shape=(len(e2c2v), grid.num_levels), dtype=float_dtype, backend=backend
-    )
-
-    if backend == "gt:gpu":
-        runtime = nabla4_gtfn.calculate_nabla4_gpu(
-            repetitions,
-            dry_runs,
-            (
-                from_array(
-                    np.array(nabla4_data.u_vert).T, dtype=float_dtype, backend=backend
-                ),
-                (0, 0),
-            ),
-            (
-                from_array(
-                    np.array(nabla4_data.v_vert).T, dtype=float_dtype, backend=backend
-                ),
-                (0, 0),
-            ),
-            (
-                from_array(
-                    np.array(nabla4_data.primal_normal_vert_v1),
-                    dtype=float_dtype,
-                    backend=backend,
-                ),
-                (0,),
-            ),
-            (
-                from_array(
-                    np.array(nabla4_data.primal_normal_vert_v2),
-                    dtype=float_dtype,
-                    backend=backend,
-                ),
-                (0,),
-            ),
-            (
-                from_array(
-                    np.array(nabla4_data.z_nabla2_e).T,
-                    dtype=float_dtype,
-                    backend=backend,
-                ),
-                (0, 0),
-            ),
-            (
-                from_array(
-                    np.array(nabla4_data.inv_vert_vert_length),
-                    dtype=float_dtype,
-                    backend=backend,
-                ),
-                (0,),
-            ),
-            (
-                from_array(
-                    np.array(nabla4_data.inv_primal_edge_length),
-                    dtype=float_dtype,
-                    backend=backend,
-                ),
-                (0,),
-            ),
-            (z_nabla4_e2_wp_gtfn, (0, 0)),
-            0,
-            len(e2c2v),
-            0,
-            grid.num_levels,
-            (
-                from_array(np.array(e2c2v), dtype=int_dtype, backend=backend),
-                (0, 0),
-            ),
-            (
-                from_array(np.array(e2ecv), dtype=int_dtype, backend=backend),
-                (0, 0),
-            ),
-        )
-    else:
-        runtime = nabla4_gtfn.calculate_nabla4_cpu(
-            repetitions,
-            dry_runs,
-            (
-                from_array(
-                    np.array(nabla4_data.u_vert).T, dtype=float_dtype, backend=backend
-                ),
-                (0, 0),
-            ),
-            (
-                from_array(
-                    np.array(nabla4_data.v_vert).T, dtype=float_dtype, backend=backend
-                ),
-                (0, 0),
-            ),
-            (
-                from_array(
-                    np.array(nabla4_data.primal_normal_vert_v1),
-                    dtype=float_dtype,
-                    backend=backend,
-                ),
-                (0,),
-            ),
-            (
-                from_array(
-                    np.array(nabla4_data.primal_normal_vert_v2),
-                    dtype=float_dtype,
-                    backend=backend,
-                ),
-                (0,),
-            ),
-            (
-                from_array(
-                    np.array(nabla4_data.z_nabla2_e).T,
-                    dtype=float_dtype,
-                    backend=backend,
-                ),
-                (0, 0),
-            ),
-            (
-                from_array(
-                    np.array(nabla4_data.inv_vert_vert_length),
-                    dtype=float_dtype,
-                    backend=backend,
-                ),
-                (0,),
-            ),
-            (
-                from_array(
-                    np.array(nabla4_data.inv_primal_edge_length),
-                    dtype=float_dtype,
-                    backend=backend,
-                ),
-                (0,),
-            ),
-            (z_nabla4_e2_wp_gtfn, (0, 0)),
-            0,
-            len(e2c2v),
-            0,
-            grid.num_levels,
-            (
-                from_array(np.array(e2c2v), dtype=int_dtype, backend=backend),
-                (0, 0),
-            ),
-            (
-                from_array(np.array(e2ecv), dtype=int_dtype, backend=backend),
-                (0, 0),
-            ),
-        )
-    return z_nabla4_e2_wp_gtfn, runtime
-
-
 def run_sanity_checks(
     v2e, nvertices, nedges, nlevels, lon_dim, lat_dim, backend="all_cpu", halo=2
 ):
@@ -321,7 +163,10 @@ def run_sanity_checks(
     p_e_in = np.random.rand(nedges, nlevels)
     ptr_coeff_1 = np.random.rand(nvertices, 6)
     ptr_coeff_2 = np.random.rand(nvertices, 6)
-    p_u_out_ref, p_v_out_ref = icon_benchmark.interpolate_validate_unstructured_cpu_ifirst(
+    (
+        p_u_out_ref,
+        p_v_out_ref,
+    ) = icon_benchmark.interpolate_validate_unstructured_cpu_ifirst(
         nvertices,
         nedges,
         nlevels,
@@ -334,7 +179,10 @@ def run_sanity_checks(
 
     if backend in ["all_cpu", "cpu_kfirst"]:
         print("Running unstructured cpu_kfirst sanity check")
-        p_u_out_cpu_kfirst, p_v_out_cpu_kfirst = icon_benchmark.interpolate_validate_unstructured_cpu_kfirst(
+        (
+            p_u_out_cpu_kfirst,
+            p_v_out_cpu_kfirst,
+        ) = icon_benchmark.interpolate_validate_unstructured_cpu_kfirst(
             nvertices,
             nedges,
             nlevels,
@@ -349,7 +197,7 @@ def run_sanity_checks(
 
     if backend in ["all_gpu", "gpu"]:
         print("Running unstructured gpu sanity check")
-        p_u_out_gpu, p_v_out_gpu= icon_benchmark.interpolate_validate_unstructured_gpu(
+        p_u_out_gpu, p_v_out_gpu = icon_benchmark.interpolate_validate_unstructured_gpu(
             nvertices,
             nedges,
             nlevels,
@@ -455,6 +303,27 @@ def run_benchmarks():
             args.halo,
         )
     )
+
+    v2e_filtered = transpose_ij(
+        halo_filter(
+            filter_v2e(
+                torus_grid.get_offset_provider("V2E").table,
+                grid_cartesian_dimensions[1],
+                grid_cartesian_dimensions[0],
+            ),
+            args.halo,
+            grid_cartesian_dimensions[1],
+            grid_cartesian_dimensions[0],
+        ),
+        grid_cartesian_dimensions[1] - 2 * args.halo,
+        grid_cartesian_dimensions[0] - 2 * args.halo,
+    )
+    v2e_generated = generate_v2e(
+        grid_cartesian_dimensions[1], grid_cartesian_dimensions[0]
+    )
+    print("v2e_filtered: {}".format(v2e_filtered))
+    print("v2e_generated: {}".format(v2e_generated))
+    assert np.allclose(v2e_filtered, v2e_generated)
 
     if args.sanity_checks:
         run_sanity_checks(
