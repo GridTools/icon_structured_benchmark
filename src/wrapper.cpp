@@ -1314,3 +1314,20 @@ interpolate_validate_structured_cpu_ifirst(std::size_t VertexDim,
         interpolate_structured<storage::cpu_ifirst>,
         cpu_ifirst>(interpolate_benchmark_object);
 }
+
+std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>
+interpolate_validate_structured_cpu_kfirst(std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    index_type longitude_dim,
+    index_type latitude_dim,
+    index_type halo,
+    std::vector<std::vector<WP_TYPE>> &p_e_in,
+    std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
+    std::vector<std::vector<WP_TYPE>> &ptr_coeff_2) {
+    interpolate_structured<storage::cpu_kfirst> interpolate_benchmark_object{
+        VertexDim, EdgeDim, KDim, longitude_dim, latitude_dim, halo, p_e_in, ptr_coeff_1, ptr_coeff_2};
+    return run_validation<std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>,
+        interpolate_structured<storage::cpu_kfirst>,
+        cpu_kfirst>(interpolate_benchmark_object);
+}

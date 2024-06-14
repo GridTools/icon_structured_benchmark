@@ -93,12 +93,12 @@ class interpolate_structured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
     };
     void run_cpu_ifirst() {
         for (index_type k_index{}; k_index < KDim; ++k_index) {
+            for (index_type j = halo; j < y_dim - halo; ++j) {
 #ifdef __clang__
 #pragma clang loop unroll(enable) vectorize(assume_safety) interleave(enable)
 #elif defined(__GNUC__)
 #pragma GCC ivdep
 #endif
-            for (index_type j = halo; j < y_dim - halo; ++j) {
                 for (index_type i = halo; i < x_dim - halo; ++i) {
                     const index_type vertex_index = i + j * x_dim;
                     const index_type vertex_index_internal = i - halo + (j - halo) * (x_dim - 2 * halo);
@@ -106,9 +106,9 @@ class interpolate_structured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
                     std::array<WP_TYPE, 6> v;
                     const std::array<index_type, 6> v2e{get_v2e(i, j)};
 #ifdef __clang__
-#pragma clang loop unroll(enable) vectorize(assume_safety) interleave(enable)
+#pragma clang loop unroll(full)
 #elif defined(__GNUC__)
-#pragma GCC ivdep
+#pragma GCC unroll 6
 #endif
                     for (auto i{0}; i < 6; ++i) {
                         u[i] = p_e_in_gt_ctv(v2e[i], k_index) * ptr_coeff_1_gt_ctv(vertex_index_internal, i);
@@ -120,7 +120,51 @@ class interpolate_structured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
             };
         };
     };
-    void run_cpu_kfirst(){};
+    void run_cpu_kfirst() {
+        for (index_type j = halo; j < y_dim - halo; ++j) {
+#ifdef __clang__
+#pragma clang loop unroll(enable) vectorize(assume_safety) interleave(enable)
+#elif defined(__GNUC__)
+#pragma GCC ivdep
+#endif
+            for (index_type i = halo; i < x_dim - halo; ++i) {
+                const index_type vertex_index = i + j * x_dim;
+                const index_type vertex_index_internal = i - halo + (j - halo) * (x_dim - 2 * halo);
+                std::array<WP_TYPE, 6> u;
+                std::array<WP_TYPE, 6> v;
+                const std::array<index_type, 6> v2e{get_v2e(i, j)};
+                std::array<WP_TYPE, 6> coeff1;
+                std::array<WP_TYPE, 6> coeff2;
+#ifdef __clang__
+#pragma clang loop unroll(full)
+#elif defined(__GNUC__)
+#pragma GCC unroll 6
+#endif
+                for (auto i{0}; i < 6; ++i) {
+                    coeff1[i] = ptr_coeff_1_gt_ctv(vertex_index_internal, i);
+                    coeff2[i] = ptr_coeff_2_gt_ctv(vertex_index_internal, i);
+                }
+#ifdef __clang__
+#pragma clang loop unroll(enable) vectorize(assume_safety) interleave(enable)
+#elif defined(__GNUC__)
+#pragma GCC ivdep
+#endif
+                for (index_type k_index{}; k_index < KDim; ++k_index) {
+#ifdef __clang__
+#pragma clang loop unroll(full)
+#elif defined(__GNUC__)
+#pragma GCC unroll 6
+#endif
+                    for (auto i{0}; i < 6; ++i) {
+                        u[i] = p_e_in_gt_ctv(v2e[i], k_index) * coeff1[i];
+                        v[i] = p_e_in_gt_ctv(v2e[i], k_index) * coeff2[i];
+                    }
+                    p_u_out_gt_tv(vertex_index_internal, k_index) = std::accumulate(u.begin(), u.end(), 0.0);
+                    p_v_out_gt_tv(vertex_index_internal, k_index) = std::accumulate(v.begin(), v.end(), 0.0);
+                };
+            };
+        };
+    };
     void run_gpu_helper();
 
   public:
@@ -144,12 +188,12 @@ __global__ void __launch_bounds__(block_dims_structured_interpol.size, 2) run_gp
 
 template <typename S>
 inline void interpolate_structured<S>::run_gpu_helper() {
-    // dim3 tblocks(block_dims_structured_interpol.x, block_dims_structured_interpol.y,
-    // block_dims_structured_interpol.z); const index_type inner_grid_size = (x_dim - 2 * halo) * (y_dim - halo *
-    // 2); dim3 grid((x_dim - 2 * halo + tblocks.x - 1) / tblocks.x,
-    //     (y_dim - 2 * halo + tblocks.y - 1) / tblocks.y,
-    //     (KDim + tblocks.z - 1) / tblocks.z);
-    // run_gpu_interpol<<<grid, tblocks>>>();
+    dim3 tblocks(block_dims_structured_interpol.x, block_dims_structured_interpol.y, block_dims_structured_interpol.z);
+    const index_type inner_grid_size = (x_dim - 2 * halo) * (y_dim - halo * 2);
+    dim3 grid((x_dim - 2 * halo + tblocks.x - 1) / tblocks.x,
+        (y_dim - 2 * halo + tblocks.y - 1) / tblocks.y,
+        (KDim + tblocks.z - 1) / tblocks.z);
+    run_gpu_interpol<<<grid, tblocks>>>();
     GT_CUDA_CHECK(cudaGetLastError());
 };
 #else

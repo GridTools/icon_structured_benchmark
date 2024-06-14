@@ -79,9 +79,9 @@ class interpolate_unstructured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
                 std::array<WP_TYPE, 6> u;
                 std::array<WP_TYPE, 6> v;
 #ifdef __clang__
-#pragma clang loop unroll(enable) vectorize(assume_safety) interleave(enable)
+#pragma clang loop unroll(full)
 #elif defined(__GNUC__)
-#pragma GCC ivdep
+#pragma GCC unroll 6
 #endif
                 for (auto i{0}; i < 6; ++i) {
                     u[i] = p_e_in_gt_ctv(v2e_gt_ctv(vertex_index, i), k_index) * ptr_coeff_1_gt_ctv(vertex_index, i);
@@ -103,9 +103,9 @@ class interpolate_unstructured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
             std::array<WP_TYPE, 6> coeff2;
             std::array<index_type, 6> v2e;
 #ifdef __clang__
-#pragma clang loop unroll(enable) vectorize(assume_safety) interleave(enable)
+#pragma clang loop unroll(full)
 #elif defined(__GNUC__)
-#pragma GCC ivdep
+#pragma GCC unroll 6
 #endif
             for (auto i{0}; i < 6; ++i) {
                 coeff1[i] = ptr_coeff_1_gt_ctv(vertex_index, i);
@@ -121,9 +121,9 @@ class interpolate_unstructured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
                 std::array<WP_TYPE, 6> u;
                 std::array<WP_TYPE, 6> v;
 #ifdef __clang__
-#pragma clang loop unroll(enable) vectorize(assume_safety) interleave(enable)
+#pragma clang loop unroll(full)
 #elif defined(__GNUC__)
-#pragma GCC ivdep
+#pragma GCC unroll 6
 #endif
                 for (auto i{0}; i < 6; ++i) {
                     u[i] = p_e_in_gt_ctv(v2e[i], k_index) * coeff1[i];

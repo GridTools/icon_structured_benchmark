@@ -229,6 +229,26 @@ def run_sanity_checks(
         assert np.allclose(p_v_out_cpu_ifirst, p_v_out_ref)
         print("structured cpu_ifirst sanity check passed")
 
+    if backend in ["all_cpu", "cpu_kfirst"]:
+        print("Running structured cpu_kfirst sanity check")
+        (
+            p_u_out_cpu_kfirst,
+            p_v_out_cpu_kfirst,
+        ) = icon_benchmark.interpolate_validate_structured_cpu_kfirst(
+            nvertices,
+            nedges,
+            nlevels,
+            lon_dim,
+            lat_dim,
+            halo,
+            p_e_in,
+            ptr_coeff_1,
+            ptr_coeff_2,
+        )
+        assert np.allclose(p_u_out_cpu_kfirst, p_u_out_ref)
+        assert np.allclose(p_v_out_cpu_kfirst, p_v_out_ref)
+        print("structured cpu_ifirst sanity check passed")
+
     print("Sanity checks pass")
 
 
