@@ -87,8 +87,6 @@ class interpolate_unstructured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
                     u[i] = p_e_in_gt_ctv(v2e_gt_ctv(vertex_index, i), k_index) * ptr_coeff_1_gt_ctv(vertex_index, i);
                     v[i] = p_e_in_gt_ctv(v2e_gt_ctv(vertex_index, i), k_index) * ptr_coeff_2_gt_ctv(vertex_index, i);
                 }
-                std::cout << "u[" << vertex_index << "] = [" << u[0] << " " << u[1] << " " << u[2] << " " << u[3] << " "
-                          << u[4] << " " << u[5] << "]" << std::endl;
                 p_u_out_gt_tv(vertex_index, k_index) = std::accumulate(u.begin(), u.end(), 0.0);
                 p_v_out_gt_tv(vertex_index, k_index) = std::accumulate(v.begin(), v.end(), 0.0);
             };
