@@ -77,4 +77,5 @@ NB_MODULE(icon_benchmark, m) {
     m.def("interpolate_validate_unstructured_cpu_ifirst", &interpolate_validate_unstructured_cpu_ifirst);
     m.def("interpolate_validate_unstructured_cpu_kfirst", &interpolate_validate_unstructured_cpu_kfirst);
     m.def("interpolate_validate_unstructured_gpu", &interpolate_validate_unstructured_gpu);
+    m.def("interpolate_validate_structured_cpu_ifirst", &interpolate_validate_structured_cpu_ifirst);
 }

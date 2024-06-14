@@ -517,8 +517,8 @@ std::vector<double> interpolate_benchmark_unstructured_cpu_kfirst(std::vector<st
     int repetitions = 101,
     int dry_runs = 1);
 
-std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>
-interpolate_validate_unstructured_gpu(std::size_t VertexDim,
+std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>> interpolate_validate_unstructured_gpu(
+    std::size_t VertexDim,
     std::size_t EdgeDim,
     std::size_t KDim,
     std::vector<std::array<index_type, 6>> &v2e,
@@ -532,3 +532,14 @@ std::vector<double> interpolate_benchmark_unstructured_gpu(std::vector<std::arra
     std::size_t KDim,
     int repetitions = 101,
     int dry_runs = 1);
+
+std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>
+interpolate_validate_structured_cpu_ifirst(std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    index_type longitude_dim,
+    index_type latitude_dim,
+    index_type halo,
+    std::vector<std::vector<WP_TYPE>> &p_e_in,
+    std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
+    std::vector<std::vector<WP_TYPE>> &ptr_coeff_2);

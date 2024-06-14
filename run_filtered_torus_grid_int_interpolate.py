@@ -160,8 +160,8 @@ def run_sanity_checks(
 ):
     print("Generating validation data")
     p_e_in = np.random.rand(nedges, nlevels)
-    ptr_coeff_1 = np.random.rand(nvertices, 6)
-    ptr_coeff_2 = np.random.rand(nvertices, 6)
+    ptr_coeff_1 = np.random.rand(nedges, 6)
+    ptr_coeff_2 = np.random.rand(nedges, 6)
     (
         p_u_out_ref,
         p_v_out_ref,
@@ -208,6 +208,26 @@ def run_sanity_checks(
         assert np.allclose(p_u_out_gpu, p_u_out_ref)
         assert np.allclose(p_v_out_gpu, p_v_out_ref)
         print("unstructured gpu sanity check passed")
+
+    if backend in ["all_cpu", "cpu_ifirst"]:
+        print("Running structured cpu_ifirst sanity check")
+        (
+            p_u_out_cpu_ifirst,
+            p_v_out_cpu_ifirst,
+        ) = icon_benchmark.interpolate_validate_structured_cpu_ifirst(
+            nvertices,
+            nedges,
+            nlevels,
+            lon_dim,
+            lat_dim,
+            halo,
+            p_e_in,
+            ptr_coeff_1,
+            ptr_coeff_2,
+        )
+        assert np.allclose(p_u_out_cpu_ifirst, p_u_out_ref)
+        assert np.allclose(p_v_out_cpu_ifirst, p_v_out_ref)
+        print("structured cpu_ifirst sanity check passed")
 
     print("Sanity checks pass")
 
@@ -261,7 +281,7 @@ def parse_arguments():
         help="E2C2V ordering",
     )
     parser.add_argument(
-        "--halo", type=int, default=2, help="Halo size for structured grids"
+        "--halo", type=int, default=1, help="Halo size for structured grids"
     )
 
     args = parser.parse_args()
@@ -325,7 +345,7 @@ def run_benchmarks():
 
     if args.sanity_checks:
         run_sanity_checks(
-            torus_grid.get_offset_provider("V2E").table,
+            v2e_filtered,
             torus_grid.num_vertices,
             torus_grid.num_edges,
             torus_grid.num_levels,

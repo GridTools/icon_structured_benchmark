@@ -1219,8 +1219,9 @@ interpolate_validate_unstructured_cpu_kfirst(std::size_t VertexDim,
         cpu_kfirst>(interpolate_benchmark_object);
 }
 
-std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>
-interpolate_validate_unstructured_gpu(std::size_t VertexDim,
+#ifdef __CUDACC__
+std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>> interpolate_validate_unstructured_gpu(
+    std::size_t VertexDim,
     std::size_t EdgeDim,
     std::size_t KDim,
     std::vector<std::array<index_type, 6>> &v2e,
@@ -1233,6 +1234,19 @@ interpolate_validate_unstructured_gpu(std::size_t VertexDim,
         interpolate_unstructured<storage::gpu>,
         gpu>(interpolate_benchmark_object);
 }
+#else
+std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>> interpolate_validate_unstructured_gpu(
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::vector<std::array<index_type, 6>> &v2e,
+    std::vector<std::vector<WP_TYPE>> &p_e_in,
+    std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
+    std::vector<std::vector<WP_TYPE>> &ptr_coeff_2) {
+    throw std::runtime_error("GPU backend not enabled");
+    return {};
+}
+#endif
 
 template <backend_impl I>
 std::vector<double> interpolate_benchmark_unstructured(std::vector<std::array<index_type, 6>> &v2e,
@@ -1282,4 +1296,21 @@ std::vector<double> interpolate_benchmark_unstructured_gpu(std::vector<std::arra
     int repetitions,
     int dry_runs) {
     return interpolate_benchmark_unstructured<gpu>(v2e, VertexDim, EdgeDim, KDim, repetitions, dry_runs);
+}
+
+std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>
+interpolate_validate_structured_cpu_ifirst(std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    index_type longitude_dim,
+    index_type latitude_dim,
+    index_type halo,
+    std::vector<std::vector<WP_TYPE>> &p_e_in,
+    std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
+    std::vector<std::vector<WP_TYPE>> &ptr_coeff_2) {
+    interpolate_structured<storage::cpu_ifirst> interpolate_benchmark_object{
+        VertexDim, EdgeDim, KDim, longitude_dim, latitude_dim, halo, p_e_in, ptr_coeff_1, ptr_coeff_2};
+    return run_validation<std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>,
+        interpolate_structured<storage::cpu_ifirst>,
+        cpu_ifirst>(interpolate_benchmark_object);
 }

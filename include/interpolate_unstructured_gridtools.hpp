@@ -3,9 +3,9 @@
 #include "mo_intp_rbf_rbf_vec_interpol_vertex.hpp"
 
 #if defined(__CUDACC__)
-template <typename T>
+template <typename S>
 constexpr block_dims get_block_dims_unstructured_interpol() {
-    throw std::runtime_error("Undefined block dimensions for type " + T::name + " in GPU backend");
+    throw std::runtime_error("Undefined block dimensions for type " + S::name + " in GPU backend");
 };
 
 template <>
@@ -31,29 +31,29 @@ constexpr block_dims get_block_dims_unstructured_interpol<int>() {
 constexpr block_dims block_dims_unstructured_interpol = get_block_dims_unstructured_interpol<index_type>();
 #endif
 
-template <typename T>
-class interpolate_unstructured : public mo_intp_rbf_rbf_vec_interpol_vertex<T> {
-    using mo_intp_rbf_rbf_vec_interpol_vertex<T>::KDim;
-    using mo_intp_rbf_rbf_vec_interpol_vertex<T>::VertexDim;
-    using mo_intp_rbf_rbf_vec_interpol_vertex<T>::EdgeDim;
-    using mo_intp_rbf_rbf_vec_interpol_vertex<T>::p_e_in_gt_ctv;
-    using mo_intp_rbf_rbf_vec_interpol_vertex<T>::ptr_coeff_1_gt_ctv;
-    using mo_intp_rbf_rbf_vec_interpol_vertex<T>::ptr_coeff_2_gt_ctv;
-    using mo_intp_rbf_rbf_vec_interpol_vertex<T>::p_u_out_gt_tv;
-    using mo_intp_rbf_rbf_vec_interpol_vertex<T>::p_v_out_gt_tv;
+template <typename S>
+class interpolate_unstructured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
+    using mo_intp_rbf_rbf_vec_interpol_vertex<S>::KDim;
+    using mo_intp_rbf_rbf_vec_interpol_vertex<S>::VertexDim;
+    using mo_intp_rbf_rbf_vec_interpol_vertex<S>::EdgeDim;
+    using mo_intp_rbf_rbf_vec_interpol_vertex<S>::p_e_in_gt_ctv;
+    using mo_intp_rbf_rbf_vec_interpol_vertex<S>::ptr_coeff_1_gt_ctv;
+    using mo_intp_rbf_rbf_vec_interpol_vertex<S>::ptr_coeff_2_gt_ctv;
+    using mo_intp_rbf_rbf_vec_interpol_vertex<S>::p_u_out_gt_tv;
+    using mo_intp_rbf_rbf_vec_interpol_vertex<S>::p_v_out_gt_tv;
 
   public:
     using neighbors_gt_t =
-        decltype(gridtools::storage::builder<T>.dimensions(0, 6_c).template type<index_type>().build());
+        decltype(gridtools::storage::builder<S>.dimensions(0, 6_c).template type<index_type>().build());
     using neighbors_gt_ctv_t =
-        decltype(gridtools::storage::builder<T>.dimensions(0, 6_c).template type<index_type>().build()->const_target_view());
+        decltype(gridtools::storage::builder<S>.dimensions(0, 6_c).template type<index_type>().build()->const_target_view());
     neighbors_gt_t v2e_gt;
     neighbors_gt_ctv_t v2e_gt_ctv;
 
     interpolate_unstructured(std::vector<std::array<index_type, 6>> v2e,
         std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim)
-        : mo_intp_rbf_rbf_vec_interpol_vertex<T>(VertexDim, EdgeDim, KDim),
-        v2e_gt(storage::builder<T>.template type<index_type>().dimensions(v2e.size(), 6_c).initializer([&v2e](int i, int j) { return v2e[i][j]; }).build()),
+        : mo_intp_rbf_rbf_vec_interpol_vertex<S>(VertexDim, EdgeDim, KDim, v2e.size()),
+        v2e_gt(storage::builder<S>.template type<index_type>().dimensions(v2e.size(), 6_c).initializer([&v2e](int i, int j) { return v2e[i][j]; }).build()),
         v2e_gt_ctv(v2e_gt->const_target_view())
     {};
 
@@ -61,8 +61,8 @@ class interpolate_unstructured : public mo_intp_rbf_rbf_vec_interpol_vertex<T> {
         std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim,
         std::vector<std::vector<WP_TYPE>> &p_e_in,
         std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
-        std::vector<std::vector<WP_TYPE>> &ptr_coeff_2) : mo_intp_rbf_rbf_vec_interpol_vertex<T>(VertexDim, EdgeDim, KDim, p_e_in, ptr_coeff_1, ptr_coeff_2),
-        v2e_gt(storage::builder<T>.template type<index_type>().dimensions(v2e.size(), 6_c).initializer([&v2e](int i, int j) { return v2e[i][j]; }).build()),
+        std::vector<std::vector<WP_TYPE>> &ptr_coeff_2) : mo_intp_rbf_rbf_vec_interpol_vertex<S>(VertexDim, EdgeDim, KDim, v2e.size(), p_e_in, ptr_coeff_1, ptr_coeff_2),
+        v2e_gt(storage::builder<S>.template type<index_type>().dimensions(v2e.size(), 6_c).initializer([&v2e](int i, int j) { return v2e[i][j]; }).build()),
         v2e_gt_ctv(v2e_gt->const_target_view())
     {};
 
@@ -87,6 +87,8 @@ class interpolate_unstructured : public mo_intp_rbf_rbf_vec_interpol_vertex<T> {
                     u[i] = p_e_in_gt_ctv(v2e_gt_ctv(vertex_index, i), k_index) * ptr_coeff_1_gt_ctv(vertex_index, i);
                     v[i] = p_e_in_gt_ctv(v2e_gt_ctv(vertex_index, i), k_index) * ptr_coeff_2_gt_ctv(vertex_index, i);
                 }
+                std::cout << "u[" << vertex_index << "] = [" << u[0] << " " << u[1] << " " << u[2] << " " << u[3] << " "
+                          << u[4] << " " << u[5] << "]" << std::endl;
                 p_u_out_gt_tv(vertex_index, k_index) = std::accumulate(u.begin(), u.end(), 0.0);
                 p_v_out_gt_tv(vertex_index, k_index) = std::accumulate(v.begin(), v.end(), 0.0);
             };
@@ -166,15 +168,19 @@ __global__ void __launch_bounds__(block_dims_unstructured_interpol.size) run_gpu
     if (vertex_index >= VertexDim || k_index >= KDim)
         return;
     for (int i{0}; i < 6; ++i) {
-        p_u_out_gt_tv(vertex_index, k_index) += p_e_in_gt_ctv(v2e_gt_ctv(vertex_index, i), k_index) * ptr_coeff_1_gt_ctv(vertex_index, i);
-        p_v_out_gt_tv(vertex_index, k_index) += p_e_in_gt_ctv(v2e_gt_ctv(vertex_index, i), k_index) * ptr_coeff_2_gt_ctv(vertex_index, i);
+        p_u_out_gt_tv(vertex_index, k_index) +=
+            p_e_in_gt_ctv(v2e_gt_ctv(vertex_index, i), k_index) * ptr_coeff_1_gt_ctv(vertex_index, i);
+        p_v_out_gt_tv(vertex_index, k_index) +=
+            p_e_in_gt_ctv(v2e_gt_ctv(vertex_index, i), k_index) * ptr_coeff_2_gt_ctv(vertex_index, i);
     }
 };
 
-template <typename T>
-inline void interpolate_unstructured<T>::run_gpu_helper() {
-    dim3 tblocks(block_dims_unstructured_interpol.x, block_dims_unstructured_interpol.y, block_dims_unstructured_interpol.z);
-    dim3 grid((v2e_gt->const_host_view().lengths()[0] + tblocks.x - 1) / tblocks.x, (KDim + tblocks.y - 1) / tblocks.y, 1);
+template <typename S>
+inline void interpolate_unstructured<S>::run_gpu_helper() {
+    dim3 tblocks(
+        block_dims_unstructured_interpol.x, block_dims_unstructured_interpol.y, block_dims_unstructured_interpol.z);
+    dim3 grid(
+        (v2e_gt->const_host_view().lengths()[0] + tblocks.x - 1) / tblocks.x, (KDim + tblocks.y - 1) / tblocks.y, 1);
     run_gpu_interpol<<<grid, tblocks>>>(v2e_gt->const_host_view().lengths()[0],
         KDim,
         v2e_gt_ctv,
@@ -186,8 +192,8 @@ inline void interpolate_unstructured<T>::run_gpu_helper() {
     GT_CUDA_CHECK(cudaGetLastError());
 };
 #else
-template <typename T>
-inline void interpolate_unstructured<T>::run_gpu_helper() {
+template <typename S>
+inline void interpolate_unstructured<S>::run_gpu_helper() {
     throw std::runtime_error("GPU backend not enabled");
 };
 #endif
