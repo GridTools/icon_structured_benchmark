@@ -249,6 +249,26 @@ def run_sanity_checks(
         assert np.allclose(p_v_out_cpu_kfirst, p_v_out_ref)
         print("structured cpu_ifirst sanity check passed")
 
+    if backend in ["all_gpu", "gpu"]:
+        print("Running structured gpu sanity check")
+        (
+            p_u_out_gpu,
+            p_v_out_gpu,
+        ) = icon_benchmark.interpolate_validate_structured_gpu(
+            nvertices,
+            nedges,
+            nlevels,
+            lon_dim,
+            lat_dim,
+            halo,
+            p_e_in,
+            ptr_coeff_1,
+            ptr_coeff_2,
+        )
+        assert np.allclose(p_u_out_gpu, p_u_out_ref)
+        assert np.allclose(p_v_out_gpu, p_v_out_ref)
+        print("structured gpu sanity check passed")
+
     print("Sanity checks pass")
 
 
