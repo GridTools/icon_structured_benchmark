@@ -1298,6 +1298,67 @@ std::vector<double> interpolate_benchmark_unstructured_gpu(std::vector<std::arra
     return interpolate_benchmark_unstructured<gpu>(v2e, VertexDim, EdgeDim, KDim, repetitions, dry_runs);
 }
 
+template <backend_impl I>
+std::vector<double> interpolate_benchmark_structured(std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    index_type longitude_dim,
+    index_type latitude_dim,
+    index_type halo,
+    int repetitions,
+    int dry_runs) {
+    if constexpr (I == backend_impl::cpu_ifirst) {
+        return run_benchmark<interpolate_structured<storage::cpu_ifirst>, I>(
+            std::make_tuple(VertexDim, EdgeDim, KDim, longitude_dim, latitude_dim, halo), repetitions, dry_runs);
+    } else if constexpr (I == backend_impl::cpu_kfirst) {
+        return run_benchmark<interpolate_structured<storage::cpu_kfirst>, I>(
+            std::make_tuple(VertexDim, EdgeDim, KDim, longitude_dim, latitude_dim, halo), repetitions, dry_runs);
+#if defined(__CUDACC__)
+    } else if constexpr (I == backend_impl::gpu) {
+        return run_benchmark<interpolate_structured<storage::gpu>, I>(
+            std::make_tuple(VertexDim, EdgeDim, KDim, longitude_dim, latitude_dim, halo), repetitions, dry_runs);
+#endif
+    } else {
+        throw std::runtime_error("Undefined backend implementation");
+    }
+}
+
+std::vector<double> interpolate_benchmark_structured_cpu_ifirst(std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    index_type longitude_dim,
+    index_type latitude_dim,
+    index_type halo,
+    int repetitions,
+    int dry_runs) {
+    return interpolate_benchmark_structured<cpu_ifirst>(
+        VertexDim, EdgeDim, KDim, longitude_dim, latitude_dim, halo, repetitions, dry_runs);
+}
+
+std::vector<double> interpolate_benchmark_structured_cpu_kfirst(std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    index_type longitude_dim,
+    index_type latitude_dim,
+    index_type halo,
+    int repetitions,
+    int dry_runs) {
+    return interpolate_benchmark_structured<cpu_kfirst>(
+        VertexDim, EdgeDim, KDim, longitude_dim, latitude_dim, halo, repetitions, dry_runs);
+}
+
+std::vector<double> interpolate_benchmark_structured_gpu(std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    index_type longitude_dim,
+    index_type latitude_dim,
+    index_type halo,
+    int repetitions,
+    int dry_runs) {
+    return interpolate_benchmark_structured<gpu>(
+        VertexDim, EdgeDim, KDim, longitude_dim, latitude_dim, halo, repetitions, dry_runs);
+}
+
 std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>
 interpolate_validate_structured_cpu_ifirst(std::size_t VertexDim,
     std::size_t EdgeDim,
