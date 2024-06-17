@@ -190,7 +190,9 @@ __global__ void __launch_bounds__(block_dims_structured_interpol_naive.size) run
 
 template <typename S>
 inline void interpolate_structured_naive<S>::run_gpu_helper() {
-    dim3 tblocks(block_dims_structured_interpol_naive.x, block_dims_structured_interpol_naive.y, block_dims_structured_interpol_naive.z);
+    dim3 tblocks(block_dims_structured_interpol_naive.x,
+        block_dims_structured_interpol_naive.y,
+        block_dims_structured_interpol_naive.z);
     const index_type inner_grid_size = (x_dim - 2 * halo) * (y_dim - halo * 2);
     dim3 grid((x_dim - 2 * halo + tblocks.x - 1) / tblocks.x,
         (y_dim - 2 * halo + tblocks.y - 1) / tblocks.y,

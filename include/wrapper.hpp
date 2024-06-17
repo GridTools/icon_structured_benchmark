@@ -526,8 +526,8 @@ std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>> 
     std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
     std::vector<std::vector<WP_TYPE>> &ptr_coeff_2);
 
-std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>> interpolate_validate_unstructured_gpu_naive(
-    std::size_t VertexDim,
+std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>
+interpolate_validate_unstructured_gpu_naive(std::size_t VertexDim,
     std::size_t EdgeDim,
     std::size_t KDim,
     std::vector<std::array<index_type, 6>> &v2e,
@@ -600,8 +600,8 @@ std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>> 
     std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
     std::vector<std::vector<WP_TYPE>> &ptr_coeff_2);
 
-std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>> interpolate_validate_structured_gpu_naive(
-    std::size_t VertexDim,
+std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>
+interpolate_validate_structured_gpu_naive(std::size_t VertexDim,
     std::size_t EdgeDim,
     std::size_t KDim,
     index_type longitude_dim,

@@ -153,14 +153,15 @@ class interpolate_unstructured_naive : public mo_intp_rbf_rbf_vec_interpol_verte
 };
 
 #if defined(__CUDACC__)
-__global__ void __launch_bounds__(block_dims_unstructured_interpol_naive.size) run_gpu_interpol_naive(index_type VertexDim,
-    index_type KDim,
-    interpolate_unstructured<storage::gpu>::neighbors_gt_ctv_t v2e_gt_ctv,
-    interpolate_unstructured<storage::gpu>::data_store_2d_ctv_WP_t p_e_in_gt_ctv,
-    interpolate_unstructured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_1_gt_ctv,
-    interpolate_unstructured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_2_gt_ctv,
-    interpolate_unstructured<storage::gpu>::data_store_2d_tv_WP_t p_u_out_gt_tv,
-    interpolate_unstructured<storage::gpu>::data_store_2d_tv_WP_t p_v_out_gt_tv) {
+__global__ void __launch_bounds__(block_dims_unstructured_interpol_naive.size)
+    run_gpu_interpol_naive(index_type VertexDim,
+        index_type KDim,
+        interpolate_unstructured<storage::gpu>::neighbors_gt_ctv_t v2e_gt_ctv,
+        interpolate_unstructured<storage::gpu>::data_store_2d_ctv_WP_t p_e_in_gt_ctv,
+        interpolate_unstructured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_1_gt_ctv,
+        interpolate_unstructured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_2_gt_ctv,
+        interpolate_unstructured<storage::gpu>::data_store_2d_tv_WP_t p_u_out_gt_tv,
+        interpolate_unstructured<storage::gpu>::data_store_2d_tv_WP_t p_v_out_gt_tv) {
     const auto vertex_index = blockIdx.x * blockDim.x + threadIdx.x;
     const auto k_index = blockIdx.y * blockDim.y + threadIdx.y;
     if (vertex_index >= VertexDim || k_index >= KDim)
@@ -176,8 +177,9 @@ __global__ void __launch_bounds__(block_dims_unstructured_interpol_naive.size) r
 
 template <typename S>
 inline void interpolate_unstructured_naive<S>::run_gpu_helper() {
-    dim3 tblocks(
-        block_dims_unstructured_interpol_naive.x, block_dims_unstructured_interpol_naive.y, block_dims_unstructured_interpol_naive.z);
+    dim3 tblocks(block_dims_unstructured_interpol_naive.x,
+        block_dims_unstructured_interpol_naive.y,
+        block_dims_unstructured_interpol_naive.z);
     dim3 grid(
         (v2e_gt->const_host_view().lengths()[0] + tblocks.x - 1) / tblocks.x, (KDim + tblocks.y - 1) / tblocks.y, 1);
     run_gpu_interpol_naive<<<grid, tblocks>>>(v2e_gt->const_host_view().lengths()[0],

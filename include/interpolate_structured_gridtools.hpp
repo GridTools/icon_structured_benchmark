@@ -31,7 +31,8 @@ constexpr block_dims get_block_dims_structured_interpol<int>() {
 constexpr block_dims block_dims_structured_interpol = get_block_dims_structured_interpol<index_type>();
 #endif
 
-GT_FORCE_INLINE constexpr std::array<index_type, 6> get_v2e(const int i, const int j, const index_type x_dim, const index_type y_dim) {
+GT_FORCE_INLINE constexpr std::array<index_type, 6> get_v2e(
+    const int i, const int j, const index_type x_dim, const index_type y_dim) {
     const index_type i_j = i + j * x_dim;
     const index_type i_jm1 = i + (j - 1) * x_dim;
     return {(x_dim * y_dim) + i_j - 1,
@@ -199,10 +200,8 @@ __global__ void __launch_bounds__(block_dims_structured_interpol.size) run_gpu_i
     for (auto k_index{blockIdx.z * blockDim.z + threadIdx.z}; k_index < KDim; k_index += gridDim.z * blockDim.z) {
 #pragma unroll
         for (int i{0}; i < 6; ++i) {
-            p_u_out_gt_tv(vertex_index_internal, k_index) +=
-                p_e_in_gt_ctv(v2e[i], k_index) * coeff1[i];
-            p_v_out_gt_tv(vertex_index_internal, k_index) +=
-                p_e_in_gt_ctv(v2e[i], k_index) * coeff2[i];
+            p_u_out_gt_tv(vertex_index_internal, k_index) += p_e_in_gt_ctv(v2e[i], k_index) * coeff1[i];
+            p_v_out_gt_tv(vertex_index_internal, k_index) += p_e_in_gt_ctv(v2e[i], k_index) * coeff2[i];
         }
     }
 };
@@ -211,9 +210,7 @@ template <typename S>
 inline void interpolate_structured<S>::run_gpu_helper() {
     dim3 tblocks(block_dims_structured_interpol.x, block_dims_structured_interpol.y, block_dims_structured_interpol.z);
     const index_type inner_grid_size = (x_dim - 2 * halo) * (y_dim - halo * 2);
-    dim3 grid((x_dim - 2 * halo + tblocks.x - 1) / tblocks.x,
-        (y_dim - 2 * halo + tblocks.y - 1) / tblocks.y,
-        1);
+    dim3 grid((x_dim - 2 * halo + tblocks.x - 1) / tblocks.x, (y_dim - 2 * halo + tblocks.y - 1) / tblocks.y, 1);
     run_gpu_interpol<<<grid, tblocks>>>(KDim,
         x_dim,
         y_dim,

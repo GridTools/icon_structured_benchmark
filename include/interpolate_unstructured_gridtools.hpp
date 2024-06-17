@@ -175,10 +175,8 @@ __global__ void __launch_bounds__(block_dims_unstructured_interpol.size) run_gpu
     for (auto k_index{blockIdx.y * blockDim.y + threadIdx.y}; k_index < KDim; k_index += gridDim.y * blockDim.y) {
 #pragma unroll
         for (int i{0}; i < 6; ++i) {
-            p_u_out_gt_tv(vertex_index, k_index) +=
-                p_e_in_gt_ctv(v2e[i], k_index) * coeff1[i];
-            p_v_out_gt_tv(vertex_index, k_index) +=
-                p_e_in_gt_ctv(v2e[i], k_index) * coeff2[i];
+            p_u_out_gt_tv(vertex_index, k_index) += p_e_in_gt_ctv(v2e[i], k_index) * coeff1[i];
+            p_v_out_gt_tv(vertex_index, k_index) += p_e_in_gt_ctv(v2e[i], k_index) * coeff2[i];
         }
     }
 };
@@ -187,8 +185,7 @@ template <typename S>
 inline void interpolate_unstructured<S>::run_gpu_helper() {
     dim3 tblocks(
         block_dims_unstructured_interpol.x, block_dims_unstructured_interpol.y, block_dims_unstructured_interpol.z);
-    dim3 grid(
-        (v2e_gt->const_host_view().lengths()[0] + tblocks.x - 1) / tblocks.x, 1, 1);
+    dim3 grid((v2e_gt->const_host_view().lengths()[0] + tblocks.x - 1) / tblocks.x, 1, 1);
     run_gpu_interpol<<<grid, tblocks>>>(v2e_gt->const_host_view().lengths()[0],
         KDim,
         v2e_gt_ctv,

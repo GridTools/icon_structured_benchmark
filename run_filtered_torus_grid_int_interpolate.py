@@ -196,7 +196,10 @@ def run_sanity_checks(
 
     if backend in ["all_gpu", "gpu"]:
         print("Running unstructured gpu naive sanity check")
-        p_u_out_gpu, p_v_out_gpu = icon_benchmark.interpolate_validate_unstructured_gpu_naive(
+        (
+            p_u_out_gpu,
+            p_v_out_gpu,
+        ) = icon_benchmark.interpolate_validate_unstructured_gpu_naive(
             nvertices,
             nedges,
             nlevels,
