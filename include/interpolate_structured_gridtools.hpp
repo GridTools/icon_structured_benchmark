@@ -31,6 +31,17 @@ constexpr block_dims get_block_dims_structured_interpol<int>() {
 constexpr block_dims block_dims_structured_interpol = get_block_dims_structured_interpol<index_type>();
 #endif
 
+GT_FORCE_INLINE constexpr std::array<index_type, 6> get_v2e(const int i, const int j, const index_type x_dim, const index_type y_dim) {
+    const index_type i_j = i + j * x_dim;
+    const index_type i_jm1 = i + (j - 1) * x_dim;
+    return {(x_dim * y_dim) + i_j - 1,
+        (x_dim * y_dim) + i_j,
+        i_jm1,
+        i_j,
+        2 * (x_dim * y_dim) + i_j,
+        2 * (x_dim * y_dim) + i_j + x_dim - 1};
+};
+
 template <typename S>
 class interpolate_structured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
     using mo_intp_rbf_rbf_vec_interpol_vertex<S>::KDim;
@@ -71,16 +82,6 @@ class interpolate_structured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
               VertexDim, EdgeDim, KDim, (y_dim - 2 * halo) * (x_dim - 2 * halo), p_e_in, ptr_coeff_1, ptr_coeff_2){};
 
   private:
-    const std::array<index_type, 6> get_v2e(const int i, const int j, const index_type x_dim, const index_type y_dim) {
-        const index_type i_j = i + j * x_dim;
-        const index_type i_jm1 = i + (j - 1) * x_dim;
-        return {(x_dim * y_dim) + i_j - 1,
-            (x_dim * y_dim) + i_j,
-            i_jm1,
-            i_j,
-            2 * (x_dim * y_dim) + i_j,
-            2 * (x_dim * y_dim) + i_j + x_dim - 1};
-    };
     void run_cpu_ifirst() {
         for (index_type k_index{}; k_index < KDim; ++k_index) {
             for (index_type j = halo; j < y_dim - halo; ++j) {
@@ -172,29 +173,29 @@ class interpolate_structured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
 };
 
 #if defined(__CUDACC__)
-__global__ void __launch_bounds__(block_dims_unstructured_interpol.size) run_gpu_interpol(index_type KDim,
+__global__ void __launch_bounds__(block_dims_structured_interpol.size) run_gpu_interpol(index_type KDim,
     index_type x_dim,
     index_type y_dim,
     index_type halo,
     index_type inner_grid_size,
-    interpolate_unstructured<storage::gpu>::data_store_2d_ctv_WP_t p_e_in_gt_ctv,
-    interpolate_unstructured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_1_gt_ctv,
-    interpolate_unstructured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_2_gt_ctv,
-    interpolate_unstructured<storage::gpu>::data_store_2d_tv_WP_t p_u_out_gt_tv,
-    interpolate_unstructured<storage::gpu>::data_store_2d_tv_WP_t p_v_out_gt_tv) {
+    interpolate_structured<storage::gpu>::data_store_2d_ctv_WP_t p_e_in_gt_ctv,
+    interpolate_structured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_1_gt_ctv,
+    interpolate_structured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_2_gt_ctv,
+    interpolate_structured<storage::gpu>::data_store_2d_tv_WP_t p_u_out_gt_tv,
+    interpolate_structured<storage::gpu>::data_store_2d_tv_WP_t p_v_out_gt_tv) {
     const auto i = blockIdx.x * blockDim.x + threadIdx.x;
     const auto j = blockIdx.y * blockDim.y + threadIdx.y;
     const auto k_index = blockIdx.z * blockDim.z + threadIdx.z;
-    if (i >= x_dim - halo || j >= y_dim - halo || k_index >= KDim)
+    if (i >= x_dim - 2 * halo || j >= y_dim - 2 * halo || k_index >= KDim)
         return;
-    const std::array<index_type, 6> v2e{get_v2e(i, j, x_dim, y_dim)};
-    const index_type vertex_index_internal = i - halo + (j - halo) * (x_dim - 2 * halo);
+    const std::array<index_type, 6> v2e{get_v2e(i + halo, j + halo, x_dim, y_dim)};
+    const index_type vertex_index_internal = i + j * (x_dim - 2 * halo);
 #pragma unroll
     for (int i{0}; i < 6; ++i) {
         p_u_out_gt_tv(vertex_index_internal, k_index) +=
-            p_e_in_gt_ctv(v2e_gt_ctv(vertex_index_internal, i), k_index) * ptr_coeff_1_gt_ctv(vertex_index_internal, i);
+            p_e_in_gt_ctv(v2e[i], k_index) * ptr_coeff_1_gt_ctv(vertex_index_internal, i);
         p_v_out_gt_tv(vertex_index_internal, k_index) +=
-            p_e_in_gt_ctv(v2e_gt_ctv(vertex_index_internal, i), k_index) * ptr_coeff_2_gt_ctv(vertex_index_internal, i);
+            p_e_in_gt_ctv(v2e[i], k_index) * ptr_coeff_2_gt_ctv(vertex_index_internal, i);
     }
 };
 

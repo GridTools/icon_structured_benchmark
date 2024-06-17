@@ -379,7 +379,7 @@ def run_benchmarks():
         grid_cartesian_dimensions[1], grid_cartesian_dimensions[0]
     )
 
-    assert np.allclose(v2e_filtered, v2e_generated)
+    assert np.allclose(v2e_filtered, v2e_generated), "Filtered V2E table is incorrect"
 
     if args.sanity_checks:
         run_sanity_checks(
@@ -447,30 +447,29 @@ def run_benchmarks():
             dry_runs,
         )
 
-        if args.backend in ["all_gpu", "gpu"]:
-            runtimes[
-                "interpolate_benchmark_unstructured_gpu"
-            ] = icon_benchmark.interpolate_benchmark_unstructured_gpu(
-                v2e_filtered,
-                torus_grid.num_vertices,
-                torus_grid.num_edges,
-                torus_grid.num_levels,
-                repetitions,
-                dry_runs,
-            )
-
-            runtimes[
-                "interpolate_benchmark_structured_gpu"
-            ] = icon_benchmark.interpolate_benchmark_structured_gpu(
-                torus_grid.num_vertices,
-                torus_grid.num_edges,
-                torus_grid.num_levels,
-                grid_cartesian_dimensions[0],
-                grid_cartesian_dimensions[1],
-                halo,
-                repetitions,
-                dry_runs,
-            )
+    if args.backend in ["all_gpu", "gpu"]:
+        runtimes[
+            "interpolate_benchmark_unstructured_gpu"
+        ] = icon_benchmark.interpolate_benchmark_unstructured_gpu(
+            v2e_filtered,
+            torus_grid.num_vertices,
+            torus_grid.num_edges,
+            torus_grid.num_levels,
+            repetitions,
+            dry_runs,
+        )
+        runtimes[
+            "interpolate_benchmark_structured_gpu"
+        ] = icon_benchmark.interpolate_benchmark_structured_gpu(
+            torus_grid.num_vertices,
+            torus_grid.num_edges,
+            torus_grid.num_levels,
+            grid_cartesian_dimensions[0],
+            grid_cartesian_dimensions[1],
+            halo,
+            repetitions,
+            dry_runs,
+        )
 
     print_median_runtimes(runtimes)
 
