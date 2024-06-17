@@ -185,17 +185,25 @@ __global__ void __launch_bounds__(block_dims_structured_interpol.size) run_gpu_i
     interpolate_structured<storage::gpu>::data_store_2d_tv_WP_t p_v_out_gt_tv) {
     const auto i = blockIdx.x * blockDim.x + threadIdx.x;
     const auto j = blockIdx.y * blockDim.y + threadIdx.y;
-    const auto k_index = blockIdx.z * blockDim.z + threadIdx.z;
-    if (i >= x_dim - 2 * halo || j >= y_dim - 2 * halo || k_index >= KDim)
+    if (i >= x_dim - 2 * halo || j >= y_dim - 2 * halo)
         return;
     const std::array<index_type, 6> v2e{get_v2e(i + halo, j + halo, x_dim, y_dim)};
     const index_type vertex_index_internal = i + j * (x_dim - 2 * halo);
+    std::array<WP_TYPE, 6> coeff1;
+    std::array<WP_TYPE, 6> coeff2;
 #pragma unroll
     for (int i{0}; i < 6; ++i) {
-        p_u_out_gt_tv(vertex_index_internal, k_index) +=
-            p_e_in_gt_ctv(v2e[i], k_index) * ptr_coeff_1_gt_ctv(vertex_index_internal, i);
-        p_v_out_gt_tv(vertex_index_internal, k_index) +=
-            p_e_in_gt_ctv(v2e[i], k_index) * ptr_coeff_2_gt_ctv(vertex_index_internal, i);
+        coeff1[i] = ptr_coeff_1_gt_ctv(vertex_index_internal, i);
+        coeff2[i] = ptr_coeff_2_gt_ctv(vertex_index_internal, i);
+    }
+    for (auto k_index{blockIdx.z * blockDim.z + threadIdx.z}; k_index < KDim; k_index += gridDim.z * blockDim.z) {
+#pragma unroll
+        for (int i{0}; i < 6; ++i) {
+            p_u_out_gt_tv(vertex_index_internal, k_index) +=
+                p_e_in_gt_ctv(v2e[i], k_index) * coeff1[i];
+            p_v_out_gt_tv(vertex_index_internal, k_index) +=
+                p_e_in_gt_ctv(v2e[i], k_index) * coeff2[i];
+        }
     }
 };
 
@@ -205,7 +213,7 @@ inline void interpolate_structured<S>::run_gpu_helper() {
     const index_type inner_grid_size = (x_dim - 2 * halo) * (y_dim - halo * 2);
     dim3 grid((x_dim - 2 * halo + tblocks.x - 1) / tblocks.x,
         (y_dim - 2 * halo + tblocks.y - 1) / tblocks.y,
-        (KDim + tblocks.z - 1) / tblocks.z);
+        1);
     run_gpu_interpol<<<grid, tblocks>>>(KDim,
         x_dim,
         y_dim,

@@ -85,7 +85,9 @@ NB_MODULE(icon_benchmark, m) {
     m.def("interpolate_validate_structured_cpu_ifirst", &interpolate_validate_structured_cpu_ifirst);
     m.def("interpolate_validate_structured_cpu_kfirst", &interpolate_validate_structured_cpu_kfirst);
     m.def("interpolate_validate_structured_gpu", &interpolate_validate_structured_gpu);
+    m.def("interpolate_validate_structured_gpu_naive", &interpolate_validate_structured_gpu_naive);
     m.def("interpolate_benchmark_structured_cpu_ifirst", &interpolate_benchmark_structured_cpu_ifirst);
     m.def("interpolate_benchmark_structured_cpu_kfirst", &interpolate_benchmark_structured_cpu_kfirst);
     m.def("interpolate_benchmark_structured_gpu", &interpolate_benchmark_structured_gpu);
+    m.def("interpolate_benchmark_structured_gpu_naive", &interpolate_benchmark_structured_gpu_naive);
 }

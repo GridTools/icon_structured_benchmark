@@ -264,6 +264,25 @@ def run_sanity_checks(
         print("structured cpu_ifirst sanity check passed")
 
     if backend in ["all_gpu", "gpu"]:
+        print("Running structured gpu naive sanity check")
+        (
+            p_u_out_gpu,
+            p_v_out_gpu,
+        ) = icon_benchmark.interpolate_validate_structured_gpu_naive(
+            nvertices,
+            nedges,
+            nlevels,
+            lon_dim,
+            lat_dim,
+            halo,
+            p_e_in,
+            ptr_coeff_1,
+            ptr_coeff_2,
+        )
+        assert np.allclose(p_u_out_gpu, p_u_out_ref)
+        assert np.allclose(p_v_out_gpu, p_v_out_ref)
+        print("structured gpu naive sanity check passed")
+
         print("Running structured gpu sanity check")
         (
             p_u_out_gpu,
@@ -479,6 +498,18 @@ def run_benchmarks():
             torus_grid.num_vertices,
             torus_grid.num_edges,
             torus_grid.num_levels,
+            repetitions,
+            dry_runs,
+        )
+        runtimes[
+            "interpolate_benchmark_structured_gpu_naive"
+        ] = icon_benchmark.interpolate_benchmark_structured_gpu(
+            torus_grid.num_vertices,
+            torus_grid.num_edges,
+            torus_grid.num_levels,
+            grid_cartesian_dimensions[0],
+            grid_cartesian_dimensions[1],
+            halo,
             repetitions,
             dry_runs,
         )

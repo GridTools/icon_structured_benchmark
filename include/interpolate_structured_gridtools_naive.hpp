@@ -4,46 +4,35 @@
 
 #if defined(__CUDACC__)
 template <typename S>
-constexpr block_dims get_block_dims_structured_interpol() {
+constexpr block_dims get_block_dims_structured_interpol_naive() {
     throw std::runtime_error("Undefined block dimensions for type " + S::name + " in GPU backend");
 };
 
 template <>
-constexpr block_dims get_block_dims_structured_interpol<std::size_t>() {
+constexpr block_dims get_block_dims_structured_interpol_naive<std::size_t>() {
     return {32, 4, 1, 128};
 };
 
 template <>
-constexpr block_dims get_block_dims_structured_interpol<std::int64_t>() {
+constexpr block_dims get_block_dims_structured_interpol_naive<std::int64_t>() {
     return {32, 8, 1, 256};
 };
 
 template <>
-constexpr block_dims get_block_dims_structured_interpol<std::uint32_t>() {
+constexpr block_dims get_block_dims_structured_interpol_naive<std::uint32_t>() {
     return {32, 9, 1, 288};
 };
 
 template <>
-constexpr block_dims get_block_dims_structured_interpol<int>() {
+constexpr block_dims get_block_dims_structured_interpol_naive<int>() {
     return {32, 9, 1, 288};
 };
 
-constexpr block_dims block_dims_structured_interpol = get_block_dims_structured_interpol<index_type>();
+constexpr block_dims block_dims_structured_interpol_naive = get_block_dims_structured_interpol_naive<index_type>();
 #endif
 
-GT_FORCE_INLINE constexpr std::array<index_type, 6> get_v2e(const int i, const int j, const index_type x_dim, const index_type y_dim) {
-    const index_type i_j = i + j * x_dim;
-    const index_type i_jm1 = i + (j - 1) * x_dim;
-    return {(x_dim * y_dim) + i_j - 1,
-        (x_dim * y_dim) + i_j,
-        i_jm1,
-        i_j,
-        2 * (x_dim * y_dim) + i_j,
-        2 * (x_dim * y_dim) + i_j + x_dim - 1};
-};
-
 template <typename S>
-class interpolate_structured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
+class interpolate_structured_naive : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
     using mo_intp_rbf_rbf_vec_interpol_vertex<S>::KDim;
     using mo_intp_rbf_rbf_vec_interpol_vertex<S>::VertexDim;
     using mo_intp_rbf_rbf_vec_interpol_vertex<S>::EdgeDim;
@@ -58,7 +47,7 @@ class interpolate_structured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
     const index_type halo;
 
   public:
-    interpolate_structured(std::size_t VertexDim,
+    interpolate_structured_naive(std::size_t VertexDim,
         std::size_t EdgeDim,
         std::size_t KDim,
         index_type y_dim,
@@ -68,7 +57,7 @@ class interpolate_structured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
           halo(halo), mo_intp_rbf_rbf_vec_interpol_vertex<S>(
                           VertexDim, EdgeDim, KDim, (y_dim - 2 * halo) * (x_dim - 2 * halo)){};
 
-    interpolate_structured(std::size_t VertexDim,
+    interpolate_structured_naive(std::size_t VertexDim,
         std::size_t EdgeDim,
         std::size_t KDim,
         index_type y_dim,
@@ -173,7 +162,7 @@ class interpolate_structured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
 };
 
 #if defined(__CUDACC__)
-__global__ void __launch_bounds__(block_dims_structured_interpol.size) run_gpu_interpol(index_type KDim,
+__global__ void __launch_bounds__(block_dims_structured_interpol_naive.size) run_gpu_interpol_naive(index_type KDim,
     index_type x_dim,
     index_type y_dim,
     index_type halo,
@@ -200,13 +189,13 @@ __global__ void __launch_bounds__(block_dims_structured_interpol.size) run_gpu_i
 };
 
 template <typename S>
-inline void interpolate_structured<S>::run_gpu_helper() {
-    dim3 tblocks(block_dims_structured_interpol.x, block_dims_structured_interpol.y, block_dims_structured_interpol.z);
+inline void interpolate_structured_naive<S>::run_gpu_helper() {
+    dim3 tblocks(block_dims_structured_interpol_naive.x, block_dims_structured_interpol_naive.y, block_dims_structured_interpol_naive.z);
     const index_type inner_grid_size = (x_dim - 2 * halo) * (y_dim - halo * 2);
     dim3 grid((x_dim - 2 * halo + tblocks.x - 1) / tblocks.x,
         (y_dim - 2 * halo + tblocks.y - 1) / tblocks.y,
         (KDim + tblocks.z - 1) / tblocks.z);
-    run_gpu_interpol<<<grid, tblocks>>>(KDim,
+    run_gpu_interpol_naive<<<grid, tblocks>>>(KDim,
         x_dim,
         y_dim,
         halo,
@@ -220,7 +209,7 @@ inline void interpolate_structured<S>::run_gpu_helper() {
 };
 #else
 template <typename S>
-inline void interpolate_structured<S>::run_gpu_helper() {
+inline void interpolate_structured_naive<S>::run_gpu_helper() {
     throw std::runtime_error("GPU backend not enabled");
 };
 #endif
