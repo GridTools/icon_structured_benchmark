@@ -1248,6 +1248,35 @@ std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>> 
 }
 #endif
 
+#ifdef __CUDACC__
+std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>> interpolate_validate_unstructured_gpu_naive(
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::vector<std::array<index_type, 6>> &v2e,
+    std::vector<std::vector<WP_TYPE>> &p_e_in,
+    std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
+    std::vector<std::vector<WP_TYPE>> &ptr_coeff_2) {
+    interpolate_unstructured_naive<storage::gpu> interpolate_benchmark_object{
+        v2e, VertexDim, EdgeDim, KDim, p_e_in, ptr_coeff_1, ptr_coeff_2};
+    return run_validation<std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>,
+        interpolate_unstructured_naive<storage::gpu>,
+        gpu>(interpolate_benchmark_object);
+}
+#else
+std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>> interpolate_validate_unstructured_gpu_naive(
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::vector<std::array<index_type, 6>> &v2e,
+    std::vector<std::vector<WP_TYPE>> &p_e_in,
+    std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
+    std::vector<std::vector<WP_TYPE>> &ptr_coeff_2) {
+    throw std::runtime_error("GPU backend not enabled");
+    return {};
+}
+#endif
+
 template <backend_impl I>
 std::vector<double> interpolate_benchmark_unstructured(std::vector<std::array<index_type, 6>> &v2e,
     std::size_t VertexDim,
@@ -1264,6 +1293,29 @@ std::vector<double> interpolate_benchmark_unstructured(std::vector<std::array<in
 #if defined(__CUDACC__)
     } else if constexpr (I == backend_impl::gpu) {
         return run_benchmark<interpolate_unstructured<storage::gpu>, I>(
+            std::make_tuple(v2e, VertexDim, EdgeDim, KDim), repetitions, dry_runs);
+#endif
+    } else {
+        throw std::runtime_error("Undefined backend implementation");
+    }
+}
+
+template <backend_impl I>
+std::vector<double> interpolate_benchmark_unstructured_naive(std::vector<std::array<index_type, 6>> &v2e,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    int repetitions,
+    int dry_runs) {
+    if constexpr (I == backend_impl::cpu_ifirst) {
+        return run_benchmark<interpolate_unstructured_naive<storage::cpu_ifirst>, I>(
+            std::make_tuple(v2e, VertexDim, EdgeDim, KDim), repetitions, dry_runs);
+    } else if constexpr (I == backend_impl::cpu_kfirst) {
+        return run_benchmark<interpolate_unstructured_naive<storage::cpu_kfirst>, I>(
+            std::make_tuple(v2e, VertexDim, EdgeDim, KDim), repetitions, dry_runs);
+#if defined(__CUDACC__)
+    } else if constexpr (I == backend_impl::gpu) {
+        return run_benchmark<interpolate_unstructured_naive<storage::gpu>, I>(
             std::make_tuple(v2e, VertexDim, EdgeDim, KDim), repetitions, dry_runs);
 #endif
     } else {
@@ -1296,6 +1348,15 @@ std::vector<double> interpolate_benchmark_unstructured_gpu(std::vector<std::arra
     int repetitions,
     int dry_runs) {
     return interpolate_benchmark_unstructured<gpu>(v2e, VertexDim, EdgeDim, KDim, repetitions, dry_runs);
+}
+
+std::vector<double> interpolate_benchmark_unstructured_gpu_naive(std::vector<std::array<index_type, 6>> &v2e,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    int repetitions,
+    int dry_runs) {
+    return interpolate_benchmark_unstructured_naive<gpu>(v2e, VertexDim, EdgeDim, KDim, repetitions, dry_runs);
 }
 
 template <backend_impl I>

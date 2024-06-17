@@ -195,6 +195,20 @@ def run_sanity_checks(
         print("unstructured cpu_kfirst sanity check passed")
 
     if backend in ["all_gpu", "gpu"]:
+        print("Running unstructured gpu naive sanity check")
+        p_u_out_gpu, p_v_out_gpu = icon_benchmark.interpolate_validate_unstructured_gpu_naive(
+            nvertices,
+            nedges,
+            nlevels,
+            v2e,
+            p_e_in,
+            ptr_coeff_1,
+            ptr_coeff_2,
+        )
+        assert np.allclose(p_u_out_gpu, p_u_out_ref)
+        assert np.allclose(p_v_out_gpu, p_v_out_ref)
+        print("unstructured gpu naive sanity check passed")
+
         print("Running unstructured gpu sanity check")
         p_u_out_gpu, p_v_out_gpu = icon_benchmark.interpolate_validate_unstructured_gpu(
             nvertices,
@@ -448,6 +462,16 @@ def run_benchmarks():
         )
 
     if args.backend in ["all_gpu", "gpu"]:
+        runtimes[
+            "interpolate_benchmark_unstructured_gpu_naive"
+        ] = icon_benchmark.interpolate_benchmark_unstructured_gpu_naive(
+            v2e_filtered,
+            torus_grid.num_vertices,
+            torus_grid.num_edges,
+            torus_grid.num_levels,
+            repetitions,
+            dry_runs,
+        )
         runtimes[
             "interpolate_benchmark_unstructured_gpu"
         ] = icon_benchmark.interpolate_benchmark_unstructured_gpu(
