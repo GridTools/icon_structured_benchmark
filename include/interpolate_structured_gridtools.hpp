@@ -98,6 +98,8 @@ class interpolate_structured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
                     const std::array<index_type, 6> v2e{get_v2e(i, j, x_dim, y_dim)};
 #ifdef __clang__
 #pragma clang loop unroll(full)
+#elif defined(__NVCC__)
+#pragma unroll 6
 #elif defined(__GNUC__)
 #pragma GCC unroll 6
 #endif
@@ -127,6 +129,8 @@ class interpolate_structured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
                 std::array<WP_TYPE, 6> coeff2;
 #ifdef __clang__
 #pragma clang loop unroll(full)
+#elif defined(__NVCC__)
+#pragma unroll 6
 #elif defined(__GNUC__)
 #pragma GCC unroll 6
 #endif
@@ -142,6 +146,8 @@ class interpolate_structured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
                 for (index_type k_index{}; k_index < KDim; ++k_index) {
 #ifdef __clang__
 #pragma clang loop unroll(full)
+#elif defined(__NVCC__)
+#pragma unroll 6
 #elif defined(__GNUC__)
 #pragma GCC unroll 6
 #endif

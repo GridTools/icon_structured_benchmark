@@ -80,6 +80,8 @@ class interpolate_unstructured_naive : public mo_intp_rbf_rbf_vec_interpol_verte
                 std::array<WP_TYPE, 6> v;
 #ifdef __clang__
 #pragma clang loop unroll(full)
+#elif defined(__NVCC__)
+#pragma unroll 6
 #elif defined(__GNUC__)
 #pragma GCC unroll 6
 #endif
@@ -104,6 +106,8 @@ class interpolate_unstructured_naive : public mo_intp_rbf_rbf_vec_interpol_verte
             std::array<index_type, 6> v2e;
 #ifdef __clang__
 #pragma clang loop unroll(full)
+#elif defined(__NVCC__)
+#pragma unroll 6
 #elif defined(__GNUC__)
 #pragma GCC unroll 6
 #endif
@@ -122,6 +126,8 @@ class interpolate_unstructured_naive : public mo_intp_rbf_rbf_vec_interpol_verte
                 std::array<WP_TYPE, 6> v;
 #ifdef __clang__
 #pragma clang loop unroll(full)
+#elif defined(__NVCC__)
+#pragma unroll 6
 #elif defined(__GNUC__)
 #pragma GCC unroll 6
 #endif
