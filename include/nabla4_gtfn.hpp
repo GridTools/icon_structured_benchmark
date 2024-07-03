@@ -81,9 +81,12 @@ namespace generated {
             }
         };
 
-        using block_sizes_t = gridtools::meta::list<
+        using thread_block_sizes_t = gridtools::meta::list<
             gridtools::meta::list<gtfn::unstructured::dim::horizontal, gridtools::integral_constant<int, 32>>,
             gridtools::meta::list<gtfn::unstructured::dim::vertical, gridtools::integral_constant<int, 8>>>;
+        using loop_block_sizes_t = gridtools::meta::list<
+            gridtools::meta::list<gtfn::unstructured::dim::horizontal, gridtools::integral_constant<int, 1>>,
+            gridtools::meta::list<gtfn::unstructured::dim::vertical, gridtools::integral_constant<int, 1>>>;
 
         inline auto calculate_nabla4 = [](auto... connectivities__) {
             return [connectivities__...](int repetitions,
@@ -121,7 +124,8 @@ namespace generated {
                         .execute();
                 }
 #if defined(IS_GPU)
-                if constexpr (std::is_same_v<decltype(backend), gridtools::fn::backend::gpu<block_sizes_t>>) {
+                if constexpr (std::is_same_v<decltype(backend),
+                                  gridtools::fn::backend::gpu<thread_block_sizes_t, loop_block_sizes_t>>) {
                     timer<backend_impl::gpu> t;
                     std::vector<double> runtimes;
                     for (int i{0}; i < repetitions; ++i) {

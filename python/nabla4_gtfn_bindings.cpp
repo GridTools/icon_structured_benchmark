@@ -19,26 +19,20 @@
 
 decltype(auto) calculate_nabla4_wrapper_cpu(int repetitions,
     int dry_runs,
-    std::pair<nanobind::ndarray<double, nanobind::shape<-1, -1>>,
-        std::tuple<ptrdiff_t, ptrdiff_t>> u_vert,
-    std::pair<nanobind::ndarray<double, nanobind::shape<-1, -1>>,
-        std::tuple<ptrdiff_t, ptrdiff_t>> v_vert,
+    std::pair<nanobind::ndarray<double, nanobind::shape<-1, -1>>, std::tuple<ptrdiff_t, ptrdiff_t>> u_vert,
+    std::pair<nanobind::ndarray<double, nanobind::shape<-1, -1>>, std::tuple<ptrdiff_t, ptrdiff_t>> v_vert,
     std::pair<nanobind::ndarray<double, nanobind::shape<-1>>, std::tuple<ptrdiff_t>> primal_normal_vert_v1,
     std::pair<nanobind::ndarray<double, nanobind::shape<-1>>, std::tuple<ptrdiff_t>> primal_normal_vert_v2,
-    std::pair<nanobind::ndarray<double, nanobind::shape<-1, -1>>,
-        std::tuple<ptrdiff_t, ptrdiff_t>> z_nabla2_e,
+    std::pair<nanobind::ndarray<double, nanobind::shape<-1, -1>>, std::tuple<ptrdiff_t, ptrdiff_t>> z_nabla2_e,
     std::pair<nanobind::ndarray<double, nanobind::shape<-1>>, std::tuple<ptrdiff_t>> inv_vert_vert_length,
     std::pair<nanobind::ndarray<double, nanobind::shape<-1>>, std::tuple<ptrdiff_t>> inv_primal_edge_length,
-    std::pair<nanobind::ndarray<double, nanobind::shape<-1, -1>>,
-        std::tuple<ptrdiff_t, ptrdiff_t>> z_nabla4_e2,
+    std::pair<nanobind::ndarray<double, nanobind::shape<-1, -1>>, std::tuple<ptrdiff_t, ptrdiff_t>> z_nabla4_e2,
     std::int32_t horizontal_start,
     std::int32_t horizontal_end,
     std::int32_t vertical_start,
     std::int32_t vertical_end,
-    std::pair<nanobind::ndarray<index_type, nanobind::shape<-1, -1>>,
-        std::tuple<ptrdiff_t, ptrdiff_t>> gt_conn_e2c2v,
-    std::pair<nanobind::ndarray<index_type, nanobind::shape<-1, -1>>,
-        std::tuple<ptrdiff_t, ptrdiff_t>> gt_conn_e2ecv) {
+    std::pair<nanobind::ndarray<index_type, nanobind::shape<-1, -1>>, std::tuple<ptrdiff_t, ptrdiff_t>> gt_conn_e2c2v,
+    std::pair<nanobind::ndarray<index_type, nanobind::shape<-1, -1>>, std::tuple<ptrdiff_t, ptrdiff_t>> gt_conn_e2ecv) {
     return calculate_nabla4(repetitions,
         dry_runs,
         gridtools::sid::rename_numbered_dimensions<generated::Vertex_t, generated::K_t>(
@@ -77,36 +71,28 @@ decltype(auto) calculate_nabla4_wrapper_cpu(int repetitions,
 #if defined(IS_GPU)
 decltype(auto) calculate_nabla4_wrapper_gpu(int repetitions,
     int dry_runs,
-    std::pair<nanobind::ndarray<double, nanobind::shape<-1, -1>>,
-        std::tuple<ptrdiff_t, ptrdiff_t>> u_vert,
-    std::pair<nanobind::ndarray<double, nanobind::shape<-1, -1>>,
-        std::tuple<ptrdiff_t, ptrdiff_t>> v_vert,
+    std::pair<nanobind::ndarray<double, nanobind::shape<-1, -1>>, std::tuple<ptrdiff_t, ptrdiff_t>> u_vert,
+    std::pair<nanobind::ndarray<double, nanobind::shape<-1, -1>>, std::tuple<ptrdiff_t, ptrdiff_t>> v_vert,
     std::pair<nanobind::ndarray<double, nanobind::shape<-1>>, std::tuple<ptrdiff_t>> primal_normal_vert_v1,
     std::pair<nanobind::ndarray<double, nanobind::shape<-1>>, std::tuple<ptrdiff_t>> primal_normal_vert_v2,
-    std::pair<nanobind::ndarray<double, nanobind::shape<-1, -1>>,
-        std::tuple<ptrdiff_t, ptrdiff_t>> z_nabla2_e,
+    std::pair<nanobind::ndarray<double, nanobind::shape<-1, -1>>, std::tuple<ptrdiff_t, ptrdiff_t>> z_nabla2_e,
     std::pair<nanobind::ndarray<double, nanobind::shape<-1>>, std::tuple<ptrdiff_t>> inv_vert_vert_length,
     std::pair<nanobind::ndarray<double, nanobind::shape<-1>>, std::tuple<ptrdiff_t>> inv_primal_edge_length,
-    std::pair<nanobind::ndarray<double, nanobind::shape<-1, -1>>,
-        std::tuple<ptrdiff_t, ptrdiff_t>> z_nabla4_e2,
+    std::pair<nanobind::ndarray<double, nanobind::shape<-1, -1>>, std::tuple<ptrdiff_t, ptrdiff_t>> z_nabla4_e2,
     std::int32_t horizontal_start,
     std::int32_t horizontal_end,
     std::int32_t vertical_start,
     std::int32_t vertical_end,
-    std::pair<nanobind::ndarray<index_type, nanobind::shape<-1, -1>>,
-        std::tuple<ptrdiff_t, ptrdiff_t>> gt_conn_e2c2v,
-    std::pair<nanobind::ndarray<index_type, nanobind::shape<-1, -1>>,
-        std::tuple<ptrdiff_t, ptrdiff_t>> gt_conn_e2ecv) {
+    std::pair<nanobind::ndarray<index_type, nanobind::shape<-1, -1>>, std::tuple<ptrdiff_t, ptrdiff_t>> gt_conn_e2c2v,
+    std::pair<nanobind::ndarray<index_type, nanobind::shape<-1, -1>>, std::tuple<ptrdiff_t, ptrdiff_t>> gt_conn_e2ecv) {
     return calculate_nabla4(repetitions,
         dry_runs,
         gridtools::sid::rename_numbered_dimensions<generated::Vertex_t, generated::K_t>(
             gridtools::sid::shift_sid_origin(
-                gridtools::nanobind::as_sid(u_vert.first, gridtools::nanobind::stride_spec<1, -1>{}),
-                u_vert.second)),
+                gridtools::nanobind::as_sid(u_vert.first, gridtools::nanobind::stride_spec<1, -1>{}), u_vert.second)),
         gridtools::sid::rename_numbered_dimensions<generated::Vertex_t, generated::K_t>(
             gridtools::sid::shift_sid_origin(
-                gridtools::nanobind::as_sid(v_vert.first, gridtools::nanobind::stride_spec<1, -1>{}),
-                v_vert.second)),
+                gridtools::nanobind::as_sid(v_vert.first, gridtools::nanobind::stride_spec<1, -1>{}), v_vert.second)),
         gridtools::sid::rename_numbered_dimensions<generated::ECV_t>(gridtools::sid::shift_sid_origin(
             gridtools::nanobind::as_sid(primal_normal_vert_v1.first, gridtools::nanobind::stride_spec<1>{}),
             primal_normal_vert_v1.second)),
@@ -137,7 +123,7 @@ decltype(auto) calculate_nabla4_wrapper_gpu(int repetitions,
             gridtools::sid::shift_sid_origin(
                 gridtools::nanobind::as_sid(gt_conn_e2ecv.first, gridtools::nanobind::stride_spec<1, -1>{}),
                 gt_conn_e2ecv.second)),
-        gridtools::fn::backend::gpu<generated::block_sizes_t>{});
+        gridtools::fn::backend::gpu<generated::thread_block_sizes_t, generated::loop_block_sizes_t>{});
 }
 #endif
 
