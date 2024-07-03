@@ -37,6 +37,8 @@ if(NOT GridTools_FOUND)
   )
   FetchContent_MakeAvailable(gridtools)
   set(_gridtools_already_fetched ON CACHE INTERNAL "")
+else()
+  message(STATUS "Using GridTools from ${GridTools_DIR}")
 endif()
 
 add_library(benchmark src/wrapper.cpp)
