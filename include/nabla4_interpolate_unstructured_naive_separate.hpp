@@ -15,7 +15,7 @@ struct nabla4_interpolate_unstructured_naive_separate {
         index_type KDim,
         index_type ECVDim)
         : nabla4_data(e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim),
-        interpolate_data(v2e, VertexDim, EdgeDim, KDim, nabla4_data.z_nabla4_e2_wp_gt)
+        interpolate_data(v2e, VertexDim, EdgeDim, KDim, nabla4_data.get_output_gt())
     {};
 
     nabla4_interpolate_unstructured_naive_separate(std::vector<std::array<index_type, 4>> e2c2v,
@@ -56,4 +56,4 @@ struct nabla4_interpolate_unstructured_naive_separate {
             throw std::runtime_error("Undefined backend implementation");
         }
     }
-}
+};

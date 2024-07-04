@@ -1137,6 +1137,6 @@ std::vector<double> nabla4_interpolate_benchmark_unstructured_gpu_naive_separate
     index_type ECVDim,
     int repetitions,
     int dry_runs) {
-    return benchmark_gridtools<gpu, interpolate_unstructured_naive_separate>(
+    return benchmark_gridtools<gpu, nabla4_interpolate_unstructured_naive_separate>(
         std::make_tuple(e2c2v, e2ecv, v2e, CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
 }
