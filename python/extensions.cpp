@@ -90,4 +90,7 @@ NB_MODULE(icon_benchmark, m) {
     m.def("interpolate_benchmark_structured_cpu_kfirst", &interpolate_benchmark_structured_cpu_kfirst);
     m.def("interpolate_benchmark_structured_gpu", &interpolate_benchmark_structured_gpu);
     m.def("interpolate_benchmark_structured_gpu_naive", &interpolate_benchmark_structured_gpu_naive);
+    // Nabla4 & Interpolate separate
+    m.def("nabla4_interpolate_benchmark_unstructured_gpu_naive_separate",
+        &nabla4_interpolate_benchmark_unstructured_gpu_naive_separate);
 }

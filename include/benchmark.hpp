@@ -12,6 +12,7 @@
 #include "nabla4_unstructured.hpp"
 #include "nabla4_unstructured_gridtools.hpp"
 #include "nabla4_unstructured_gridtools_naive.hpp"
+#include "nabla4_interpolate_unstructured_naive_separate.hpp"
 #include "timer.hpp"
 
 template <typename T, backend_impl I>

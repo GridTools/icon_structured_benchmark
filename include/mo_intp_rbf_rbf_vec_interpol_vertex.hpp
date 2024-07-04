@@ -63,11 +63,41 @@ struct mo_intp_rbf_rbf_vec_interpol_vertex {
         p_v_out_gt_tv(p_v_out_gt->target_view())
     {};
 
+    mo_intp_rbf_rbf_vec_interpol_vertex(std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim, data_store_2d_WP_t p_e_in_gt, std::size_t output_size)
+        : VertexDim(VertexDim), EdgeDim(EdgeDim), KDim(KDim), output_size(output_size),
+        p_e_in_gt(p_e_in_gt),
+        ptr_coeff_1_gt(storage::builder<S>.template type<WP_TYPE>().dimensions(output_size, 6_c).initializer([](int i, int j) { return rand_utils.template get<WP_TYPE>(); }).build()),
+        ptr_coeff_2_gt(storage::builder<S>.template type<WP_TYPE>().dimensions(output_size, 6_c).initializer([](int i, int j) { return rand_utils.template get<WP_TYPE>(); }).build()),
+        p_u_out_gt(storage::builder<S>.template type<WP_TYPE>().dimensions(output_size, KDim).initializer([](int i, int j) { return 0; }).build()),
+        p_v_out_gt(storage::builder<S>.template type<WP_TYPE>().dimensions(output_size, KDim).initializer([](int i, int j) { return 0; }).build()),
+        p_e_in_gt_ctv(p_e_in_gt->const_target_view()),
+        ptr_coeff_1_gt_ctv(ptr_coeff_1_gt->const_target_view()),
+        ptr_coeff_2_gt_ctv(ptr_coeff_2_gt->const_target_view()),
+        p_u_out_gt_tv(p_u_out_gt->target_view()),
+        p_v_out_gt_tv(p_v_out_gt->target_view())
+    {};
+
     mo_intp_rbf_rbf_vec_interpol_vertex(std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim, std::size_t output_size,
         std::vector<std::vector<WP_TYPE>> p_e_in,
         std::vector<std::vector<WP_TYPE>> ptr_coeff_1,
         std::vector<std::vector<WP_TYPE>> ptr_coeff_2) : VertexDim(VertexDim), EdgeDim(EdgeDim), KDim(KDim), output_size(output_size),
         p_e_in_gt(storage::builder<S>.template type<WP_TYPE>().dimensions(EdgeDim, KDim).initializer([&p_e_in](int i, int j) { return p_e_in[i][j]; }).build()),
+        ptr_coeff_1_gt(storage::builder<S>.template type<WP_TYPE>().dimensions(output_size, 6_c).initializer([&ptr_coeff_1](int i, int j) { return ptr_coeff_1[i][j]; }).build()),
+        ptr_coeff_2_gt(storage::builder<S>.template type<WP_TYPE>().dimensions(output_size, 6_c).initializer([&ptr_coeff_2](int i, int j) { return ptr_coeff_2[i][j]; }).build()),
+        p_u_out_gt(storage::builder<S>.template type<WP_TYPE>().dimensions(output_size, KDim).initializer([](int i, int j) { return 0; }).build()),
+        p_v_out_gt(storage::builder<S>.template type<WP_TYPE>().dimensions(output_size, KDim).initializer([](int i, int j) { return 0; }).build()),
+        p_e_in_gt_ctv(p_e_in_gt->const_target_view()),
+        ptr_coeff_1_gt_ctv(ptr_coeff_1_gt->const_target_view()),
+        ptr_coeff_2_gt_ctv(ptr_coeff_2_gt->const_target_view()),
+        p_u_out_gt_tv(p_u_out_gt->target_view()),
+        p_v_out_gt_tv(p_v_out_gt->target_view())
+    {};
+
+    mo_intp_rbf_rbf_vec_interpol_vertex(std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim, std::size_t output_size,
+        data_store_2d_WP_t &p_e_in_gt,
+        std::vector<std::vector<WP_TYPE>> ptr_coeff_1,
+        std::vector<std::vector<WP_TYPE>> ptr_coeff_2) : VertexDim(VertexDim), EdgeDim(EdgeDim), KDim(KDim), output_size(output_size),
+        p_e_in_gt(p_e_in_gt),
         ptr_coeff_1_gt(storage::builder<S>.template type<WP_TYPE>().dimensions(output_size, 6_c).initializer([&ptr_coeff_1](int i, int j) { return ptr_coeff_1[i][j]; }).build()),
         ptr_coeff_2_gt(storage::builder<S>.template type<WP_TYPE>().dimensions(output_size, 6_c).initializer([&ptr_coeff_2](int i, int j) { return ptr_coeff_2[i][j]; }).build()),
         p_u_out_gt(storage::builder<S>.template type<WP_TYPE>().dimensions(output_size, KDim).initializer([](int i, int j) { return 0; }).build()),

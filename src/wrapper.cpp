@@ -1125,3 +1125,18 @@ interpolate_validate_structured_gpu_naive(std::size_t VertexDim,
     return interpolate_validate_gridtools<gpu, interpolate_structured_naive>(
         std::make_tuple(VertexDim, EdgeDim, KDim, longitude_dim, latitude_dim, halo, p_e_in, ptr_coeff_1, ptr_coeff_2));
 }
+
+std::vector<double> nabla4_interpolate_benchmark_unstructured_gpu_naive_separate(
+    std::vector<std::array<index_type, 4>> &e2c2v,
+    std::vector<std::array<index_type, 4>> &e2ecv,
+    std::vector<std::array<index_type, 6>> &v2e,
+    index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    int repetitions,
+    int dry_runs) {
+    return benchmark_gridtools<gpu, interpolate_unstructured_naive_separate>(
+        std::make_tuple(e2c2v, e2ecv, v2e, CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
+}

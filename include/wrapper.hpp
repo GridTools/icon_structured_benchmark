@@ -628,3 +628,15 @@ std::vector<double> interpolate_benchmark_structured_gpu_naive(std::size_t Verte
     index_type halo,
     int repetitions = 101,
     int dry_runs = 1);
+
+std::vector<double> nabla4_interpolate_benchmark_unstructured_gpu_naive_separate(
+    std::vector<std::array<index_type, 4>> &e2c2v,
+    std::vector<std::array<index_type, 4>> &e2ecv,
+    std::vector<std::array<index_type, 6>> &v2e,
+    index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    int repetitions = 101,
+    int dry_runs = 1);
