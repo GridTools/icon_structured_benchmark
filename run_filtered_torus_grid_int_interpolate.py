@@ -506,7 +506,7 @@ def run_benchmarks():
         )
         runtimes[
             "interpolate_benchmark_structured_gpu_naive"
-        ] = icon_benchmark.interpolate_benchmark_structured_gpu(
+        ] = icon_benchmark.interpolate_benchmark_structured_gpu_naive(
             torus_grid.num_vertices,
             torus_grid.num_edges,
             torus_grid.num_levels,
