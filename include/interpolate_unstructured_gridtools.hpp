@@ -10,16 +10,19 @@ constexpr block_dims get_block_dims_unstructured_interpol() {
 
 template <>
 constexpr block_dims get_block_dims_unstructured_interpol<std::size_t>() {
+    // not optimized
     return {32, 4, 1, 128};
 };
 
 template <>
 constexpr block_dims get_block_dims_unstructured_interpol<std::int64_t>() {
+    // not optimized
     return {32, 8, 1, 256};
 };
 
 template <>
 constexpr block_dims get_block_dims_unstructured_interpol<std::uint32_t>() {
+    // not optimized
     return {32, 9, 1, 288};
 };
 

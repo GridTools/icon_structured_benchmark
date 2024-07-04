@@ -10,22 +10,25 @@ constexpr block_dims get_block_dims_structured_interpol() {
 
 template <>
 constexpr block_dims get_block_dims_structured_interpol<std::size_t>() {
+    // not optimized
     return {32, 4, 1, 128};
 };
 
 template <>
 constexpr block_dims get_block_dims_structured_interpol<std::int64_t>() {
+    // not optimized
     return {32, 8, 1, 256};
 };
 
 template <>
 constexpr block_dims get_block_dims_structured_interpol<std::uint32_t>() {
+    // not optimized
     return {32, 9, 1, 288};
 };
 
 template <>
 constexpr block_dims get_block_dims_structured_interpol<int>() {
-    return {32, 2, 9, 576};
+    return {32, 1, 9, 288};
 };
 
 constexpr block_dims block_dims_structured_interpol = get_block_dims_structured_interpol<index_type>();
