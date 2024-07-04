@@ -25,7 +25,7 @@ constexpr block_dims get_block_dims_structured_interpol<std::uint32_t>() {
 
 template <>
 constexpr block_dims get_block_dims_structured_interpol<int>() {
-    return {32, 9, 1, 288};
+    return {32, 2, 6, 384};
 };
 
 constexpr block_dims block_dims_structured_interpol = get_block_dims_structured_interpol<index_type>();
