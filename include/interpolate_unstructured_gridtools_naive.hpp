@@ -115,11 +115,6 @@ class interpolate_unstructured_naive : public mo_intp_rbf_rbf_vec_interpol_verte
         };
     };
     void run_cpu_kfirst() {
-#ifdef __clang__
-#pragma clang loop unroll(enable) vectorize(assume_safety) interleave(enable)
-#elif defined(__GNUC__)
-#pragma GCC ivdep
-#endif
         for (index_type vertex_index = 0; vertex_index < v2e_gt_ctv.lengths()[0]; ++vertex_index) {
             std::array<WP_TYPE, 6> coeff1;
             std::array<WP_TYPE, 6> coeff2;
