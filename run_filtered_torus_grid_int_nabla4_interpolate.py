@@ -137,25 +137,6 @@ def filter_edge_vector(
     return np.array(filtered_vector)
 
 
-def compare_ndarrays(a, b):
-    same = True
-    if a.shape != b.shape:
-        same = False
-
-    for i in range(a.shape[0]):
-        for j in range(a.shape[1]):
-            if not np.isclose(a[i][j], b[i][j]):
-                print(
-                    "Difference at index ({}, {}) is {}".format(i, j, a[i][j] - b[i][j])
-                )
-                same = False
-    if not same:
-        print("Arrays are not the same")
-        import sys
-
-        sys.exit(1)
-
-
 def run_gtfn(repetitions, dry_runs, e2c2v, e2ecv, nabla4_data, grid, backend):
     if backend == "gt:gpu":
         import cupy as cp  # type: ignore [import-not-found]
