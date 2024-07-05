@@ -21,8 +21,7 @@ import netCDF4  # type: ignore [import-not-found]
 
 from json import dump
 
-from run_filtered_torus_grid_int_interpolate import transpose_ij, halo_filter, filter_v2e
-
+from run_filtered_torus_grid_int_interpolate import process_v2e
 
 def print_median_runtimes(runtimes):
     for key in runtimes.keys():
@@ -483,19 +482,11 @@ def run_benchmarks():
         args.e2c2v_ordering,
         args.halo,
     )
-    filtered_v2e = transpose_ij(
-        halo_filter(
-            filter_v2e(
-                torus_grid.get_offset_provider("V2E").table,
-                grid_cartesian_dimensions[1],
-                grid_cartesian_dimensions[0],
-            ),
-            args.halo,
-            grid_cartesian_dimensions[1],
-            grid_cartesian_dimensions[0],
-        ),
-        grid_cartesian_dimensions[1] - 2 * (args.halo + 1),
-        grid_cartesian_dimensions[0] - 2 * (args.halo + 1),
+    filtered_v2e = process_v2e(
+        torus_grid.get_offset_provider("V2E").table,
+        grid_cartesian_dimensions[1],
+        grid_cartesian_dimensions[0],
+        args.halo + 1,
     )
 
     print(
