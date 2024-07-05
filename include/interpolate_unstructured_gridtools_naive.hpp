@@ -70,7 +70,7 @@ class interpolate_unstructured_naive : public mo_intp_rbf_rbf_vec_interpol_verte
 
     interpolate_unstructured_naive(std::vector<std::array<index_type, 6>> v2e,
         std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim,
-        input_type &p_e_in,
+        const input_type &p_e_in,
         std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
         std::vector<std::vector<WP_TYPE>> &ptr_coeff_2) : mo_intp_rbf_rbf_vec_interpol_vertex<S>(VertexDim, EdgeDim, KDim, v2e.size(), p_e_in, ptr_coeff_1, ptr_coeff_2),
         v2e_gt(storage::builder<S>.template type<index_type>().dimensions(v2e.size(), 6_c).initializer([&v2e](int i, int j) { return v2e[i][j]; }).build()),
