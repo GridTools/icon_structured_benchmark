@@ -1,4 +1,4 @@
 nanobind
 pandas
 seaborn
-cupy
+# cupy

@@ -354,6 +354,34 @@ def run_sanity_checks(
         assert np.allclose(p_v_out_cpu_ifirst, p_v_out_ref)
         print("unstructured cpu_ifirst sanity check passed")
 
+    if backend in ["all_cpu", "cpu_kfirst"]:
+        print("Running unstructured cpu_kfirst sanity check")
+        (
+            p_u_out_cpu_kfirst,
+            p_v_out_cpu_kfirst,
+        ) = icon_benchmark.nabla4_interpolate_validate_unstructured_cpu_kfirst_separate(
+            filtered_e2c2v,
+            filtered_e2ecv,
+            filtered_e2v,
+            random_validation_data.CellDim,
+            random_validation_data.VertexDim,
+            random_validation_data.EdgeDim,
+            random_validation_data.KDim,
+            random_validation_data.ECVDim,
+            np.array(random_validation_data.u_vert).T,
+            np.array(random_validation_data.v_vert).T,
+            random_validation_data.primal_normal_vert_v1,
+            random_validation_data.primal_normal_vert_v2,
+            np.array(random_validation_data.z_nabla2_e).T,
+            random_validation_data.inv_vert_vert_length,
+            random_validation_data.inv_primal_edge_length,
+            ptr_coeff_1,
+            ptr_coeff_2,
+        )
+        assert np.allclose(p_u_out_cpu_kfirst, p_u_out_ref)
+        assert np.allclose(p_v_out_cpu_kfirst, p_v_out_ref)
+        print("unstructured cpu_kfirst sanity check passed")
+
     print("Sanity checks pass")
 
 
@@ -501,6 +529,7 @@ def run_benchmarks():
                     nabla4_local_vertex_j = global_vertex_j - halo
                     transformed_v2e[i + j * x_dim_inner][k] = nabla4_local_vertex_i + nabla4_local_vertex_j * x_dim_nabla4 + orientation * nabla4_dim
         return transformed_v2e
+
     filtered_v2e = transform_v2e_to_nabla4_region(filtered_v2e, grid_cartesian_dimensions[1], grid_cartesian_dimensions[0], args.halo)
 
     runtimes = {}
@@ -523,6 +552,22 @@ def run_benchmarks():
         runtimes[
             "nabla4_interpolate_benchmark_unstructured_cpu_ifirst"
         ] = icon_benchmark.nabla4_interpolate_benchmark_unstructured_cpu_ifirst_separate(
+            filtered_e2c2v,
+            filtered_e2ecv,
+            filtered_v2e,
+            torus_grid.num_cells,
+            torus_grid.num_vertices,
+            torus_grid.num_edges,
+            torus_grid.num_levels,
+            torus_grid.size[E2C2VDim],
+            repetitions,
+            dry_runs,
+        )
+
+    if args.backend in ["all_cpu", "cpu_kfirst"]:
+        runtimes[
+            "nabla4_interpolate_benchmark_unstructured_cpu_kfirst"
+        ] = icon_benchmark.nabla4_interpolate_benchmark_unstructured_cpu_kfirst_separate(
             filtered_e2c2v,
             filtered_e2ecv,
             filtered_v2e,
