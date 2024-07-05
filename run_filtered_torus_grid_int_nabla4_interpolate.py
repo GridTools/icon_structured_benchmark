@@ -309,7 +309,7 @@ def run_sanity_checks(
         grid.num_levels,
         grid.size[E2C2VDim],
     )
-    p_e_in = random_validation_data.z_nabla4_e2_wp
+    p_e_in = np.array(random_validation_data.z_nabla4_e2_wp).T
     ptr_coeff_1 = np.random.rand(grid.num_edges, 6)
     ptr_coeff_2 = np.random.rand(grid.num_edges, 6)
     (
@@ -317,7 +317,7 @@ def run_sanity_checks(
         p_v_out_ref,
     ) = icon_benchmark.interpolate_validate_unstructured_cpu_ifirst(
         grid.num_vertices,
-        grid.num_edges,
+        (lon_dim - 2 * halo) * (lat_dim - 2 * halo) * 3,
         grid.num_levels,
         filtered_e2v,
         p_e_in,
@@ -331,7 +331,7 @@ def run_sanity_checks(
         (
             p_u_out_cpu_ifirst,
             p_v_out_cpu_ifirst,
-        ) = icon_benchmark.nabla4_interpolate_validate_unstructured_cpu_ifirst(
+        ) = icon_benchmark.nabla4_interpolate_validate_unstructured_cpu_ifirst_separate(
             filtered_e2c2v,
             filtered_e2ecv,
             filtered_e2v,
@@ -435,6 +435,19 @@ def run_benchmarks():
 
     grid_cartesian_dimensions = get_torus_cartesian_dimensions(args.grid)
 
+    print(
+        "CellsDim: {} VertexDim: {} EdgeDim: {} KDim: {} E2C2VDim: {} Longitude dimension: {} Latitude dimension: {} Halo: {}".format(
+            torus_grid.num_cells,
+            torus_grid.num_vertices,
+            torus_grid.num_edges,
+            torus_grid.num_levels,
+            torus_grid.size[E2C2VDim],
+            grid_cartesian_dimensions[0],
+            grid_cartesian_dimensions[1],
+            args.halo,
+        )
+    )
+
     filtered_e2c2v = filter_edge_vector(
         torus_grid.get_offset_provider("E2C2V").table,
         grid_cartesian_dimensions,
@@ -470,18 +483,25 @@ def run_benchmarks():
         args.halo + 1,
     )
 
-    print(
-        "CellsDim: {} VertexDim: {} EdgeDim: {} KDim: {} E2C2VDim: {} Longitude dimension: {} Latitude dimension: {} Halo: {}".format(
-            torus_grid.num_cells,
-            torus_grid.num_vertices,
-            torus_grid.num_edges,
-            torus_grid.num_levels,
-            torus_grid.size[E2C2VDim],
-            grid_cartesian_dimensions[0],
-            grid_cartesian_dimensions[1],
-            args.halo,
-        )
-    )
+    def transform_v2e_to_nabla4_region(v2e, x_dim, y_dim, halo):
+        x_dim_inner = x_dim - 2 * (halo + 1)
+        y_dim_inner = y_dim - 2 * (halo + 1)
+        x_dim_nabla4 = x_dim - 2 * halo
+        y_dim_nabla4 = y_dim - 2 * halo
+        nabla4_dim = x_dim_nabla4 * y_dim_nabla4
+        transformed_v2e = np.zeros_like(v2e)
+        assert (x_dim_inner * y_dim_inner, 6) == v2e.shape
+        for i in range(x_dim_inner):
+            for j in range(y_dim_inner):
+                for k in range(6):
+                    global_vertex_i = (v2e[i + j * x_dim_inner][k] % (x_dim * y_dim)) % x_dim
+                    global_vertex_j = (v2e[i + j * x_dim_inner][k] % (x_dim * y_dim)) // x_dim
+                    orientation = v2e[i + j * x_dim_inner][k] // (x_dim * y_dim)
+                    nabla4_local_vertex_i = global_vertex_i - halo
+                    nabla4_local_vertex_j = global_vertex_j - halo
+                    transformed_v2e[i + j * x_dim_inner][k] = nabla4_local_vertex_i + nabla4_local_vertex_j * x_dim_nabla4 + orientation * nabla4_dim
+        return transformed_v2e
+    filtered_v2e = transform_v2e_to_nabla4_region(filtered_v2e, grid_cartesian_dimensions[1], grid_cartesian_dimensions[0], args.halo)
 
     runtimes = {}
 
