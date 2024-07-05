@@ -4,6 +4,7 @@
 #include "interpolate_structured_gridtools_naive.hpp"
 #include "interpolate_unstructured_gridtools.hpp"
 #include "interpolate_unstructured_gridtools_naive.hpp"
+#include "nabla4_interpolate_unstructured_naive_separate.hpp"
 #include "nabla4_structured_simple.hpp"
 #include "nabla4_structured_torus.hpp"
 #include "nabla4_structured_torus_gridtools.hpp"
@@ -12,7 +13,6 @@
 #include "nabla4_unstructured.hpp"
 #include "nabla4_unstructured_gridtools.hpp"
 #include "nabla4_unstructured_gridtools_naive.hpp"
-#include "nabla4_interpolate_unstructured_naive_separate.hpp"
 #include "timer.hpp"
 
 template <typename T, backend_impl I>

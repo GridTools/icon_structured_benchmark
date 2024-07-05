@@ -135,7 +135,8 @@ def transpose_ij(v2e_table, x_dim, y_dim):
     assert transposed_v2e_table.shape == (x_dim * y_dim, 6)
     return transposed_v2e_table
 
-def process_v2e(v2e_table, x_dim, y_dim, halo = 1):
+
+def process_v2e(v2e_table, x_dim, y_dim, halo=1):
     return transpose_ij(
         halo_filter(
             filter_v2e(
@@ -147,9 +148,10 @@ def process_v2e(v2e_table, x_dim, y_dim, halo = 1):
             x_dim,
             y_dim,
         ),
-        x_dim  - 2 * halo,
+        x_dim - 2 * halo,
         y_dim - 2 * halo,
     )
+
 
 def compare_ndarrays(a, b):
     same = True

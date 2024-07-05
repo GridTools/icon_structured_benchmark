@@ -23,6 +23,7 @@ from json import dump
 
 from run_filtered_torus_grid_int_interpolate import process_v2e
 
+
 def print_median_runtimes(runtimes):
     for key in runtimes.keys():
         values = runtimes[key]
@@ -297,7 +298,14 @@ def run_gtfn(repetitions, dry_runs, e2c2v, e2ecv, nabla4_data, grid, backend):
 
 
 def run_sanity_checks(
-    filtered_e2c2v, filtered_e2ecv, filtered_e2v, grid, lon_dim, lat_dim, backend="all_cpu", halo=2
+    filtered_e2c2v,
+    filtered_e2ecv,
+    filtered_e2v,
+    grid,
+    lon_dim,
+    lat_dim,
+    backend="all_cpu",
+    halo=2,
 ):
     print("Generating validation data")
     random_validation_data = icon_benchmark.get_nabla4_benchmark_validation_data(
@@ -522,15 +530,28 @@ def run_benchmarks():
         for i in range(x_dim_inner):
             for j in range(y_dim_inner):
                 for k in range(6):
-                    global_vertex_i = (v2e[i + j * x_dim_inner][k] % (x_dim * y_dim)) % x_dim
-                    global_vertex_j = (v2e[i + j * x_dim_inner][k] % (x_dim * y_dim)) // x_dim
+                    global_vertex_i = (
+                        v2e[i + j * x_dim_inner][k] % (x_dim * y_dim)
+                    ) % x_dim
+                    global_vertex_j = (
+                        v2e[i + j * x_dim_inner][k] % (x_dim * y_dim)
+                    ) // x_dim
                     orientation = v2e[i + j * x_dim_inner][k] // (x_dim * y_dim)
                     nabla4_local_vertex_i = global_vertex_i - halo
                     nabla4_local_vertex_j = global_vertex_j - halo
-                    transformed_v2e[i + j * x_dim_inner][k] = nabla4_local_vertex_i + nabla4_local_vertex_j * x_dim_nabla4 + orientation * nabla4_dim
+                    transformed_v2e[i + j * x_dim_inner][k] = (
+                        nabla4_local_vertex_i
+                        + nabla4_local_vertex_j * x_dim_nabla4
+                        + orientation * nabla4_dim
+                    )
         return transformed_v2e
 
-    filtered_v2e = transform_v2e_to_nabla4_region(filtered_v2e, grid_cartesian_dimensions[1], grid_cartesian_dimensions[0], args.halo)
+    filtered_v2e = transform_v2e_to_nabla4_region(
+        filtered_v2e,
+        grid_cartesian_dimensions[1],
+        grid_cartesian_dimensions[0],
+        args.halo,
+    )
 
     runtimes = {}
 

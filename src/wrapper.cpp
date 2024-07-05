@@ -1171,8 +1171,8 @@ std::vector<double> nabla4_interpolate_benchmark_unstructured_gpu_naive_separate
         std::make_tuple(e2c2v, e2ecv, v2e, CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
 }
 
-std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>> nabla4_interpolate_validate_unstructured_cpu_ifirst_separate(
-    std::vector<std::array<index_type, 4>> &e2c2v,
+std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>
+nabla4_interpolate_validate_unstructured_cpu_ifirst_separate(std::vector<std::array<index_type, 4>> &e2c2v,
     std::vector<std::array<index_type, 4>> &e2ecv,
     std::vector<std::array<index_type, 6>> &v2e,
     index_type CellDim,
@@ -1207,10 +1207,10 @@ std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>> 
             inv_primal_edge_length,
             ptr_coeff_1,
             ptr_coeff_2));
-    }
+}
 
-std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>> nabla4_interpolate_validate_unstructured_cpu_kfirst_separate(
-    std::vector<std::array<index_type, 4>> &e2c2v,
+std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>
+nabla4_interpolate_validate_unstructured_cpu_kfirst_separate(std::vector<std::array<index_type, 4>> &e2c2v,
     std::vector<std::array<index_type, 4>> &e2ecv,
     std::vector<std::array<index_type, 6>> &v2e,
     index_type CellDim,
@@ -1245,4 +1245,4 @@ std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>> 
             inv_primal_edge_length,
             ptr_coeff_1,
             ptr_coeff_2));
-    }
+}

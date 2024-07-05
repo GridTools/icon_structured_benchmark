@@ -665,8 +665,8 @@ std::vector<double> nabla4_interpolate_benchmark_unstructured_gpu_naive_separate
     int repetitions = 101,
     int dry_runs = 1);
 
-std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>> nabla4_interpolate_validate_unstructured_cpu_ifirst_separate(
-    std::vector<std::array<index_type, 4>> &e2c2v,
+std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>
+nabla4_interpolate_validate_unstructured_cpu_ifirst_separate(std::vector<std::array<index_type, 4>> &e2c2v,
     std::vector<std::array<index_type, 4>> &e2ecv,
     std::vector<std::array<index_type, 6>> &v2e,
     index_type CellDim,
@@ -684,8 +684,8 @@ std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>> 
     std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
     std::vector<std::vector<WP_TYPE>> &ptr_coeff_2);
 
-std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>> nabla4_interpolate_validate_unstructured_cpu_kfirst_separate(
-    std::vector<std::array<index_type, 4>> &e2c2v,
+std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>
+nabla4_interpolate_validate_unstructured_cpu_kfirst_separate(std::vector<std::array<index_type, 4>> &e2c2v,
     std::vector<std::array<index_type, 4>> &e2ecv,
     std::vector<std::array<index_type, 6>> &v2e,
     index_type CellDim,

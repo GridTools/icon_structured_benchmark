@@ -116,7 +116,5 @@ struct nabla4_gt_data {
         }
         return result;
     }
-    data_store_2d_VP_t get_output_gt() {
-        return z_nabla4_e2_wp_gt;
-    }
+    data_store_2d_VP_t get_output_gt() { return z_nabla4_e2_wp_gt; }
 };
