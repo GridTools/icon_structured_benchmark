@@ -1,5 +1,5 @@
-#include <mo_intp_rbf_rbf_vec_interpol_vertex.hpp>
-#include <nabla4_gridtools.hpp>
+#include <interpolate_unstructured_gridtools_naive.hpp>
+#include <nabla4_unstructured_gridtools_naive.hpp>
 
 template <typename T>
 struct nabla4_interpolate_unstructured_naive_separate {
