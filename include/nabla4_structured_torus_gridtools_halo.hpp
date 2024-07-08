@@ -243,7 +243,7 @@ class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
 };
 
 #if defined(__CUDACC__)
-__global__ void __launch_bounds__(block_dims_structured_kloop.size) run_gpu_kloop_structured(index_type KDim,
+__global__ void __launch_bounds__(block_dims_structured_kloop.size) run_gpu_kloop_nabla4_structured(index_type KDim,
     index_type x_dim,
     index_type x_dim_inner,
     index_type y_dim,
@@ -352,7 +352,7 @@ inline void nabla4_structured_torus_halo_gt<T>::run_gpu_kloop_helper() {
     dim3 tblocks(block_dims_structured_kloop.x, block_dims_structured_kloop.y, block_dims_structured_kloop.z);
     const index_type inner_grid_size = (x_dim - 2 * halo) * (y_dim - halo * 2);
     dim3 grid((x_dim - 2 * halo + tblocks.x - 1) / tblocks.x, (y_dim - 2 * halo + tblocks.y - 1) / tblocks.y, 1);
-    run_gpu_kloop_structured<<<grid, tblocks>>>(KDim,
+    run_gpu_kloop_nabla4_structured<<<grid, tblocks>>>(KDim,
         x_dim,
         x_dim - 2 * halo,
         y_dim,
