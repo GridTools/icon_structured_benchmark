@@ -4,6 +4,7 @@
 #include "interpolate_structured_gridtools_naive.hpp"
 #include "interpolate_unstructured_gridtools.hpp"
 #include "interpolate_unstructured_gridtools_naive.hpp"
+#include "nabla4_interpolate_structured_naive_separate.hpp"
 #include "nabla4_interpolate_unstructured_naive_separate.hpp"
 #include "nabla4_structured_simple.hpp"
 #include "nabla4_structured_torus.hpp"
