@@ -1,13 +1,13 @@
-#include <interpolate_structured_gridtools_naive.hpp>
-#include <nabla4_structured_torus_gridtools_halo_naive.hpp>
+#include <interpolate_structured_gridtools.hpp>
+#include <nabla4_structured_torus_gridtools_halo.hpp>
 
 template <typename T>
-struct nabla4_interpolate_structured_naive_separate {
-    nabla4_structured_torus_halo_gt_naive<T> nabla4_data;
-    interpolate_structured_naive<T> interpolate_data;
+struct nabla4_interpolate_structured_separate {
+    nabla4_structured_torus_halo_gt<T> nabla4_data;
+    interpolate_structured<T> interpolate_data;
 
   public:
-    nabla4_interpolate_structured_naive_separate(index_type CellDim,
+    nabla4_interpolate_structured_separate(index_type CellDim,
         index_type VertexDim,
         index_type EdgeDim,
         index_type KDim,
@@ -18,7 +18,7 @@ struct nabla4_interpolate_structured_naive_separate {
         : nabla4_data(CellDim, VertexDim, EdgeDim, KDim, ECVDim, y_dim, x_dim, halo),
           interpolate_data(VertexDim, EdgeDim, KDim, y_dim - 2 * halo, x_dim - 2 * halo, 1){};
 
-    nabla4_interpolate_structured_naive_separate(index_type CellDim,
+    nabla4_interpolate_structured_separate(index_type CellDim,
         index_type VertexDim,
         index_type EdgeDim,
         index_type KDim,
@@ -64,7 +64,7 @@ struct nabla4_interpolate_structured_naive_separate {
 
     template <backend_impl I>
     inline void run() {
-        if constexpr (I == backend_impl::cpu_ifirst || I == backend_impl::cpu_kfirst || I == backend_impl::gpu) {
+        if constexpr (I == backend_impl::cpu_ifirst || I == backend_impl::cpu_kfirst || I == backend_impl::gpu_naive) {
             nabla4_data.template run<I>();
             interpolate_data.template run<I>();
         } else {

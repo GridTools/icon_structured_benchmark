@@ -1,13 +1,13 @@
-#include <interpolate_unstructured_gridtools_naive.hpp>
-#include <nabla4_unstructured_gridtools_naive.hpp>
+#include <interpolate_unstructured_gridtools.hpp>
+#include <nabla4_unstructured_gridtools.hpp>
 
 template <typename T>
-struct nabla4_interpolate_unstructured_naive_separate {
-    nabla4_unstructured_gt_naive<T> nabla4_data;
-    interpolate_unstructured_naive<T> interpolate_data;
+struct nabla4_interpolate_unstructured_separate {
+    nabla4_unstructured_gt<T> nabla4_data;
+    interpolate_unstructured<T> interpolate_data;
 
   public:
-    nabla4_interpolate_unstructured_naive_separate(std::vector<std::array<index_type, 4>> e2c2v,
+    nabla4_interpolate_unstructured_separate(std::vector<std::array<index_type, 4>> e2c2v,
         std::vector<std::array<index_type, 4>> e2ecv,
         std::vector<std::array<index_type, 6>> v2e,
         index_type CellDim,
@@ -18,7 +18,7 @@ struct nabla4_interpolate_unstructured_naive_separate {
         : nabla4_data(e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim),
           interpolate_data(v2e, VertexDim, EdgeDim, KDim, nabla4_data.get_output_gt()){};
 
-    nabla4_interpolate_unstructured_naive_separate(std::vector<std::array<index_type, 4>> e2c2v,
+    nabla4_interpolate_unstructured_separate(std::vector<std::array<index_type, 4>> e2c2v,
         std::vector<std::array<index_type, 4>> e2ecv,
         std::vector<std::array<index_type, 6>> v2e,
         index_type CellDim,
@@ -55,7 +55,7 @@ struct nabla4_interpolate_unstructured_naive_separate {
 
     template <backend_impl I>
     inline void run() {
-        if constexpr (I == backend_impl::cpu_ifirst || I == backend_impl::cpu_kfirst || I == backend_impl::gpu) {
+        if constexpr (I == backend_impl::cpu_ifirst || I == backend_impl::cpu_kfirst || I == backend_impl::gpu_naive) {
             nabla4_data.template run<I>();
             interpolate_data.template run<I>();
         } else {
