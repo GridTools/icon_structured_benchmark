@@ -9,7 +9,7 @@ from analysis import (
 )
 
 if __name__ == "__main__":
-    git_commit = "3ad077a"
+    git_commit = "a31fdd3"
 
     backend = "gpu"
 
@@ -20,10 +20,10 @@ if __name__ == "__main__":
         "torus_100000_100000_64",
     ]
 
-    klevels = [1, 16, 65]
+    klevels = [1, 16, 65, 80]
 
     runtimes_output = read_torus_results_commit_backend_index_type(
-        "results/output_{}_{}_{}".format(git_commit, backend, index_type),
+        "results/nabla4_output_{}_{}_{}".format(git_commit, backend, index_type),
         torus_files,
         klevels,
         git_commit,
@@ -31,7 +31,7 @@ if __name__ == "__main__":
         index_type,
     )
 
-    output_directory = "results/plot_output_halo_{}_{}_{}".format(
+    output_directory = "results/plot_nabla4_output_halo_{}_{}_{}".format(
         git_commit, backend, index_type
     )
 
@@ -47,7 +47,7 @@ if __name__ == "__main__":
             "nabla4_benchmark_unstructured_gpu_gridtools",
             "nabla4_benchmark_structured_torus_gpu_gridtools_halo",
         ),
-        "gpu",
+        "gpu_kloop",
         output_directory,
     )
 
