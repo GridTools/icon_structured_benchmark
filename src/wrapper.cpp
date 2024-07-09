@@ -58,7 +58,9 @@ std::vector<double> benchmark_gridtools(std::tuple<Args...> &&args, int repetiti
     } else if constexpr (I == backend_impl::cpu_kfirst) {
         return run_benchmark<T<storage::cpu_kfirst>, I>(std::forward<decltype(args)>(args), repetitions, dry_runs);
 #ifdef __CUDACC__
-    } else if constexpr (I == backend_impl::gpu) {
+    } else if constexpr (I == backend_impl::gpu_kloop) {
+        return run_benchmark<T<storage::gpu>, I>(std::forward<decltype(args)>(args), repetitions, dry_runs);
+    } else if constexpr (I == backend_impl::gpu_naive) {
         return run_benchmark<T<storage::gpu>, I>(std::forward<decltype(args)>(args), repetitions, dry_runs);
 #endif
     } else {
@@ -77,10 +79,14 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_gridtools(std::tuple<Args...> 
             [](auto &&...args) { return T<storage::cpu_kfirst>{std::forward<decltype(args)>(args)...}; }, args)};
         return run_validation<T<storage::cpu_kfirst>, cpu_kfirst>(benchmark_object);
 #ifdef __CUDACC__
-    } else if constexpr (I == backend_impl::gpu) {
+    } else if constexpr (I == backend_impl::gpu_kloop) {
         T<storage::gpu> benchmark_object{
             std::apply([](auto &&...args) { return T<storage::gpu>{std::forward<decltype(args)>(args)...}; }, args)};
-        return run_validation<T<storage::gpu>, gpu>(benchmark_object);
+        return run_validation<T<storage::gpu>, gpu_kloop>(benchmark_object);
+    } else if constexpr (I == backend_impl::gpu_naive) {
+        T<storage::gpu> benchmark_object{
+            std::apply([](auto &&...args) { return T<storage::gpu>{std::forward<decltype(args)>(args)...}; }, args)};
+        return run_validation<T<storage::gpu>, gpu_naive>(benchmark_object);
 #endif
     } else {
         throw std::runtime_error("[wrapper] Undefined backend implementation");
@@ -161,7 +167,7 @@ std::vector<double> nabla4_benchmark_unstructured_gpu_gridtools(std::vector<std:
     index_type ECVDim,
     int repetitions,
     int dry_runs) {
-    return benchmark_gridtools<gpu, nabla4_unstructured_gt>(
+    return benchmark_gridtools<gpu_kloop, nabla4_unstructured_gt>(
         std::make_tuple(e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
 }
 
@@ -174,7 +180,7 @@ std::vector<double> nabla4_benchmark_unstructured_gpu_gridtools_naive(std::vecto
     index_type ECVDim,
     int repetitions,
     int dry_runs) {
-    return benchmark_gridtools<gpu, nabla4_unstructured_gt_naive>(
+    return benchmark_gridtools<gpu_naive, nabla4_unstructured_gt>(
         std::make_tuple(e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
 }
 
@@ -347,7 +353,7 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_gpu_gridtools(
     std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
     std::vector<WP_TYPE> &inv_vert_vert_length,
     std::vector<WP_TYPE> &inv_primal_edge_length) {
-    return nabla4_validate_gridtools<gpu, nabla4_unstructured_gt>(std::make_tuple(e2c2v,
+    return nabla4_validate_gridtools<gpu_kloop, nabla4_unstructured_gt>(std::make_tuple(e2c2v,
         e2ecv,
         CellDim,
         VertexDim,
@@ -378,7 +384,7 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_gpu_gridtools_nai
     std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
     std::vector<WP_TYPE> &inv_vert_vert_length,
     std::vector<WP_TYPE> &inv_primal_edge_length) {
-    return nabla4_validate_gridtools<gpu, nabla4_unstructured_gt_naive>(std::make_tuple(e2c2v,
+    return nabla4_validate_gridtools<gpu_naive, nabla4_unstructured_gt>(std::make_tuple(e2c2v,
         e2ecv,
         CellDim,
         VertexDim,
@@ -612,7 +618,7 @@ std::vector<double> nabla4_benchmark_structured_torus_gpu_gridtools_halo(index_t
     index_type halo,
     int repetitions,
     int dry_runs) {
-    return benchmark_gridtools<gpu, nabla4_structured_torus_halo_gt>(
+    return benchmark_gridtools<gpu_kloop, nabla4_structured_torus_halo_gt>(
         std::make_tuple(CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, halo),
         repetitions,
         dry_runs);
@@ -628,7 +634,7 @@ std::vector<double> nabla4_benchmark_structured_torus_gpu_gridtools_halo_naive(i
     index_type halo,
     int repetitions,
     int dry_runs) {
-    return benchmark_gridtools<gpu, nabla4_structured_torus_halo_gt_naive>(
+    return benchmark_gridtools<gpu_naive, nabla4_structured_torus_halo_gt>(
         std::make_tuple(CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, halo),
         repetitions,
         dry_runs);
@@ -863,7 +869,7 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_gpu_gridtools
     std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
     std::vector<WP_TYPE> &inv_vert_vert_length,
     std::vector<WP_TYPE> &inv_primal_edge_length) {
-    return nabla4_validate_gridtools<gpu, nabla4_structured_torus_halo_gt>(std::make_tuple(CellDim,
+    return nabla4_validate_gridtools<gpu_kloop, nabla4_structured_torus_halo_gt>(std::make_tuple(CellDim,
         VertexDim,
         EdgeDim,
         KDim,
@@ -895,7 +901,7 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_gpu_gridtools
     std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
     std::vector<WP_TYPE> &inv_vert_vert_length,
     std::vector<WP_TYPE> &inv_primal_edge_length) {
-    return nabla4_validate_gridtools<gpu, nabla4_structured_torus_halo_gt_naive>(std::make_tuple(CellDim,
+    return nabla4_validate_gridtools<gpu_naive, nabla4_structured_torus_halo_gt>(std::make_tuple(CellDim,
         VertexDim,
         EdgeDim,
         KDim,
@@ -924,10 +930,14 @@ std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>> 
             [](auto &&...args) { return T<storage::cpu_kfirst>{std::forward<decltype(args)>(args)...}; }, args)};
         return run_validation<T<storage::cpu_kfirst>, cpu_kfirst>(benchmark_object);
 #ifdef __CUDACC__
-    } else if constexpr (I == backend_impl::gpu) {
+    } else if constexpr (I == backend_impl::gpu_kloop) {
         T<storage::gpu> benchmark_object{
             std::apply([](auto &&...args) { return T<storage::gpu>{std::forward<decltype(args)>(args)...}; }, args)};
-        return run_validation<T<storage::gpu>, gpu>(benchmark_object);
+        return run_validation<T<storage::gpu>, gpu_kloop>(benchmark_object);
+    } else if constexpr (I == backend_impl::gpu_naive) {
+        T<storage::gpu> benchmark_object{
+            std::apply([](auto &&...args) { return T<storage::gpu>{std::forward<decltype(args)>(args)...}; }, args)};
+        return run_validation<T<storage::gpu>, gpu_naive>(benchmark_object);
 #endif
     } else {
         throw std::runtime_error("[wrapper] Undefined backend implementation");
@@ -966,7 +976,7 @@ std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>> 
     std::vector<std::vector<WP_TYPE>> &p_e_in,
     std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
     std::vector<std::vector<WP_TYPE>> &ptr_coeff_2) {
-    return interpolate_validate_gridtools<gpu, interpolate_unstructured>(
+    return interpolate_validate_gridtools<gpu_kloop, interpolate_unstructured>(
         std::make_tuple(v2e, VertexDim, EdgeDim, KDim, p_e_in, ptr_coeff_1, ptr_coeff_2));
 }
 
@@ -978,7 +988,7 @@ interpolate_validate_unstructured_gpu_naive(std::size_t VertexDim,
     std::vector<std::vector<WP_TYPE>> &p_e_in,
     std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
     std::vector<std::vector<WP_TYPE>> &ptr_coeff_2) {
-    return interpolate_validate_gridtools<gpu, interpolate_unstructured_naive>(
+    return interpolate_validate_gridtools<gpu_naive, interpolate_unstructured>(
         std::make_tuple(v2e, VertexDim, EdgeDim, KDim, p_e_in, ptr_coeff_1, ptr_coeff_2));
 }
 
@@ -1008,7 +1018,7 @@ std::vector<double> interpolate_benchmark_unstructured_gpu(std::vector<std::arra
     std::size_t KDim,
     int repetitions,
     int dry_runs) {
-    return benchmark_gridtools<gpu, interpolate_unstructured>(
+    return benchmark_gridtools<gpu_kloop, interpolate_unstructured>(
         std::make_tuple(v2e, VertexDim, EdgeDim, KDim), repetitions, dry_runs);
 }
 
@@ -1018,7 +1028,7 @@ std::vector<double> interpolate_benchmark_unstructured_gpu_naive(std::vector<std
     std::size_t KDim,
     int repetitions,
     int dry_runs) {
-    return benchmark_gridtools<gpu, interpolate_unstructured_naive>(
+    return benchmark_gridtools<gpu_naive, interpolate_unstructured>(
         std::make_tuple(v2e, VertexDim, EdgeDim, KDim), repetitions, dry_runs);
 }
 
@@ -1054,7 +1064,7 @@ std::vector<double> interpolate_benchmark_structured_gpu(std::size_t VertexDim,
     index_type halo,
     int repetitions,
     int dry_runs) {
-    return benchmark_gridtools<gpu, interpolate_structured>(
+    return benchmark_gridtools<gpu_kloop, interpolate_structured>(
         std::make_tuple(VertexDim, EdgeDim, KDim, longitude_dim, latitude_dim, halo), repetitions, dry_runs);
 }
 
@@ -1066,7 +1076,7 @@ std::vector<double> interpolate_benchmark_structured_gpu_naive(std::size_t Verte
     index_type halo,
     int repetitions,
     int dry_runs) {
-    return benchmark_gridtools<gpu, interpolate_structured_naive>(
+    return benchmark_gridtools<gpu_naive, interpolate_structured>(
         std::make_tuple(VertexDim, EdgeDim, KDim, longitude_dim, latitude_dim, halo), repetitions, dry_runs);
 }
 
@@ -1108,7 +1118,7 @@ std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>> 
     std::vector<std::vector<WP_TYPE>> &p_e_in,
     std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
     std::vector<std::vector<WP_TYPE>> &ptr_coeff_2) {
-    return interpolate_validate_gridtools<gpu, interpolate_structured>(
+    return interpolate_validate_gridtools<gpu_kloop, interpolate_structured>(
         std::make_tuple(VertexDim, EdgeDim, KDim, longitude_dim, latitude_dim, halo, p_e_in, ptr_coeff_1, ptr_coeff_2));
 }
 
@@ -1122,7 +1132,7 @@ interpolate_validate_structured_gpu_naive(std::size_t VertexDim,
     std::vector<std::vector<WP_TYPE>> &p_e_in,
     std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
     std::vector<std::vector<WP_TYPE>> &ptr_coeff_2) {
-    return interpolate_validate_gridtools<gpu, interpolate_structured_naive>(
+    return interpolate_validate_gridtools<gpu_naive, interpolate_structured>(
         std::make_tuple(VertexDim, EdgeDim, KDim, longitude_dim, latitude_dim, halo, p_e_in, ptr_coeff_1, ptr_coeff_2));
 }
 
@@ -1137,7 +1147,7 @@ std::vector<double> nabla4_interpolate_benchmark_unstructured_cpu_ifirst_separat
     index_type ECVDim,
     int repetitions,
     int dry_runs) {
-    return benchmark_gridtools<cpu_ifirst, nabla4_interpolate_unstructured_naive_separate>(
+    return benchmark_gridtools<cpu_ifirst, nabla4_interpolate_unstructured_separate>(
         std::make_tuple(e2c2v, e2ecv, v2e, CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
 }
 
@@ -1151,7 +1161,7 @@ std::vector<double> nabla4_interpolate_benchmark_structured_cpu_ifirst_separate(
     index_type halo,
     int repetitions,
     int dry_runs) {
-    return benchmark_gridtools<cpu_ifirst, nabla4_interpolate_structured_naive_separate>(
+    return benchmark_gridtools<cpu_ifirst, nabla4_interpolate_structured_separate>(
         std::make_tuple(CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, halo),
         repetitions,
         dry_runs);
@@ -1168,7 +1178,7 @@ std::vector<double> nabla4_interpolate_benchmark_unstructured_cpu_kfirst_separat
     index_type ECVDim,
     int repetitions,
     int dry_runs) {
-    return benchmark_gridtools<cpu_kfirst, nabla4_interpolate_unstructured_naive_separate>(
+    return benchmark_gridtools<cpu_kfirst, nabla4_interpolate_unstructured_separate>(
         std::make_tuple(e2c2v, e2ecv, v2e, CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
 }
 
@@ -1182,7 +1192,7 @@ std::vector<double> nabla4_interpolate_benchmark_structured_cpu_kfirst_separate(
     index_type halo,
     int repetitions,
     int dry_runs) {
-    return benchmark_gridtools<cpu_kfirst, nabla4_interpolate_structured_naive_separate>(
+    return benchmark_gridtools<cpu_kfirst, nabla4_interpolate_structured_separate>(
         std::make_tuple(CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, halo),
         repetitions,
         dry_runs);
@@ -1199,7 +1209,7 @@ std::vector<double> nabla4_interpolate_benchmark_unstructured_gpu_naive_separate
     index_type ECVDim,
     int repetitions,
     int dry_runs) {
-    return benchmark_gridtools<gpu, nabla4_interpolate_unstructured_naive_separate>(
+    return benchmark_gridtools<gpu_naive, nabla4_interpolate_unstructured_separate>(
         std::make_tuple(e2c2v, e2ecv, v2e, CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
 }
 
@@ -1213,7 +1223,7 @@ std::vector<double> nabla4_interpolate_benchmark_structured_gpu_naive_separate(i
     index_type halo,
     int repetitions,
     int dry_runs) {
-    return benchmark_gridtools<gpu, nabla4_interpolate_structured_naive_separate>(
+    return benchmark_gridtools<gpu_naive, nabla4_interpolate_structured_separate>(
         std::make_tuple(CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, halo),
         repetitions,
         dry_runs);
@@ -1237,24 +1247,23 @@ nabla4_interpolate_validate_unstructured_cpu_ifirst_separate(std::vector<std::ar
     std::vector<WP_TYPE> &inv_primal_edge_length,
     std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
     std::vector<std::vector<WP_TYPE>> &ptr_coeff_2) {
-    return interpolate_validate_gridtools<cpu_ifirst, nabla4_interpolate_unstructured_naive_separate>(
-        std::make_tuple(e2c2v,
-            e2ecv,
-            v2e,
-            CellDim,
-            VertexDim,
-            EdgeDim,
-            KDim,
-            ECVDim,
-            u_vert,
-            v_vert,
-            primal_normal_vert_v1,
-            primal_normal_vert_v2,
-            z_nabla2_e,
-            inv_vert_vert_length,
-            inv_primal_edge_length,
-            ptr_coeff_1,
-            ptr_coeff_2));
+    return interpolate_validate_gridtools<cpu_ifirst, nabla4_interpolate_unstructured_separate>(std::make_tuple(e2c2v,
+        e2ecv,
+        v2e,
+        CellDim,
+        VertexDim,
+        EdgeDim,
+        KDim,
+        ECVDim,
+        u_vert,
+        v_vert,
+        primal_normal_vert_v1,
+        primal_normal_vert_v2,
+        z_nabla2_e,
+        inv_vert_vert_length,
+        inv_primal_edge_length,
+        ptr_coeff_1,
+        ptr_coeff_2));
 }
 
 std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>
@@ -1275,24 +1284,23 @@ nabla4_interpolate_validate_structured_cpu_ifirst_separate(index_type CellDim,
     std::vector<WP_TYPE> &inv_primal_edge_length,
     std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
     std::vector<std::vector<WP_TYPE>> &ptr_coeff_2) {
-    return interpolate_validate_gridtools<cpu_ifirst, nabla4_interpolate_structured_naive_separate>(
-        std::make_tuple(CellDim,
-            VertexDim,
-            EdgeDim,
-            KDim,
-            ECVDim,
-            longitude_dim,
-            latitude_dim,
-            halo,
-            u_vert,
-            v_vert,
-            primal_normal_vert_v1,
-            primal_normal_vert_v2,
-            z_nabla2_e,
-            inv_vert_vert_length,
-            inv_primal_edge_length,
-            ptr_coeff_1,
-            ptr_coeff_2));
+    return interpolate_validate_gridtools<cpu_ifirst, nabla4_interpolate_structured_separate>(std::make_tuple(CellDim,
+        VertexDim,
+        EdgeDim,
+        KDim,
+        ECVDim,
+        longitude_dim,
+        latitude_dim,
+        halo,
+        u_vert,
+        v_vert,
+        primal_normal_vert_v1,
+        primal_normal_vert_v2,
+        z_nabla2_e,
+        inv_vert_vert_length,
+        inv_primal_edge_length,
+        ptr_coeff_1,
+        ptr_coeff_2));
 }
 
 std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>
@@ -1313,24 +1321,23 @@ nabla4_interpolate_validate_unstructured_cpu_kfirst_separate(std::vector<std::ar
     std::vector<WP_TYPE> &inv_primal_edge_length,
     std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
     std::vector<std::vector<WP_TYPE>> &ptr_coeff_2) {
-    return interpolate_validate_gridtools<cpu_kfirst, nabla4_interpolate_unstructured_naive_separate>(
-        std::make_tuple(e2c2v,
-            e2ecv,
-            v2e,
-            CellDim,
-            VertexDim,
-            EdgeDim,
-            KDim,
-            ECVDim,
-            u_vert,
-            v_vert,
-            primal_normal_vert_v1,
-            primal_normal_vert_v2,
-            z_nabla2_e,
-            inv_vert_vert_length,
-            inv_primal_edge_length,
-            ptr_coeff_1,
-            ptr_coeff_2));
+    return interpolate_validate_gridtools<cpu_kfirst, nabla4_interpolate_unstructured_separate>(std::make_tuple(e2c2v,
+        e2ecv,
+        v2e,
+        CellDim,
+        VertexDim,
+        EdgeDim,
+        KDim,
+        ECVDim,
+        u_vert,
+        v_vert,
+        primal_normal_vert_v1,
+        primal_normal_vert_v2,
+        z_nabla2_e,
+        inv_vert_vert_length,
+        inv_primal_edge_length,
+        ptr_coeff_1,
+        ptr_coeff_2));
 }
 
 std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>
@@ -1351,24 +1358,23 @@ nabla4_interpolate_validate_structured_cpu_kfirst_separate(index_type CellDim,
     std::vector<WP_TYPE> &inv_primal_edge_length,
     std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
     std::vector<std::vector<WP_TYPE>> &ptr_coeff_2) {
-    return interpolate_validate_gridtools<cpu_kfirst, nabla4_interpolate_structured_naive_separate>(
-        std::make_tuple(CellDim,
-            VertexDim,
-            EdgeDim,
-            KDim,
-            ECVDim,
-            longitude_dim,
-            latitude_dim,
-            halo,
-            u_vert,
-            v_vert,
-            primal_normal_vert_v1,
-            primal_normal_vert_v2,
-            z_nabla2_e,
-            inv_vert_vert_length,
-            inv_primal_edge_length,
-            ptr_coeff_1,
-            ptr_coeff_2));
+    return interpolate_validate_gridtools<cpu_kfirst, nabla4_interpolate_structured_separate>(std::make_tuple(CellDim,
+        VertexDim,
+        EdgeDim,
+        KDim,
+        ECVDim,
+        longitude_dim,
+        latitude_dim,
+        halo,
+        u_vert,
+        v_vert,
+        primal_normal_vert_v1,
+        primal_normal_vert_v2,
+        z_nabla2_e,
+        inv_vert_vert_length,
+        inv_primal_edge_length,
+        ptr_coeff_1,
+        ptr_coeff_2));
 }
 
 std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>
@@ -1389,7 +1395,7 @@ nabla4_interpolate_validate_unstructured_gpu_naive_separate(std::vector<std::arr
     std::vector<WP_TYPE> &inv_primal_edge_length,
     std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
     std::vector<std::vector<WP_TYPE>> &ptr_coeff_2) {
-    return interpolate_validate_gridtools<gpu, nabla4_interpolate_unstructured_naive_separate>(std::make_tuple(e2c2v,
+    return interpolate_validate_gridtools<gpu_naive, nabla4_interpolate_unstructured_separate>(std::make_tuple(e2c2v,
         e2ecv,
         v2e,
         CellDim,
@@ -1426,7 +1432,7 @@ nabla4_interpolate_validate_structured_gpu_naive_separate(index_type CellDim,
     std::vector<WP_TYPE> &inv_primal_edge_length,
     std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
     std::vector<std::vector<WP_TYPE>> &ptr_coeff_2) {
-    return interpolate_validate_gridtools<gpu, nabla4_interpolate_structured_naive_separate>(std::make_tuple(CellDim,
+    return interpolate_validate_gridtools<gpu_naive, nabla4_interpolate_structured_separate>(std::make_tuple(CellDim,
         VertexDim,
         EdgeDim,
         KDim,

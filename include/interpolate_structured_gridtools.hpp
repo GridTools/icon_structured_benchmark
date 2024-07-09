@@ -4,34 +4,64 @@
 
 #if defined(__CUDACC__)
 template <typename S>
-constexpr block_dims get_block_dims_structured_interpol() {
+constexpr block_dims get_block_dims_structured_interpol_kloop() {
     throw std::runtime_error("Undefined block dimensions for type " + S::name + " in GPU backend");
 };
 
 template <>
-constexpr block_dims get_block_dims_structured_interpol<std::size_t>() {
+constexpr block_dims get_block_dims_structured_interpol_kloop<std::size_t>() {
     // not optimized
     return {32, 4, 1, 128};
 };
 
 template <>
-constexpr block_dims get_block_dims_structured_interpol<std::int64_t>() {
+constexpr block_dims get_block_dims_structured_interpol_kloop<std::int64_t>() {
     // not optimized
     return {32, 8, 1, 256};
 };
 
 template <>
-constexpr block_dims get_block_dims_structured_interpol<std::uint32_t>() {
+constexpr block_dims get_block_dims_structured_interpol_kloop<std::uint32_t>() {
     // not optimized
     return {32, 9, 1, 288};
 };
 
 template <>
-constexpr block_dims get_block_dims_structured_interpol<int>() {
+constexpr block_dims get_block_dims_structured_interpol_kloop<int>() {
     return {32, 1, 9, 288};
 };
 
-constexpr block_dims block_dims_structured_interpol = get_block_dims_structured_interpol<index_type>();
+constexpr block_dims block_dims_structured_interpol_kloop = get_block_dims_structured_interpol_kloop<index_type>();
+
+template <typename S>
+constexpr block_dims get_block_dims_structured_interpol_naive() {
+    throw std::runtime_error("Undefined block dimensions for type " + S::name + " in GPU backend");
+};
+
+template <>
+constexpr block_dims get_block_dims_structured_interpol_naive<std::size_t>() {
+    // not optimized
+    return {32, 4, 1, 128};
+};
+
+template <>
+constexpr block_dims get_block_dims_structured_interpol_naive<std::int64_t>() {
+    // not optimized
+    return {32, 8, 1, 256};
+};
+
+template <>
+constexpr block_dims get_block_dims_structured_interpol_naive<std::uint32_t>() {
+    // not optimized
+    return {32, 9, 1, 288};
+};
+
+template <>
+constexpr block_dims get_block_dims_structured_interpol_naive<int>() {
+    return {32, 2, 8, 512};
+};
+
+constexpr block_dims block_dims_structured_interpol_naive = get_block_dims_structured_interpol_naive<index_type>();
 #endif
 
 GT_FORCE_INLINE constexpr std::array<index_type, 6> get_v2e(
@@ -56,6 +86,7 @@ class interpolate_structured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
     using mo_intp_rbf_rbf_vec_interpol_vertex<S>::ptr_coeff_2_gt_ctv;
     using mo_intp_rbf_rbf_vec_interpol_vertex<S>::p_u_out_gt_tv;
     using mo_intp_rbf_rbf_vec_interpol_vertex<S>::p_v_out_gt_tv;
+    using input_type = typename mo_intp_rbf_rbf_vec_interpol_vertex<S>::data_store_2d_WP_t;
 
     const index_type y_dim;
     const index_type x_dim;
@@ -78,7 +109,31 @@ class interpolate_structured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
         index_type y_dim,
         index_type x_dim,
         index_type halo,
+        input_type p_e_in_gt)
+        : y_dim(y_dim), x_dim(x_dim),
+          halo(halo), mo_intp_rbf_rbf_vec_interpol_vertex<S>(
+                          VertexDim, EdgeDim, KDim, p_e_in_gt, (y_dim - 2 * halo) * (x_dim - 2 * halo)){};
+
+    interpolate_structured(std::size_t VertexDim,
+        std::size_t EdgeDim,
+        std::size_t KDim,
+        index_type y_dim,
+        index_type x_dim,
+        index_type halo,
         std::vector<std::vector<WP_TYPE>> &p_e_in,
+        std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
+        std::vector<std::vector<WP_TYPE>> &ptr_coeff_2)
+        : y_dim(y_dim), x_dim(x_dim), halo(halo),
+          mo_intp_rbf_rbf_vec_interpol_vertex<S>(
+              VertexDim, EdgeDim, KDim, (y_dim - 2 * halo) * (x_dim - 2 * halo), p_e_in, ptr_coeff_1, ptr_coeff_2){};
+
+    interpolate_structured(std::size_t VertexDim,
+        std::size_t EdgeDim,
+        std::size_t KDim,
+        index_type y_dim,
+        index_type x_dim,
+        index_type halo,
+        const input_type &p_e_in,
         std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
         std::vector<std::vector<WP_TYPE>> &ptr_coeff_2)
         : y_dim(y_dim), x_dim(x_dim), halo(halo),
@@ -164,7 +219,8 @@ class interpolate_structured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
             };
         };
     };
-    void run_gpu_helper();
+    void run_gpu_kloop_helper();
+    void run_gpu_naive_helper();
 
   public:
     /// Compute function timed for benchmarking
@@ -174,8 +230,10 @@ class interpolate_structured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
             run_cpu_ifirst();
         } else if constexpr (I == backend_impl::cpu_kfirst) {
             run_cpu_kfirst();
-        } else if constexpr (I == backend_impl::gpu) {
-            run_gpu_helper();
+        } else if constexpr (I == backend_impl::gpu_kloop) {
+            run_gpu_kloop_helper();
+        } else if constexpr (I == backend_impl::gpu_naive) {
+            run_gpu_naive_helper();
         } else {
             throw std::runtime_error("Undefined backend implementation");
         }
@@ -183,16 +241,17 @@ class interpolate_structured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
 };
 
 #if defined(__CUDACC__)
-__global__ void __launch_bounds__(block_dims_structured_interpol.size) run_gpu_interpol(index_type KDim,
-    index_type x_dim,
-    index_type y_dim,
-    index_type halo,
-    index_type inner_grid_size,
-    interpolate_structured<storage::gpu>::data_store_2d_ctv_WP_t p_e_in_gt_ctv,
-    interpolate_structured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_1_gt_ctv,
-    interpolate_structured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_2_gt_ctv,
-    interpolate_structured<storage::gpu>::data_store_2d_tv_WP_t p_u_out_gt_tv,
-    interpolate_structured<storage::gpu>::data_store_2d_tv_WP_t p_v_out_gt_tv) {
+__global__ void __launch_bounds__(block_dims_structured_interpol_kloop.size)
+    run_gpu_kloop_interpol_structured(index_type KDim,
+        index_type x_dim,
+        index_type y_dim,
+        index_type halo,
+        index_type inner_grid_size,
+        interpolate_structured<storage::gpu>::data_store_2d_ctv_WP_t p_e_in_gt_ctv,
+        interpolate_structured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_1_gt_ctv,
+        interpolate_structured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_2_gt_ctv,
+        interpolate_structured<storage::gpu>::data_store_2d_tv_WP_t p_u_out_gt_tv,
+        interpolate_structured<storage::gpu>::data_store_2d_tv_WP_t p_v_out_gt_tv) {
     const auto i = blockIdx.x * blockDim.x + threadIdx.x;
     const auto j = blockIdx.y * blockDim.y + threadIdx.y;
     if (i >= x_dim - 2 * halo || j >= y_dim - 2 * halo)
@@ -216,11 +275,62 @@ __global__ void __launch_bounds__(block_dims_structured_interpol.size) run_gpu_i
 };
 
 template <typename S>
-inline void interpolate_structured<S>::run_gpu_helper() {
-    dim3 tblocks(block_dims_structured_interpol.x, block_dims_structured_interpol.y, block_dims_structured_interpol.z);
+inline void interpolate_structured<S>::run_gpu_kloop_helper() {
+    dim3 tblocks(block_dims_structured_interpol_kloop.x,
+        block_dims_structured_interpol_kloop.y,
+        block_dims_structured_interpol_kloop.z);
     const index_type inner_grid_size = (x_dim - 2 * halo) * (y_dim - halo * 2);
     dim3 grid((x_dim - 2 * halo + tblocks.x - 1) / tblocks.x, (y_dim - 2 * halo + tblocks.y - 1) / tblocks.y, 1);
-    run_gpu_interpol<<<grid, tblocks>>>(KDim,
+    run_gpu_kloop_interpol_structured<<<grid, tblocks>>>(KDim,
+        x_dim,
+        y_dim,
+        halo,
+        inner_grid_size,
+        p_e_in_gt_ctv,
+        ptr_coeff_1_gt_ctv,
+        ptr_coeff_2_gt_ctv,
+        p_u_out_gt_tv,
+        p_v_out_gt_tv);
+    GT_CUDA_CHECK(cudaGetLastError());
+};
+
+__global__ void __launch_bounds__(block_dims_structured_interpol_naive.size)
+    run_gpu_naive_interpol_structured(index_type KDim,
+        index_type x_dim,
+        index_type y_dim,
+        index_type halo,
+        index_type inner_grid_size,
+        interpolate_structured<storage::gpu>::data_store_2d_ctv_WP_t p_e_in_gt_ctv,
+        interpolate_structured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_1_gt_ctv,
+        interpolate_structured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_2_gt_ctv,
+        interpolate_structured<storage::gpu>::data_store_2d_tv_WP_t p_u_out_gt_tv,
+        interpolate_structured<storage::gpu>::data_store_2d_tv_WP_t p_v_out_gt_tv) {
+    const auto i = blockIdx.x * blockDim.x + threadIdx.x;
+    const auto j = blockIdx.y * blockDim.y + threadIdx.y;
+    const auto k_index = blockIdx.z * blockDim.z + threadIdx.z;
+    if (i >= x_dim - 2 * halo || j >= y_dim - 2 * halo || k_index >= KDim)
+        return;
+    const std::array<index_type, 6> v2e{get_v2e(i + halo, j + halo, x_dim, y_dim)};
+    const index_type vertex_index_internal = i + j * (x_dim - 2 * halo);
+#pragma unroll
+    for (int i{0}; i < 6; ++i) {
+        p_u_out_gt_tv(vertex_index_internal, k_index) +=
+            p_e_in_gt_ctv(v2e[i], k_index) * ptr_coeff_1_gt_ctv(vertex_index_internal, i);
+        p_v_out_gt_tv(vertex_index_internal, k_index) +=
+            p_e_in_gt_ctv(v2e[i], k_index) * ptr_coeff_2_gt_ctv(vertex_index_internal, i);
+    }
+};
+
+template <typename S>
+inline void interpolate_structured<S>::run_gpu_naive_helper() {
+    dim3 tblocks(block_dims_structured_interpol_naive.x,
+        block_dims_structured_interpol_naive.y,
+        block_dims_structured_interpol_naive.z);
+    const index_type inner_grid_size = (x_dim - 2 * halo) * (y_dim - halo * 2);
+    dim3 grid((x_dim - 2 * halo + tblocks.x - 1) / tblocks.x,
+        (y_dim - 2 * halo + tblocks.y - 1) / tblocks.y,
+        (KDim + tblocks.z - 1) / tblocks.z);
+    run_gpu_naive_interpol_structured<<<grid, tblocks>>>(KDim,
         x_dim,
         y_dim,
         halo,
@@ -234,7 +344,12 @@ inline void interpolate_structured<S>::run_gpu_helper() {
 };
 #else
 template <typename S>
-inline void interpolate_structured<S>::run_gpu_helper() {
+inline void interpolate_structured<S>::run_gpu_kloop_helper() {
+    throw std::runtime_error("GPU backend not enabled");
+};
+
+template <typename S>
+inline void interpolate_structured<S>::run_gpu_naive_helper() {
     throw std::runtime_error("GPU backend not enabled");
 };
 #endif

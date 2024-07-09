@@ -15,7 +15,7 @@ using std::chrono::high_resolution_clock;
 template <backend_impl I>
 class timer {
 #if not defined(__CUDACC__)
-    static_assert(I != backend_impl::gpu, "GPU backend not supported");
+    static_assert(I != backend_impl::gpu_kloop || I != backend_impl::gpu_naive, "GPU backend not supported");
 #else
     cudaEvent_t start_event, stop_event;
 #endif
@@ -24,7 +24,7 @@ class timer {
   public:
     timer() {
 #if defined(__CUDACC__)
-        if constexpr (I == backend_impl::gpu) {
+        if constexpr (I == backend_impl::gpu_kloop || I == backend_impl::gpu_naive) {
             GT_CUDA_CHECK(cudaEventCreate(&start_event));
             cudaEventCreate(&stop_event);
         }
@@ -32,7 +32,7 @@ class timer {
     }
     inline void start() {
 #if defined(__CUDACC__)
-        if constexpr (I == backend_impl::gpu) {
+        if constexpr (I == backend_impl::gpu_kloop || I == backend_impl::gpu_naive) {
             GT_CUDA_CHECK(cudaEventRecord(start_event, 0));
         } else {
 #endif
@@ -43,7 +43,7 @@ class timer {
     }
     inline void stop() {
 #if defined(__CUDACC__)
-        if constexpr (I == backend_impl::gpu) {
+        if constexpr (I == backend_impl::gpu_kloop || I == backend_impl::gpu_naive) {
             GT_CUDA_CHECK(cudaEventRecord(stop_event, 0));
             GT_CUDA_CHECK(cudaEventSynchronize(stop_event));
         } else {
@@ -55,7 +55,7 @@ class timer {
     }
     inline double elapsed() const {
 #if defined(__CUDACC__)
-        if constexpr (I == backend_impl::gpu) {
+        if constexpr (I == backend_impl::gpu_kloop || I == backend_impl::gpu_naive) {
             float elapsed_time{};
             GT_CUDA_CHECK(cudaEventElapsedTime(&elapsed_time, start_event, stop_event));
             return static_cast<double>(elapsed_time / 1000.0);
@@ -68,7 +68,7 @@ class timer {
     }
     ~timer() {
 #if defined(__CUDACC__)
-        if constexpr (I == backend_impl::gpu) {
+        if constexpr (I == backend_impl::gpu_kloop || I == backend_impl::gpu_naive) {
             GT_CUDA_CHECK(cudaEventDestroy(start_event));
             GT_CUDA_CHECK(cudaEventDestroy(stop_event));
         }

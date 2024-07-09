@@ -126,7 +126,7 @@ namespace generated {
 #if defined(IS_GPU)
                 if constexpr (std::is_same_v<decltype(backend),
                                   gridtools::fn::backend::gpu<thread_block_sizes_t, loop_block_sizes_t>>) {
-                    timer<backend_impl::gpu> t;
+                    timer<backend_impl::gpu_naive> t;
                     std::vector<double> runtimes;
                     for (int i{0}; i < repetitions; ++i) {
                         t.start();
