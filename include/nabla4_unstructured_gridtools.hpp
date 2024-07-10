@@ -69,6 +69,7 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
     using nabla4_gt_data<T>::VertexDim;
     using nabla4_gt_data<T>::KDim;
     using nabla4_gt_data<T>::ECVDim;
+    using nabla4_gt_data<T>::output_size;
     using nabla4_gt_data<T>::u_vert_gt;
     using nabla4_gt_data<T>::v_vert_gt;
     using nabla4_gt_data<T>::primal_normal_vert_v1_gt;
@@ -286,8 +287,8 @@ __global__ void __launch_bounds__(block_dims_unstructured_kloop.size, 2)
 template <typename T>
 inline void nabla4_unstructured_gt<T>::run_gpu_kloop_helper() {
     dim3 tblocks(block_dims_unstructured_kloop.x, block_dims_unstructured_kloop.y, block_dims_unstructured_kloop.z);
-    dim3 grid((e2c2v_gt->const_host_view().lengths()[0] + tblocks.x - 1) / tblocks.x, 1, 1);
-    run_gpu_kloop_nabla4_unstructured<<<grid, tblocks>>>(e2c2v_gt->const_host_view().lengths()[0],
+    dim3 grid((output_size + tblocks.x - 1) / tblocks.x, 1, 1);
+    run_gpu_kloop_nabla4_unstructured<<<grid, tblocks>>>(output_size,
         KDim,
         e2c2v_gt_tv,
         e2ecv_gt_tv,
@@ -345,9 +346,8 @@ __global__ void __launch_bounds__(block_dims_unstructured_naive.size)
 template <typename T>
 inline void nabla4_unstructured_gt<T>::run_gpu_naive_helper() {
     dim3 tblocks(block_dims_unstructured_naive.x, block_dims_unstructured_naive.y, block_dims_unstructured_naive.z);
-    dim3 grid(
-        (e2c2v_gt->const_host_view().lengths()[0] + tblocks.x - 1) / tblocks.x, (KDim + tblocks.y - 1) / tblocks.y, 1);
-    run_gpu_naive_nabla4_unstructured<<<grid, tblocks>>>(e2c2v_gt->const_host_view().lengths()[0],
+    dim3 grid((output_size + tblocks.x - 1) / tblocks.x, (KDim + tblocks.y - 1) / tblocks.y, 1);
+    run_gpu_naive_nabla4_unstructured<<<grid, tblocks>>>(output_size,
         KDim,
         e2c2v_gt_tv,
         e2ecv_gt_tv,

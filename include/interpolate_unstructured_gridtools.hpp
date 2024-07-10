@@ -69,6 +69,7 @@ class interpolate_unstructured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
     using mo_intp_rbf_rbf_vec_interpol_vertex<S>::KDim;
     using mo_intp_rbf_rbf_vec_interpol_vertex<S>::VertexDim;
     using mo_intp_rbf_rbf_vec_interpol_vertex<S>::EdgeDim;
+    using mo_intp_rbf_rbf_vec_interpol_vertex<S>::output_size;
     using mo_intp_rbf_rbf_vec_interpol_vertex<S>::p_e_in_gt_ctv;
     using mo_intp_rbf_rbf_vec_interpol_vertex<S>::ptr_coeff_1_gt_ctv;
     using mo_intp_rbf_rbf_vec_interpol_vertex<S>::ptr_coeff_2_gt_ctv;
@@ -241,8 +242,8 @@ inline void interpolate_unstructured<S>::run_gpu_kloop_helper() {
     dim3 tblocks(block_dims_unstructured_interpol_kloop.x,
         block_dims_unstructured_interpol_kloop.y,
         block_dims_unstructured_interpol_kloop.z);
-    dim3 grid((v2e_gt->const_host_view().lengths()[0] + tblocks.x - 1) / tblocks.x, 1, 1);
-    run_gpu_kloop_interpol_unstructured<<<grid, tblocks>>>(v2e_gt->const_host_view().lengths()[0],
+    dim3 grid((output_size + tblocks.x - 1) / tblocks.x, 1, 1);
+    run_gpu_kloop_interpol_unstructured<<<grid, tblocks>>>(output_size,
         KDim,
         v2e_gt_ctv,
         p_e_in_gt_ctv,
@@ -280,9 +281,8 @@ inline void interpolate_unstructured<S>::run_gpu_naive_helper() {
     dim3 tblocks(block_dims_unstructured_interpol_naive.x,
         block_dims_unstructured_interpol_naive.y,
         block_dims_unstructured_interpol_naive.z);
-    dim3 grid(
-        (v2e_gt->const_host_view().lengths()[0] + tblocks.x - 1) / tblocks.x, (KDim + tblocks.y - 1) / tblocks.y, 1);
-    run_gpu_naive_interpol_unstructured<<<grid, tblocks>>>(v2e_gt->const_host_view().lengths()[0],
+    dim3 grid((output_size + tblocks.x - 1) / tblocks.x, (KDim + tblocks.y - 1) / tblocks.y, 1);
+    run_gpu_naive_interpol_unstructured<<<grid, tblocks>>>(output_size,
         KDim,
         v2e_gt_ctv,
         p_e_in_gt_ctv,
