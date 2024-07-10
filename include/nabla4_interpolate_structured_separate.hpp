@@ -64,7 +64,8 @@ struct nabla4_interpolate_structured_separate {
 
     template <backend_impl I>
     inline void run() {
-        if constexpr (I == backend_impl::cpu_ifirst || I == backend_impl::cpu_kfirst || I == backend_impl::gpu_naive) {
+        if constexpr (I == backend_impl::cpu_ifirst || I == backend_impl::cpu_kfirst || I == backend_impl::gpu_naive ||
+                      I == backend_impl::gpu_kloop) {
             nabla4_data.template run<I>();
             interpolate_data.template run<I>();
         } else {
