@@ -16,7 +16,8 @@ struct nabla4_interpolate_structured_separate {
         index_type x_dim,
         index_type halo)
         : nabla4_data(CellDim, VertexDim, EdgeDim, KDim, ECVDim, y_dim, x_dim, halo),
-          interpolate_data(VertexDim, EdgeDim, KDim, y_dim - 2 * halo, x_dim - 2 * halo, 1){};
+          interpolate_data(
+              VertexDim, EdgeDim, KDim, y_dim - 2 * halo, x_dim - 2 * halo, 1, nabla4_data.get_output_gt()){};
 
     nabla4_interpolate_structured_separate(index_type CellDim,
         index_type VertexDim,
