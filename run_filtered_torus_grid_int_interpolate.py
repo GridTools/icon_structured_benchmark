@@ -76,15 +76,13 @@ def generate_v2e(x_dim, y_dim, internal_halo=1):
             j_internal = j - internal_halo
             i_j = i + j * x_dim
             i_jm1 = i + (j - 1) * x_dim
-            v2e[j_internal * x_dim_internal + i_internal][0] = (
-                (x_dim * y_dim) + i_j - internal_halo
-            )
+            v2e[j_internal * x_dim_internal + i_internal][0] = (x_dim * y_dim) + i_j - 1
             v2e[j_internal * x_dim_internal + i_internal][1] = (x_dim * y_dim) + i_j
             v2e[j_internal * x_dim_internal + i_internal][2] = i_jm1
             v2e[j_internal * x_dim_internal + i_internal][3] = i_j
             v2e[j_internal * x_dim_internal + i_internal][4] = 2 * (x_dim * y_dim) + i_j
             v2e[j_internal * x_dim_internal + i_internal][5] = (
-                2 * (x_dim * y_dim) + i_j + x_dim - internal_halo
+                2 * (x_dim * y_dim) + i_j + x_dim - 1
             )
     return v2e
 
