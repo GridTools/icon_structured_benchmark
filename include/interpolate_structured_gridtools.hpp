@@ -266,11 +266,15 @@ __global__ void __launch_bounds__(block_dims_structured_interpol_kloop.size)
         coeff2[i] = ptr_coeff_2_gt_ctv(vertex_index_internal, i);
     }
     for (auto k_index{blockIdx.z * blockDim.z + threadIdx.z}; k_index < KDim; k_index += gridDim.z * blockDim.z) {
+        double u{0.0};
+        double v{0.0};
 #pragma unroll
         for (int i{0}; i < 6; ++i) {
-            p_u_out_gt_tv(vertex_index_internal, k_index) += p_e_in_gt_ctv(v2e[i], k_index) * coeff1[i];
-            p_v_out_gt_tv(vertex_index_internal, k_index) += p_e_in_gt_ctv(v2e[i], k_index) * coeff2[i];
+            u += p_e_in_gt_ctv(v2e[i], k_index) * coeff1[i];
+            v += p_e_in_gt_ctv(v2e[i], k_index) * coeff2[i];
         }
+        p_u_out_gt_tv(vertex_index_internal, k_index) = u;
+        p_v_out_gt_tv(vertex_index_internal, k_index) = v;
     }
 };
 
@@ -312,13 +316,15 @@ __global__ void __launch_bounds__(block_dims_structured_interpol_naive.size)
         return;
     const std::array<index_type, 6> v2e{get_v2e(i + halo, j + halo, x_dim, y_dim)};
     const index_type vertex_index_internal = i + j * (x_dim - 2 * halo);
+    double u{0.0};
+    double v{0.0};
 #pragma unroll
     for (int i{0}; i < 6; ++i) {
-        p_u_out_gt_tv(vertex_index_internal, k_index) +=
-            p_e_in_gt_ctv(v2e[i], k_index) * ptr_coeff_1_gt_ctv(vertex_index_internal, i);
-        p_v_out_gt_tv(vertex_index_internal, k_index) +=
-            p_e_in_gt_ctv(v2e[i], k_index) * ptr_coeff_2_gt_ctv(vertex_index_internal, i);
+        u += p_e_in_gt_ctv(v2e[i], k_index) * ptr_coeff_1_gt_ctv(vertex_index_internal, i);
+        v += p_e_in_gt_ctv(v2e[i], k_index) * ptr_coeff_2_gt_ctv(vertex_index_internal, i);
     }
+    p_u_out_gt_tv(vertex_index_internal, k_index) = u;
+    p_v_out_gt_tv(vertex_index_internal, k_index) = v;
 };
 
 template <typename S>

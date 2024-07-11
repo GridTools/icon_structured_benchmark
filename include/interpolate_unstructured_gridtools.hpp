@@ -28,7 +28,7 @@ constexpr block_dims get_block_dims_unstructured_interpol_kloop<std::uint32_t>()
 
 template <>
 constexpr block_dims get_block_dims_unstructured_interpol_kloop<int>() {
-    return {32, 9, 1, 288};
+    return {32, 8, 1, 256};
 };
 
 constexpr block_dims block_dims_unstructured_interpol_kloop = get_block_dims_unstructured_interpol_kloop<index_type>();
@@ -229,11 +229,15 @@ __global__ void __launch_bounds__(block_dims_unstructured_interpol_kloop.size)
         v2e[i] = v2e_gt_ctv(vertex_index, i);
     }
     for (auto k_index{blockIdx.y * blockDim.y + threadIdx.y}; k_index < KDim; k_index += gridDim.y * blockDim.y) {
+        double u{0.0};
+        double v{0.0};
 #pragma unroll
         for (int i{0}; i < 6; ++i) {
-            p_u_out_gt_tv(vertex_index, k_index) += p_e_in_gt_ctv(v2e[i], k_index) * coeff1[i];
-            p_v_out_gt_tv(vertex_index, k_index) += p_e_in_gt_ctv(v2e[i], k_index) * coeff2[i];
+            u += p_e_in_gt_ctv(v2e[i], k_index) * coeff1[i];
+            v += p_e_in_gt_ctv(v2e[i], k_index) * coeff2[i];
         }
+        p_u_out_gt_tv(vertex_index, k_index) = u;
+        p_v_out_gt_tv(vertex_index, k_index) = v;
     }
 };
 
@@ -267,13 +271,15 @@ __global__ void __launch_bounds__(block_dims_unstructured_interpol_naive.size)
     const auto k_index = blockIdx.y * blockDim.y + threadIdx.y;
     if (vertex_index >= VertexDim || k_index >= KDim)
         return;
+    double u{0.0};
+    double v{0.0};
 #pragma unroll
     for (int i{0}; i < 6; ++i) {
-        p_u_out_gt_tv(vertex_index, k_index) +=
-            p_e_in_gt_ctv(v2e_gt_ctv(vertex_index, i), k_index) * ptr_coeff_1_gt_ctv(vertex_index, i);
-        p_v_out_gt_tv(vertex_index, k_index) +=
-            p_e_in_gt_ctv(v2e_gt_ctv(vertex_index, i), k_index) * ptr_coeff_2_gt_ctv(vertex_index, i);
+        u += p_e_in_gt_ctv(v2e_gt_ctv(vertex_index, i), k_index) * ptr_coeff_1_gt_ctv(vertex_index, i);
+        v += p_e_in_gt_ctv(v2e_gt_ctv(vertex_index, i), k_index) * ptr_coeff_2_gt_ctv(vertex_index, i);
     }
+    p_u_out_gt_tv(vertex_index, k_index) = u;
+    p_v_out_gt_tv(vertex_index, k_index) = v;
 };
 
 template <typename S>
