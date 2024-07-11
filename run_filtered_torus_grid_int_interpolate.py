@@ -66,8 +66,7 @@ def get_torus_grid(filename, num_levels, transformation, e2c2v_ordering="per-ver
     return simple_grid
 
 
-def generate_v2e(x_dim, y_dim):
-    internal_halo = 1
+def generate_v2e(x_dim, y_dim, internal_halo=1):
     y_dim_internal = y_dim - 2 * internal_halo
     x_dim_internal = x_dim - 2 * internal_halo
     v2e = np.zeros((y_dim_internal * x_dim_internal, 6), dtype=np.int32)
@@ -77,13 +76,15 @@ def generate_v2e(x_dim, y_dim):
             j_internal = j - internal_halo
             i_j = i + j * x_dim
             i_jm1 = i + (j - 1) * x_dim
-            v2e[j_internal * x_dim_internal + i_internal][0] = (x_dim * y_dim) + i_j - 1
+            v2e[j_internal * x_dim_internal + i_internal][0] = (
+                (x_dim * y_dim) + i_j - internal_halo
+            )
             v2e[j_internal * x_dim_internal + i_internal][1] = (x_dim * y_dim) + i_j
             v2e[j_internal * x_dim_internal + i_internal][2] = i_jm1
             v2e[j_internal * x_dim_internal + i_internal][3] = i_j
             v2e[j_internal * x_dim_internal + i_internal][4] = 2 * (x_dim * y_dim) + i_j
             v2e[j_internal * x_dim_internal + i_internal][5] = (
-                2 * (x_dim * y_dim) + i_j + x_dim - 1
+                2 * (x_dim * y_dim) + i_j + x_dim - internal_halo
             )
     return v2e
 
@@ -421,7 +422,7 @@ def run_benchmarks():
         args.halo,
     )
     v2e_generated = generate_v2e(
-        grid_cartesian_dimensions[1], grid_cartesian_dimensions[0]
+        grid_cartesian_dimensions[1], grid_cartesian_dimensions[0], args.halo
     )
 
     assert np.allclose(v2e_filtered, v2e_generated), "Filtered V2E table is incorrect"
