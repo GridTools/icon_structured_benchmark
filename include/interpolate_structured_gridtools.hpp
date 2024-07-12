@@ -81,6 +81,7 @@ class interpolate_structured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
     using mo_intp_rbf_rbf_vec_interpol_vertex<S>::KDim;
     using mo_intp_rbf_rbf_vec_interpol_vertex<S>::VertexDim;
     using mo_intp_rbf_rbf_vec_interpol_vertex<S>::EdgeDim;
+    using mo_intp_rbf_rbf_vec_interpol_vertex<S>::output_size;
     using mo_intp_rbf_rbf_vec_interpol_vertex<S>::p_e_in_gt_ctv;
     using mo_intp_rbf_rbf_vec_interpol_vertex<S>::ptr_coeff_1_gt_ctv;
     using mo_intp_rbf_rbf_vec_interpol_vertex<S>::ptr_coeff_2_gt_ctv;

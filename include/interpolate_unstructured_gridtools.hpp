@@ -66,6 +66,7 @@ constexpr block_dims block_dims_unstructured_interpol_naive = get_block_dims_uns
 
 template <typename S>
 class interpolate_unstructured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
+  public:
     using mo_intp_rbf_rbf_vec_interpol_vertex<S>::KDim;
     using mo_intp_rbf_rbf_vec_interpol_vertex<S>::VertexDim;
     using mo_intp_rbf_rbf_vec_interpol_vertex<S>::EdgeDim;
@@ -77,7 +78,6 @@ class interpolate_unstructured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
     using mo_intp_rbf_rbf_vec_interpol_vertex<S>::p_v_out_gt_tv;
     using input_type = typename mo_intp_rbf_rbf_vec_interpol_vertex<S>::data_store_2d_WP_t;
 
-  public:
     using neighbors_gt_t =
         decltype(gridtools::storage::builder<S>.dimensions(0, 6_c).template type<index_type>().build());
     using neighbors_gt_ctv_t =

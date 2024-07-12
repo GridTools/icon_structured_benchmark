@@ -63,7 +63,7 @@ constexpr block_dims block_dims_unstructured_naive = get_block_dims_unstructured
 
 template <typename T>
 class nabla4_unstructured_gt : public nabla4_gt_data<T> {
-
+  public:
     using nabla4_gt_data<T>::CellDim;
     using nabla4_gt_data<T>::EdgeDim;
     using nabla4_gt_data<T>::VertexDim;
@@ -87,7 +87,6 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
     using nabla4_gt_data<T>::inv_primal_edge_length_gt_tv;
     using nabla4_gt_data<T>::z_nabla4_e2_wp_gt_tv;
 
-  public:
     using neighbors_gt_t =
         decltype(gridtools::storage::builder<T>.dimensions(0, 4_c).template type<index_type>().build());
     using neighbors_gt_ctv_t =

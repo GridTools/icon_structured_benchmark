@@ -1213,6 +1213,21 @@ std::vector<double> nabla4_interpolate_benchmark_unstructured_gpu_naive_separate
         std::make_tuple(e2c2v, e2ecv, v2e, CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
 }
 
+std::vector<double> nabla4_interpolate_benchmark_unstructured_gpu_naive_inlined(
+    std::vector<std::array<index_type, 4>> &e2c2v,
+    std::vector<std::array<index_type, 4>> &e2ecv,
+    std::vector<std::array<index_type, 6>> &v2e,
+    index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    int repetitions,
+    int dry_runs) {
+    return benchmark_gridtools<gpu_naive, nabla4_interpolate_unstructured_inlined>(
+        std::make_tuple(e2c2v, e2ecv, v2e, CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
+}
+
 std::vector<double> nabla4_interpolate_benchmark_unstructured_gpu_kloop_separate(
     std::vector<std::array<index_type, 4>> &e2c2v,
     std::vector<std::array<index_type, 4>> &e2ecv,
