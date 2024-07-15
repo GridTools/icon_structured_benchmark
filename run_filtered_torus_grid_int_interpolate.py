@@ -87,7 +87,7 @@ def generate_v2e(x_dim, y_dim, internal_halo=1):
     return v2e
 
 
-def filter_v2e(v2e_table, x_dim, y_dim):
+def filter_v2e_per_orientation(v2e_table, x_dim, y_dim):
     e2e_table = []
     for i in range(x_dim * y_dim):
         e2e_table.append(i * 3)
@@ -135,10 +135,10 @@ def transpose_ij(v2e_table, x_dim, y_dim):
     return transposed_v2e_table
 
 
-def process_v2e(v2e_table, x_dim, y_dim, halo=1):
+def process_v2e_per_orientation(v2e_table, x_dim, y_dim, halo=1):
     return transpose_ij(
         halo_filter(
-            filter_v2e(
+            filter_v2e_per_orientation(
                 v2e_table,
                 x_dim,
                 y_dim,
@@ -150,6 +150,47 @@ def process_v2e(v2e_table, x_dim, y_dim, halo=1):
         x_dim - 2 * halo,
         y_dim - 2 * halo,
     )
+
+
+def filter_v2e_per_vertex(v2e_table, x_dim, y_dim):
+    e2e_table = []
+    for i in range(x_dim * y_dim):
+        e2e_table.append(i * 3)
+        e2e_table.append(i * 3 + 1)
+        e2e_table.append(
+            i * 3 + 3 * x_dim + 2
+            if i * 3 + 2 + 3 * x_dim < x_dim * y_dim * 3
+            else i * 3 + 3 * x_dim + 2 - x_dim * y_dim * 3
+        )
+
+    for edges in v2e_table:
+        for edge_id in range(6):
+            edges[edge_id] = e2e_table[edges[edge_id]]
+
+    return v2e_table
+
+
+def process_v2e_per_vertex(v2e_table, x_dim, y_dim, halo=1):
+    print("Processing V2E table per vertex")
+    print("original v2e table")
+    print(v2e_table)
+    output = transpose_ij(
+        halo_filter(
+            filter_v2e_per_vertex(
+                v2e_table,
+                x_dim,
+                y_dim,
+            ),
+            halo,
+            x_dim,
+            y_dim,
+        ),
+        x_dim - 2 * halo,
+        y_dim - 2 * halo,
+    )
+    print("processed v2e table")
+    print(output)
+    return output
 
 
 def compare_ndarrays(a, b):
@@ -413,17 +454,29 @@ def run_benchmarks():
         )
     )
 
-    v2e_filtered = process_v2e(
-        torus_grid.get_offset_provider("V2E").table,
-        grid_cartesian_dimensions[1],
-        grid_cartesian_dimensions[0],
-        args.halo,
+    v2e_filtered = (
+        process_v2e_per_orientation(
+            torus_grid.get_offset_provider("V2E").table,
+            grid_cartesian_dimensions[1],
+            grid_cartesian_dimensions[0],
+            args.halo,
+        )
+        if args.e2c2v_ordering == "per-orientation"
+        else process_v2e_per_vertex(
+            torus_grid.get_offset_provider("V2E").table,
+            grid_cartesian_dimensions[1],
+            grid_cartesian_dimensions[0],
+            args.halo,
+        )
     )
     v2e_generated = generate_v2e(
         grid_cartesian_dimensions[1], grid_cartesian_dimensions[0], args.halo
     )
 
-    assert np.allclose(v2e_filtered, v2e_generated), "Filtered V2E table is incorrect"
+    if args.e2c2v_ordering == "per-orientation":
+        assert np.allclose(
+            v2e_filtered, v2e_generated
+        ), "Filtered V2E table is incorrect"
 
     if args.sanity_checks:
         run_sanity_checks(

@@ -21,7 +21,10 @@ import netCDF4  # type: ignore [import-not-found]
 
 from json import dump
 
-from run_filtered_torus_grid_int_interpolate import process_v2e
+from run_filtered_torus_grid_int_interpolate import (
+    process_v2e_per_orientation,
+    process_v2e_per_vertex,
+)
 
 
 def print_median_runtimes(runtimes):
@@ -309,14 +312,15 @@ def run_sanity_checks(
     lat_dim,
     backend="all_cpu",
     halo=2,
+    e2c2v_ordering="per-vertex",
     combination="separate",
 ):
-    # print("filtered_e2c2v_separate")
-    # for i in range(len(filtered_e2c2v_separate)):
-    #     print("filtered_e2c2v_separate[{}]: {}".format(i, filtered_e2c2v_separate[i]))
-    # print("filtered_e2c2v_inlined")
-    # for i in range(len(filtered_e2c2v_inlined)):
-    #     print("filtered_e2c2v_inlined[{}]: {}".format(i, filtered_e2c2v_inlined[i]))
+    print("filtered_e2c2v_separate")
+    for i in range(len(filtered_e2c2v_separate)):
+        print("filtered_e2c2v_separate[{}]: {}".format(i, filtered_e2c2v_separate[i]))
+    print("filtered_e2c2v_inlined")
+    for i in range(len(filtered_e2c2v_inlined)):
+        print("filtered_e2c2v_inlined[{}]: {}".format(i, filtered_e2c2v_inlined[i]))
     print("Generating separate validation data")
     random_validation_data_separate = (
         icon_benchmark.get_nabla4_benchmark_validation_data(
@@ -329,13 +333,29 @@ def run_sanity_checks(
             grid.size[E2C2VDim],
         )
     )
-    # print("np.array(random_validation_data_separate.z_nabla4_e2_wp).T")
-    # for i in range(len(np.array(random_validation_data_separate.z_nabla4_e2_wp).T)):
-    #     for k in range(len(np.array(random_validation_data_separate.z_nabla4_e2_wp).T[i])):
-    #         print("z_nabla4_e2_wp[{}][{}]: {}".format(i, k, np.array(random_validation_data_separate.z_nabla4_e2_wp).T[i][k]))
-    # for i in range(len(np.array(random_validation_data_separate.z_nabla4_e2_wp).T)):
-    #     for k in range(len(np.array(random_validation_data_separate.z_nabla4_e2_wp).T[i])):
-    #         print("z_nabla4_e2_wp[{}][{}]: {}".format(i, k, np.array(random_validation_data_separate.z_nabla4_e2_wp).T[i][k]))
+    print("np.array(random_validation_data_separate.z_nabla4_e2_wp).T")
+    for i in range(len(np.array(random_validation_data_separate.z_nabla4_e2_wp).T)):
+        for k in range(
+            len(np.array(random_validation_data_separate.z_nabla4_e2_wp).T[i])
+        ):
+            print(
+                "z_nabla4_e2_wp[{}][{}]: {}".format(
+                    i,
+                    k,
+                    np.array(random_validation_data_separate.z_nabla4_e2_wp).T[i][k],
+                )
+            )
+    for i in range(len(np.array(random_validation_data_separate.z_nabla4_e2_wp).T)):
+        for k in range(
+            len(np.array(random_validation_data_separate.z_nabla4_e2_wp).T[i])
+        ):
+            print(
+                "z_nabla4_e2_wp[{}][{}]: {}".format(
+                    i,
+                    k,
+                    np.array(random_validation_data_separate.z_nabla4_e2_wp).T[i][k],
+                )
+            )
     p_e_in = np.array(random_validation_data_separate.z_nabla4_e2_wp).T
     ptr_coeff_1 = np.random.rand(grid.num_edges, 6)
     ptr_coeff_2 = np.random.rand(grid.num_edges, 6)
@@ -429,46 +449,131 @@ def run_sanity_checks(
                 (random_validation_data_separate.EdgeDim, grid.num_levels),
                 dtype=np.float64,
             )
-            # print("len(np.array(random_validation_data_separate.z_nabla2_e).T):", len(np.array(random_validation_data_separate.z_nabla2_e).T))
-            # print("np.array(random_validation_data_separate.z_nabla2_e).T")
-            # for i in range(len(np.array(random_validation_data_separate.z_nabla2_e).T)):
-            #     for k in range(len(np.array(random_validation_data_separate.z_nabla2_e).T[i])):
-            #         print("np.array(random_validation_data_separate.z_nabla2_e).T[{}][{}]: {}".format(i, k, np.array(random_validation_data_separate.z_nabla2_e).T[i][k]))
-            for edge_index in range(random_validation_data_separate.EdgeDim):
-                j = edge_index % (lon_dim * lat_dim) // lat_dim
-                i = edge_index % (lon_dim * lat_dim) % lat_dim
-                orientation = edge_index // (lon_dim * lat_dim)
-                # print("i", i, "j", j, "edge_index", edge_index)
-                internal_index = (
-                    i
-                    - halo
-                    + (j - halo) * (lat_dim - 2 * halo)
-                    + orientation * (lon_dim - 2 * halo) * (lat_dim - 2 * halo)
-                )
-                # print("internal_index", internal_index)
-                if (
-                    i >= halo
-                    and j >= halo
-                    and i < lat_dim - halo
-                    and j < lon_dim - halo
+            print(
+                "len(np.array(random_validation_data_separate.z_nabla2_e).T):",
+                len(np.array(random_validation_data_separate.z_nabla2_e).T),
+            )
+            print("np.array(random_validation_data_separate.z_nabla2_e).T")
+            for i in range(len(np.array(random_validation_data_separate.z_nabla2_e).T)):
+                for k in range(
+                    len(np.array(random_validation_data_separate.z_nabla2_e).T[i])
                 ):
-                    inv_vert_vert_length_inlined[
-                        edge_index
-                    ] = random_validation_data_separate.inv_vert_vert_length[
-                        internal_index
-                    ]
-                    inv_primal_edge_length_inlined[
-                        edge_index
-                    ] = random_validation_data_separate.inv_primal_edge_length[
-                        internal_index
-                    ]
-                    z_nabla2_e_inlined[edge_index] = np.array(
-                        random_validation_data_separate.z_nabla2_e
-                    ).T[internal_index]
-            # print("z_nabla2_e_inlined")
-            # for i in range(len(z_nabla2_e_inlined)):
-            #     for k in range(len(z_nabla2_e_inlined[i])):
-            #         print("z_nabla2_e_inlined[{}][{}]: {}".format(i, k, z_nabla2_e_inlined[i][k]))
+                    print(
+                        "np.array(random_validation_data_separate.z_nabla2_e).T[{}][{}]: {}".format(
+                            i,
+                            k,
+                            np.array(random_validation_data_separate.z_nabla2_e).T[i][
+                                k
+                            ],
+                        )
+                    )
+            if e2c2v_ordering == "per-orientation":
+                for edge_index in range(random_validation_data_separate.EdgeDim):
+                    j = edge_index % (lon_dim * lat_dim) // lat_dim
+                    i = edge_index % (lon_dim * lat_dim) % lat_dim
+                    orientation = edge_index // (lon_dim * lat_dim)
+                    # print("i", i, "j", j, "edge_index", edge_index)
+                    internal_index = (
+                        i
+                        - halo
+                        + (j - halo) * (lat_dim - 2 * halo)
+                        + orientation * (lon_dim - 2 * halo) * (lat_dim - 2 * halo)
+                    )
+                    # print("internal_index", internal_index)
+                    if (
+                        i >= halo
+                        and j >= halo
+                        and i < lat_dim - halo
+                        and j < lon_dim - halo
+                    ):
+                        inv_vert_vert_length_inlined[
+                            edge_index
+                        ] = random_validation_data_separate.inv_vert_vert_length[
+                            internal_index
+                        ]
+                        inv_primal_edge_length_inlined[
+                            edge_index
+                        ] = random_validation_data_separate.inv_primal_edge_length[
+                            internal_index
+                        ]
+                        z_nabla2_e_inlined[edge_index] = np.array(
+                            random_validation_data_separate.z_nabla2_e
+                        ).T[internal_index]
+            else:
+                for edge_index in range(random_validation_data_separate.EdgeDim):
+                    j = edge_index // 3 // lat_dim
+                    i = edge_index // 3 % lat_dim
+                    orientation = edge_index % 3
+                    internal_index = (
+                        i - halo + (j - halo) * (lat_dim - 2 * halo)
+                    ) * 3 + orientation
+                    if (
+                        i >= halo
+                        and j >= halo
+                        and i < lat_dim - halo
+                        and j < lon_dim - halo
+                    ):
+                        print(
+                            "i",
+                            i,
+                            "j",
+                            j,
+                            "orientation",
+                            orientation,
+                            "edge_index",
+                            edge_index,
+                        )
+                        print("internal_index", internal_index)
+                        inv_vert_vert_length_inlined[
+                            edge_index
+                        ] = random_validation_data_separate.inv_vert_vert_length[
+                            internal_index
+                        ]
+                        inv_primal_edge_length_inlined[
+                            edge_index
+                        ] = random_validation_data_separate.inv_primal_edge_length[
+                            internal_index
+                        ]
+                        z_nabla2_e_inlined[edge_index] = np.array(
+                            random_validation_data_separate.z_nabla2_e
+                        ).T[internal_index]
+            print("z_nabla2_e_inlined")
+            for i in range(len(z_nabla2_e_inlined)):
+                for k in range(len(z_nabla2_e_inlined[i])):
+                    print(
+                        "z_nabla2_e_inlined[{}][{}]: {}".format(
+                            i, k, z_nabla2_e_inlined[i][k]
+                        )
+                    )
+            if e2c2v_ordering == "per-vertex":
+
+                def filter_ptr_coeff_per_vertex(ptr_coeff_original):
+                    ptr_coeff_per_vertex = np.zeros_like(ptr_coeff_original)
+                    for i in range(ptr_coeff_original.shape[0] // 3):
+                        ptr_coeff_per_vertex[i * 3] = ptr_coeff_original[i]
+                        ptr_coeff_per_vertex[i * 3 + 1] = ptr_coeff_original[
+                            i + ptr_coeff_original.shape[0] // 3
+                        ]
+                        ptr_coeff_per_vertex[i * 3 + 2] = ptr_coeff_original[
+                            i + 2 * (ptr_coeff_original.shape[0] // 3)
+                        ]
+                    return ptr_coeff_per_vertex
+
+                print("ptr_coeff_1")
+                for i in range(len(ptr_coeff_1)):
+                    print("ptr_coeff_1[{}]: {}".format(i, ptr_coeff_1[i]))
+
+                ptr_coeff_1_per_vertex = filter_ptr_coeff_per_vertex(ptr_coeff_1)
+                ptr_coeff_2_per_vertex = filter_ptr_coeff_per_vertex(ptr_coeff_2)
+
+                print("ptr_coeff_1_per_vertex")
+                for i in range(len(ptr_coeff_1_per_vertex)):
+                    print(
+                        "ptr_coeff_1_per_vertex[{}]: {}".format(
+                            i, ptr_coeff_1_per_vertex[i]
+                        )
+                    )
+
             # import pdb
             # pdb.set_trace()
             (
@@ -493,8 +598,6 @@ def run_sanity_checks(
                 ptr_coeff_1,
                 ptr_coeff_2,
             )
-            # import pdb
-            # pdb.set_trace()
             assert np.allclose(
                 p_u_out_cpu_ifirst_unstructured_inlined, p_u_out_ref_separate
             )
@@ -914,7 +1017,15 @@ def run_benchmarks():
         )
     )
 
-    def filter_neighbors(grid_e2c2v, grid_e2ecv, grid_v2e, combination="separate"):
+    def filter_neighbors(
+        grid_e2c2v,
+        grid_e2ecv,
+        grid_v2e,
+        e2c2v_ordering="per-vertex",
+        combination="separate",
+        nabla2_separate=[],
+        nabla2_inline=[],
+    ):
         filtered_e2c2v = filter_edge_vector(
             grid_e2c2v,
             grid_cartesian_dimensions,
@@ -942,14 +1053,23 @@ def run_benchmarks():
             args.halo if combination == "separate" else 0,
         )
 
-        filtered_v2e = process_v2e(
-            grid_v2e,
-            grid_cartesian_dimensions[1],
-            grid_cartesian_dimensions[0],
-            args.halo + 1,
+        filtered_v2e = (
+            process_v2e_per_orientation(
+                grid_v2e,
+                grid_cartesian_dimensions[1],
+                grid_cartesian_dimensions[0],
+                args.halo + 1,
+            )
+            if e2c2v_ordering == "per-orientation"
+            else process_v2e_per_vertex(
+                grid_v2e,
+                grid_cartesian_dimensions[1],
+                grid_cartesian_dimensions[0],
+                args.halo + 1,
+            )
         )
 
-        def transform_v2e_to_nabla4_region(v2e, x_dim, y_dim, halo):
+        def transform_v2e_to_nabla4_region_per_orientation(v2e, x_dim, y_dim, halo):
             x_dim_inner = x_dim - 2 * (halo + 1)
             y_dim_inner = y_dim - 2 * (halo + 1)
             x_dim_nabla4 = x_dim - 2 * halo
@@ -976,17 +1096,54 @@ def run_benchmarks():
                         )
             return transformed_v2e
 
-        if combination == "separate":
-            filtered_v2e = transform_v2e_to_nabla4_region(
-                filtered_v2e,
-                grid_cartesian_dimensions[1],
-                grid_cartesian_dimensions[0],
-                args.halo,
-            )
+        def transform_v2e_to_nabla4_region_per_vertex(v2e, x_dim, y_dim, halo):
+            x_dim_inner = x_dim - 2 * (halo + 1)
+            y_dim_inner = y_dim - 2 * (halo + 1)
+            x_dim_nabla4 = x_dim - 2 * halo
+            y_dim_nabla4 = y_dim - 2 * halo
+            nabla4_dim = x_dim_nabla4 * y_dim_nabla4
+            transformed_v2e = np.zeros_like(v2e)
+            assert (x_dim_inner * y_dim_inner, 6) == v2e.shape
+            for i in range(x_dim_inner):
+                for j in range(y_dim_inner):
+                    for k in range(6):
+                        global_vertex_i = (v2e[i + j * x_dim_inner][k] // 3) % x_dim
+                        global_vertex_j = (v2e[i + j * x_dim_inner][k] // 3) // x_dim
+                        orientation = v2e[i + j * x_dim_inner][k] % 3
+                        nabla4_local_vertex_i = global_vertex_i - halo
+                        nabla4_local_vertex_j = global_vertex_j - halo
+                        transformed_v2e[i + j * x_dim_inner][k] = (
+                            nabla4_local_vertex_i + nabla4_local_vertex_j * x_dim_nabla4
+                        ) * 3 + orientation
+            return transformed_v2e
 
+        if combination == "separate":
+            print("filtered_v2e before transformation")
+            for i in range(len(filtered_v2e)):
+                print("filtered_v2e[{}]: {}".format(i, filtered_v2e[i]))
+            filtered_v2e = (
+                transform_v2e_to_nabla4_region_per_orientation(
+                    filtered_v2e,
+                    grid_cartesian_dimensions[1],
+                    grid_cartesian_dimensions[0],
+                    args.halo,
+                )
+                if e2c2v_ordering == "per-orientation"
+                else transform_v2e_to_nabla4_region_per_vertex(
+                    filtered_v2e,
+                    grid_cartesian_dimensions[1],
+                    grid_cartesian_dimensions[0],
+                    args.halo,
+                )
+            )
+            print("filtered_v2e after transformation")
+            for i in range(len(filtered_v2e)):
+                print("filtered_v2e[{}]: {}".format(i, filtered_v2e[i]))
         return filtered_e2c2v, filtered_e2ecv, filtered_v2e
 
-    # np.savetxt("original_v2e_8192.txt", torus_grid.get_offset_provider("V2E").table, fmt="%d")
+    np.savetxt(
+        "original_v2e_8192.txt", torus_grid.get_offset_provider("V2E").table, fmt="%d"
+    )
     (
         filtered_e2c2v_separate,
         filtered_e2ecv_separate,
@@ -995,6 +1152,7 @@ def run_benchmarks():
         torus_grid.get_offset_provider("E2C2V").table,
         torus_grid.get_offset_provider("E2ECV").table,
         torus_grid.get_offset_provider("V2E").table,
+        args.e2c2v_ordering,
         "separate",
     )
     (
@@ -1005,12 +1163,13 @@ def run_benchmarks():
         torus_grid.get_offset_provider("E2C2V").table,
         torus_grid.get_offset_provider("E2ECV").table,
         torus_grid.get_offset_provider("V2E").table,
+        args.e2c2v_ordering,
         "inlined",
     )
-    # np.savetxt("filtered_e2c2v_separate_8192.txt", filtered_e2c2v_separate, fmt="%d")
-    # np.savetxt("filtered_e2c2v_inlined_8192.txt", filtered_e2c2v_inlined, fmt="%d")
-    # np.savetxt("filtered_v2e_separate_8192.txt", filtered_v2e_separate, fmt="%d")
-    # np.savetxt("filtered_v2e_inlined_8192.txt", filtered_v2e_inlined, fmt="%d")
+    np.savetxt("filtered_e2c2v_separate_8192.txt", filtered_e2c2v_separate, fmt="%d")
+    np.savetxt("filtered_e2c2v_inlined_8192.txt", filtered_e2c2v_inlined, fmt="%d")
+    np.savetxt("filtered_v2e_separate_8192.txt", filtered_v2e_separate, fmt="%d")
+    np.savetxt("filtered_v2e_inlined_8192.txt", filtered_v2e_inlined, fmt="%d")
 
     runtimes = {}
 
@@ -1029,6 +1188,7 @@ def run_benchmarks():
             grid_cartesian_dimensions[1],
             args.backend,
             halo,
+            args.e2c2v_ordering,
             args.combination,
         )
 
