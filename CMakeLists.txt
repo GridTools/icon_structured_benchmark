@@ -42,6 +42,7 @@ else()
 endif()
 
 add_library(benchmark src/wrapper.cpp)
+set_property(TARGET benchmark PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_include_directories(benchmark PRIVATE include GridTools)
 target_link_libraries(benchmark PUBLIC GridTools::gridtools GridTools::stencil_naive GridTools::storage_cpu_ifirst GridTools::storage_cpu_kfirst)
 if (${INDEX_TYPE} STREQUAL "sizet")
