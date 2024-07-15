@@ -982,6 +982,8 @@ def parse_arguments():
     args = parser.parse_args()
     if "gpu" in args.backend:
         args.e2c2v_ordering = "per-orientation"
+    else:
+        args.e2c2v_ordering = "per-vertex"
 
     return args
 
