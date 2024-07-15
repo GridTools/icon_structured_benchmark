@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.27.0)
 project(Nabla4Benchmark)
 
 option(IS_GPU "Enable GPU execution" OFF)
-option(INDEX_TYPE "Index type" "")
+option(INDEX_TYPE "Index type" "int")
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
