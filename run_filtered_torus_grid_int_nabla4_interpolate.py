@@ -344,6 +344,62 @@ def run_sanity_checks(
     )
     print("Generated separated validation data")
 
+    print("Generating inlined validation data")
+    inv_vert_vert_length_inlined = np.zeros(
+        random_validation_data_separate.EdgeDim, dtype=np.float64
+    )
+    inv_primal_edge_length_inlined = np.zeros(
+        random_validation_data_separate.EdgeDim, dtype=np.float64
+    )
+    z_nabla2_e_inlined = np.zeros(
+        (random_validation_data_separate.EdgeDim, grid.num_levels),
+        dtype=np.float64,
+    )
+    if e2c2v_ordering == "per-orientation":
+        for edge_index in range(random_validation_data_separate.EdgeDim):
+            j = edge_index % (lon_dim * lat_dim) // lat_dim
+            i = edge_index % (lon_dim * lat_dim) % lat_dim
+            orientation = edge_index // (lon_dim * lat_dim)
+            internal_index = (
+                i
+                - halo
+                + (j - halo) * (lat_dim - 2 * halo)
+                + orientation * (lon_dim - 2 * halo) * (lat_dim - 2 * halo)
+            )
+            if i >= halo and j >= halo and i < lat_dim - halo and j < lon_dim - halo:
+                inv_vert_vert_length_inlined[
+                    edge_index
+                ] = random_validation_data_separate.inv_vert_vert_length[internal_index]
+                inv_primal_edge_length_inlined[
+                    edge_index
+                ] = random_validation_data_separate.inv_primal_edge_length[
+                    internal_index
+                ]
+                z_nabla2_e_inlined[edge_index] = np.array(
+                    random_validation_data_separate.z_nabla2_e
+                ).T[internal_index]
+    else:
+        for edge_index in range(random_validation_data_separate.EdgeDim):
+            j = edge_index // 3 // lat_dim
+            i = edge_index // 3 % lat_dim
+            orientation = edge_index % 3
+            internal_index = (
+                i - halo + (j - halo) * (lat_dim - 2 * halo)
+            ) * 3 + orientation
+            if i >= halo and j >= halo and i < lat_dim - halo and j < lon_dim - halo:
+                inv_vert_vert_length_inlined[
+                    edge_index
+                ] = random_validation_data_separate.inv_vert_vert_length[internal_index]
+                inv_primal_edge_length_inlined[
+                    edge_index
+                ] = random_validation_data_separate.inv_primal_edge_length[
+                    internal_index
+                ]
+                z_nabla2_e_inlined[edge_index] = np.array(
+                    random_validation_data_separate.z_nabla2_e
+                ).T[internal_index]
+    print("Generated inlined validation data")
+
     if backend in ["all_cpu", "cpu_ifirst"]:
         if combination in ["all", "separate"]:
             print("Running unstructured cpu_ifirst separate sanity check")
@@ -410,74 +466,6 @@ def run_sanity_checks(
 
         if combination in ["all", "inlined"]:
             print("Running unstructured cpu_ifirst inlined sanity check")
-            inv_vert_vert_length_inlined = np.zeros(
-                random_validation_data_separate.EdgeDim, dtype=np.float64
-            )
-            inv_primal_edge_length_inlined = np.zeros(
-                random_validation_data_separate.EdgeDim, dtype=np.float64
-            )
-            z_nabla2_e_inlined = np.zeros(
-                (random_validation_data_separate.EdgeDim, grid.num_levels),
-                dtype=np.float64,
-            )
-            if e2c2v_ordering == "per-orientation":
-                for edge_index in range(random_validation_data_separate.EdgeDim):
-                    j = edge_index % (lon_dim * lat_dim) // lat_dim
-                    i = edge_index % (lon_dim * lat_dim) % lat_dim
-                    orientation = edge_index // (lon_dim * lat_dim)
-                    internal_index = (
-                        i
-                        - halo
-                        + (j - halo) * (lat_dim - 2 * halo)
-                        + orientation * (lon_dim - 2 * halo) * (lat_dim - 2 * halo)
-                    )
-                    if (
-                        i >= halo
-                        and j >= halo
-                        and i < lat_dim - halo
-                        and j < lon_dim - halo
-                    ):
-                        inv_vert_vert_length_inlined[
-                            edge_index
-                        ] = random_validation_data_separate.inv_vert_vert_length[
-                            internal_index
-                        ]
-                        inv_primal_edge_length_inlined[
-                            edge_index
-                        ] = random_validation_data_separate.inv_primal_edge_length[
-                            internal_index
-                        ]
-                        z_nabla2_e_inlined[edge_index] = np.array(
-                            random_validation_data_separate.z_nabla2_e
-                        ).T[internal_index]
-            else:
-                for edge_index in range(random_validation_data_separate.EdgeDim):
-                    j = edge_index // 3 // lat_dim
-                    i = edge_index // 3 % lat_dim
-                    orientation = edge_index % 3
-                    internal_index = (
-                        i - halo + (j - halo) * (lat_dim - 2 * halo)
-                    ) * 3 + orientation
-                    if (
-                        i >= halo
-                        and j >= halo
-                        and i < lat_dim - halo
-                        and j < lon_dim - halo
-                    ):
-                        inv_vert_vert_length_inlined[
-                            edge_index
-                        ] = random_validation_data_separate.inv_vert_vert_length[
-                            internal_index
-                        ]
-                        inv_primal_edge_length_inlined[
-                            edge_index
-                        ] = random_validation_data_separate.inv_primal_edge_length[
-                            internal_index
-                        ]
-                        z_nabla2_e_inlined[edge_index] = np.array(
-                            random_validation_data_separate.z_nabla2_e
-                        ).T[internal_index]
-
             (
                 p_u_out_cpu_ifirst_unstructured_inlined,
                 p_v_out_cpu_ifirst_unstructured_inlined,
@@ -570,7 +558,39 @@ def run_sanity_checks(
             assert np.allclose(
                 p_v_out_cpu_kfirst_structured_separate, p_v_out_ref_separate
             )
-            print("structured cpu_ifirst sanity check passed")
+            print("structured cpu_kfirst sanity check passed")
+
+        if combination in ["all", "inlined"]:
+            print("Running unstructured cpu_kfirst inlined sanity check")
+            (
+                p_u_out_cpu_kfirst_unstructured_inlined,
+                p_v_out_cpu_kfirst_unstructured_inlined,
+            ) = icon_benchmark.nabla4_interpolate_validate_unstructured_cpu_kfirst_inlined(
+                filtered_e2c2v_inlined,
+                filtered_e2ecv_inlined,
+                filtered_e2v_inlined,
+                random_validation_data_separate.CellDim,
+                random_validation_data_separate.VertexDim,
+                random_validation_data_separate.EdgeDim,
+                random_validation_data_separate.KDim,
+                random_validation_data_separate.ECVDim,
+                np.array(random_validation_data_separate.u_vert).T,
+                np.array(random_validation_data_separate.v_vert).T,
+                random_validation_data_separate.primal_normal_vert_v1,
+                random_validation_data_separate.primal_normal_vert_v2,
+                z_nabla2_e_inlined,
+                inv_vert_vert_length_inlined,
+                inv_primal_edge_length_inlined,
+                ptr_coeff_1,
+                ptr_coeff_2,
+            )
+            assert np.allclose(
+                p_u_out_cpu_kfirst_unstructured_inlined, p_u_out_ref_separate
+            )
+            assert np.allclose(
+                p_v_out_cpu_kfirst_unstructured_inlined, p_v_out_ref_separate
+            )
+            print("unstructured cpu_kfirst inlined sanity check passed")
 
     if backend in ["all_gpu", "gpu_naive"]:
         if combination in ["all", "separate"]:
@@ -1107,6 +1127,22 @@ def run_benchmarks():
                 grid_cartesian_dimensions[0],
                 grid_cartesian_dimensions[1],
                 halo,
+                repetitions,
+                dry_runs,
+            )
+
+        if args.combination in ["all", "inlined"]:
+            runtimes[
+                "nabla4_interpolate_benchmark_unstructured_cpu_kfirst_inlined"
+            ] = icon_benchmark.nabla4_interpolate_benchmark_unstructured_cpu_kfirst_inlined(
+                filtered_e2c2v_inlined,
+                filtered_e2ecv_inlined,
+                filtered_v2e_inlined,
+                torus_grid.num_cells,
+                torus_grid.num_vertices,
+                torus_grid.num_edges,
+                torus_grid.num_levels,
+                torus_grid.size[E2C2VDim],
                 repetitions,
                 dry_runs,
             )
