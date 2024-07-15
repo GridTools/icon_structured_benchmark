@@ -315,12 +315,6 @@ def run_sanity_checks(
     e2c2v_ordering="per-vertex",
     combination="separate",
 ):
-    print("filtered_e2c2v_separate")
-    for i in range(len(filtered_e2c2v_separate)):
-        print("filtered_e2c2v_separate[{}]: {}".format(i, filtered_e2c2v_separate[i]))
-    print("filtered_e2c2v_inlined")
-    for i in range(len(filtered_e2c2v_inlined)):
-        print("filtered_e2c2v_inlined[{}]: {}".format(i, filtered_e2c2v_inlined[i]))
     print("Generating separate validation data")
     random_validation_data_separate = (
         icon_benchmark.get_nabla4_benchmark_validation_data(
@@ -333,29 +327,6 @@ def run_sanity_checks(
             grid.size[E2C2VDim],
         )
     )
-    print("np.array(random_validation_data_separate.z_nabla4_e2_wp).T")
-    for i in range(len(np.array(random_validation_data_separate.z_nabla4_e2_wp).T)):
-        for k in range(
-            len(np.array(random_validation_data_separate.z_nabla4_e2_wp).T[i])
-        ):
-            print(
-                "z_nabla4_e2_wp[{}][{}]: {}".format(
-                    i,
-                    k,
-                    np.array(random_validation_data_separate.z_nabla4_e2_wp).T[i][k],
-                )
-            )
-    for i in range(len(np.array(random_validation_data_separate.z_nabla4_e2_wp).T)):
-        for k in range(
-            len(np.array(random_validation_data_separate.z_nabla4_e2_wp).T[i])
-        ):
-            print(
-                "z_nabla4_e2_wp[{}][{}]: {}".format(
-                    i,
-                    k,
-                    np.array(random_validation_data_separate.z_nabla4_e2_wp).T[i][k],
-                )
-            )
     p_e_in = np.array(random_validation_data_separate.z_nabla4_e2_wp).T
     ptr_coeff_1 = np.random.rand(grid.num_edges, 6)
     ptr_coeff_2 = np.random.rand(grid.num_edges, 6)
@@ -449,37 +420,17 @@ def run_sanity_checks(
                 (random_validation_data_separate.EdgeDim, grid.num_levels),
                 dtype=np.float64,
             )
-            print(
-                "len(np.array(random_validation_data_separate.z_nabla2_e).T):",
-                len(np.array(random_validation_data_separate.z_nabla2_e).T),
-            )
-            print("np.array(random_validation_data_separate.z_nabla2_e).T")
-            for i in range(len(np.array(random_validation_data_separate.z_nabla2_e).T)):
-                for k in range(
-                    len(np.array(random_validation_data_separate.z_nabla2_e).T[i])
-                ):
-                    print(
-                        "np.array(random_validation_data_separate.z_nabla2_e).T[{}][{}]: {}".format(
-                            i,
-                            k,
-                            np.array(random_validation_data_separate.z_nabla2_e).T[i][
-                                k
-                            ],
-                        )
-                    )
             if e2c2v_ordering == "per-orientation":
                 for edge_index in range(random_validation_data_separate.EdgeDim):
                     j = edge_index % (lon_dim * lat_dim) // lat_dim
                     i = edge_index % (lon_dim * lat_dim) % lat_dim
                     orientation = edge_index // (lon_dim * lat_dim)
-                    # print("i", i, "j", j, "edge_index", edge_index)
                     internal_index = (
                         i
                         - halo
                         + (j - halo) * (lat_dim - 2 * halo)
                         + orientation * (lon_dim - 2 * halo) * (lat_dim - 2 * halo)
                     )
-                    # print("internal_index", internal_index)
                     if (
                         i >= halo
                         and j >= halo
@@ -513,17 +464,6 @@ def run_sanity_checks(
                         and i < lat_dim - halo
                         and j < lon_dim - halo
                     ):
-                        print(
-                            "i",
-                            i,
-                            "j",
-                            j,
-                            "orientation",
-                            orientation,
-                            "edge_index",
-                            edge_index,
-                        )
-                        print("internal_index", internal_index)
                         inv_vert_vert_length_inlined[
                             edge_index
                         ] = random_validation_data_separate.inv_vert_vert_length[
@@ -537,45 +477,7 @@ def run_sanity_checks(
                         z_nabla2_e_inlined[edge_index] = np.array(
                             random_validation_data_separate.z_nabla2_e
                         ).T[internal_index]
-            print("z_nabla2_e_inlined")
-            for i in range(len(z_nabla2_e_inlined)):
-                for k in range(len(z_nabla2_e_inlined[i])):
-                    print(
-                        "z_nabla2_e_inlined[{}][{}]: {}".format(
-                            i, k, z_nabla2_e_inlined[i][k]
-                        )
-                    )
-            if e2c2v_ordering == "per-vertex":
 
-                def filter_ptr_coeff_per_vertex(ptr_coeff_original):
-                    ptr_coeff_per_vertex = np.zeros_like(ptr_coeff_original)
-                    for i in range(ptr_coeff_original.shape[0] // 3):
-                        ptr_coeff_per_vertex[i * 3] = ptr_coeff_original[i]
-                        ptr_coeff_per_vertex[i * 3 + 1] = ptr_coeff_original[
-                            i + ptr_coeff_original.shape[0] // 3
-                        ]
-                        ptr_coeff_per_vertex[i * 3 + 2] = ptr_coeff_original[
-                            i + 2 * (ptr_coeff_original.shape[0] // 3)
-                        ]
-                    return ptr_coeff_per_vertex
-
-                print("ptr_coeff_1")
-                for i in range(len(ptr_coeff_1)):
-                    print("ptr_coeff_1[{}]: {}".format(i, ptr_coeff_1[i]))
-
-                ptr_coeff_1_per_vertex = filter_ptr_coeff_per_vertex(ptr_coeff_1)
-                ptr_coeff_2_per_vertex = filter_ptr_coeff_per_vertex(ptr_coeff_2)
-
-                print("ptr_coeff_1_per_vertex")
-                for i in range(len(ptr_coeff_1_per_vertex)):
-                    print(
-                        "ptr_coeff_1_per_vertex[{}]: {}".format(
-                            i, ptr_coeff_1_per_vertex[i]
-                        )
-                    )
-
-            # import pdb
-            # pdb.set_trace()
             (
                 p_u_out_cpu_ifirst_unstructured_inlined,
                 p_v_out_cpu_ifirst_unstructured_inlined,
@@ -735,58 +637,22 @@ def run_sanity_checks(
             print("structured gpu_naive separate sanity check passed")
 
         if combination in ["all", "inlined"]:
-            print("filtered_e2c2v_inlined.shape", filtered_e2c2v_inlined.shape)
-            print(
-                "np.array(random_validation_data_separate.z_nabla2_e).T.shape",
-                np.array(random_validation_data_separate.z_nabla2_e).T.shape,
-            )
-            print("random_validation_data_separate.")
-            print(
-                "np.array(random_validation_data_separate.u_vert).T.shape",
-                np.array(random_validation_data_separate.u_vert).T.shape,
-            )
-            print(
-                "np.array(random_validation_data_separate.v_vert).T.shape",
-                np.array(random_validation_data_separate.v_vert).T.shape,
-            )
-            print(
-                "len(random_validation_data_separate.primal_normal_vert_v1)",
-                len(random_validation_data_separate.primal_normal_vert_v1),
-            )
-            print(
-                "len(random_validation_data_separate.primal_normal_vert_v2)",
-                len(random_validation_data_separate.primal_normal_vert_v2),
-            )
-            print(
-                "len(random_validation_data_separate.inv_vert_vert_length)",
-                len(random_validation_data_separate.inv_vert_vert_length),
-            )
-            print(
-                "len(random_validation_data_separate.inv_primal_edge_length)",
-                len(random_validation_data_separate.inv_primal_edge_length),
-            )
             inv_vert_vert_length_inlined = np.zeros(
                 random_validation_data_separate.EdgeDim, dtype=np.float64
             )
             inv_primal_edge_length_inlined = np.zeros(
                 random_validation_data_separate.EdgeDim, dtype=np.float64
             )
-            print(
-                "random_validation_data_separate.inv_vert_vert_length",
-                random_validation_data_separate.inv_vert_vert_length,
-            )
             for edge_index in range(random_validation_data_separate.EdgeDim):
                 j = edge_index % (lon_dim * lat_dim) // lat_dim
                 i = edge_index % (lon_dim * lat_dim) % lat_dim
                 orientation = edge_index // (lon_dim * lat_dim)
-                # print("i", i, "j", j, "edge_index", edge_index)
                 internal_index = (
                     i
                     - halo
                     + (j - halo) * (lat_dim - 2 * halo)
                     + orientation * (lon_dim - 2 * halo) * (lat_dim - 2 * halo)
                 )
-                # print("internal_index", internal_index)
                 if (
                     i >= halo
                     and j >= halo
@@ -803,7 +669,6 @@ def run_sanity_checks(
                     ] = random_validation_data_separate.inv_primal_edge_length[
                         internal_index
                     ]
-            print("inv_vert_vert_length_inlined", inv_vert_vert_length_inlined)
 
             print("Running unstructured gpu_naive inlined sanity check")
             (
@@ -830,22 +695,6 @@ def run_sanity_checks(
                 ptr_coeff_1,
                 ptr_coeff_2,
             )
-            assert len(p_u_out_gpu_naive_unstructured_inlined) == len(
-                p_u_out_ref_separate
-            )
-            assert len(p_v_out_gpu_naive_unstructured_inlined) == len(
-                p_v_out_ref_separate
-            )
-            print(
-                "p_u_out_gpu_naive_unstructured_inlined",
-                p_u_out_gpu_naive_unstructured_inlined,
-            )
-            print(
-                "p_v_out_gpu_naive_unstructured_inlined",
-                p_v_out_gpu_naive_unstructured_inlined,
-            )
-            print("p_u_out_ref_separate", p_u_out_ref_separate)
-            print("p_v_out_ref_separate", p_v_out_ref_separate)
             assert np.allclose(
                 p_u_out_gpu_naive_unstructured_inlined, p_u_out_ref_separate
             )
@@ -1025,8 +874,6 @@ def run_benchmarks():
         grid_v2e,
         e2c2v_ordering="per-vertex",
         combination="separate",
-        nabla2_separate=[],
-        nabla2_inline=[],
     ):
         filtered_e2c2v = filter_edge_vector(
             grid_e2c2v,
@@ -1103,7 +950,6 @@ def run_benchmarks():
             y_dim_inner = y_dim - 2 * (halo + 1)
             x_dim_nabla4 = x_dim - 2 * halo
             y_dim_nabla4 = y_dim - 2 * halo
-            nabla4_dim = x_dim_nabla4 * y_dim_nabla4
             transformed_v2e = np.zeros_like(v2e)
             assert (x_dim_inner * y_dim_inner, 6) == v2e.shape
             for i in range(x_dim_inner):
@@ -1120,9 +966,6 @@ def run_benchmarks():
             return transformed_v2e
 
         if combination == "separate":
-            print("filtered_v2e before transformation")
-            for i in range(len(filtered_v2e)):
-                print("filtered_v2e[{}]: {}".format(i, filtered_v2e[i]))
             filtered_v2e = (
                 transform_v2e_to_nabla4_region_per_orientation(
                     filtered_v2e,
@@ -1138,9 +981,6 @@ def run_benchmarks():
                     args.halo,
                 )
             )
-            print("filtered_v2e after transformation")
-            for i in range(len(filtered_v2e)):
-                print("filtered_v2e[{}]: {}".format(i, filtered_v2e[i]))
         return filtered_e2c2v, filtered_e2ecv, filtered_v2e
 
     np.savetxt(

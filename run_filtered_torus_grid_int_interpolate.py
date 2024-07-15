@@ -171,10 +171,7 @@ def filter_v2e_per_vertex(v2e_table, x_dim, y_dim):
 
 
 def process_v2e_per_vertex(v2e_table, x_dim, y_dim, halo=1):
-    print("Processing V2E table per vertex")
-    print("original v2e table")
-    print(v2e_table)
-    output = transpose_ij(
+    return transpose_ij(
         halo_filter(
             filter_v2e_per_vertex(
                 v2e_table,
@@ -188,9 +185,6 @@ def process_v2e_per_vertex(v2e_table, x_dim, y_dim, halo=1):
         x_dim - 2 * halo,
         y_dim - 2 * halo,
     )
-    print("processed v2e table")
-    print(output)
-    return output
 
 
 def compare_ndarrays(a, b):
