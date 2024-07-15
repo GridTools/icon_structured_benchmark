@@ -64,7 +64,7 @@ constexpr block_dims get_block_dims_structured_interpol_naive<int>() {
 constexpr block_dims block_dims_structured_interpol_naive = get_block_dims_structured_interpol_naive<index_type>();
 #endif
 
-GT_FORCE_INLINE constexpr std::array<index_type, 6> get_v2e(
+GT_FORCE_INLINE constexpr std::array<index_type, 6> get_v2e_per_orientation(
     const int i, const int j, const index_type x_dim, const index_type y_dim) {
     const index_type i_j = i + j * x_dim;
     const index_type i_jm1 = i + (j - 1) * x_dim;
@@ -76,11 +76,19 @@ GT_FORCE_INLINE constexpr std::array<index_type, 6> get_v2e(
         2 * (x_dim * y_dim) + i_j + x_dim - 1};
 };
 
+GT_FORCE_INLINE constexpr std::array<index_type, 6> get_v2e_per_vertex(
+    const int i, const int j, const index_type x_dim, const index_type y_dim) {
+    const index_type i_j = i + j * x_dim;
+    const index_type i_jm1 = i + (j - 1) * x_dim;
+    return {3 * i_j - 2, 3 * i_j + 1, 3 * i_jm1, 3 * i_j, 3 * i_j + 2, (i - 1 + (j + 1) * x_dim) * 3 + 2};
+};
+
 template <typename S>
 class interpolate_structured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
     using mo_intp_rbf_rbf_vec_interpol_vertex<S>::KDim;
     using mo_intp_rbf_rbf_vec_interpol_vertex<S>::VertexDim;
     using mo_intp_rbf_rbf_vec_interpol_vertex<S>::EdgeDim;
+    using mo_intp_rbf_rbf_vec_interpol_vertex<S>::output_size;
     using mo_intp_rbf_rbf_vec_interpol_vertex<S>::p_e_in_gt_ctv;
     using mo_intp_rbf_rbf_vec_interpol_vertex<S>::ptr_coeff_1_gt_ctv;
     using mo_intp_rbf_rbf_vec_interpol_vertex<S>::ptr_coeff_2_gt_ctv;
@@ -153,7 +161,7 @@ class interpolate_structured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
                     const index_type vertex_index_internal = i - halo + (j - halo) * (x_dim - 2 * halo);
                     std::array<WP_TYPE, 6> u;
                     std::array<WP_TYPE, 6> v;
-                    const std::array<index_type, 6> v2e{get_v2e(i, j, x_dim, y_dim)};
+                    const std::array<index_type, 6> v2e{get_v2e_per_vertex(i, j, x_dim, y_dim)};
 #ifdef __clang__
 #pragma clang loop unroll(full)
 #elif defined(__NVCC__)
@@ -182,7 +190,7 @@ class interpolate_structured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
                 const index_type vertex_index_internal = i - halo + (j - halo) * (x_dim - 2 * halo);
                 std::array<WP_TYPE, 6> u;
                 std::array<WP_TYPE, 6> v;
-                const std::array<index_type, 6> v2e{get_v2e(i, j, x_dim, y_dim)};
+                const std::array<index_type, 6> v2e{get_v2e_per_vertex(i, j, x_dim, y_dim)};
                 std::array<WP_TYPE, 6> coeff1;
                 std::array<WP_TYPE, 6> coeff2;
 #ifdef __clang__
@@ -314,7 +322,7 @@ __global__ void __launch_bounds__(block_dims_structured_interpol_naive.size)
     const auto k_index = blockIdx.z * blockDim.z + threadIdx.z;
     if (i >= x_dim - 2 * halo || j >= y_dim - 2 * halo || k_index >= KDim)
         return;
-    const std::array<index_type, 6> v2e{get_v2e(i + halo, j + halo, x_dim, y_dim)};
+    const std::array<index_type, 6> v2e{get_v2e_per_orientation(i + halo, j + halo, x_dim, y_dim)};
     const index_type vertex_index_internal = i + j * (x_dim - 2 * halo);
     double u{0.0};
     double v{0.0};

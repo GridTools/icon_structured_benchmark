@@ -48,7 +48,6 @@ struct mo_intp_rbf_rbf_vec_interpol_vertex {
     const data_store_2d_tv_WP_t p_u_out_gt_tv;
     const data_store_2d_tv_WP_t p_v_out_gt_tv;
 
-  public:
     mo_intp_rbf_rbf_vec_interpol_vertex(std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim, std::size_t output_size)
         : VertexDim(VertexDim), EdgeDim(EdgeDim), KDim(KDim), output_size(output_size),
         p_e_in_gt(storage::builder<S>.template type<WP_TYPE>().dimensions(EdgeDim, KDim).initializer([](int i, int j) { return rand_utils.template get<WP_TYPE>(); }).build()),
