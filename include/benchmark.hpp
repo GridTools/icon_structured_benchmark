@@ -31,7 +31,7 @@ std::vector<double> run_benchmark(T &benchmark_object, int repetitions, int dry_
 
 template <typename T, backend_impl I, typename... Args>
 std::vector<double> run_benchmark(std::tuple<Args...> &&args, int repetitions, int dry_runs) {
-    T benchmark_object{std::apply([](auto &&...args) { return T{std::forward<decltype(args)>(args)...}; }, args)};
+    T benchmark_object{std::make_from_tuple<T>(args)};
     for (int dry_run{}; dry_run < dry_runs; ++dry_run) {
         benchmark_object.template run<I>();
     }
