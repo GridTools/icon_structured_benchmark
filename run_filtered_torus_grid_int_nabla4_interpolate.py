@@ -355,6 +355,7 @@ def run_sanity_checks(
         (random_validation_data_separate.EdgeDim, grid.num_levels),
         dtype=np.float64,
     )
+    z_nabla2_e_ref = np.array(random_validation_data_separate.z_nabla2_e).T
     if e2c2v_ordering == "per-orientation":
         for edge_index in range(random_validation_data_separate.EdgeDim):
             j = edge_index % (lon_dim * lat_dim) // lat_dim
@@ -375,9 +376,7 @@ def run_sanity_checks(
                 ] = random_validation_data_separate.inv_primal_edge_length[
                     internal_index
                 ]
-                z_nabla2_e_inlined[edge_index] = np.array(
-                    random_validation_data_separate.z_nabla2_e
-                ).T[internal_index]
+                z_nabla2_e_inlined[edge_index] = z_nabla2_e_ref[internal_index]
     else:
         for edge_index in range(random_validation_data_separate.EdgeDim):
             j = edge_index // 3 // lat_dim
@@ -395,9 +394,7 @@ def run_sanity_checks(
                 ] = random_validation_data_separate.inv_primal_edge_length[
                     internal_index
                 ]
-                z_nabla2_e_inlined[edge_index] = np.array(
-                    random_validation_data_separate.z_nabla2_e
-                ).T[internal_index]
+                z_nabla2_e_inlined[edge_index] = z_nabla2_e_ref[internal_index]
     print("Generated inlined validation data")
 
     if backend in ["all_cpu", "cpu_ifirst"]:
@@ -835,7 +832,7 @@ def parse_arguments():
     parser.add_argument(
         "--combination",
         choices=["separate", "inlined", "all"],
-        default="separate",
+        default="all",
         help="Which combination of kernels to benchmark",
     )
     parser.add_argument(
