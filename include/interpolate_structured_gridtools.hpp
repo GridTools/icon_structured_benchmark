@@ -264,7 +264,7 @@ __global__ void __launch_bounds__(block_dims_structured_interpol_kloop.size)
     const auto j = blockIdx.y * blockDim.y + threadIdx.y;
     if (i >= x_dim - 2 * halo || j >= y_dim - 2 * halo)
         return;
-    const std::array<index_type, 6> v2e{get_v2e(i + halo, j + halo, x_dim, y_dim)};
+    const std::array<index_type, 6> v2e{get_v2e_per_orientation(i + halo, j + halo, x_dim, y_dim)};
     const index_type vertex_index_internal = i + j * (x_dim - 2 * halo);
     std::array<WP_TYPE, 6> coeff1;
     std::array<WP_TYPE, 6> coeff2;
