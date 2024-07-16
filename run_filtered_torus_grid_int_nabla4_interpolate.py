@@ -965,9 +965,6 @@ def run_benchmarks():
             )
         return filtered_e2c2v, filtered_e2ecv, filtered_v2e
 
-    np.savetxt(
-        "original_v2e_8192.txt", torus_grid.get_offset_provider("V2E").table, fmt="%d"
-    )
     (
         filtered_e2c2v_separate,
         filtered_e2ecv_separate,
@@ -990,10 +987,6 @@ def run_benchmarks():
         args.e2c2v_ordering,
         "inlined",
     )
-    np.savetxt("filtered_e2c2v_separate_8192.txt", filtered_e2c2v_separate, fmt="%d")
-    np.savetxt("filtered_e2c2v_inlined_8192.txt", filtered_e2c2v_inlined, fmt="%d")
-    np.savetxt("filtered_v2e_separate_8192.txt", filtered_v2e_separate, fmt="%d")
-    np.savetxt("filtered_v2e_inlined_8192.txt", filtered_v2e_inlined, fmt="%d")
 
     runtimes = {}
 
