@@ -78,6 +78,14 @@ execute_process(
 list(APPEND CMAKE_PREFIX_PATH "${NB_DIR}")
 find_package(nanobind CONFIG REQUIRED)
 
+# Test if we have the right version.
+execute_process(
+  COMMAND "${Python_EXECUTABLE}" -m nanobind --version
+  OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE NB_VER)
+if(${NB_VER} VERSION_LESS 2.0.0)
+  message(FATAL_ERROR "Require nanobind version greater than 2.0.0, but found ${NB_VER}")
+endif()
+
 nanobind_add_module(icon_benchmark python/extensions.cpp)
 target_include_directories(icon_benchmark PRIVATE include)
 target_link_libraries(icon_benchmark PRIVATE benchmark)
