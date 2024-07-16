@@ -654,39 +654,6 @@ def run_sanity_checks(
             print("structured gpu_naive separate sanity check passed")
 
         if combination in ["all", "inlined"]:
-            inv_vert_vert_length_inlined = np.zeros(
-                random_validation_data_separate.EdgeDim, dtype=np.float64
-            )
-            inv_primal_edge_length_inlined = np.zeros(
-                random_validation_data_separate.EdgeDim, dtype=np.float64
-            )
-            for edge_index in range(random_validation_data_separate.EdgeDim):
-                j = edge_index % (lon_dim * lat_dim) // lat_dim
-                i = edge_index % (lon_dim * lat_dim) % lat_dim
-                orientation = edge_index // (lon_dim * lat_dim)
-                internal_index = (
-                    i
-                    - halo
-                    + (j - halo) * (lat_dim - 2 * halo)
-                    + orientation * (lon_dim - 2 * halo) * (lat_dim - 2 * halo)
-                )
-                if (
-                    i >= halo
-                    and j >= halo
-                    and i < lat_dim - halo
-                    and j < lon_dim - halo
-                ):
-                    inv_vert_vert_length_inlined[
-                        edge_index
-                    ] = random_validation_data_separate.inv_vert_vert_length[
-                        internal_index
-                    ]
-                    inv_primal_edge_length_inlined[
-                        edge_index
-                    ] = random_validation_data_separate.inv_primal_edge_length[
-                        internal_index
-                    ]
-
             print("Running unstructured gpu_naive inlined sanity check")
             (
                 p_u_out_gpu_naive_unstructured_inlined,
@@ -704,9 +671,7 @@ def run_sanity_checks(
                 np.array(random_validation_data_separate.v_vert).T,
                 random_validation_data_separate.primal_normal_vert_v1,
                 random_validation_data_separate.primal_normal_vert_v2,
-                np.zeros(
-                    (filtered_e2c2v_inlined.shape[0], grid.num_levels), dtype=np.float64
-                ),
+                z_nabla2_e_inlined,
                 inv_vert_vert_length_inlined,
                 inv_primal_edge_length_inlined,
                 ptr_coeff_1,
