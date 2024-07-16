@@ -46,10 +46,10 @@ if __name__ == "__main__":
     # print_median_acceleration_over_k(
     #     filter_runtime_data(
     #         runtimes_output,
-    #         "nabla4_interpolate_benchmark_unstructured_gpu_naive",
-    #         "nabla4_interpolate_benchmark_unstructured_gpu_naive",
+    #         "nabla4_interpolate_benchmark_unstructured_gpu_kloop",
+    #         "nabla4_interpolate_benchmark_structured_gpu_kloop",
     #     ),
-    #     "gpu",
+    #     "gpu_kloop",
     #     output_directory,
     # )
 
@@ -66,14 +66,16 @@ if __name__ == "__main__":
     # Generate violin plots for each torus size
     for torus_size, runtime_data in runtimes_output.items():
         for k in runtime_data.keys():
-            # sort runtime_data[k] in the following order: nabla4_benchmark_unstructured_gtfn_gpu, nabla4_benchmark_unstructured_gpu_gridtools_naive, nabla4_benchmark_structured_torus_gpu_gridtools_halo_naive, nabla4_benchmark_unstructured_gpu_gridtools, nabla4_benchmark_structured_torus_gpu_gridtools_halo
             runtime_data[k] = {
-                "nabla4_interpolate_benchmark_unstructured_gpu_naive": runtime_data[k][
-                    "nabla4_interpolate_benchmark_unstructured_gpu_naive"
-                ],
-                "nabla4_interpolate_benchmark_structured_gpu_naive": runtime_data[k][
-                    "nabla4_interpolate_benchmark_structured_gpu_naive"
-                ],
+                "nabla4_interpolate_benchmark_unstructured_gpu_naive_separate": runtime_data[
+                    k
+                ]["nabla4_interpolate_benchmark_unstructured_gpu_naive_separate"],
+                "nabla4_interpolate_benchmark_unstructured_gpu_naive_inlined": runtime_data[
+                    k
+                ]["nabla4_interpolate_benchmark_unstructured_gpu_naive_inlined"],
+                "nabla4_interpolate_benchmark_structured_gpu_naive_separate": runtime_data[
+                    k
+                ]["nabla4_interpolate_benchmark_structured_gpu_naive_separate"],
                 # "nabla4_benchmark_unstructured_gpu_kloop_gridtools": runtime_data[k][
                 #     "nabla4_benchmark_unstructured_gpu_kloop_gridtools"
                 # ],
