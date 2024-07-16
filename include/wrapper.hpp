@@ -58,7 +58,7 @@ std::vector<double> nabla4_benchmark_unstructured_cpu_kfirst_gridtools(std::vect
     int repetitions = 101,
     int dry_runs = 1);
 
-std::vector<double> nabla4_benchmark_unstructured_gpu_gridtools(std::vector<std::array<index_type, 4>> &e2c2v,
+std::vector<double> nabla4_benchmark_unstructured_gpu_kloop_gridtools(std::vector<std::array<index_type, 4>> &e2c2v,
     std::vector<std::array<index_type, 4>> &e2ecv,
     index_type CellDim,
     index_type VertexDim,
@@ -68,7 +68,7 @@ std::vector<double> nabla4_benchmark_unstructured_gpu_gridtools(std::vector<std:
     int repetitions = 101,
     int dry_runs = 1);
 
-std::vector<double> nabla4_benchmark_unstructured_gpu_gridtools_naive(std::vector<std::array<index_type, 4>> &e2c2v,
+std::vector<double> nabla4_benchmark_unstructured_gpu_naive_gridtools(std::vector<std::array<index_type, 4>> &e2c2v,
     std::vector<std::array<index_type, 4>> &e2ecv,
     index_type CellDim,
     index_type VertexDim,
@@ -157,7 +157,7 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_kfirst_gridto
     std::vector<WP_TYPE> &inv_vert_vert_length,
     std::vector<WP_TYPE> &inv_primal_edge_length);
 
-std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_gpu_gridtools(
+std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_gpu_kloop_gridtools(
     std::vector<std::array<index_type, 4>> &e2c2v,
     std::vector<std::array<index_type, 4>> &e2ecv,
     index_type CellDim,
@@ -173,7 +173,7 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_gpu_gridtools(
     std::vector<WP_TYPE> &inv_vert_vert_length,
     std::vector<WP_TYPE> &inv_primal_edge_length);
 
-std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_gpu_gridtools_naive(
+std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_gpu_naive_gridtools(
     std::vector<std::array<index_type, 4>> &e2c2v,
     std::vector<std::array<index_type, 4>> &e2ecv,
     index_type CellDim,
@@ -324,7 +324,7 @@ std::vector<double> nabla4_benchmark_structured_torus_cpu_kfirst_gridtools_halo(
     int repetitions = 101,
     int dry_runs = 1);
 
-std::vector<double> nabla4_benchmark_structured_torus_gpu_gridtools_halo(index_type CellDim,
+std::vector<double> nabla4_benchmark_structured_torus_gpu_kloop_gridtools_halo(index_type CellDim,
     index_type VertexDim,
     index_type EdgeDim,
     index_type KDim,
@@ -335,7 +335,7 @@ std::vector<double> nabla4_benchmark_structured_torus_gpu_gridtools_halo(index_t
     int repetitions = 101,
     int dry_runs = 1);
 
-std::vector<double> nabla4_benchmark_structured_torus_gpu_gridtools_halo_naive(index_type CellDim,
+std::vector<double> nabla4_benchmark_structured_torus_gpu_naive_gridtools_halo(index_type CellDim,
     index_type VertexDim,
     index_type EdgeDim,
     index_type KDim,
@@ -453,7 +453,7 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_cpu_kfirst_gr
     std::vector<WP_TYPE> &inv_vert_vert_length,
     std::vector<WP_TYPE> &inv_primal_edge_length);
 
-std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_gpu_gridtools_halo(index_type CellDim,
+std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_gpu_kloop_gridtools_halo(index_type CellDim,
     index_type VertexDim,
     index_type EdgeDim,
     index_type KDim,
@@ -469,7 +469,7 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_gpu_gridtools
     std::vector<WP_TYPE> &inv_vert_vert_length,
     std::vector<WP_TYPE> &inv_primal_edge_length);
 
-std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_gpu_gridtools_halo_naive(index_type CellDim,
+std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_gpu_naive_gridtools_halo(index_type CellDim,
     index_type VertexDim,
     index_type EdgeDim,
     index_type KDim,
@@ -517,8 +517,8 @@ std::vector<double> interpolate_benchmark_unstructured_cpu_kfirst(std::vector<st
     int repetitions = 101,
     int dry_runs = 1);
 
-std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>> interpolate_validate_unstructured_gpu(
-    std::size_t VertexDim,
+std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>
+interpolate_validate_unstructured_gpu_kloop(std::size_t VertexDim,
     std::size_t EdgeDim,
     std::size_t KDim,
     std::vector<std::array<index_type, 6>> &v2e,
@@ -535,7 +535,7 @@ interpolate_validate_unstructured_gpu_naive(std::size_t VertexDim,
     std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
     std::vector<std::vector<WP_TYPE>> &ptr_coeff_2);
 
-std::vector<double> interpolate_benchmark_unstructured_gpu(std::vector<std::array<index_type, 6>> &v2e,
+std::vector<double> interpolate_benchmark_unstructured_gpu_kloop(std::vector<std::array<index_type, 6>> &v2e,
     std::size_t VertexDim,
     std::size_t EdgeDim,
     std::size_t KDim,
@@ -589,8 +589,8 @@ std::vector<double> interpolate_benchmark_structured_cpu_kfirst(std::size_t Vert
     int repetitions = 101,
     int dry_runs = 1);
 
-std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>> interpolate_validate_structured_gpu(
-    std::size_t VertexDim,
+std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>
+interpolate_validate_structured_gpu_kloop(std::size_t VertexDim,
     std::size_t EdgeDim,
     std::size_t KDim,
     index_type longitude_dim,
@@ -611,7 +611,7 @@ interpolate_validate_structured_gpu_naive(std::size_t VertexDim,
     std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
     std::vector<std::vector<WP_TYPE>> &ptr_coeff_2);
 
-std::vector<double> interpolate_benchmark_structured_gpu(std::size_t VertexDim,
+std::vector<double> interpolate_benchmark_structured_gpu_kloop(std::size_t VertexDim,
     std::size_t EdgeDim,
     std::size_t KDim,
     index_type longitude_dim,

@@ -44,8 +44,8 @@ if __name__ == "__main__":
     print_median_acceleration_over_k(
         filter_runtime_data(
             runtimes_output,
-            "nabla4_benchmark_unstructured_gpu_gridtools",
-            "nabla4_benchmark_structured_torus_gpu_gridtools_halo",
+            "nabla4_benchmark_unstructured_gpu_kloop_gridtools",
+            "nabla4_benchmark_structured_torus_gpu_kloop_gridtools_halo",
         ),
         "gpu_kloop",
         output_directory,
@@ -54,8 +54,8 @@ if __name__ == "__main__":
     print_median_acceleration_over_k(
         filter_runtime_data(
             runtimes_output,
-            "nabla4_benchmark_unstructured_gpu_gridtools_naive",
-            "nabla4_benchmark_structured_torus_gpu_gridtools_halo_naive",
+            "nabla4_benchmark_unstructured_gpu_naive_gridtools",
+            "nabla4_benchmark_structured_torus_gpu_naive_gridtools_halo",
         ),
         "gpu_naive",
         output_directory,
@@ -64,22 +64,22 @@ if __name__ == "__main__":
     # Generate violin plots for each torus size
     for torus_size, runtime_data in runtimes_output.items():
         for k in runtime_data.keys():
-            # sort runtime_data[k] in the following order: nabla4_benchmark_unstructured_gtfn_gpu, nabla4_benchmark_unstructured_gpu_gridtools_naive, nabla4_benchmark_structured_torus_gpu_gridtools_halo_naive, nabla4_benchmark_unstructured_gpu_gridtools, nabla4_benchmark_structured_torus_gpu_gridtools_halo
+            # sort runtime_data[k] in the following order: nabla4_benchmark_unstructured_gtfn_gpu, nabla4_benchmark_unstructured_gpu_naive_gridtools, nabla4_benchmark_structured_torus_gpu_naivegridtools_halo, nabla4_benchmark_unstructured_gpu_kloop_gridtools, nabla4_benchmark_structured_torus_gpu_kloop_gridtools_halo
             runtime_data[k] = {
                 "nabla4_benchmark_unstructured_gtfn_gpu": runtime_data[k][
                     "nabla4_benchmark_unstructured_gtfn_gpu"
                 ],
-                "nabla4_benchmark_unstructured_gpu_gridtools_naive": runtime_data[k][
-                    "nabla4_benchmark_unstructured_gpu_gridtools_naive"
+                "nabla4_benchmark_unstructured_gpu_naive_gridtools": runtime_data[k][
+                    "nabla4_benchmark_unstructured_gpu_naive_gridtools"
                 ],
-                "nabla4_benchmark_structured_torus_gpu_gridtools_halo_naive": runtime_data[
+                "nabla4_benchmark_structured_torus_gpu_naive_gridtools_halo": runtime_data[
                     k
-                ]["nabla4_benchmark_structured_torus_gpu_gridtools_halo_naive"],
-                "nabla4_benchmark_unstructured_gpu_gridtools": runtime_data[k][
-                    "nabla4_benchmark_unstructured_gpu_gridtools"
+                ]["nabla4_benchmark_structured_torus_gpu_naive_gridtools_halo"],
+                "nabla4_benchmark_unstructured_gpu_kloop_gridtools": runtime_data[k][
+                    "nabla4_benchmark_unstructured_gpu_kloop_gridtools"
                 ],
-                "nabla4_benchmark_structured_torus_gpu_gridtools_halo": runtime_data[k][
-                    "nabla4_benchmark_structured_torus_gpu_gridtools_halo"
-                ],
+                "nabla4_benchmark_structured_torus_gpu_kloop_gridtools_halo": runtime_data[
+                    k
+                ]["nabla4_benchmark_structured_torus_gpu_kloop_gridtools_halo"],
             }
             generate_violin_plots(runtime_data[k], k, torus_size, output_directory)

@@ -54,8 +54,8 @@ if __name__ == "__main__":
     print_median_acceleration_over_k(
         filter_runtime_data(
             runtimes_output,
-            "interpolate_benchmark_unstructured_gpu",
-            "interpolate_benchmark_structured_gpu",
+            "interpolate_benchmark_unstructured_gpu_kloop",
+            "interpolate_benchmark_structured_gpu_kloop",
         ),
         "gpu_kloop",
         output_directory,
@@ -72,11 +72,11 @@ if __name__ == "__main__":
                 "interpolate_benchmark_structured_gpu_naive": runtime_data[k][
                     "interpolate_benchmark_structured_gpu_naive"
                 ],
-                "interpolate_benchmark_unstructured_gpu": runtime_data[k][
-                    "interpolate_benchmark_unstructured_gpu"
+                "interpolate_benchmark_unstructured_gpu_kloop": runtime_data[k][
+                    "interpolate_benchmark_unstructured_gpu_kloop"
                 ],
-                "interpolate_benchmark_structured_gpu": runtime_data[k][
-                    "interpolate_benchmark_structured_gpu"
+                "interpolate_benchmark_structured_gpu_kloop": runtime_data[k][
+                    "interpolate_benchmark_structured_gpu_kloop"
                 ],
             }
             generate_violin_plots(runtime_data[k], k, torus_size, output_directory)

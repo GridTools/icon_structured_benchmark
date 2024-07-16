@@ -74,11 +74,11 @@ if __name__ == "__main__":
                 "nabla4_interpolate_benchmark_structured_gpu_naive": runtime_data[k][
                     "nabla4_interpolate_benchmark_structured_gpu_naive"
                 ],
-                # "nabla4_benchmark_unstructured_gpu_gridtools": runtime_data[k][
-                #     "nabla4_benchmark_unstructured_gpu_gridtools"
+                # "nabla4_benchmark_unstructured_gpu_kloop_gridtools": runtime_data[k][
+                #     "nabla4_benchmark_unstructured_gpu_kloop_gridtools"
                 # ],
-                # "nabla4_benchmark_structured_torus_gpu_gridtools_halo": runtime_data[k][
-                #     "nabla4_benchmark_structured_torus_gpu_gridtools_halo"
+                # "nabla4_benchmark_structured_torus_gpu_kloop_gridtools_halo": runtime_data[k][
+                #     "nabla4_benchmark_structured_torus_gpu_kloop_gridtools_halo"
                 # ],
             }
             generate_violin_plots(runtime_data[k], k, torus_size, output_directory)

@@ -27,15 +27,15 @@ NB_MODULE(icon_benchmark, m) {
     m.def("nabla4_benchmark_unstructured_cpu_ifirst_gridtools", &nabla4_benchmark_unstructured_cpu_ifirst_gridtools);
     m.def("nabla4_benchmark_unstructured_cpu_kfirst", &nabla4_benchmark_unstructured_cpu_kfirst);
     m.def("nabla4_benchmark_unstructured_cpu_kfirst_gridtools", &nabla4_benchmark_unstructured_cpu_kfirst_gridtools);
-    m.def("nabla4_benchmark_unstructured_gpu_gridtools", &nabla4_benchmark_unstructured_gpu_gridtools);
-    m.def("nabla4_benchmark_unstructured_gpu_gridtools_naive", &nabla4_benchmark_unstructured_gpu_gridtools_naive);
+    m.def("nabla4_benchmark_unstructured_gpu_kloop_gridtools", &nabla4_benchmark_unstructured_gpu_kloop_gridtools);
+    m.def("nabla4_benchmark_unstructured_gpu_naive_gridtools", &nabla4_benchmark_unstructured_gpu_naive_gridtools);
     m.def("nabla4_validate_unstructured_naive", &nabla4_validate_unstructured_naive);
     m.def("nabla4_validate_unstructured_cpu_ifirst", &nabla4_validate_unstructured_cpu_ifirst);
     m.def("nabla4_validate_unstructured_cpu_ifirst_gridtools", &nabla4_validate_unstructured_cpu_ifirst_gridtools);
     m.def("nabla4_validate_unstructured_cpu_kfirst", &nabla4_validate_unstructured_cpu_kfirst);
     m.def("nabla4_validate_unstructured_cpu_kfirst_gridtools", &nabla4_validate_unstructured_cpu_kfirst_gridtools);
-    m.def("nabla4_validate_unstructured_gpu_gridtools", &nabla4_validate_unstructured_gpu_gridtools);
-    m.def("nabla4_validate_unstructured_gpu_gridtools_naive", &nabla4_validate_unstructured_gpu_gridtools_naive);
+    m.def("nabla4_validate_unstructured_gpu_kloop_gridtools", &nabla4_validate_unstructured_gpu_kloop_gridtools);
+    m.def("nabla4_validate_unstructured_gpu_naive_gridtools", &nabla4_validate_unstructured_gpu_naive_gridtools);
     /// Structured
     m.def("nabla4_benchmark_structured_simple_naive", &nabla4_benchmark_structured_simple_naive);
     m.def("nabla4_benchmark_structured_simple_cpu_ifirst", &nabla4_benchmark_structured_simple_cpu_ifirst);
@@ -55,10 +55,10 @@ NB_MODULE(icon_benchmark, m) {
         &nabla4_benchmark_structured_torus_cpu_kfirst_gridtools);
     m.def("nabla4_benchmark_structured_torus_cpu_kfirst_gridtools_halo",
         &nabla4_benchmark_structured_torus_cpu_kfirst_gridtools_halo);
-    m.def(
-        "nabla4_benchmark_structured_torus_gpu_gridtools_halo", &nabla4_benchmark_structured_torus_gpu_gridtools_halo);
-    m.def("nabla4_benchmark_structured_torus_gpu_gridtools_halo_naive",
-        &nabla4_benchmark_structured_torus_gpu_gridtools_halo_naive);
+    m.def("nabla4_benchmark_structured_torus_gpu_kloop_gridtools_halo",
+        &nabla4_benchmark_structured_torus_gpu_kloop_gridtools_halo);
+    m.def("nabla4_benchmark_structured_torus_gpu_naive_gridtools_halo",
+        &nabla4_benchmark_structured_torus_gpu_naive_gridtools_halo);
     m.def("nabla4_validate_structured_torus_naive", &nabla4_validate_structured_torus_naive);
     m.def("nabla4_validate_structured_torus_cpu_ifirst", &nabla4_validate_structured_torus_cpu_ifirst);
     m.def("nabla4_validate_structured_torus_cpu_ifirst_gridtools",
@@ -70,25 +70,26 @@ NB_MODULE(icon_benchmark, m) {
         &nabla4_validate_structured_torus_cpu_kfirst_gridtools);
     m.def("nabla4_validate_structured_torus_cpu_kfirst_gridtools_halo",
         &nabla4_validate_structured_torus_cpu_kfirst_gridtools_halo);
-    m.def("nabla4_validate_structured_torus_gpu_gridtools_halo", &nabla4_validate_structured_torus_gpu_gridtools_halo);
-    m.def("nabla4_validate_structured_torus_gpu_gridtools_halo_naive",
-        &nabla4_validate_structured_torus_gpu_gridtools_halo_naive);
+    m.def("nabla4_validate_structured_torus_gpu_kloop_gridtools_halo",
+        &nabla4_validate_structured_torus_gpu_kloop_gridtools_halo);
+    m.def("nabla4_validate_structured_torus_gpu_naive_gridtools_halo",
+        &nabla4_validate_structured_torus_gpu_naive_gridtools_halo);
     /// Interpolate
     m.def("interpolate_validate_unstructured_cpu_ifirst", &interpolate_validate_unstructured_cpu_ifirst);
     m.def("interpolate_validate_unstructured_cpu_kfirst", &interpolate_validate_unstructured_cpu_kfirst);
-    m.def("interpolate_validate_unstructured_gpu", &interpolate_validate_unstructured_gpu);
+    m.def("interpolate_validate_unstructured_gpu_kloop", &interpolate_validate_unstructured_gpu_kloop);
     m.def("interpolate_validate_unstructured_gpu_naive", &interpolate_validate_unstructured_gpu_naive);
     m.def("interpolate_benchmark_unstructured_cpu_ifirst", &interpolate_benchmark_unstructured_cpu_ifirst);
     m.def("interpolate_benchmark_unstructured_cpu_kfirst", &interpolate_benchmark_unstructured_cpu_kfirst);
-    m.def("interpolate_benchmark_unstructured_gpu", &interpolate_benchmark_unstructured_gpu);
+    m.def("interpolate_benchmark_unstructured_gpu_kloop", &interpolate_benchmark_unstructured_gpu_kloop);
     m.def("interpolate_benchmark_unstructured_gpu_naive", &interpolate_benchmark_unstructured_gpu_naive);
     m.def("interpolate_validate_structured_cpu_ifirst", &interpolate_validate_structured_cpu_ifirst);
     m.def("interpolate_validate_structured_cpu_kfirst", &interpolate_validate_structured_cpu_kfirst);
-    m.def("interpolate_validate_structured_gpu", &interpolate_validate_structured_gpu);
+    m.def("interpolate_validate_structured_gpu_kloop", &interpolate_validate_structured_gpu_kloop);
     m.def("interpolate_validate_structured_gpu_naive", &interpolate_validate_structured_gpu_naive);
     m.def("interpolate_benchmark_structured_cpu_ifirst", &interpolate_benchmark_structured_cpu_ifirst);
     m.def("interpolate_benchmark_structured_cpu_kfirst", &interpolate_benchmark_structured_cpu_kfirst);
-    m.def("interpolate_benchmark_structured_gpu", &interpolate_benchmark_structured_gpu);
+    m.def("interpolate_benchmark_structured_gpu_kloop", &interpolate_benchmark_structured_gpu_kloop);
     m.def("interpolate_benchmark_structured_gpu_naive", &interpolate_benchmark_structured_gpu_naive);
     // Nabla4 & Interpolate separate
     m.def("nabla4_interpolate_validate_unstructured_cpu_ifirst_separate",

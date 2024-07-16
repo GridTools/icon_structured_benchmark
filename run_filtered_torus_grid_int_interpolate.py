@@ -245,11 +245,11 @@ def run_sanity_checks(
         assert np.allclose(p_v_out_cpu_kfirst, p_v_out_ref)
         print("unstructured cpu_kfirst sanity check passed")
 
-    if backend in ["all_gpu", "gpu"]:
+    if backend in ["all_gpu", "gpu_kloop"]:
         print("Running unstructured gpu naive sanity check")
         (
-            p_u_out_gpu,
-            p_v_out_gpu,
+            p_u_out_gpu_naive,
+            p_v_out_gpu_naive,
         ) = icon_benchmark.interpolate_validate_unstructured_gpu_naive(
             nvertices,
             nedges,
@@ -259,12 +259,15 @@ def run_sanity_checks(
             ptr_coeff_1,
             ptr_coeff_2,
         )
-        assert np.allclose(p_u_out_gpu, p_u_out_ref)
-        assert np.allclose(p_v_out_gpu, p_v_out_ref)
+        assert np.allclose(p_u_out_gpu_naive, p_u_out_ref)
+        assert np.allclose(p_v_out_gpu_naive, p_v_out_ref)
         print("unstructured gpu naive sanity check passed")
 
-        print("Running unstructured gpu sanity check")
-        p_u_out_gpu, p_v_out_gpu = icon_benchmark.interpolate_validate_unstructured_gpu(
+        print("Running unstructured gpu kloop sanity check")
+        (
+            p_u_out_gpu_kloop,
+            p_v_out_gpu_kloop,
+        ) = icon_benchmark.interpolate_validate_unstructured_gpu_kloop(
             nvertices,
             nedges,
             nlevels,
@@ -273,9 +276,9 @@ def run_sanity_checks(
             ptr_coeff_1,
             ptr_coeff_2,
         )
-        assert np.allclose(p_u_out_gpu, p_u_out_ref)
-        assert np.allclose(p_v_out_gpu, p_v_out_ref)
-        print("unstructured gpu sanity check passed")
+        assert np.allclose(p_u_out_gpu_kloop, p_u_out_ref)
+        assert np.allclose(p_v_out_gpu_kloop, p_v_out_ref)
+        print("unstructured gpu kloop sanity check passed")
 
     if backend in ["all_cpu", "cpu_ifirst"]:
         print("Running structured cpu_ifirst sanity check")
@@ -317,11 +320,11 @@ def run_sanity_checks(
         assert np.allclose(p_v_out_cpu_kfirst, p_v_out_ref)
         print("structured cpu_ifirst sanity check passed")
 
-    if backend in ["all_gpu", "gpu"]:
+    if backend in ["all_gpu", "gpu_kloop"]:
         print("Running structured gpu naive sanity check")
         (
-            p_u_out_gpu,
-            p_v_out_gpu,
+            p_u_out_gpu_naive,
+            p_v_out_gpu_naive,
         ) = icon_benchmark.interpolate_validate_structured_gpu_naive(
             nvertices,
             nedges,
@@ -333,15 +336,15 @@ def run_sanity_checks(
             ptr_coeff_1,
             ptr_coeff_2,
         )
-        assert np.allclose(p_u_out_gpu, p_u_out_ref)
-        assert np.allclose(p_v_out_gpu, p_v_out_ref)
+        assert np.allclose(p_u_out_gpu_naive, p_u_out_ref)
+        assert np.allclose(p_v_out_gpu_naive, p_v_out_ref)
         print("structured gpu naive sanity check passed")
 
-        print("Running structured gpu sanity check")
+        print("Running structured gpu kloop sanity check")
         (
-            p_u_out_gpu,
-            p_v_out_gpu,
-        ) = icon_benchmark.interpolate_validate_structured_gpu(
+            p_u_out_gpu_kloop,
+            p_v_out_gpu_kloop,
+        ) = icon_benchmark.interpolate_validate_structured_gpu_kloop(
             nvertices,
             nedges,
             nlevels,
@@ -352,9 +355,9 @@ def run_sanity_checks(
             ptr_coeff_1,
             ptr_coeff_2,
         )
-        assert np.allclose(p_u_out_gpu, p_u_out_ref)
-        assert np.allclose(p_v_out_gpu, p_v_out_ref)
-        print("structured gpu sanity check passed")
+        assert np.allclose(p_u_out_gpu_kloop, p_u_out_ref)
+        assert np.allclose(p_v_out_gpu_kloop, p_v_out_ref)
+        print("structured gpu kloop sanity check passed")
 
     print("Sanity checks pass")
 
@@ -393,7 +396,7 @@ def parse_arguments():
             "naive",
             "cpu_ifirst",
             "cpu_kfirst",
-            "gpu",
+            "gpu_kloop",
             "gpu_naive",
         ],
         default="all_cpu",
@@ -538,7 +541,7 @@ def run_benchmarks():
             dry_runs,
         )
 
-    if args.backend in ["all_gpu", "gpu"]:
+    if args.backend in ["all_gpu", "gpu_kloop"]:
         runtimes[
             "interpolate_benchmark_unstructured_gpu_naive"
         ] = icon_benchmark.interpolate_benchmark_unstructured_gpu_naive(
@@ -550,8 +553,8 @@ def run_benchmarks():
             dry_runs,
         )
         runtimes[
-            "interpolate_benchmark_unstructured_gpu"
-        ] = icon_benchmark.interpolate_benchmark_unstructured_gpu(
+            "interpolate_benchmark_unstructured_gpu_kloop"
+        ] = icon_benchmark.interpolate_benchmark_unstructured_gpu_kloop(
             v2e_filtered,
             torus_grid.num_vertices,
             torus_grid.num_edges,
@@ -572,8 +575,8 @@ def run_benchmarks():
             dry_runs,
         )
         runtimes[
-            "interpolate_benchmark_structured_gpu"
-        ] = icon_benchmark.interpolate_benchmark_structured_gpu(
+            "interpolate_benchmark_structured_gpu_kloop"
+        ] = icon_benchmark.interpolate_benchmark_structured_gpu_kloop(
             torus_grid.num_vertices,
             torus_grid.num_edges,
             torus_grid.num_levels,
