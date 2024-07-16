@@ -9,7 +9,7 @@ from analysis import (
 )
 
 if __name__ == "__main__":
-    git_commit = "a31fdd3"
+    git_commit = "3aa7b37"
 
     backend = "gpu"
 
