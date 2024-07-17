@@ -115,6 +115,11 @@ struct nabla4_interpolate_unstructured_inlined_v2v {
 
     void run_cpu_ifirst() {
         for (index_type k_index{}; k_index < interpolate_data.KDim; ++k_index) {
+#ifdef __clang__
+#pragma clang loop unroll(enable) vectorize(assume_safety) interleave(enable)
+#elif defined(__GNUC__)
+#pragma GCC ivdep
+#endif
             for (index_type vertex_index = 0; vertex_index < interpolate_data.output_size; ++vertex_index) {
                 std::array<WP_TYPE, 6> z_nabla4_e2_wp;
                 const std::array<index_type, 24> e2c2v{v2e2c2v_gt_tv(vertex_index, 0),
@@ -141,7 +146,11 @@ struct nabla4_interpolate_unstructured_inlined_v2v {
                     v2e2c2v_gt_tv(vertex_index, 1),
                     v2e2c2v_gt_tv(vertex_index, 5),
                     v2e2c2v_gt_tv(vertex_index, 0)};
-#pragma unroll
+#ifdef __clang__
+#pragma clang loop unroll(enable) interleave(enable)
+#elif defined(__GNUC__)
+#pragma GCC unroll
+#endif
                 for (int i{0}; i < 24; i += 4) {
                     const auto E2C2V_0 = e2c2v[i];
                     const auto E2C2V_1 = e2c2v[i + 1];
@@ -195,6 +204,11 @@ struct nabla4_interpolate_unstructured_inlined_v2v {
             std::array<index_type, 6> E2ECV_1;
             std::array<index_type, 6> E2ECV_2;
             std::array<index_type, 6> E2ECV_3;
+#ifdef __clang__
+#pragma clang loop unroll(enable) interleave(enable)
+#elif defined(__GNUC__)
+#pragma GCC unroll
+#endif
             for (int i{0}; i < 6; ++i) {
                 const auto edge_index = interpolate_data.v2e_gt_ctv(vertex_index, i);
                 edge_indexes[i] = edge_index;
@@ -227,8 +241,18 @@ struct nabla4_interpolate_unstructured_inlined_v2v {
                 v2e2c2v_gt_tv(vertex_index, 1),
                 v2e2c2v_gt_tv(vertex_index, 5),
                 v2e2c2v_gt_tv(vertex_index, 0)};
+#ifdef __clang__
+#pragma clang loop unroll(enable) vectorize(assume_safety) interleave(enable)
+#elif defined(__GNUC__)
+#pragma GCC ivdep
+#endif
             for (index_type k_index{}; k_index < interpolate_data.KDim; ++k_index) {
                 std::array<WP_TYPE, 6> z_nabla4_e2_wp;
+#ifdef __clang__
+#pragma clang loop unroll(enable) interleave(enable)
+#elif defined(__GNUC__)
+#pragma GCC unroll
+#endif
                 for (int i{0}; i < 6; ++i) {
                     const double nabv_tang_wp = nabla4_data.u_vert_gt_tv(e2c2v[i * 4], k_index) *
                                                     nabla4_data.primal_normal_vert_v1_gt_tv(E2ECV_0[i]) +
