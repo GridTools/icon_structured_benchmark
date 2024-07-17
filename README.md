@@ -125,13 +125,13 @@ To install `icon-structured`:
 
 Important CMake options:
 
-`IS_GPU`: Enable GPU execution
-`INDEX_TYPE`: Set the type of the indexes of the neighbor tables (Default is `int`
-)
-`CMAKE_CUDA_ARCHITECTURES`: Set the correct CUDA compute capability for the GPU being used
-`CMAKE_CUDA_FLAGS="-diag-suppress 177 -fPIC --save-temps --verbose --generate-line-info -Xptxas=-v --expt-relaxed-constexpr"`: some extra flags useful for CUDA compilation
-`CMAKE_CXX/CUDA_FLAGS="-DNDEBUG"`: needs to be set for CXX and CUDA compilation to avoid GridTools checks and overhead when measuring performance
-`CMAKE_PREFIX_PATH=<GRIDTOOLS_INSTALLATION_PATH>`: useful to avoid cloning GridTools in each build folder
+- `IS_GPU`: Enable GPU execution
+- `INDEX_TYPE`: Set the type of the indexes of the neighbor tables (Default is `int`
+  )
+- `CMAKE_CUDA_ARCHITECTURES`: Set the correct CUDA compute capability for the GPU being used
+- `CMAKE_CUDA_FLAGS="-diag-suppress 177 -fPIC --save-temps --verbose --generate-line-info -Xptxas=-v --expt-relaxed-constexpr"`: some extra flags useful for CUDA compilation
+- `CMAKE_CXX/CUDA_FLAGS="-DNDEBUG"`: needs to be set for CXX and CUDA compilation to avoid GridTools checks and overhead when measuring performance
+- `CMAKE_PREFIX_PATH=<GRIDTOOLS_INSTALLATION_PATH>`: useful to avoid cloning GridTools in each build folder
 
 ```
 pip install -r requirements.txt
