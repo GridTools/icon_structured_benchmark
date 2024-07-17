@@ -653,6 +653,18 @@ std::vector<double> nabla4_interpolate_benchmark_unstructured_cpu_ifirst_inlined
     int repetitions = 101,
     int dry_runs = 1);
 
+std::vector<double> nabla4_interpolate_benchmark_unstructured_cpu_ifirst_inlined_v2v(
+    std::vector<std::array<index_type, 4>> &e2c2v,
+    std::vector<std::array<index_type, 4>> &e2ecv,
+    std::vector<std::array<index_type, 6>> &v2e,
+    index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    int repetitions = 101,
+    int dry_runs = 1);
+
 std::vector<double> nabla4_interpolate_benchmark_structured_cpu_ifirst_separate(index_type CellDim,
     index_type VertexDim,
     index_type EdgeDim,
@@ -677,6 +689,18 @@ std::vector<double> nabla4_interpolate_benchmark_unstructured_cpu_kfirst_separat
     int dry_runs = 1);
 
 std::vector<double> nabla4_interpolate_benchmark_unstructured_cpu_kfirst_inlined(
+    std::vector<std::array<index_type, 4>> &e2c2v,
+    std::vector<std::array<index_type, 4>> &e2ecv,
+    std::vector<std::array<index_type, 6>> &v2e,
+    index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    int repetitions = 101,
+    int dry_runs = 1);
+
+std::vector<double> nabla4_interpolate_benchmark_unstructured_cpu_kfirst_inlined_v2v(
     std::vector<std::array<index_type, 4>> &e2c2v,
     std::vector<std::array<index_type, 4>> &e2ecv,
     std::vector<std::array<index_type, 6>> &v2e,
@@ -796,6 +820,25 @@ nabla4_interpolate_validate_unstructured_cpu_ifirst_inlined(std::vector<std::arr
     std::vector<std::vector<WP_TYPE>> &ptr_coeff_2);
 
 std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>
+nabla4_interpolate_validate_unstructured_cpu_ifirst_inlined_v2v(std::vector<std::array<index_type, 4>> &e2c2v,
+    std::vector<std::array<index_type, 4>> &e2ecv,
+    std::vector<std::array<index_type, 6>> &v2e,
+    index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    std::vector<std::vector<VP_TYPE>> &u_vert,
+    std::vector<std::vector<VP_TYPE>> &v_vert,
+    std::vector<WP_TYPE> &primal_normal_vert_v1,
+    std::vector<WP_TYPE> &primal_normal_vert_v2,
+    std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+    std::vector<WP_TYPE> &inv_vert_vert_length,
+    std::vector<WP_TYPE> &inv_primal_edge_length,
+    std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
+    std::vector<std::vector<WP_TYPE>> &ptr_coeff_2);
+
+std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>
 nabla4_interpolate_validate_structured_cpu_ifirst_separate(index_type CellDim,
     index_type VertexDim,
     index_type EdgeDim,
@@ -835,6 +878,25 @@ nabla4_interpolate_validate_unstructured_cpu_kfirst_separate(std::vector<std::ar
 
 std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>
 nabla4_interpolate_validate_unstructured_cpu_kfirst_inlined(std::vector<std::array<index_type, 4>> &e2c2v,
+    std::vector<std::array<index_type, 4>> &e2ecv,
+    std::vector<std::array<index_type, 6>> &v2e,
+    index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    std::vector<std::vector<VP_TYPE>> &u_vert,
+    std::vector<std::vector<VP_TYPE>> &v_vert,
+    std::vector<WP_TYPE> &primal_normal_vert_v1,
+    std::vector<WP_TYPE> &primal_normal_vert_v2,
+    std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+    std::vector<WP_TYPE> &inv_vert_vert_length,
+    std::vector<WP_TYPE> &inv_primal_edge_length,
+    std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
+    std::vector<std::vector<WP_TYPE>> &ptr_coeff_2);
+
+std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>
+nabla4_interpolate_validate_unstructured_cpu_kfirst_inlined_v2v(std::vector<std::array<index_type, 4>> &e2c2v,
     std::vector<std::array<index_type, 4>> &e2ecv,
     std::vector<std::array<index_type, 6>> &v2e,
     index_type CellDim,
