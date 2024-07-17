@@ -114,32 +114,60 @@ struct nabla4_interpolate_unstructured_inlined {
 
     void run_cpu_kfirst() {
         for (index_type vertex_index = 0; vertex_index < interpolate_data.output_size; ++vertex_index) {
-            std::array<index_type, 6> edge_indexes;
-            std::array<index_type, 6> E2C2V_0;
-            std::array<index_type, 6> E2C2V_1;
-            std::array<index_type, 6> E2C2V_2;
-            std::array<index_type, 6> E2C2V_3;
-            std::array<index_type, 6> E2ECV_0;
-            std::array<index_type, 6> E2ECV_1;
-            std::array<index_type, 6> E2ECV_2;
-            std::array<index_type, 6> E2ECV_3;
-#ifdef __clang__
-#pragma clang loop unroll(enable) interleave(enable)
-#elif defined(__GNUC__)
-#pragma GCC unroll
-#endif
-            for (int i{0}; i < 6; ++i) {
-                const auto edge_index = interpolate_data.v2e_gt_ctv(vertex_index, i);
-                edge_indexes[i] = edge_index;
-                E2C2V_0[i] = nabla4_data.e2c2v_gt_tv(edge_index, 0);
-                E2C2V_1[i] = nabla4_data.e2c2v_gt_tv(edge_index, 1);
-                E2C2V_2[i] = nabla4_data.e2c2v_gt_tv(edge_index, 2);
-                E2C2V_3[i] = nabla4_data.e2c2v_gt_tv(edge_index, 3);
-                E2ECV_0[i] = nabla4_data.e2ecv_gt_tv(edge_index, 0);
-                E2ECV_1[i] = nabla4_data.e2ecv_gt_tv(edge_index, 1);
-                E2ECV_2[i] = nabla4_data.e2ecv_gt_tv(edge_index, 2);
-                E2ECV_3[i] = nabla4_data.e2ecv_gt_tv(edge_index, 3);
-            }
+            const std::array<index_type, 6> edge_indexes{interpolate_data.v2e_gt_ctv(vertex_index, 0),
+                interpolate_data.v2e_gt_ctv(vertex_index, 1),
+                interpolate_data.v2e_gt_ctv(vertex_index, 2),
+                interpolate_data.v2e_gt_ctv(vertex_index, 3),
+                interpolate_data.v2e_gt_ctv(vertex_index, 4),
+                interpolate_data.v2e_gt_ctv(vertex_index, 5)};
+            const std::array<index_type, 6> E2C2V_0{nabla4_data.e2c2v_gt_tv(edge_indexes[0], 0),
+                nabla4_data.e2c2v_gt_tv(edge_indexes[1], 0),
+                nabla4_data.e2c2v_gt_tv(edge_indexes[2], 0),
+                nabla4_data.e2c2v_gt_tv(edge_indexes[3], 0),
+                nabla4_data.e2c2v_gt_tv(edge_indexes[4], 0),
+                nabla4_data.e2c2v_gt_tv(edge_indexes[5], 0)};
+            const std::array<index_type, 6> E2C2V_1{nabla4_data.e2c2v_gt_tv(edge_indexes[0], 1),
+                nabla4_data.e2c2v_gt_tv(edge_indexes[1], 1),
+                nabla4_data.e2c2v_gt_tv(edge_indexes[2], 1),
+                nabla4_data.e2c2v_gt_tv(edge_indexes[3], 1),
+                nabla4_data.e2c2v_gt_tv(edge_indexes[4], 1),
+                nabla4_data.e2c2v_gt_tv(edge_indexes[5], 1)};
+            const std::array<index_type, 6> E2C2V_2{nabla4_data.e2c2v_gt_tv(edge_indexes[0], 2),
+                nabla4_data.e2c2v_gt_tv(edge_indexes[1], 2),
+                nabla4_data.e2c2v_gt_tv(edge_indexes[2], 2),
+                nabla4_data.e2c2v_gt_tv(edge_indexes[3], 2),
+                nabla4_data.e2c2v_gt_tv(edge_indexes[4], 2),
+                nabla4_data.e2c2v_gt_tv(edge_indexes[5], 2)};
+            const std::array<index_type, 6> E2C2V_3{nabla4_data.e2c2v_gt_tv(edge_indexes[0], 3),
+                nabla4_data.e2c2v_gt_tv(edge_indexes[1], 3),
+                nabla4_data.e2c2v_gt_tv(edge_indexes[2], 3),
+                nabla4_data.e2c2v_gt_tv(edge_indexes[3], 3),
+                nabla4_data.e2c2v_gt_tv(edge_indexes[4], 3),
+                nabla4_data.e2c2v_gt_tv(edge_indexes[5], 3)};
+            const std::array<index_type, 6> E2ECV_0{nabla4_data.e2ecv_gt_tv(edge_indexes[0], 0),
+                nabla4_data.e2ecv_gt_tv(edge_indexes[1], 0),
+                nabla4_data.e2ecv_gt_tv(edge_indexes[2], 0),
+                nabla4_data.e2ecv_gt_tv(edge_indexes[3], 0),
+                nabla4_data.e2ecv_gt_tv(edge_indexes[4], 0),
+                nabla4_data.e2ecv_gt_tv(edge_indexes[5], 0)};
+            const std::array<index_type, 6> E2ECV_1{nabla4_data.e2ecv_gt_tv(edge_indexes[0], 1),
+                nabla4_data.e2ecv_gt_tv(edge_indexes[1], 1),
+                nabla4_data.e2ecv_gt_tv(edge_indexes[2], 1),
+                nabla4_data.e2ecv_gt_tv(edge_indexes[3], 1),
+                nabla4_data.e2ecv_gt_tv(edge_indexes[4], 1),
+                nabla4_data.e2ecv_gt_tv(edge_indexes[5], 1)};
+            const std::array<index_type, 6> E2ECV_2{nabla4_data.e2ecv_gt_tv(edge_indexes[0], 2),
+                nabla4_data.e2ecv_gt_tv(edge_indexes[1], 2),
+                nabla4_data.e2ecv_gt_tv(edge_indexes[2], 2),
+                nabla4_data.e2ecv_gt_tv(edge_indexes[3], 2),
+                nabla4_data.e2ecv_gt_tv(edge_indexes[4], 2),
+                nabla4_data.e2ecv_gt_tv(edge_indexes[5], 2)};
+            const std::array<index_type, 6> E2ECV_3{nabla4_data.e2ecv_gt_tv(edge_indexes[0], 3),
+                nabla4_data.e2ecv_gt_tv(edge_indexes[1], 3),
+                nabla4_data.e2ecv_gt_tv(edge_indexes[2], 3),
+                nabla4_data.e2ecv_gt_tv(edge_indexes[3], 3),
+                nabla4_data.e2ecv_gt_tv(edge_indexes[4], 3),
+                nabla4_data.e2ecv_gt_tv(edge_indexes[5], 3)};
 #ifdef __clang__
 #pragma clang loop unroll(enable) vectorize(assume_safety) interleave(enable)
 #elif defined(__GNUC__)
@@ -150,7 +178,7 @@ struct nabla4_interpolate_unstructured_inlined {
 #ifdef __clang__
 #pragma clang loop unroll(enable) interleave(enable)
 #elif defined(__GNUC__)
-#pragma GCC unroll
+#pragma GCC unroll 6
 #endif
                 for (int i{0}; i < 6; ++i) {
                     const double nabv_tang_wp = nabla4_data.u_vert_gt_tv(E2C2V_0[i], k_index) *
