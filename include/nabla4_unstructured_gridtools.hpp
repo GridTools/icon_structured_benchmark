@@ -327,24 +327,26 @@ __global__ void __launch_bounds__(block_dims_unstructured_naive.size)
     const auto E2ECV_1 = __ldcs(&e2ecv_gt_tv(edge_index, 1));
     const auto E2ECV_2 = __ldcs(&e2ecv_gt_tv(edge_index, 2));
     const auto E2ECV_3 = __ldcs(&e2ecv_gt_tv(edge_index, 3));
-    const std::array<VP_TYPE, 4> u_vert = { __ldcs(&u_vert_gt_tv(E2C2V_0, k_index)), __ldcs(&u_vert_gt_tv(E2C2V_1, k_index)),
-        __ldcs(&u_vert_gt_tv(E2C2V_2, k_index)), __ldcs(&u_vert_gt_tv(E2C2V_3, k_index)) };
-    const std::array<VP_TYPE, 4> v_vert = { __ldcs(&v_vert_gt_tv(E2C2V_0, k_index)), __ldcs(&v_vert_gt_tv(E2C2V_1, k_index)),
-        __ldcs(&v_vert_gt_tv(E2C2V_2, k_index)), __ldcs(&v_vert_gt_tv(E2C2V_3, k_index)) };
-    const std::array<WP_TYPE, 4> primal_normal_vert_v1 = { __ldcs(&primal_normal_vert_v1_gt_tv(E2ECV_0)),
-        __ldcs(&primal_normal_vert_v1_gt_tv(E2ECV_1)), __ldcs(&primal_normal_vert_v1_gt_tv(E2ECV_2)),
-        __ldcs(&primal_normal_vert_v1_gt_tv(E2ECV_3)) };
-    const std::array<WP_TYPE, 4> primal_normal_vert_v2 = { __ldcs(&primal_normal_vert_v2_gt_tv(E2ECV_0)),
-        __ldcs(&primal_normal_vert_v2_gt_tv(E2ECV_1)), __ldcs(&primal_normal_vert_v2_gt_tv(E2ECV_2)),
-        __ldcs(&primal_normal_vert_v2_gt_tv(E2ECV_3)) };
-    const double nabv_tang_wp = u_vert[0] * primal_normal_vert_v1[0] +
-                          v_vert[0] * primal_normal_vert_v2[0] +
-                          u_vert[1] * primal_normal_vert_v1[1] +
-                          v_vert[1] * primal_normal_vert_v2[1];
-    const double nabv_norm_wp = u_vert[2] * primal_normal_vert_v1[2] +
-                          v_vert[2] * primal_normal_vert_v2[2] +
-                          u_vert[3] * primal_normal_vert_v1[3] +
-                          v_vert[3] * primal_normal_vert_v2[3];
+    const std::array<VP_TYPE, 4> u_vert = {__ldcs(&u_vert_gt_tv(E2C2V_0, k_index)),
+        __ldcs(&u_vert_gt_tv(E2C2V_1, k_index)),
+        __ldcs(&u_vert_gt_tv(E2C2V_2, k_index)),
+        __ldcs(&u_vert_gt_tv(E2C2V_3, k_index))};
+    const std::array<VP_TYPE, 4> v_vert = {__ldcs(&v_vert_gt_tv(E2C2V_0, k_index)),
+        __ldcs(&v_vert_gt_tv(E2C2V_1, k_index)),
+        __ldcs(&v_vert_gt_tv(E2C2V_2, k_index)),
+        __ldcs(&v_vert_gt_tv(E2C2V_3, k_index))};
+    const std::array<WP_TYPE, 4> primal_normal_vert_v1 = {__ldcs(&primal_normal_vert_v1_gt_tv(E2ECV_0)),
+        __ldcs(&primal_normal_vert_v1_gt_tv(E2ECV_1)),
+        __ldcs(&primal_normal_vert_v1_gt_tv(E2ECV_2)),
+        __ldcs(&primal_normal_vert_v1_gt_tv(E2ECV_3))};
+    const std::array<WP_TYPE, 4> primal_normal_vert_v2 = {__ldcs(&primal_normal_vert_v2_gt_tv(E2ECV_0)),
+        __ldcs(&primal_normal_vert_v2_gt_tv(E2ECV_1)),
+        __ldcs(&primal_normal_vert_v2_gt_tv(E2ECV_2)),
+        __ldcs(&primal_normal_vert_v2_gt_tv(E2ECV_3))};
+    const double nabv_tang_wp = u_vert[0] * primal_normal_vert_v1[0] + v_vert[0] * primal_normal_vert_v2[0] +
+                                u_vert[1] * primal_normal_vert_v1[1] + v_vert[1] * primal_normal_vert_v2[1];
+    const double nabv_norm_wp = u_vert[2] * primal_normal_vert_v1[2] + v_vert[2] * primal_normal_vert_v2[2] +
+                                u_vert[3] * primal_normal_vert_v1[3] + v_vert[3] * primal_normal_vert_v2[3];
     const auto inv_vert_vert_length_gt_tv_edge_index = __ldcs(&inv_vert_vert_length_gt_tv(edge_index));
     const auto inv_primal_edge_length_gt_tv_edge_index = __ldcs(&inv_primal_edge_length_gt_tv(edge_index));
     const auto z_nabla2_e = __ldcs(&z_nabla2_e_gt_tv(edge_index, k_index));
