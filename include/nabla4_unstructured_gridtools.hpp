@@ -327,34 +327,22 @@ __global__ void __launch_bounds__(block_dims_unstructured_naive.size)
     const auto E2ECV_1 = __ldg(&e2ecv_gt_tv(edge_index, 1));
     const auto E2ECV_2 = __ldg(&e2ecv_gt_tv(edge_index, 2));
     const auto E2ECV_3 = __ldg(&e2ecv_gt_tv(edge_index, 3));
-    const std::array<VP_TYPE, 4> u_vert = {__ldg(&u_vert_gt_tv(E2C2V_0, k_index)),
-        __ldg(&u_vert_gt_tv(E2C2V_1, k_index)),
-        __ldg(&u_vert_gt_tv(E2C2V_2, k_index)),
-        __ldg(&u_vert_gt_tv(E2C2V_3, k_index))};
-    const std::array<VP_TYPE, 4> v_vert = {__ldg(&v_vert_gt_tv(E2C2V_0, k_index)),
-        __ldg(&v_vert_gt_tv(E2C2V_1, k_index)),
-        __ldg(&v_vert_gt_tv(E2C2V_2, k_index)),
-        __ldg(&v_vert_gt_tv(E2C2V_3, k_index))};
-    const std::array<WP_TYPE, 4> primal_normal_vert_v1 = {__ldg(&primal_normal_vert_v1_gt_tv(E2ECV_0)),
-        __ldg(&primal_normal_vert_v1_gt_tv(E2ECV_1)),
-        __ldg(&primal_normal_vert_v1_gt_tv(E2ECV_2)),
-        __ldg(&primal_normal_vert_v1_gt_tv(E2ECV_3))};
-    const std::array<WP_TYPE, 4> primal_normal_vert_v2 = {__ldg(&primal_normal_vert_v2_gt_tv(E2ECV_0)),
-        __ldg(&primal_normal_vert_v2_gt_tv(E2ECV_1)),
-        __ldg(&primal_normal_vert_v2_gt_tv(E2ECV_2)),
-        __ldg(&primal_normal_vert_v2_gt_tv(E2ECV_3))};
-    const double nabv_tang_wp = u_vert[0] * primal_normal_vert_v1[0] + v_vert[0] * primal_normal_vert_v2[0] +
-                                u_vert[1] * primal_normal_vert_v1[1] + v_vert[1] * primal_normal_vert_v2[1];
-    const double nabv_norm_wp = u_vert[2] * primal_normal_vert_v1[2] + v_vert[2] * primal_normal_vert_v2[2] +
-                                u_vert[3] * primal_normal_vert_v1[3] + v_vert[3] * primal_normal_vert_v2[3];
-    const auto inv_vert_vert_length_gt_tv_edge_index = __ldg(&inv_vert_vert_length_gt_tv(edge_index));
-    const auto inv_primal_edge_length_gt_tv_edge_index = __ldg(&inv_primal_edge_length_gt_tv(edge_index));
+    double nabv_tang_wp = __ldg(&u_vert_gt_tv(E2C2V_0, k_index)) * __ldg(&primal_normal_vert_v1_gt_tv(E2ECV_0)) +
+                          __ldg(&v_vert_gt_tv(E2C2V_0, k_index)) * __ldg(&primal_normal_vert_v2_gt_tv(E2ECV_0)) +
+                          __ldg(&u_vert_gt_tv(E2C2V_1, k_index)) * __ldg(&primal_normal_vert_v1_gt_tv(E2ECV_1)) +
+                          __ldg(&v_vert_gt_tv(E2C2V_1, k_index)) * __ldg(&primal_normal_vert_v2_gt_tv(E2ECV_1));
+    double nabv_norm_wp = __ldg(&u_vert_gt_tv(E2C2V_2, k_index)) * __ldg(&primal_normal_vert_v1_gt_tv(E2ECV_2)) +
+                          __ldg(&v_vert_gt_tv(E2C2V_2, k_index)) * __ldg(&primal_normal_vert_v2_gt_tv(E2ECV_2)) +
+                          __ldg(&u_vert_gt_tv(E2C2V_3, k_index)) * __ldg(&primal_normal_vert_v1_gt_tv(E2ECV_3)) +
+                          __ldg(&v_vert_gt_tv(E2C2V_3, k_index)) * __ldg(&primal_normal_vert_v2_gt_tv(E2ECV_3));
+    const auto inv_vert_vert_length = __ldg(&inv_vert_vert_length_gt_tv(edge_index));
+    const auto inv_primal_edge_length = __ldg(&inv_primal_edge_length_gt_tv(edge_index));
     const auto z_nabla2_e = __ldg(&z_nabla2_e_gt_tv(edge_index, k_index));
-    __stcs(&z_nabla4_e2_wp_gt_tv(edge_index, k_index),
+    z_nabla4_e2_wp_gt_tv(edge_index, k_index) =
         4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e) *
-                      (inv_vert_vert_length_gt_tv_edge_index * inv_vert_vert_length_gt_tv_edge_index) +
+                      (inv_vert_vert_length * inv_vert_vert_length) +
                   (nabv_tang_wp - 2.0 * z_nabla2_e) *
-                      (inv_primal_edge_length_gt_tv_edge_index * inv_primal_edge_length_gt_tv_edge_index)));
+                      (inv_primal_edge_length * inv_primal_edge_length));
 };
 
 template <typename T>
