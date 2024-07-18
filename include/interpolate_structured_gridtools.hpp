@@ -76,7 +76,7 @@ GT_FORCE_INLINE constexpr std::array<index_type, 6> get_v2e_per_orientation(
         2 * (x_dim * y_dim) + i_j + x_dim - 1};
 };
 
-GT_FORCE_INLINE constexpr std::array<index_type, 6> get_v2e_per_vertex(
+GT_FORCE_INLINE constexpr const std::array<index_type, 6> get_v2e_per_vertex(
     const int i, const int j, const index_type x_dim, const index_type y_dim) {
     const index_type i_j = i + j * x_dim;
     const index_type i_jm1 = i + (j - 1) * x_dim;
