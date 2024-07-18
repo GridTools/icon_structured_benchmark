@@ -66,7 +66,7 @@ constexpr block_dims block_dims_structured_naive = get_block_dims_structured_nai
 
 template <typename T>
 class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
-
+  public:
     using nabla4_gt_data<T>::CellDim;
     using nabla4_gt_data<T>::EdgeDim;
     using nabla4_gt_data<T>::VertexDim;
@@ -85,7 +85,6 @@ class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
     const index_type x_dim;
     const index_type halo;
 
-  public:
     /// Constructor with all the necessary information for \c nabla4 compute
     /// kernel execution
     nabla4_structured_torus_halo_gt(index_type CellDim,

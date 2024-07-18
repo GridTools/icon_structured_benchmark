@@ -85,6 +85,7 @@ GT_FORCE_INLINE constexpr const std::array<index_type, 6> get_v2e_per_vertex(
 
 template <typename S>
 class interpolate_structured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
+  public:
     using mo_intp_rbf_rbf_vec_interpol_vertex<S>::KDim;
     using mo_intp_rbf_rbf_vec_interpol_vertex<S>::VertexDim;
     using mo_intp_rbf_rbf_vec_interpol_vertex<S>::EdgeDim;
@@ -100,7 +101,6 @@ class interpolate_structured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
     const index_type x_dim;
     const index_type halo;
 
-  public:
     interpolate_structured(std::size_t VertexDim,
         std::size_t EdgeDim,
         std::size_t KDim,
