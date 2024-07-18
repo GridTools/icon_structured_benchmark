@@ -339,10 +339,8 @@ __global__ void __launch_bounds__(block_dims_unstructured_naive.size)
     const auto inv_primal_edge_length = __ldg(&inv_primal_edge_length_gt_tv(edge_index));
     const auto z_nabla2_e = __ldg(&z_nabla2_e_gt_tv(edge_index, k_index));
     z_nabla4_e2_wp_gt_tv(edge_index, k_index) =
-        4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e) *
-                      (inv_vert_vert_length * inv_vert_vert_length) +
-                  (nabv_tang_wp - 2.0 * z_nabla2_e) *
-                      (inv_primal_edge_length * inv_primal_edge_length));
+        4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e) * (inv_vert_vert_length * inv_vert_vert_length) +
+                  (nabv_tang_wp - 2.0 * z_nabla2_e) * (inv_primal_edge_length * inv_primal_edge_length));
 };
 
 template <typename T>
