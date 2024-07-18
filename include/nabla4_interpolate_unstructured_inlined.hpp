@@ -297,6 +297,7 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
     if (vertex_index >= interpolate_output_size || k_index >= KDim)
         return;
     std::array<WP_TYPE, 6> z_nabla4_e2_wp;
+#pragma unroll
     for (int i{0}; i < 6; ++i) {
         const auto edge_index = v2e_gt_tv(vertex_index, i);
         const auto E2C2V_0 = e2c2v_gt_tv(edge_index, 0);
