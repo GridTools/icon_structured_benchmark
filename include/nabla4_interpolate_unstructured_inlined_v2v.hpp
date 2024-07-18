@@ -147,17 +147,17 @@ struct nabla4_interpolate_unstructured_inlined_v2v {
 #ifdef __clang__
 #pragma clang loop unroll(enable) interleave(enable)
 #elif defined(__GNUC__)
-#pragma GCC unroll 24
+#pragma GCC unroll 6
 #endif
-                for (int i{0}; i < 24; i += 4) {
-                    const auto E2C2V_0 = e2c2v[i];
-                    const auto E2C2V_1 = e2c2v[i + 1];
-                    const auto E2C2V_2 = e2c2v[i + 2];
-                    const auto E2C2V_3 = e2c2v[i + 3];
-                    const auto E2ECV_0 = v2e2ecv_gt_ctv(vertex_index, i);
-                    const auto E2ECV_1 = v2e2ecv_gt_ctv(vertex_index, i + 1);
-                    const auto E2ECV_2 = v2e2ecv_gt_ctv(vertex_index, i + 2);
-                    const auto E2ECV_3 = v2e2ecv_gt_ctv(vertex_index, i + 3);
+                for (int i{0}; i < 6; ++i) {
+                    const auto E2C2V_0 = e2c2v[i * 4];
+                    const auto E2C2V_1 = e2c2v[i * 4 + 1];
+                    const auto E2C2V_2 = e2c2v[i * 4 + 2];
+                    const auto E2C2V_3 = e2c2v[i * 4 + 3];
+                    const auto E2ECV_0 = v2e2ecv_gt_ctv(vertex_index, i * 4);
+                    const auto E2ECV_1 = v2e2ecv_gt_ctv(vertex_index, i * 4 + 1);
+                    const auto E2ECV_2 = v2e2ecv_gt_ctv(vertex_index, i * 4 + 2);
+                    const auto E2ECV_3 = v2e2ecv_gt_ctv(vertex_index, i * 4 + 3);
                     const double nabv_tang_wp =
                         nabla4_data.u_vert_gt_tv(E2C2V_0, k_index) * nabla4_data.primal_normal_vert_v1_gt_tv(E2ECV_0) +
                         nabla4_data.v_vert_gt_tv(E2C2V_0, k_index) * nabla4_data.primal_normal_vert_v2_gt_tv(E2ECV_0) +
@@ -168,8 +168,8 @@ struct nabla4_interpolate_unstructured_inlined_v2v {
                         nabla4_data.v_vert_gt_tv(E2C2V_2, k_index) * nabla4_data.primal_normal_vert_v2_gt_tv(E2ECV_2) +
                         nabla4_data.u_vert_gt_tv(E2C2V_3, k_index) * nabla4_data.primal_normal_vert_v1_gt_tv(E2ECV_3) +
                         nabla4_data.v_vert_gt_tv(E2C2V_3, k_index) * nabla4_data.primal_normal_vert_v2_gt_tv(E2ECV_3);
-                    const auto edge_index = interpolate_data.v2e_gt_ctv(vertex_index, i / 4);
-                    z_nabla4_e2_wp[i / 4] =
+                    const auto edge_index = interpolate_data.v2e_gt_ctv(vertex_index, i);
+                    z_nabla4_e2_wp[i] =
                         4.0 * ((nabv_norm_wp - 2.0 * nabla4_data.z_nabla2_e_gt_tv(edge_index, k_index)) *
                                       (nabla4_data.inv_vert_vert_length_gt_tv(edge_index) *
                                           nabla4_data.inv_vert_vert_length_gt_tv(edge_index)) +
