@@ -1,6 +1,20 @@
 #include <interpolate_structured_gridtools.hpp>
 #include <nabla4_structured_torus_gridtools_halo.hpp>
 
+GT_FORCE_INLINE constexpr index_type get_index(int i, int j, int x_dim) { return i + j * x_dim; }
+
+GT_FORCE_INLINE constexpr const std::array<index_type, 7> get_v2e2c2v(int i, int j, int x_dim) {
+    std::array<index_type, 7> v2e2c2v{};
+    v2e2c2v[0] = get_index(i - 1, j, x_dim);
+    v2e2c2v[1] = get_index(i, j, x_dim);
+    v2e2c2v[2] = get_index(i - 1, j + 1, x_dim);
+    v2e2c2v[3] = get_index(i, j - 1, x_dim);
+    v2e2c2v[4] = get_index(i + 1, j, x_dim);
+    v2e2c2v[5] = get_index(i, j + 1, x_dim);
+    v2e2c2v[6] = get_index(i + 1, j - 1, x_dim);
+    return v2e2c2v;
+}
+
 template <typename T>
 struct nabla4_interpolate_structured_inlined {
     nabla4_structured_torus_halo_gt<T> nabla4_data;
@@ -66,20 +80,6 @@ struct nabla4_interpolate_structured_inlined {
               ptr_coeff_2){};
 
     auto get_output() -> decltype(interpolate_data.get_output()) { return interpolate_data.get_output(); }
-
-    GT_FORCE_INLINE constexpr index_type get_index(int i, int j, int x_dim) const { return i + j * x_dim; }
-
-    GT_FORCE_INLINE constexpr const std::array<index_type, 7> get_v2e2c2v(int i, int j, int x_dim) const {
-        std::array<index_type, 7> v2e2c2v{};
-        v2e2c2v[0] = get_index(i - 1, j, x_dim);
-        v2e2c2v[1] = get_index(i, j, x_dim);
-        v2e2c2v[2] = get_index(i - 1, j + 1, x_dim);
-        v2e2c2v[3] = get_index(i, j - 1, x_dim);
-        v2e2c2v[4] = get_index(i + 1, j, x_dim);
-        v2e2c2v[5] = get_index(i, j + 1, x_dim);
-        v2e2c2v[6] = get_index(i + 1, j - 1, x_dim);
-        return v2e2c2v;
-    }
 
     void run_cpu_ifirst() {
         for (index_type k_index{}; k_index < interpolate_data.KDim; ++k_index) {
@@ -343,14 +343,219 @@ struct nabla4_interpolate_structured_inlined {
         };
     }
 
+    void run_gpu_naive_helper();
+
     template <backend_impl I>
     inline void run() {
         if constexpr (I == backend_impl::cpu_ifirst) {
             run_cpu_ifirst();
         } else if constexpr (I == backend_impl::cpu_kfirst) {
             run_cpu_kfirst();
+        } else if constexpr (I == backend_impl::gpu_naive) {
+            run_gpu_naive_helper();
         } else {
             throw std::runtime_error("Undefined backend implementation");
         }
     }
 };
+
+#if defined(__CUDACC__)
+template <typename T>
+constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_naive() {
+    throw std::runtime_error("Undefined block dimensions for type " + T::name + " in GPU backend");
+};
+
+template <>
+constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_naive<std::size_t>() {
+    // not optimized
+    return {32, 8, 1, 256};
+};
+
+template <>
+constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_naive<std::int64_t>() {
+    // not optimized
+    return {32, 8, 1, 256};
+};
+
+template <>
+constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_naive<std::uint32_t>() {
+    // not optimized
+    return {32, 9, 1, 288};
+};
+
+template <>
+constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_naive<int>() {
+    return {32, 8, 1, 256};
+};
+
+constexpr block_dims block_dims_structured_nabla_interpol_inlined_naive =
+    get_block_dims_structured_nabla_interpol_inlined_naive<index_type>();
+
+__global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_naive.size)
+    run_gpu_naive_nabla4_interpolate_inlined_structured(
+        index_type KDim,
+        index_type nabla4_x_dim,
+        index_type nabla4_y_dim,
+        index_type interpolate_x_dim,
+        index_type interpolate_y_dim,
+        index_type interpolate_halo,
+        index_type interpolate_output_size,
+        nabla4_structured_torus_halo_gt<storage::gpu>::data_store_2d_ctv_VP_t u_vert_gt_tv,
+        nabla4_structured_torus_halo_gt<storage::gpu>::data_store_2d_ctv_VP_t v_vert_gt_tv,
+        nabla4_structured_torus_halo_gt<storage::gpu>::data_store_1d_ctv_WP_t primal_normal_vert_v1_gt_tv,
+        nabla4_structured_torus_halo_gt<storage::gpu>::data_store_1d_ctv_WP_t primal_normal_vert_v2_gt_tv,
+        nabla4_structured_torus_halo_gt<storage::gpu>::data_store_2d_ctv_WP_t z_nabla2_e_gt_tv,
+        nabla4_structured_torus_halo_gt<storage::gpu>::data_store_1d_ctv_WP_t inv_vert_vert_length_gt_tv,
+        nabla4_structured_torus_halo_gt<storage::gpu>::data_store_1d_ctv_WP_t inv_primal_edge_length_gt_tv,
+        interpolate_structured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_1_gt_ctv,
+        interpolate_structured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_2_gt_ctv,
+        interpolate_structured<storage::gpu>::data_store_2d_tv_WP_t p_u_out_gt_tv,
+        interpolate_structured<storage::gpu>::data_store_2d_tv_WP_t p_v_out_gt_tv) {
+    const auto i{blockIdx.x * blockDim.x + threadIdx.x + interpolate_halo};
+    const auto j{blockIdx.y * blockDim.y + threadIdx.y + interpolate_halo};
+    const auto k_index{blockIdx.z * blockDim.z + threadIdx.z};
+    if (i >= nabla4_x_dim - interpolate_halo || j >= nabla4_y_dim - interpolate_halo || k_index >= KDim) {
+        return;
+    }
+    const std::array<index_type, 7> v2e2c2v_compressed{get_v2e2c2v(i, j, nabla4_x_dim)};
+    const std::array<index_type, 6> v2e{get_v2e_per_orientation(i, j, nabla4_x_dim, nabla4_y_dim)};
+    const auto outer_domain_dim = nabla4_x_dim * nabla4_y_dim;
+    const std::array<index_type, 24> v2e2ecv{v2e[0],
+        v2e[0] + outer_domain_dim * 3,
+        v2e[0] + outer_domain_dim * 6,
+        v2e[0] + outer_domain_dim * 9,
+        v2e[1],
+        v2e[1] + outer_domain_dim * 3,
+        v2e[1] + outer_domain_dim * 6,
+        v2e[1] + outer_domain_dim * 9,
+        v2e[2],
+        v2e[2] + outer_domain_dim * 3,
+        v2e[2] + outer_domain_dim * 6,
+        v2e[2] + outer_domain_dim * 9,
+        v2e[3],
+        v2e[3] + outer_domain_dim * 3,
+        v2e[3] + outer_domain_dim * 6,
+        v2e[3] + outer_domain_dim * 9,
+        v2e[4],
+        v2e[4] + outer_domain_dim * 3,
+        v2e[4] + outer_domain_dim * 6,
+        v2e[4] + outer_domain_dim * 9,
+        v2e[5],
+        v2e[5] + outer_domain_dim * 3,
+        v2e[5] + outer_domain_dim * 6,
+        v2e[5] + outer_domain_dim * 9};
+    const std::array<index_type, 24> v2e2c2v{v2e2c2v_compressed[0],
+        v2e2c2v_compressed[1],
+        v2e2c2v_compressed[2],
+        v2e2c2v_compressed[3],
+        v2e2c2v_compressed[1],
+        v2e2c2v_compressed[4],
+        v2e2c2v_compressed[5],
+        v2e2c2v_compressed[6],
+        v2e2c2v_compressed[3],
+        v2e2c2v_compressed[1],
+        v2e2c2v_compressed[0],
+        v2e2c2v_compressed[6],
+        v2e2c2v_compressed[1],
+        v2e2c2v_compressed[5],
+        v2e2c2v_compressed[2],
+        v2e2c2v_compressed[4],
+        v2e2c2v_compressed[1],
+        v2e2c2v_compressed[6],
+        v2e2c2v_compressed[4],
+        v2e2c2v_compressed[3],
+        v2e2c2v_compressed[2],
+        v2e2c2v_compressed[1],
+        v2e2c2v_compressed[5],
+        v2e2c2v_compressed[0]};
+    std::array<WP_TYPE, 6> z_nabla4_e2_wp;
+    const index_type vertex_index_internal =
+        i - interpolate_halo +
+        (j - interpolate_halo) * (nabla4_x_dim - 2 * interpolate_halo);
+#pragma unroll 6
+    for (auto i{0}; i < 6; ++i) {
+        const auto edge_index = v2e[i];
+        const auto E2C2V_0 = v2e2c2v[i * 4];
+        const auto E2C2V_1 = v2e2c2v[i * 4 + 1];
+        const auto E2C2V_2 = v2e2c2v[i * 4 + 2];
+        const auto E2C2V_3 = v2e2c2v[i * 4 + 3];
+        const auto E2ECV_0 = v2e2ecv[i * 4];
+        const auto E2ECV_1 = v2e2ecv[i * 4 + 1];
+        const auto E2ECV_2 = v2e2ecv[i * 4 + 2];
+        const auto E2ECV_3 = v2e2ecv[i * 4 + 3];
+        const double nabv_tang_wp = u_vert_gt_tv(E2C2V_0, k_index) *
+                                        primal_normal_vert_v1_gt_tv(E2ECV_0) +
+                                    v_vert_gt_tv(E2C2V_0, k_index) *
+                                        primal_normal_vert_v2_gt_tv(E2ECV_0) +
+                                    u_vert_gt_tv(E2C2V_1, k_index) *
+                                        primal_normal_vert_v1_gt_tv(E2ECV_1) +
+                                    v_vert_gt_tv(E2C2V_1, k_index) *
+                                        primal_normal_vert_v2_gt_tv(E2ECV_1);
+        const double nabv_norm_wp = u_vert_gt_tv(E2C2V_2, k_index) *
+                                        primal_normal_vert_v1_gt_tv(E2ECV_2) +
+                                    v_vert_gt_tv(E2C2V_2, k_index) *
+                                        primal_normal_vert_v2_gt_tv(E2ECV_2) +
+                                    u_vert_gt_tv(E2C2V_3, k_index) *
+                                        primal_normal_vert_v1_gt_tv(E2ECV_3) +
+                                    v_vert_gt_tv(E2C2V_3, k_index) *
+                                        primal_normal_vert_v2_gt_tv(E2ECV_3);
+        z_nabla4_e2_wp[i] =
+            4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_tv(edge_index, k_index)) *
+                            (inv_vert_vert_length_gt_tv(edge_index) *
+                                inv_vert_vert_length_gt_tv(edge_index)) +
+                        (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(edge_index, k_index)) *
+                            (inv_primal_edge_length_gt_tv(edge_index) *
+                                inv_primal_edge_length_gt_tv(edge_index)));
+    }
+    p_u_out_gt_tv(vertex_index_internal, k_index) =
+        z_nabla4_e2_wp[0] * ptr_coeff_1_gt_ctv(vertex_index_internal, 0) +
+        z_nabla4_e2_wp[1] * ptr_coeff_1_gt_ctv(vertex_index_internal, 1) +
+        z_nabla4_e2_wp[2] * ptr_coeff_1_gt_ctv(vertex_index_internal, 2) +
+        z_nabla4_e2_wp[3] * ptr_coeff_1_gt_ctv(vertex_index_internal, 3) +
+        z_nabla4_e2_wp[4] * ptr_coeff_1_gt_ctv(vertex_index_internal, 4) +
+        z_nabla4_e2_wp[5] * ptr_coeff_1_gt_ctv(vertex_index_internal, 5);
+    p_v_out_gt_tv(vertex_index_internal, k_index) =
+        z_nabla4_e2_wp[0] * ptr_coeff_2_gt_ctv(vertex_index_internal, 0) +
+        z_nabla4_e2_wp[1] * ptr_coeff_2_gt_ctv(vertex_index_internal, 1) +
+        z_nabla4_e2_wp[2] * ptr_coeff_2_gt_ctv(vertex_index_internal, 2) +
+        z_nabla4_e2_wp[3] * ptr_coeff_2_gt_ctv(vertex_index_internal, 3) +
+        z_nabla4_e2_wp[4] * ptr_coeff_2_gt_ctv(vertex_index_internal, 4) +
+        z_nabla4_e2_wp[5] * ptr_coeff_2_gt_ctv(vertex_index_internal, 5);
+};
+
+template <typename T>
+inline void nabla4_interpolate_structured_inlined<T>::run_gpu_naive_helper() {
+    dim3 tblocks(block_dims_structured_nabla_interpol_inlined_naive.x,
+        block_dims_structured_nabla_interpol_inlined_naive.y,
+        block_dims_structured_nabla_interpol_inlined_naive.z);
+    const index_type inner_grid_size = interpolate_data.x_dim * interpolate_data.y_dim;
+    dim3 grid((interpolate_data.x_dim + tblocks.x - 1) / tblocks.x,
+        (interpolate_data.y_dim + tblocks.y - 1) / tblocks.y,
+        (interpolate_data.KDim + tblocks.z - 1) / tblocks.z);
+    run_gpu_naive_nabla4_interpolate_inlined_structured<<<grid, tblocks>>>(
+        interpolate_data.KDim,
+        nabla4_data.x_dim,
+        nabla4_data.y_dim,
+        interpolate_data.x_dim,
+        interpolate_data.y_dim,
+        interpolate_data.halo,
+        inner_grid_size,
+        nabla4_data.u_vert_gt_tv,
+        nabla4_data.v_vert_gt_tv,
+        nabla4_data.primal_normal_vert_v1_gt_tv,
+        nabla4_data.primal_normal_vert_v2_gt_tv,
+        nabla4_data.z_nabla2_e_gt_tv,
+        nabla4_data.inv_vert_vert_length_gt_tv,
+        nabla4_data.inv_primal_edge_length_gt_tv,
+        interpolate_data.ptr_coeff_1_gt_ctv,
+        interpolate_data.ptr_coeff_2_gt_ctv,
+        interpolate_data.p_u_out_gt_tv,
+        interpolate_data.p_v_out_gt_tv);
+    GT_CUDA_CHECK(cudaGetLastError());
+};
+#else
+template <typename T>
+inline void nabla4_interpolate_structured_inlined<T>::run_gpu_naive_helper() {
+    throw std::runtime_error("GPU backend not enabled");
+};
+#endif
