@@ -177,6 +177,8 @@ struct nabla4_interpolate_unstructured_inlined {
                 std::array<WP_TYPE, 6> z_nabla4_e2_wp;
 #ifdef __clang__
 #pragma clang loop unroll(enable) interleave(enable)
+#elif defined(__NVCC__)
+#pragma unroll 6
 #elif defined(__GNUC__)
 #pragma GCC unroll 6
 #endif
