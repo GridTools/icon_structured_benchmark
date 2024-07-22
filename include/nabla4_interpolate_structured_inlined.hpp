@@ -204,10 +204,151 @@ struct nabla4_interpolate_structured_inlined {
         };
     }
 
+    void run_cpu_kfirst() {
+        for (index_type j = interpolate_data.halo; j < nabla4_data.y_dim - interpolate_data.halo; ++j) {
+            for (index_type i = interpolate_data.halo; i < nabla4_data.x_dim - interpolate_data.halo; ++i) {
+                const std::array<index_type, 7> v2e2c2v_compressed{get_v2e2c2v(i, j, nabla4_data.x_dim)};
+                const std::array<index_type, 6> v2e{get_v2e_per_vertex(i, j, nabla4_data.x_dim, nabla4_data.y_dim)};
+                const std::array<index_type, 24> v2e2ecv{v2e[0] * 4,
+                    v2e[0] * 4 + 1,
+                    v2e[0] * 4 + 2,
+                    v2e[0] * 4 + 3,
+                    v2e[1] * 4,
+                    v2e[1] * 4 + 1,
+                    v2e[1] * 4 + 2,
+                    v2e[1] * 4 + 3,
+                    v2e[2] * 4,
+                    v2e[2] * 4 + 1,
+                    v2e[2] * 4 + 2,
+                    v2e[2] * 4 + 3,
+                    v2e[3] * 4,
+                    v2e[3] * 4 + 1,
+                    v2e[3] * 4 + 2,
+                    v2e[3] * 4 + 3,
+                    v2e[4] * 4,
+                    v2e[4] * 4 + 1,
+                    v2e[4] * 4 + 2,
+                    v2e[4] * 4 + 3,
+                    v2e[5] * 4,
+                    v2e[5] * 4 + 1,
+                    v2e[5] * 4 + 2,
+                    v2e[5] * 4 + 3};
+                const std::array<index_type, 24> v2e2c2v{v2e2c2v_compressed[0],
+                    v2e2c2v_compressed[1],
+                    v2e2c2v_compressed[2],
+                    v2e2c2v_compressed[3],
+                    v2e2c2v_compressed[1],
+                    v2e2c2v_compressed[4],
+                    v2e2c2v_compressed[5],
+                    v2e2c2v_compressed[6],
+                    v2e2c2v_compressed[3],
+                    v2e2c2v_compressed[1],
+                    v2e2c2v_compressed[0],
+                    v2e2c2v_compressed[6],
+                    v2e2c2v_compressed[1],
+                    v2e2c2v_compressed[5],
+                    v2e2c2v_compressed[2],
+                    v2e2c2v_compressed[4],
+                    v2e2c2v_compressed[1],
+                    v2e2c2v_compressed[6],
+                    v2e2c2v_compressed[4],
+                    v2e2c2v_compressed[3],
+                    v2e2c2v_compressed[2],
+                    v2e2c2v_compressed[1],
+                    v2e2c2v_compressed[5],
+                    v2e2c2v_compressed[0]};
+                const index_type vertex_index_internal =
+                    i - interpolate_data.halo +
+                    (j - interpolate_data.halo) * (nabla4_data.x_dim - 2 * interpolate_data.halo);
+                const std::array<WP_TYPE, 6> inv_vert_vert_length{nabla4_data.inv_vert_vert_length_gt_tv(v2e[0]),
+                    nabla4_data.inv_vert_vert_length_gt_tv(v2e[1]),
+                    nabla4_data.inv_vert_vert_length_gt_tv(v2e[2]),
+                    nabla4_data.inv_vert_vert_length_gt_tv(v2e[3]),
+                    nabla4_data.inv_vert_vert_length_gt_tv(v2e[4]),
+                    nabla4_data.inv_vert_vert_length_gt_tv(v2e[5])};
+                const std::array<WP_TYPE, 6> inv_primal_edge_length{nabla4_data.inv_primal_edge_length_gt_tv(v2e[0]),
+                    nabla4_data.inv_primal_edge_length_gt_tv(v2e[1]),
+                    nabla4_data.inv_primal_edge_length_gt_tv(v2e[2]),
+                    nabla4_data.inv_primal_edge_length_gt_tv(v2e[3]),
+                    nabla4_data.inv_primal_edge_length_gt_tv(v2e[4]),
+                    nabla4_data.inv_primal_edge_length_gt_tv(v2e[5])};
+                const std::array<WP_TYPE, 6> coef1{interpolate_data.ptr_coeff_1_gt_ctv(vertex_index_internal, 0),
+                    interpolate_data.ptr_coeff_1_gt_ctv(vertex_index_internal, 1),
+                    interpolate_data.ptr_coeff_1_gt_ctv(vertex_index_internal, 2),
+                    interpolate_data.ptr_coeff_1_gt_ctv(vertex_index_internal, 3),
+                    interpolate_data.ptr_coeff_1_gt_ctv(vertex_index_internal, 4),
+                    interpolate_data.ptr_coeff_1_gt_ctv(vertex_index_internal, 5)};
+                const std::array<WP_TYPE, 6> coef2{interpolate_data.ptr_coeff_2_gt_ctv(vertex_index_internal, 0),
+                    interpolate_data.ptr_coeff_2_gt_ctv(vertex_index_internal, 1),
+                    interpolate_data.ptr_coeff_2_gt_ctv(vertex_index_internal, 2),
+                    interpolate_data.ptr_coeff_2_gt_ctv(vertex_index_internal, 3),
+                    interpolate_data.ptr_coeff_2_gt_ctv(vertex_index_internal, 4),
+                    interpolate_data.ptr_coeff_2_gt_ctv(vertex_index_internal, 5)};
+#ifdef __clang__
+#pragma clang loop unroll(enable) vectorize(assume_safety) interleave(enable)
+#elif defined(__GNUC__)
+#pragma GCC ivdep
+#endif
+                for (index_type k_index{}; k_index < interpolate_data.KDim; ++k_index) {
+
+                    std::array<WP_TYPE, 6> z_nabla4_e2_wp;
+
+#ifdef __clang__
+#pragma clang loop unroll(full)
+#elif defined(__NVCC__)
+#pragma unroll 6
+#elif defined(__GNUC__)
+#pragma GCC unroll 6
+#endif
+                    for (auto i{0}; i < 6; ++i) {
+                        const auto edge_index = v2e[i];
+                        const auto E2C2V_0 = v2e2c2v[i * 4];
+                        const auto E2C2V_1 = v2e2c2v[i * 4 + 1];
+                        const auto E2C2V_2 = v2e2c2v[i * 4 + 2];
+                        const auto E2C2V_3 = v2e2c2v[i * 4 + 3];
+                        const auto E2ECV_0 = v2e2ecv[i * 4];
+                        const auto E2ECV_1 = v2e2ecv[i * 4 + 1];
+                        const auto E2ECV_2 = v2e2ecv[i * 4 + 2];
+                        const auto E2ECV_3 = v2e2ecv[i * 4 + 3];
+                        const double nabv_tang_wp = nabla4_data.u_vert_gt_tv(E2C2V_0, k_index) *
+                                                        nabla4_data.primal_normal_vert_v1_gt_tv(E2ECV_0) +
+                                                    nabla4_data.v_vert_gt_tv(E2C2V_0, k_index) *
+                                                        nabla4_data.primal_normal_vert_v2_gt_tv(E2ECV_0) +
+                                                    nabla4_data.u_vert_gt_tv(E2C2V_1, k_index) *
+                                                        nabla4_data.primal_normal_vert_v1_gt_tv(E2ECV_1) +
+                                                    nabla4_data.v_vert_gt_tv(E2C2V_1, k_index) *
+                                                        nabla4_data.primal_normal_vert_v2_gt_tv(E2ECV_1);
+                        const double nabv_norm_wp = nabla4_data.u_vert_gt_tv(E2C2V_2, k_index) *
+                                                        nabla4_data.primal_normal_vert_v1_gt_tv(E2ECV_2) +
+                                                    nabla4_data.v_vert_gt_tv(E2C2V_2, k_index) *
+                                                        nabla4_data.primal_normal_vert_v2_gt_tv(E2ECV_2) +
+                                                    nabla4_data.u_vert_gt_tv(E2C2V_3, k_index) *
+                                                        nabla4_data.primal_normal_vert_v1_gt_tv(E2ECV_3) +
+                                                    nabla4_data.v_vert_gt_tv(E2C2V_3, k_index) *
+                                                        nabla4_data.primal_normal_vert_v2_gt_tv(E2ECV_3);
+                        z_nabla4_e2_wp[i] =
+                            4.0 * ((nabv_norm_wp - 2.0 * nabla4_data.z_nabla2_e_gt_tv(edge_index, k_index)) *
+                                          (inv_vert_vert_length[i] * inv_vert_vert_length[i]) +
+                                      (nabv_tang_wp - 2.0 * nabla4_data.z_nabla2_e_gt_tv(edge_index, k_index)) *
+                                          (inv_primal_edge_length[i] * inv_primal_edge_length[i]));
+                    }
+                    interpolate_data.p_u_out_gt_tv(vertex_index_internal, k_index) =
+                        z_nabla4_e2_wp[0] * coef1[0] + z_nabla4_e2_wp[1] * coef1[1] + z_nabla4_e2_wp[2] * coef1[2] +
+                        z_nabla4_e2_wp[3] * coef1[3] + z_nabla4_e2_wp[4] * coef1[4] + z_nabla4_e2_wp[5] * coef1[5];
+                    interpolate_data.p_v_out_gt_tv(vertex_index_internal, k_index) =
+                        z_nabla4_e2_wp[0] * coef2[0] + z_nabla4_e2_wp[1] * coef2[1] + z_nabla4_e2_wp[2] * coef2[2] +
+                        z_nabla4_e2_wp[3] * coef2[3] + z_nabla4_e2_wp[4] * coef2[4] + z_nabla4_e2_wp[5] * coef2[5];
+                };
+            };
+        };
+    }
+
     template <backend_impl I>
     inline void run() {
         if constexpr (I == backend_impl::cpu_ifirst) {
             run_cpu_ifirst();
+        } else if constexpr (I == backend_impl::cpu_kfirst) {
+            run_cpu_kfirst();
         } else {
             throw std::runtime_error("Undefined backend implementation");
         }

@@ -523,6 +523,37 @@ def run_sanity_checks(
             )
             print("unstructured cpu_kfirst inlined v2e2c2v sanity check passed")
 
+            print("Running structured cpu_kfirst inlined sanity check")
+            (
+                p_u_out_cpu_kfirst_structured_inlined,
+                p_v_out_cpu_kfirst_structured_inlined,
+            ) = icon_benchmark.nabla4_interpolate_validate_structured_cpu_kfirst_inlined(
+                random_validation_data_separate.CellDim,
+                random_validation_data_separate.VertexDim,
+                random_validation_data_separate.EdgeDim,
+                random_validation_data_separate.KDim,
+                random_validation_data_separate.ECVDim,
+                lon_dim,
+                lat_dim,
+                halo,
+                np.array(random_validation_data_separate.u_vert).T,
+                np.array(random_validation_data_separate.v_vert).T,
+                random_validation_data_separate.primal_normal_vert_v1,
+                random_validation_data_separate.primal_normal_vert_v2,
+                z_nabla2_e_inlined,
+                inv_vert_vert_length_inlined,
+                inv_primal_edge_length_inlined,
+                ptr_coeff_1,
+                ptr_coeff_2,
+            )
+            assert np.allclose(
+                p_u_out_cpu_kfirst_structured_inlined, p_u_out_ref_separate
+            )
+            assert np.allclose(
+                p_v_out_cpu_kfirst_structured_inlined, p_v_out_ref_separate
+            )
+            print("structured cpu_kfirst inlined sanity check passed")
+
     if backend in ["all_gpu", "gpu_naive"]:
         if combination in ["all", "separate"]:
             print("Running unstructured gpu_naive separate sanity check")
@@ -1135,6 +1166,20 @@ def run_benchmarks():
                 torus_grid.num_edges,
                 torus_grid.num_levels,
                 torus_grid.size[E2C2VDim],
+                repetitions,
+                dry_runs,
+            )
+            runtimes[
+                "nabla4_interpolate_benchmark_structured_cpu_kfirst_inlined"
+            ] = icon_benchmark.nabla4_interpolate_benchmark_structured_cpu_kfirst_inlined(
+                torus_grid.num_cells,
+                torus_grid.num_vertices,
+                torus_grid.num_edges,
+                torus_grid.num_levels,
+                torus_grid.size[E2C2VDim],
+                grid_cartesian_dimensions[0],
+                grid_cartesian_dimensions[1],
+                halo,
                 repetitions,
                 dry_runs,
             )
