@@ -19,7 +19,7 @@ struct nabla4_interpolate_structured_inlined {
                                                                                        EdgeDim,
                                                                                        KDim,
                                                                                        y_dim - 2 * (halo + 1),
-                                                                                       x_dim - (2 * halo + 1),
+                                                                                       x_dim - 2 * (halo + 1),
                                                                                        halo + 1,
                                                                                        nabla4_data.get_output_gt()){};
 
@@ -140,8 +140,7 @@ struct nabla4_interpolate_structured_inlined {
                         v2e2c2v_compressed[1],
                         v2e2c2v_compressed[5],
                         v2e2c2v_compressed[0]};
-                    std::array<WP_TYPE, 6> u;
-                    std::array<WP_TYPE, 6> v;
+                    std::array<WP_TYPE, 6> z_nabla4_e2_wp;
                     const index_type vertex_index_internal =
                         i - interpolate_data.halo +
                         (j - interpolate_data.halo) * (nabla4_data.x_dim - 2 * interpolate_data.halo);
@@ -178,20 +177,28 @@ struct nabla4_interpolate_structured_inlined {
                                                         nabla4_data.primal_normal_vert_v1_gt_tv(E2ECV_3) +
                                                     nabla4_data.v_vert_gt_tv(E2C2V_3, k_index) *
                                                         nabla4_data.primal_normal_vert_v2_gt_tv(E2ECV_3);
-                        const double z_nabla4_e2_wp =
+                        z_nabla4_e2_wp[i] =
                             4.0 * ((nabv_norm_wp - 2.0 * nabla4_data.z_nabla2_e_gt_tv(edge_index, k_index)) *
                                           (nabla4_data.inv_vert_vert_length_gt_tv(edge_index) *
                                               nabla4_data.inv_vert_vert_length_gt_tv(edge_index)) +
                                       (nabv_tang_wp - 2.0 * nabla4_data.z_nabla2_e_gt_tv(edge_index, k_index)) *
                                           (nabla4_data.inv_primal_edge_length_gt_tv(edge_index) *
                                               nabla4_data.inv_primal_edge_length_gt_tv(edge_index)));
-                        u[i] = z_nabla4_e2_wp * interpolate_data.ptr_coeff_1_gt_ctv(vertex_index_internal, i);
-                        v[i] = z_nabla4_e2_wp * interpolate_data.ptr_coeff_2_gt_ctv(vertex_index_internal, i);
                     }
                     interpolate_data.p_u_out_gt_tv(vertex_index_internal, k_index) =
-                        std::accumulate(u.begin(), u.end(), 0.0);
+                        z_nabla4_e2_wp[0] * interpolate_data.ptr_coeff_1_gt_ctv(vertex_index_internal, 0) +
+                        z_nabla4_e2_wp[1] * interpolate_data.ptr_coeff_1_gt_ctv(vertex_index_internal, 1) +
+                        z_nabla4_e2_wp[2] * interpolate_data.ptr_coeff_1_gt_ctv(vertex_index_internal, 2) +
+                        z_nabla4_e2_wp[3] * interpolate_data.ptr_coeff_1_gt_ctv(vertex_index_internal, 3) +
+                        z_nabla4_e2_wp[4] * interpolate_data.ptr_coeff_1_gt_ctv(vertex_index_internal, 4) +
+                        z_nabla4_e2_wp[5] * interpolate_data.ptr_coeff_1_gt_ctv(vertex_index_internal, 5);
                     interpolate_data.p_v_out_gt_tv(vertex_index_internal, k_index) =
-                        std::accumulate(v.begin(), v.end(), 0.0);
+                        z_nabla4_e2_wp[0] * interpolate_data.ptr_coeff_2_gt_ctv(vertex_index_internal, 0) +
+                        z_nabla4_e2_wp[1] * interpolate_data.ptr_coeff_2_gt_ctv(vertex_index_internal, 1) +
+                        z_nabla4_e2_wp[2] * interpolate_data.ptr_coeff_2_gt_ctv(vertex_index_internal, 2) +
+                        z_nabla4_e2_wp[3] * interpolate_data.ptr_coeff_2_gt_ctv(vertex_index_internal, 3) +
+                        z_nabla4_e2_wp[4] * interpolate_data.ptr_coeff_2_gt_ctv(vertex_index_internal, 4) +
+                        z_nabla4_e2_wp[5] * interpolate_data.ptr_coeff_2_gt_ctv(vertex_index_internal, 5);
                 };
             };
         };
