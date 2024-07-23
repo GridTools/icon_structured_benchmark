@@ -146,6 +146,8 @@ struct nabla4_interpolate_unstructured_inlined_v2v {
                     v2e2c2v_gt_ctv(vertex_index, 0)};
 #ifdef __clang__
 #pragma clang loop unroll(enable) interleave(enable)
+#elif defined(__NVCC__)
+#pragma unroll 6
 #elif defined(__GNUC__)
 #pragma GCC unroll 24
 #endif
