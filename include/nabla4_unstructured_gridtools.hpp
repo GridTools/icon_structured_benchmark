@@ -287,7 +287,7 @@ __global__ void __launch_bounds__(block_dims_unstructured_kloop.size, 2)
 template <typename T>
 inline void nabla4_unstructured_gt<T>::run_gpu_kloop_helper() {
     dim3 tblocks(block_dims_unstructured_kloop.x, block_dims_unstructured_kloop.y, block_dims_unstructured_kloop.z);
-    dim3 grid((output_size + tblocks.x - 1) / tblocks.x, 1, 1);
+    dim3 grid((output_size + tblocks.x - 1) / tblocks.x, 2, 1);
     run_gpu_kloop_nabla4_unstructured<<<grid, tblocks>>>(output_size,
         KDim,
         e2c2v_gt_tv,
