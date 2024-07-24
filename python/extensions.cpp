@@ -143,10 +143,14 @@ NB_MODULE(icon_benchmark, m) {
         &nabla4_interpolate_benchmark_structured_cpu_kfirst_inlined);
     m.def("nabla4_interpolate_validate_unstructured_gpu_naive_inlined",
         &nabla4_interpolate_validate_unstructured_gpu_naive_inlined);
+    m.def("nabla4_interpolate_validate_unstructured_gpu_kloop_inlined",
+        &nabla4_interpolate_validate_unstructured_gpu_kloop_inlined);
     m.def("nabla4_interpolate_validate_structured_gpu_naive_inlined",
         &nabla4_interpolate_validate_structured_gpu_naive_inlined);
     m.def("nabla4_interpolate_benchmark_unstructured_gpu_naive_inlined",
         &nabla4_interpolate_benchmark_unstructured_gpu_naive_inlined);
+    m.def("nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined",
+        &nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined);
     m.def("nabla4_interpolate_benchmark_structured_gpu_naive_inlined",
         &nabla4_interpolate_benchmark_structured_gpu_naive_inlined);
     // Nabla4 & Interpolate inlined v2v
