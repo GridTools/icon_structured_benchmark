@@ -593,8 +593,7 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
         v2e2ecv_gt_ctv(vertex_index, 21),
         v2e2ecv_gt_ctv(vertex_index, 22),
         v2e2ecv_gt_ctv(vertex_index, 23)};
-    const std::array<WP_TYPE, 24> primal_normal_vert_v1{
-        primal_normal_vert_v1_gt_tv(e2ecv[0]),
+    const std::array<WP_TYPE, 24> primal_normal_vert_v1{primal_normal_vert_v1_gt_tv(e2ecv[0]),
         primal_normal_vert_v1_gt_tv(e2ecv[1]),
         primal_normal_vert_v1_gt_tv(e2ecv[2]),
         primal_normal_vert_v1_gt_tv(e2ecv[3]),
@@ -618,8 +617,7 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
         primal_normal_vert_v1_gt_tv(e2ecv[21]),
         primal_normal_vert_v1_gt_tv(e2ecv[22]),
         primal_normal_vert_v1_gt_tv(e2ecv[23])};
-    const std::array<WP_TYPE, 24> primal_normal_vert_v2{
-        primal_normal_vert_v2_gt_tv(e2ecv[0]),
+    const std::array<WP_TYPE, 24> primal_normal_vert_v2{primal_normal_vert_v2_gt_tv(e2ecv[0]),
         primal_normal_vert_v2_gt_tv(e2ecv[1]),
         primal_normal_vert_v2_gt_tv(e2ecv[2]),
         primal_normal_vert_v2_gt_tv(e2ecv[3]),
@@ -643,36 +641,31 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
         primal_normal_vert_v2_gt_tv(e2ecv[21]),
         primal_normal_vert_v2_gt_tv(e2ecv[22]),
         primal_normal_vert_v2_gt_tv(e2ecv[23])};
-    const std::array<index_type, 6> edge_indexes{
-        v2e_gt_ctv(vertex_index, 0),
+    const std::array<index_type, 6> edge_indexes{v2e_gt_ctv(vertex_index, 0),
         v2e_gt_ctv(vertex_index, 1),
         v2e_gt_ctv(vertex_index, 2),
         v2e_gt_ctv(vertex_index, 3),
         v2e_gt_ctv(vertex_index, 4),
         v2e_gt_ctv(vertex_index, 5)};
-    const std::array<WP_TYPE, 6> inv_vert_vert_length{
-        inv_vert_vert_length_gt_tv(edge_indexes[0]),
+    const std::array<WP_TYPE, 6> inv_vert_vert_length{inv_vert_vert_length_gt_tv(edge_indexes[0]),
         inv_vert_vert_length_gt_tv(edge_indexes[1]),
         inv_vert_vert_length_gt_tv(edge_indexes[2]),
         inv_vert_vert_length_gt_tv(edge_indexes[3]),
         inv_vert_vert_length_gt_tv(edge_indexes[4]),
         inv_vert_vert_length_gt_tv(edge_indexes[5])};
-    const std::array<WP_TYPE, 6> inv_primal_edge_length{
-        inv_primal_edge_length_gt_tv(edge_indexes[0]),
+    const std::array<WP_TYPE, 6> inv_primal_edge_length{inv_primal_edge_length_gt_tv(edge_indexes[0]),
         inv_primal_edge_length_gt_tv(edge_indexes[1]),
         inv_primal_edge_length_gt_tv(edge_indexes[2]),
         inv_primal_edge_length_gt_tv(edge_indexes[3]),
         inv_primal_edge_length_gt_tv(edge_indexes[4]),
         inv_primal_edge_length_gt_tv(edge_indexes[5])};
-    const std::array<WP_TYPE, 6> ptr_coeff_1{
-        ptr_coeff_1_gt_ctv(vertex_index, 0),
+    const std::array<WP_TYPE, 6> ptr_coeff_1{ptr_coeff_1_gt_ctv(vertex_index, 0),
         ptr_coeff_1_gt_ctv(vertex_index, 1),
         ptr_coeff_1_gt_ctv(vertex_index, 2),
         ptr_coeff_1_gt_ctv(vertex_index, 3),
         ptr_coeff_1_gt_ctv(vertex_index, 4),
         ptr_coeff_1_gt_ctv(vertex_index, 5)};
-    const std::array<WP_TYPE, 6> ptr_coeff_2{
-        ptr_coeff_2_gt_ctv(vertex_index, 0),
+    const std::array<WP_TYPE, 6> ptr_coeff_2{ptr_coeff_2_gt_ctv(vertex_index, 0),
         ptr_coeff_2_gt_ctv(vertex_index, 1),
         ptr_coeff_2_gt_ctv(vertex_index, 2),
         ptr_coeff_2_gt_ctv(vertex_index, 3),
@@ -694,24 +687,17 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
                                         u_vert_gt_tv(E2C2V_3, k_index) * primal_normal_vert_v1[i + 3] +
                                         v_vert_gt_tv(E2C2V_3, k_index) * primal_normal_vert_v2[i + 3];
             const auto edge_index = edge_indexes[i / 4];
-            z_nabla4_e2_wp[i / 4] =
-                4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_tv(edge_index, k_index)) *
-                            (inv_vert_vert_length[i / 4] * inv_vert_vert_length[i / 4]) +
-                        (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(edge_index, k_index)) *
-                            (inv_primal_edge_length[i / 4] * inv_primal_edge_length[i / 4]));
+            z_nabla4_e2_wp[i / 4] = 4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_tv(edge_index, k_index)) *
+                                                  (inv_vert_vert_length[i / 4] * inv_vert_vert_length[i / 4]) +
+                                              (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(edge_index, k_index)) *
+                                                  (inv_primal_edge_length[i / 4] * inv_primal_edge_length[i / 4]));
         }
-        p_u_out_gt_tv(vertex_index, k_index) = ptr_coeff_1[0] * z_nabla4_e2_wp[0] +
-                                            ptr_coeff_1[1] * z_nabla4_e2_wp[1] +
-                                            ptr_coeff_1[2] * z_nabla4_e2_wp[2] +
-                                            ptr_coeff_1[3] * z_nabla4_e2_wp[3] +
-                                            ptr_coeff_1[4] * z_nabla4_e2_wp[4] +
-                                            ptr_coeff_1[5] * z_nabla4_e2_wp[5];
-        p_v_out_gt_tv(vertex_index, k_index) = ptr_coeff_2[0] * z_nabla4_e2_wp[0] +
-                                            ptr_coeff_2[1] * z_nabla4_e2_wp[1] +
-                                            ptr_coeff_2[2] * z_nabla4_e2_wp[2] +
-                                            ptr_coeff_2[3] * z_nabla4_e2_wp[3] +
-                                            ptr_coeff_2[4] * z_nabla4_e2_wp[4] +
-                                            ptr_coeff_2[5] * z_nabla4_e2_wp[5];
+        p_u_out_gt_tv(vertex_index, k_index) = ptr_coeff_1[0] * z_nabla4_e2_wp[0] + ptr_coeff_1[1] * z_nabla4_e2_wp[1] +
+                                               ptr_coeff_1[2] * z_nabla4_e2_wp[2] + ptr_coeff_1[3] * z_nabla4_e2_wp[3] +
+                                               ptr_coeff_1[4] * z_nabla4_e2_wp[4] + ptr_coeff_1[5] * z_nabla4_e2_wp[5];
+        p_v_out_gt_tv(vertex_index, k_index) = ptr_coeff_2[0] * z_nabla4_e2_wp[0] + ptr_coeff_2[1] * z_nabla4_e2_wp[1] +
+                                               ptr_coeff_2[2] * z_nabla4_e2_wp[2] + ptr_coeff_2[3] * z_nabla4_e2_wp[3] +
+                                               ptr_coeff_2[4] * z_nabla4_e2_wp[4] + ptr_coeff_2[5] * z_nabla4_e2_wp[5];
     }
 };
 
