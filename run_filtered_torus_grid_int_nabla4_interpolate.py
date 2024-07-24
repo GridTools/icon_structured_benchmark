@@ -704,8 +704,6 @@ def run_sanity_checks(
                 ptr_coeff_1,
                 ptr_coeff_2,
             )
-            print("p_u_out_gpu_naive_structured_inlined", p_u_out_gpu_naive_structured_inlined)
-            print("p_u_out_ref_separate", p_u_out_ref_separate)
             assert np.allclose(
                 p_u_out_gpu_naive_structured_inlined, p_u_out_ref_separate
             )
