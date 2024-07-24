@@ -298,7 +298,6 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
         interpolate_unstructured<storage::gpu>::data_store_2d_tv_WP_t p_u_out_gt_tv,
         interpolate_unstructured<storage::gpu>::data_store_2d_tv_WP_t p_v_out_gt_tv) {
     const auto vertex_index = blockIdx.x * blockDim.x + threadIdx.x;
-    const auto k_index = blockIdx.y * blockDim.y + threadIdx.y;
     if (vertex_index >= interpolate_output_size)
         return;
     std::array<WP_TYPE, 6> z_nabla4_e2_wp;
