@@ -225,7 +225,7 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_c
         }
     }
     __syncthreads();
-    const std::array<index_type, 6> v2e{get_v2e_per_orientation(i - halo, j - halo + 1, blockDim.x + 1, blockDim.y + 2)};
+    const std::array<index_type, 6> v2e{get_v2e_per_orientation(i - halo + 1, j - halo + 1, blockDim.x + 1, blockDim.y + 2)};
     const std::array<index_type, 6> v2e_original{get_v2e_per_orientation(i, j, x_dim, y_dim)};
     std::array<index_type, 6> shared_mem_v2e_indexes;
     for (int idx{0}; idx < 6; ++idx) {
