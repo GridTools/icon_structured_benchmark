@@ -736,7 +736,7 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_n
                           (inv_vert_vert_length_gt_tv(edge_index) * inv_vert_vert_length_gt_tv(edge_index)) +
                       (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(edge_index, k_index)) *
                           (inv_primal_edge_length_gt_tv(edge_index) * inv_primal_edge_length_gt_tv(edge_index)));
-        printf("edge_index: %d, z_nabla4_e2_wp[%d]: %f\n", edge_index, i, z_nabla4_e2_wp[i]);
+        // printf("edge_index: %d, z_nabla4_e2_wp[%d]: %f\n", edge_index, i, z_nabla4_e2_wp[i]);
     }
     p_u_out_gt_tv(vertex_index_internal, k_index) = z_nabla4_e2_wp[0] * ptr_coeff_1_gt_ctv(vertex_index_internal, 0) +
                                                     z_nabla4_e2_wp[1] * ptr_coeff_1_gt_ctv(vertex_index_internal, 1) +
