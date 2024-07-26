@@ -132,33 +132,13 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_c
     if (i >= x_dim - halo || j >= y_dim - halo || k_index >= KDim) {
         return;
     }
-    // printf("i: %d, j: %d, k_index: %d\n", i, j, k_index);
-    // printf("blockIdx.x: %d, blockIdx.y: %d\n", blockIdx.x, blockIdx.y);
     extern __shared__ WP_TYPE z_nabla4_e2[];
-    // printf("i-1: %d, i+blockDim.x+1: %d, x_dim - halo + 2: %d, j-1: %d, j+blockDim.y+2: %d, y_dim - halo + 3: %d\n", i - 1, i + blockDim.x + 1, x_dim - halo + 2, j - 1, j + blockDim.y + 2, y_dim - halo + 3);
-    // for (auto i_internal_block{i - 1}; i_internal_block < halo + (blockIdx.x + 1) * blockDim.x + 1 && i_internal_block < x_dim - halo; i_internal_block += min(blockDim.x, x_dim - 2 * halo)) {
-    //     for (auto j_internal_block{j - 1}; j_internal_block < halo + (blockIdx.y + 1) * blockDim.y + 2 && j_internal_block < y_dim - halo + 1; j_internal_block += min(blockDim.y, y_dim - 2 * halo)) {
     const auto i_step = min(blockDim.x, x_dim - 2 * halo - blockIdx.x * blockDim.x);
     const auto j_step = min(blockDim.y, y_dim - 2 * halo - blockIdx.y * blockDim.y);
     const auto i_limit = min(halo + (blockIdx.x + 1) * blockDim.x, x_dim - halo);
     const auto j_limit = min(halo + (blockIdx.y + 1) * blockDim.y + 1, y_dim - halo + 1);
-    // printf("i: %d, j: %d, i_step: %d, j_step: %d, i_limit: %d, j_limit: %d\n", i, j, i_step, j_step, i_limit, j_limit);
-    // for (int i_rep{0}; i_rep < 2; ++i_rep) {
-    //     for (int j_rep{0}; j_rep < 2; ++j_rep) {
-    //         const auto i_internal_block{i - 1 + i_rep * i_step};
-    //         const auto j_internal_block{j - 1 + j_rep * j_step};
-    //         if (i_internal_block >= i_limit || j_internal_block >= j_limit) {
-    //             // printf("continue i_internal_block: %d, x_dim - halo: %d, j_internal_block: %d, y_dim - halo: %d\n", i_internal_block, x_dim - halo, j_internal_block, y_dim - halo);
-    //             // printf("continue i_internal_block: %d, j_internal_block: %d, blockIdx.x: %d, blockIdx.y: %d\n", i_internal_block, j_internal_block, blockIdx.x, blockIdx.y);
-    //             continue;
-    //         }
     for (int i_internal_block{i - 1}; i_internal_block < i_limit; i_internal_block += i_step) {
         for (int j_internal_block{j - 1}; j_internal_block < j_limit; j_internal_block += j_step) {
-            // if (i_internal_block >= halo + (blockIdx.x + 1) * blockDim.x || i_internal_block >= blockIdx.x * blockDim.x + x_dim - (2 * halo) || j_internal_block >= halo + (blockIdx.y + 1) * blockDim.y + 1 || j_internal_block >= blockIdx.y * blockDim.y + y_dim - (2 * halo) + 1) {
-            //     printf("continue i_internal_block: %d, halo + (blockIdx.x + 1) * blockDim.x: %d, blockIdx.x * blockDim.x + x_dim - (2 * halo): %d, j_internal_block: %d, halo + (blockIdx.y + 1) * blockDim.y + 1: %d, blockIdx.y * blockDim.y + y_dim - (2 * halo) + 1: %d\n", i_internal_block, halo + (blockIdx.x + 1) * blockDim.x, blockIdx.x * blockDim.x + x_dim - (2 * halo), j_internal_block, halo + (blockIdx.y + 1) * blockDim.y + 1, blockIdx.y * blockDim.y + y_dim - (2 * halo) + 1);
-            //     continue;
-            // }
-            // printf("running i_internal_block: %d, j_internal_block: %d, blockIdx.x: %d, blockIdx.y: %d\n", i_internal_block, j_internal_block, blockIdx.x, blockIdx.y);
             const index_type i_j = j_internal_block * x_dim + i_internal_block;
             const index_type i_jp1 = (j_internal_block + 1) * x_dim + i_internal_block;
             const index_type im1_jp1 = (j_internal_block + 1) * x_dim + i_internal_block - 1;
@@ -180,12 +160,6 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_c
                 E2ECV_2[1] + total_edges,
                 E2ECV_2[2] + total_edges};
             const index_type edge_index = i_j;
-            // printf("global edge_index: %d, E2C2V_0[0]: %d, E2C2V_1[0]: %d, E2C2V_2[0]: %d, E2C2V_3[0]: %d\n", edge_index, E2C2V_0[0], E2C2V_1[0], E2C2V_2[0], E2C2V_3[0]);
-            // printf("global edge_index: %d, E2C2V_0[1]: %d, E2C2V_1[1]: %d, E2C2V_2[1]: %d, E2C2V_3[1]: %d\n", edge_index + outer_domain_size, E2C2V_0[1], E2C2V_1[1], E2C2V_2[1], E2C2V_3[1]);
-            // printf("global edge_index: %d, E2C2V_0[2]: %d, E2C2V_1[2]: %d, E2C2V_2[2]: %d, E2C2V_3[2]: %d\n", edge_index + 2 * outer_domain_size, E2C2V_0[2], E2C2V_1[2], E2C2V_2[2], E2C2V_3[2]);
-            // printf("global edge_index: %d, E2ECV_0[0]: %d, E2ECV_1[0]: %d, E2ECV_2[0]: %d, E2ECV_3[0]: %d\n", edge_index, E2ECV_0[0], E2ECV_1[0], E2ECV_2[0], E2ECV_3[0]);
-            // printf("global edge_index: %d, E2ECV_0[1]: %d, E2ECV_1[1]: %d, E2ECV_2[1]: %d, E2ECV_3[1]: %d\n", edge_index + outer_domain_size, E2ECV_0[1], E2ECV_1[1], E2ECV_2[1], E2ECV_3[1]);
-            // printf("global edge_index: %d, E2ECV_0[2]: %d, E2ECV_1[2]: %d, E2ECV_2[2]: %d, E2ECV_3[2]: %d\n", edge_index + 2 * outer_domain_size, E2ECV_0[2], E2ECV_1[2], E2ECV_2[2], E2ECV_3[2]);
             const WP_TYPE primal_normal_vert_v1_0[3] = {primal_normal_vert_v1_gt_tv(E2ECV_0[0]),
                 primal_normal_vert_v1_gt_tv(E2ECV_0[1]),
                 primal_normal_vert_v1_gt_tv(E2ECV_0[2])};
@@ -236,29 +210,16 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_c
                                             v_vert_gt_tv(E2C2V_2_c, k_index) * primal_normal_vert_v2_2[color] +
                                             u_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v1_3[color] +
                                             v_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v2_3[color];
-                // printf("i_internal_block: %d, i, %d, j_internal_block: %d, j: %d, blockDim.x: %d, color: %d, shared_mem_inner_domain: %d\n", i_internal_block, i, j_internal_block, j, blockDim.x, color, shared_mem_inner_domain);
                 const auto local_edge_index = i_internal_block - (blockIdx.x * blockDim.x) + 1 - halo + ((j_internal_block - (blockIdx.y * blockDim.y) + 1 - halo) * (blockDim.x + 1)) + color * shared_mem_inner_domain;
-                // printf("local_edge_index: %d, i_internal_block: %d, j_internal_block: %d, color: %d\n", local_edge_index, i_internal_block, j_internal_block, color);
                 z_nabla4_e2[local_edge_index] =
                     4.0 *
                     ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_tv(edge_index + color * outer_domain_size, k_index)) * inv_vert_vert_length_sqr[color] +
                         (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(edge_index + color * outer_domain_size, k_index)) * inv_primal_edge_length_sqr[color]);
-                // printf("global edge_index: %d, z_nabla4_e2[%d]: %f\n", edge_index + color * outer_domain_size, local_edge_index, z_nabla4_e2[local_edge_index]);
             };
         }
     }
     __syncthreads();
     const std::array<index_type, 6> v2e{get_v2e_per_orientation(i - halo + 1 - (blockIdx.x * blockDim.x), j - halo + 1 - (blockIdx.y * blockDim.y), blockDim.x + 1, blockDim.y + 2)};
-    // const std::array<index_type, 6> v2e_original{get_v2e_per_orientation(i, j, x_dim, y_dim)};
-    // std::array<index_type, 6> shared_mem_v2e_indexes;
-    // for (int idx{0}; idx < 6; ++idx) {
-        // const auto i_shared_mem = v2e[i] % x_dim;
-        // const auto j_shared_mem = v2e[i] / x_dim;
-        // const auto color = v2e[idx] / outer_domain_size;
-        // shared_mem_v2e_indexes[idx] = i_shared_mem + (j_shared_mem * (blockDim.x + 1)) + color * shared_mem_inner_domain;
-        // printf("v2e_original[%d]: %d, v2e_shared[%d]: %d, z_nabla4_e2: %lf\n", idx, v2e_original[idx], idx, v2e[idx], z_nabla4_e2[v2e[idx]]);
-    // }
-    // printf("z_nabla4_e2[v2e[0]]: %lf, v2e[0]: %d, z_nabla4_e2[v2e[1]]: %lf, v2e[1]: %d, z_nabla4_e2[v2e[2]]: %lf, v2e[2]: %d, z_nabla4_e2[v2e[3]]: %lf, v2e[3]: %d, z_nabla4_e2[v2e[4]]: %lf, v2e[4]: %d, z_nabla4_e2[v2e[5]]: %lf, v2e[5]: %d\n", z_nabla4_e2[v2e[0]], v2e[0], z_nabla4_e2[v2e[1]], v2e[1], z_nabla4_e2[v2e[2]], v2e[2], z_nabla4_e2[v2e[3]], v2e[3], z_nabla4_e2[v2e[4]], v2e[4], z_nabla4_e2[v2e[5]], v2e[5]);
     const index_type vertex_index_internal = i - halo + (j - halo) * (x_dim - 2 * halo);
     p_u_out_gt_tv(vertex_index_internal, k_index) = z_nabla4_e2[v2e[0]] * ptr_coeff_1_gt_ctv(vertex_index_internal, 0) +
                                                     z_nabla4_e2[v2e[1]] * ptr_coeff_1_gt_ctv(vertex_index_internal, 1) +
@@ -288,10 +249,6 @@ inline void nabla4_interpolate_structured_inlined_cached<T>::run_gpu_naive_helpe
         (inner_y_dim + tblocks.y - 1) / tblocks.y,
         (interpolate_data.KDim + tblocks.z - 1) / tblocks.z);
     const index_type shared_mem_inner_domain = (tblocks.x + 1) * (tblocks.y + 2);
-    // printf("x_dim: %d, y_dim: %d, halo: %d, inner_domain_size: %d, outer_domain_size: %d, shared_mem_inner_domain: %d\n", interpolate_data.x_dim, interpolate_data.y_dim, interpolate_data.halo, inner_domain_size, outer_domain_size, shared_mem_inner_domain);
-    // printf("x_inner_dim: %d, y_inner_dim: %d\n", inner_x_dim, inner_y_dim);
-    // printf("tblocks.x: %d, tblocks.y: %d, tblocks.z: %d\n", tblocks.x, tblocks.y, tblocks.z);
-    // printf("grid.x: %d, grid.y: %d, grid.z: %d\n", grid.x, grid.y, grid.z);
     run_gpu_naive_nabla4_interpolate_inlined_cached_structured<<<grid, tblocks, shared_mem_inner_domain * 3 * sizeof(WP_TYPE)>>>(interpolate_data.KDim,
         interpolate_data.x_dim,
         interpolate_data.y_dim,
