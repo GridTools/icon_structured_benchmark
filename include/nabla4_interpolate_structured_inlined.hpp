@@ -384,7 +384,7 @@ constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_kloop<std:
 
 template <>
 constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_kloop<int>() {
-    return {32, 8, 1, 256};
+    return {32, 2, 4, 256};
 };
 
 constexpr block_dims block_dims_structured_nabla_interpol_inlined_kloop =
@@ -580,9 +580,7 @@ inline void nabla4_interpolate_structured_inlined<T>::run_gpu_kloop_helper() {
     const index_type outer_domain_size = interpolate_data.x_dim * interpolate_data.y_dim;
     const index_type inner_x_dim = interpolate_data.x_dim - 2 * interpolate_data.halo;
     const index_type inner_y_dim = interpolate_data.y_dim - 2 * interpolate_data.halo;
-    dim3 grid((inner_x_dim + tblocks.x - 1) / tblocks.x,
-        (inner_y_dim + tblocks.y - 1) / tblocks.y,
-        (interpolate_data.KDim + tblocks.z - 1) / tblocks.z);
+    dim3 grid((inner_x_dim + tblocks.x - 1) / tblocks.x, (inner_y_dim + tblocks.y - 1) / tblocks.y, 1);
     run_gpu_kloop_nabla4_interpolate_inlined_structured<<<grid, tblocks>>>(interpolate_data.KDim,
         interpolate_data.x_dim,
         interpolate_data.y_dim,
