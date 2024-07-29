@@ -2146,23 +2146,24 @@ nabla4_interpolate_validate_structured_gpu_naive_inlined_cached(index_type CellD
     std::vector<WP_TYPE> &inv_primal_edge_length,
     std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
     std::vector<std::vector<WP_TYPE>> &ptr_coeff_2) {
-    return interpolate_validate_gridtools<gpu_naive, nabla4_interpolate_structured_inlined_cached>(std::make_tuple(CellDim,
-        VertexDim,
-        EdgeDim,
-        KDim,
-        ECVDim,
-        longitude_dim,
-        latitude_dim,
-        halo,
-        u_vert,
-        v_vert,
-        primal_normal_vert_v1,
-        primal_normal_vert_v2,
-        z_nabla2_e,
-        inv_vert_vert_length,
-        inv_primal_edge_length,
-        ptr_coeff_1,
-        ptr_coeff_2));
+    return interpolate_validate_gridtools<gpu_naive, nabla4_interpolate_structured_inlined_cached>(
+        std::make_tuple(CellDim,
+            VertexDim,
+            EdgeDim,
+            KDim,
+            ECVDim,
+            longitude_dim,
+            latitude_dim,
+            halo,
+            u_vert,
+            v_vert,
+            primal_normal_vert_v1,
+            primal_normal_vert_v2,
+            z_nabla2_e,
+            inv_vert_vert_length,
+            inv_primal_edge_length,
+            ptr_coeff_1,
+            ptr_coeff_2));
 }
 
 std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>
