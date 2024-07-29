@@ -150,15 +150,12 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_c
             const index_type E2C2V_2[3] = {im1_jp1, i_jp1, ip1_j};
             const index_type E2C2V_3[3] = {ip1_j, ip1_jm1, i_jm1};
             const index_type E2ECV_0[3] = {i_j, i_j + outer_domain_size, i_j + 2 * outer_domain_size};
-            const index_type E2ECV_1[3] = {E2ECV_0[0] + total_edges,
-                E2ECV_0[1] + total_edges,
-                E2ECV_0[2] + total_edges};
-            const index_type E2ECV_2[3] = {E2ECV_1[0] + total_edges,
-                E2ECV_1[1] + total_edges,
-                E2ECV_1[2] + total_edges};
-            const index_type E2ECV_3[3] = {E2ECV_2[0] + total_edges,
-                E2ECV_2[1] + total_edges,
-                E2ECV_2[2] + total_edges};
+            const index_type E2ECV_1[3] = {
+                E2ECV_0[0] + total_edges, E2ECV_0[1] + total_edges, E2ECV_0[2] + total_edges};
+            const index_type E2ECV_2[3] = {
+                E2ECV_1[0] + total_edges, E2ECV_1[1] + total_edges, E2ECV_1[2] + total_edges};
+            const index_type E2ECV_3[3] = {
+                E2ECV_2[0] + total_edges, E2ECV_2[1] + total_edges, E2ECV_2[2] + total_edges};
             const index_type edge_index = i_j;
             const WP_TYPE primal_normal_vert_v1_0[3] = {primal_normal_vert_v1_gt_tv(E2ECV_0[0]),
                 primal_normal_vert_v1_gt_tv(E2ECV_0[1]),
@@ -210,16 +207,23 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_c
                                             v_vert_gt_tv(E2C2V_2_c, k_index) * primal_normal_vert_v2_2[color] +
                                             u_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v1_3[color] +
                                             v_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v2_3[color];
-                const auto local_edge_index = i_internal_block - (blockIdx.x * blockDim.x) + 1 - halo + ((j_internal_block - (blockIdx.y * blockDim.y) + 1 - halo) * (blockDim.x + 1)) + color * shared_mem_inner_domain;
+                const auto local_edge_index =
+                    i_internal_block - (blockIdx.x * blockDim.x) + 1 - halo +
+                    ((j_internal_block - (blockIdx.y * blockDim.y) + 1 - halo) * (blockDim.x + 1)) +
+                    color * shared_mem_inner_domain;
                 z_nabla4_e2[local_edge_index] =
-                    4.0 *
-                    ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_tv(edge_index + color * outer_domain_size, k_index)) * inv_vert_vert_length_sqr[color] +
-                        (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(edge_index + color * outer_domain_size, k_index)) * inv_primal_edge_length_sqr[color]);
+                    4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_tv(edge_index + color * outer_domain_size, k_index)) *
+                                  inv_vert_vert_length_sqr[color] +
+                              (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(edge_index + color * outer_domain_size, k_index)) *
+                                  inv_primal_edge_length_sqr[color]);
             };
         }
     }
     __syncthreads();
-    const std::array<index_type, 6> v2e{get_v2e_per_orientation(i - halo + 1 - (blockIdx.x * blockDim.x), j - halo + 1 - (blockIdx.y * blockDim.y), blockDim.x + 1, blockDim.y + 2)};
+    const std::array<index_type, 6> v2e{get_v2e_per_orientation(i - halo + 1 - (blockIdx.x * blockDim.x),
+        j - halo + 1 - (blockIdx.y * blockDim.y),
+        blockDim.x + 1,
+        blockDim.y + 2)};
     const index_type vertex_index_internal = i - halo + (j - halo) * (x_dim - 2 * halo);
     p_u_out_gt_tv(vertex_index_internal, k_index) = z_nabla4_e2[v2e[0]] * ptr_coeff_1_gt_ctv(vertex_index_internal, 0) +
                                                     z_nabla4_e2[v2e[1]] * ptr_coeff_1_gt_ctv(vertex_index_internal, 1) +
@@ -249,7 +253,9 @@ inline void nabla4_interpolate_structured_inlined_cached<T>::run_gpu_naive_helpe
         (inner_y_dim + tblocks.y - 1) / tblocks.y,
         (interpolate_data.KDim + tblocks.z - 1) / tblocks.z);
     const index_type shared_mem_inner_domain = (tblocks.x + 1) * (tblocks.y + 2);
-    run_gpu_naive_nabla4_interpolate_inlined_cached_structured<<<grid, tblocks, shared_mem_inner_domain * 3 * sizeof(WP_TYPE)>>>(interpolate_data.KDim,
+    run_gpu_naive_nabla4_interpolate_inlined_cached_structured<<<grid,
+        tblocks,
+        shared_mem_inner_domain * 3 * sizeof(WP_TYPE)>>>(interpolate_data.KDim,
         interpolate_data.x_dim,
         interpolate_data.y_dim,
         interpolate_data.halo,

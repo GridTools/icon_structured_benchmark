@@ -207,19 +207,26 @@ def run_sanity_checks(
         orientation = edge_indices // (lon_dim * lat_dim)
 
         internal_index = (
-            i - halo
+            i
+            - halo
             + (j - halo) * (lat_dim - 2 * halo)
             + orientation * (lon_dim - 2 * halo) * (lat_dim - 2 * halo)
         )
 
         # Find valid indices
-        valid_mask = (i >= halo) & (j >= halo) & (i < lat_dim - halo) & (j < lon_dim - halo)
+        valid_mask = (
+            (i >= halo) & (j >= halo) & (i < lat_dim - halo) & (j < lon_dim - halo)
+        )
         valid_edge_indices = edge_indices[valid_mask]
         valid_internal_indices = internal_index[valid_mask]
 
         # Assign the corresponding values using valid indices
-        inv_vert_vert_length_inlined[valid_edge_indices] = np.array(random_validation_data_separate.inv_vert_vert_length)[valid_internal_indices]
-        inv_primal_edge_length_inlined[valid_edge_indices] = np.array(random_validation_data_separate.inv_primal_edge_length)[valid_internal_indices]
+        inv_vert_vert_length_inlined[valid_edge_indices] = np.array(
+            random_validation_data_separate.inv_vert_vert_length
+        )[valid_internal_indices]
+        inv_primal_edge_length_inlined[valid_edge_indices] = np.array(
+            random_validation_data_separate.inv_primal_edge_length
+        )[valid_internal_indices]
         z_nabla2_e_inlined[valid_edge_indices] = z_nabla2_e_ref[valid_internal_indices]
     else:
         # Generate all edge indices
@@ -236,14 +243,20 @@ def run_sanity_checks(
         ) * 3 + orientation
 
         # Find valid indices
-        valid_mask = (i >= halo) & (j >= halo) & (i < lat_dim - halo) & (j < lon_dim - halo)
+        valid_mask = (
+            (i >= halo) & (j >= halo) & (i < lat_dim - halo) & (j < lon_dim - halo)
+        )
         valid_edge_indices = np.array(edge_indices[valid_mask], dtype=np.int32)
         # import pdb; pdb.set_trace()
         valid_internal_indices = np.array(internal_index[valid_mask], dtype=np.int32)
 
         # Assign the corresponding values using valid indices
-        inv_vert_vert_length_inlined[valid_edge_indices] = np.array(random_validation_data_separate.inv_vert_vert_length)[valid_internal_indices]
-        inv_primal_edge_length_inlined[valid_edge_indices] = np.array(random_validation_data_separate.inv_primal_edge_length)[valid_internal_indices]
+        inv_vert_vert_length_inlined[valid_edge_indices] = np.array(
+            random_validation_data_separate.inv_vert_vert_length
+        )[valid_internal_indices]
+        inv_primal_edge_length_inlined[valid_edge_indices] = np.array(
+            random_validation_data_separate.inv_primal_edge_length
+        )[valid_internal_indices]
         z_nabla2_e_inlined[valid_edge_indices] = z_nabla2_e_ref[valid_internal_indices]
     print("Generated inlined validation data")
 
