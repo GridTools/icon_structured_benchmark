@@ -626,30 +626,29 @@ constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_naive<std:
 
 template <>
 constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_naive<int>() {
-    return {32, 7, 4, 896};
+    return {32, 3, 6, 896};
 };
 
 constexpr block_dims block_dims_structured_nabla_interpol_inlined_naive =
     get_block_dims_structured_nabla_interpol_inlined_naive<index_type>();
 
-__global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_naive.size)
-    run_gpu_naive_nabla4_interpolate_inlined_structured(index_type KDim,
-        index_type x_dim,
-        index_type y_dim,
-        index_type halo,
-        index_type inner_domain_size,
-        index_type outer_domain_size,
-        nabla4_structured_torus_halo_gt<storage::gpu>::data_store_2d_ctv_VP_t u_vert_gt_tv,
-        nabla4_structured_torus_halo_gt<storage::gpu>::data_store_2d_ctv_VP_t v_vert_gt_tv,
-        nabla4_structured_torus_halo_gt<storage::gpu>::data_store_1d_ctv_WP_t primal_normal_vert_v1_gt_tv,
-        nabla4_structured_torus_halo_gt<storage::gpu>::data_store_1d_ctv_WP_t primal_normal_vert_v2_gt_tv,
-        nabla4_structured_torus_halo_gt<storage::gpu>::data_store_2d_ctv_WP_t z_nabla2_e_gt_tv,
-        nabla4_structured_torus_halo_gt<storage::gpu>::data_store_1d_ctv_WP_t inv_vert_vert_length_gt_tv,
-        nabla4_structured_torus_halo_gt<storage::gpu>::data_store_1d_ctv_WP_t inv_primal_edge_length_gt_tv,
-        interpolate_structured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_1_gt_ctv,
-        interpolate_structured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_2_gt_ctv,
-        interpolate_structured<storage::gpu>::data_store_2d_tv_WP_t p_u_out_gt_tv,
-        interpolate_structured<storage::gpu>::data_store_2d_tv_WP_t p_v_out_gt_tv) {
+__global__ void __maxnreg__(52) run_gpu_naive_nabla4_interpolate_inlined_structured(index_type KDim,
+    index_type x_dim,
+    index_type y_dim,
+    index_type halo,
+    index_type inner_domain_size,
+    index_type outer_domain_size,
+    nabla4_structured_torus_halo_gt<storage::gpu>::data_store_2d_ctv_VP_t u_vert_gt_tv,
+    nabla4_structured_torus_halo_gt<storage::gpu>::data_store_2d_ctv_VP_t v_vert_gt_tv,
+    nabla4_structured_torus_halo_gt<storage::gpu>::data_store_1d_ctv_WP_t primal_normal_vert_v1_gt_tv,
+    nabla4_structured_torus_halo_gt<storage::gpu>::data_store_1d_ctv_WP_t primal_normal_vert_v2_gt_tv,
+    nabla4_structured_torus_halo_gt<storage::gpu>::data_store_2d_ctv_WP_t z_nabla2_e_gt_tv,
+    nabla4_structured_torus_halo_gt<storage::gpu>::data_store_1d_ctv_WP_t inv_vert_vert_length_gt_tv,
+    nabla4_structured_torus_halo_gt<storage::gpu>::data_store_1d_ctv_WP_t inv_primal_edge_length_gt_tv,
+    interpolate_structured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_1_gt_ctv,
+    interpolate_structured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_2_gt_ctv,
+    interpolate_structured<storage::gpu>::data_store_2d_tv_WP_t p_u_out_gt_tv,
+    interpolate_structured<storage::gpu>::data_store_2d_tv_WP_t p_v_out_gt_tv) {
     const auto i{blockIdx.x * blockDim.x + threadIdx.x + halo};
     const auto j{blockIdx.y * blockDim.y + threadIdx.y + halo};
     const auto k_index{blockIdx.z * blockDim.z + threadIdx.z};
