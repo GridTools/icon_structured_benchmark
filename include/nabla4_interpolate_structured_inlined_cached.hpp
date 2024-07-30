@@ -330,7 +330,7 @@ constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_cached_nai
 
 template <>
 constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_cached_naive<int>() {
-    return {32, 2, 4, 256};
+    return {32, 8, 4, 1024};
 };
 
 constexpr block_dims block_dims_structured_nabla_interpol_inlined_cached_naive =
