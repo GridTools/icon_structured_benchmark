@@ -367,8 +367,123 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_c
     const auto j_step = min(blockDim.y, y_dim - 2 * halo - blockIdx.y * blockDim.y);
     const auto i_limit = min(halo + (blockIdx.x + 1) * blockDim.x, x_dim - halo);
     const auto j_limit = min(halo + (blockIdx.y + 1) * blockDim.y + 1, y_dim - halo + 1);
-    for (int i_internal_block{i - 1}; i_internal_block < i_limit; i_internal_block += i_step) {
-        for (int j_internal_block{j - 1}; j_internal_block < j_limit; j_internal_block += j_step) {
+    // bottom
+    {
+        const int j_internal_block = j - 1;
+        for (int i_internal_block{i}; i_internal_block < i_limit; i_internal_block += i_step) {
+            const index_type i_j = j_internal_block * x_dim + i_internal_block;
+            const index_type i_jp1 = (j_internal_block + 1) * x_dim + i_internal_block;
+            const index_type im1_jp1 = (j_internal_block + 1) * x_dim + i_internal_block - 1;
+            const index_type ip1_j = j_internal_block * x_dim + i_internal_block + 1;
+            const index_type E2C2V_0{i_j};
+            const index_type E2C2V_1{i_jp1};
+            const index_type E2C2V_2{im1_jp1};
+            const index_type E2C2V_3{ip1_j};
+            const index_type E2ECV_0{i_j};
+            const index_type E2ECV_1{E2ECV_0 + total_edges};
+            const index_type E2ECV_2{E2ECV_1 + total_edges};
+            const index_type E2ECV_3{E2ECV_2 + total_edges};
+            const index_type edge_index = i_j;
+            const WP_TYPE primal_normal_vert_v1_0{primal_normal_vert_v1_gt_tv(E2ECV_0)};
+            const WP_TYPE primal_normal_vert_v1_1{primal_normal_vert_v1_gt_tv(E2ECV_1)};
+            const WP_TYPE primal_normal_vert_v1_2{primal_normal_vert_v1_gt_tv(E2ECV_2)};
+            const WP_TYPE primal_normal_vert_v1_3{primal_normal_vert_v1_gt_tv(E2ECV_3)};
+            const WP_TYPE primal_normal_vert_v2_0{primal_normal_vert_v2_gt_tv(E2ECV_0)};
+            const WP_TYPE primal_normal_vert_v2_1{primal_normal_vert_v2_gt_tv(E2ECV_1)};
+            const WP_TYPE primal_normal_vert_v2_2{primal_normal_vert_v2_gt_tv(E2ECV_2)};
+            const WP_TYPE primal_normal_vert_v2_3{primal_normal_vert_v2_gt_tv(E2ECV_3)};
+            const WP_TYPE inv_vert_vert_length_sqr{
+                inv_vert_vert_length_gt_tv(edge_index) * inv_vert_vert_length_gt_tv(edge_index)};
+            const WP_TYPE inv_primal_edge_length_sqr{
+                inv_primal_edge_length_gt_tv(edge_index) * inv_primal_edge_length_gt_tv(edge_index)};
+            const double nabv_tang_wp = u_vert_gt_tv(E2C2V_0, k_index) * primal_normal_vert_v1_0 +
+                                        v_vert_gt_tv(E2C2V_0, k_index) * primal_normal_vert_v2_0 +
+                                        u_vert_gt_tv(E2C2V_1, k_index) * primal_normal_vert_v1_1 +
+                                        v_vert_gt_tv(E2C2V_1, k_index) * primal_normal_vert_v2_1;
+            const double nabv_norm_wp = u_vert_gt_tv(E2C2V_2, k_index) * primal_normal_vert_v1_2 +
+                                        v_vert_gt_tv(E2C2V_2, k_index) * primal_normal_vert_v2_2 +
+                                        u_vert_gt_tv(E2C2V_3, k_index) * primal_normal_vert_v1_3 +
+                                        v_vert_gt_tv(E2C2V_3, k_index) * primal_normal_vert_v2_3;
+            const auto local_edge_index =
+                i_internal_block - (blockIdx.x * blockDim.x) + 1 - halo +
+                ((j_internal_block - (blockIdx.y * blockDim.y) + 1 - halo) * (blockDim.x + 1));
+            z_nabla4_e2[local_edge_index] =
+                4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_tv(edge_index, k_index)) * inv_vert_vert_length_sqr +
+                          (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(edge_index, k_index)) * inv_primal_edge_length_sqr);
+        }
+    }
+    // left
+    {
+        const int i_internal_block{i - 1};
+        for (int j_internal_block{j}; j_internal_block < j_limit; j_internal_block += j_step) {
+            const index_type i_j = j_internal_block * x_dim + i_internal_block;
+            const index_type i_jp1 = (j_internal_block + 1) * x_dim + i_internal_block;
+            const index_type ip1_j = j_internal_block * x_dim + i_internal_block + 1;
+            const index_type ip1_jm1 = (j_internal_block - 1) * x_dim + i_internal_block + 1;
+            const index_type i_jm1 = (j_internal_block - 1) * x_dim + i_internal_block;
+            const index_type E2C2V_0[2] = {i_j, i_j};
+            const index_type E2C2V_1[2] = {ip1_j, ip1_jm1};
+            const index_type E2C2V_2[2] = {i_jp1, ip1_j};
+            const index_type E2C2V_3[2] = {ip1_jm1, i_jm1};
+            const index_type E2ECV_0[2] = {i_j + outer_domain_size, i_j + 2 * outer_domain_size};
+            const index_type E2ECV_1[2] = {E2ECV_0[0] + total_edges, E2ECV_0[1] + total_edges};
+            const index_type E2ECV_2[2] = {E2ECV_1[0] + total_edges, E2ECV_1[1] + total_edges};
+            const index_type E2ECV_3[2] = {E2ECV_2[0] + total_edges, E2ECV_2[1] + total_edges};
+            const index_type edge_index = i_j;
+            const WP_TYPE primal_normal_vert_v1_0[2] = {
+                primal_normal_vert_v1_gt_tv(E2ECV_0[0]), primal_normal_vert_v1_gt_tv(E2ECV_0[1])};
+            const WP_TYPE primal_normal_vert_v1_1[2] = {
+                primal_normal_vert_v1_gt_tv(E2ECV_1[0]), primal_normal_vert_v1_gt_tv(E2ECV_1[1])};
+            const WP_TYPE primal_normal_vert_v1_2[2] = {
+                primal_normal_vert_v1_gt_tv(E2ECV_2[0]), primal_normal_vert_v1_gt_tv(E2ECV_2[1])};
+            const WP_TYPE primal_normal_vert_v1_3[2] = {
+                primal_normal_vert_v1_gt_tv(E2ECV_3[0]), primal_normal_vert_v1_gt_tv(E2ECV_3[1])};
+            const WP_TYPE primal_normal_vert_v2_0[2] = {
+                primal_normal_vert_v2_gt_tv(E2ECV_0[0]), primal_normal_vert_v2_gt_tv(E2ECV_0[1])};
+            const WP_TYPE primal_normal_vert_v2_1[2] = {
+                primal_normal_vert_v2_gt_tv(E2ECV_1[0]), primal_normal_vert_v2_gt_tv(E2ECV_1[1])};
+            const WP_TYPE primal_normal_vert_v2_2[2] = {
+                primal_normal_vert_v2_gt_tv(E2ECV_2[0]), primal_normal_vert_v2_gt_tv(E2ECV_2[1])};
+            const WP_TYPE primal_normal_vert_v2_3[2] = {
+                primal_normal_vert_v2_gt_tv(E2ECV_3[0]), primal_normal_vert_v2_gt_tv(E2ECV_3[1])};
+            const WP_TYPE inv_vert_vert_length_sqr[2] = {inv_vert_vert_length_gt_tv(edge_index + outer_domain_size) *
+                                                             inv_vert_vert_length_gt_tv(edge_index + outer_domain_size),
+                inv_vert_vert_length_gt_tv(edge_index + 2 * outer_domain_size) *
+                    inv_vert_vert_length_gt_tv(edge_index + 2 * outer_domain_size)};
+            const WP_TYPE inv_primal_edge_length_sqr[2] = {
+                inv_primal_edge_length_gt_tv(edge_index + outer_domain_size) *
+                    inv_primal_edge_length_gt_tv(edge_index + outer_domain_size),
+                inv_primal_edge_length_gt_tv(edge_index + 2 * outer_domain_size) *
+                    inv_primal_edge_length_gt_tv(edge_index + 2 * outer_domain_size)};
+#pragma unroll
+            for (auto color{0}; color < 2; ++color) {
+                const auto E2C2V_0_c = E2C2V_0[color];
+                const auto E2C2V_1_c = E2C2V_1[color];
+                const auto E2C2V_2_c = E2C2V_2[color];
+                const auto E2C2V_3_c = E2C2V_3[color];
+                const double nabv_tang_wp = u_vert_gt_tv(E2C2V_0_c, k_index) * primal_normal_vert_v1_0[color] +
+                                            v_vert_gt_tv(E2C2V_0_c, k_index) * primal_normal_vert_v2_0[color] +
+                                            u_vert_gt_tv(E2C2V_1_c, k_index) * primal_normal_vert_v1_1[color] +
+                                            v_vert_gt_tv(E2C2V_1_c, k_index) * primal_normal_vert_v2_1[color];
+                const double nabv_norm_wp = u_vert_gt_tv(E2C2V_2_c, k_index) * primal_normal_vert_v1_2[color] +
+                                            v_vert_gt_tv(E2C2V_2_c, k_index) * primal_normal_vert_v2_2[color] +
+                                            u_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v1_3[color] +
+                                            v_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v2_3[color];
+                const auto local_edge_index =
+                    i_internal_block - (blockIdx.x * blockDim.x) + 1 - halo +
+                    ((j_internal_block - (blockIdx.y * blockDim.y) + 1 - halo) * (blockDim.x + 1)) +
+                    (color + 1) * shared_mem_inner_domain;
+                z_nabla4_e2[local_edge_index] =
+                    4.0 *
+                    ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_tv(edge_index + (color + 1) * outer_domain_size, k_index)) *
+                            inv_vert_vert_length_sqr[color] +
+                        (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(edge_index + (color + 1) * outer_domain_size, k_index)) *
+                            inv_primal_edge_length_sqr[color]);
+            };
+        }
+    }
+    for (int i_internal_block{i}; i_internal_block < i_limit; i_internal_block += i_step) {
+        for (int j_internal_block{j}; j_internal_block < j_limit - 1; j_internal_block += j_step) {
             const index_type i_j = j_internal_block * x_dim + i_internal_block;
             const index_type i_jp1 = (j_internal_block + 1) * x_dim + i_internal_block;
             const index_type im1_jp1 = (j_internal_block + 1) * x_dim + i_internal_block - 1;
@@ -447,6 +562,60 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_c
                               (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(edge_index + color * outer_domain_size, k_index)) *
                                   inv_primal_edge_length_sqr[color]);
             };
+        }
+    }
+    // top
+    {
+        const int j_internal_block = j_limit - 1;
+        for (int i_internal_block{i}; i_internal_block < i_limit - 1; i_internal_block += i_step) {
+            const index_type i_j = j_internal_block * x_dim + i_internal_block;
+            const index_type i_jp1 = (j_internal_block + 1) * x_dim + i_internal_block;
+            const index_type im1_jp1 = (j_internal_block + 1) * x_dim + i_internal_block - 1;
+            const index_type ip1_j = j_internal_block * x_dim + i_internal_block + 1;
+            const index_type ip1_jm1 = (j_internal_block - 1) * x_dim + i_internal_block + 1;
+            const index_type i_jm1 = (j_internal_block - 1) * x_dim + i_internal_block;
+            const index_type E2C2V_0{i_j};
+            const index_type E2C2V_1{ip1_jm1};
+            const index_type E2C2V_2{ip1_j};
+            const index_type E2C2V_3{i_jm1};
+            const index_type E2ECV_0{i_j + 2 * outer_domain_size};
+            const index_type E2ECV_1{E2ECV_0 + total_edges};
+            const index_type E2ECV_2{E2ECV_1 + total_edges};
+            const index_type E2ECV_3{E2ECV_2 + total_edges};
+            const index_type edge_index = i_j;
+            const WP_TYPE primal_normal_vert_v1_0{primal_normal_vert_v1_gt_tv(E2ECV_0)};
+            const WP_TYPE primal_normal_vert_v1_1{primal_normal_vert_v1_gt_tv(E2ECV_1)};
+            const WP_TYPE primal_normal_vert_v1_2{primal_normal_vert_v1_gt_tv(E2ECV_2)};
+            const WP_TYPE primal_normal_vert_v1_3{primal_normal_vert_v1_gt_tv(E2ECV_3)};
+            const WP_TYPE primal_normal_vert_v2_0{primal_normal_vert_v2_gt_tv(E2ECV_0)};
+            const WP_TYPE primal_normal_vert_v2_1{primal_normal_vert_v2_gt_tv(E2ECV_1)};
+            const WP_TYPE primal_normal_vert_v2_2{primal_normal_vert_v2_gt_tv(E2ECV_2)};
+            const WP_TYPE primal_normal_vert_v2_3{primal_normal_vert_v2_gt_tv(E2ECV_3)};
+            const WP_TYPE inv_vert_vert_length_sqr{inv_vert_vert_length_gt_tv(edge_index + 2 * outer_domain_size) *
+                                                   inv_vert_vert_length_gt_tv(edge_index + 2 * outer_domain_size)};
+            const WP_TYPE inv_primal_edge_length_sqr{inv_primal_edge_length_gt_tv(edge_index + 2 * outer_domain_size) *
+                                                     inv_primal_edge_length_gt_tv(edge_index + 2 * outer_domain_size)};
+            const auto E2C2V_0_c = E2C2V_0;
+            const auto E2C2V_1_c = E2C2V_1;
+            const auto E2C2V_2_c = E2C2V_2;
+            const auto E2C2V_3_c = E2C2V_3;
+            const double nabv_tang_wp = u_vert_gt_tv(E2C2V_0_c, k_index) * primal_normal_vert_v1_0 +
+                                        v_vert_gt_tv(E2C2V_0_c, k_index) * primal_normal_vert_v2_0 +
+                                        u_vert_gt_tv(E2C2V_1_c, k_index) * primal_normal_vert_v1_1 +
+                                        v_vert_gt_tv(E2C2V_1_c, k_index) * primal_normal_vert_v2_1;
+            const double nabv_norm_wp = u_vert_gt_tv(E2C2V_2_c, k_index) * primal_normal_vert_v1_2 +
+                                        v_vert_gt_tv(E2C2V_2_c, k_index) * primal_normal_vert_v2_2 +
+                                        u_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v1_3 +
+                                        v_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v2_3;
+            const auto local_edge_index =
+                i_internal_block - (blockIdx.x * blockDim.x) + 1 - halo +
+                ((j_internal_block - (blockIdx.y * blockDim.y) + 1 - halo) * (blockDim.x + 1)) +
+                2 * shared_mem_inner_domain;
+            z_nabla4_e2[local_edge_index] =
+                4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_tv(edge_index + 2 * outer_domain_size, k_index)) *
+                              inv_vert_vert_length_sqr +
+                          (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(edge_index + 2 * outer_domain_size, k_index)) *
+                              inv_primal_edge_length_sqr);
         }
     }
     __syncthreads();
