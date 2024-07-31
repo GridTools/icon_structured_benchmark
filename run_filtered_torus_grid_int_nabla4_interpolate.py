@@ -1193,36 +1193,6 @@ def run_benchmarks():
         "inlined",
     )
 
-    def create_v2e2c2v_neighbor(e2c2v, v2e):
-        v2e2c2v = np.zeros((len(v2e), 24), dtype=np.int32)
-        for i, v2e_neighbors in enumerate(v2e):
-            for j, v2e_neighbor in enumerate(v2e_neighbors):
-                for k, e2c2v_neighbor in enumerate(e2c2v[v2e_neighbor]):
-                    v2e2c2v[i][j * 4 + k] = e2c2v_neighbor
-        return v2e2c2v
-
-    def optimize_v2e2c2v(v2e2c2v):
-        v2e2c2v_opt = np.zeros((len(v2e2c2v), 7), dtype=np.int32)
-        for i, v2e2c2v_neighbors in enumerate(v2e2c2v):
-            v2e2c2v_opt[i][0] = v2e2c2v_neighbors[0]
-            v2e2c2v_opt[i][1] = v2e2c2v_neighbors[1]
-            v2e2c2v_opt[i][2] = v2e2c2v_neighbors[2]
-            v2e2c2v_opt[i][3] = v2e2c2v_neighbors[3]
-            v2e2c2v_opt[i][4] = v2e2c2v_neighbors[5]
-            v2e2c2v_opt[i][5] = v2e2c2v_neighbors[6]
-            v2e2c2v_opt[i][6] = v2e2c2v_neighbors[7]
-            assert np.isin(v2e2c2v_opt[i], v2e2c2v[i]).all()
-            # print("i: ", i)
-            # for j in v2e2c2v_neighbors:
-            #     print(list(v2e2c2v_opt[i]).index(j))
-        return v2e2c2v_opt
-
-    v2e2c2v = create_v2e2c2v_neighbor(filtered_e2c2v_inlined, filtered_v2e_inlined)
-    v2e2c2v_opt = optimize_v2e2c2v(v2e2c2v)
-
-    # v2e2ecv = create_v2e2c2v_neighbor(filtered_e2ecv_inlined, filtered_v2e_inlined)
-    # v2e2ecv_opt = optimize_v2e2c2v(v2e2ecv)
-
     runtimes = {}
 
     halo = args.halo
