@@ -103,7 +103,7 @@ constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_cached_klo
 
 template <>
 constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_cached_kloop<int>() {
-    return {32, 8, 1, 256};
+    return {32, 4, 2, 256};
 };
 
 constexpr block_dims block_dims_structured_nabla_interpol_inlined_cached_kloop =
@@ -118,6 +118,7 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_c
         index_type outer_domain_size,
         index_type total_edges,
         index_type shared_mem_inner_domain,
+        int k_repetitions,
         nabla4_structured_torus_halo_gt<storage::gpu>::data_store_2d_ctv_VP_t u_vert_gt_tv,
         nabla4_structured_torus_halo_gt<storage::gpu>::data_store_2d_ctv_VP_t v_vert_gt_tv,
         nabla4_structured_torus_halo_gt<storage::gpu>::data_store_1d_ctv_WP_t primal_normal_vert_v1_gt_tv,
@@ -197,7 +198,7 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_c
                 inv_primal_edge_length_gt_tv(edge_index + 2 * outer_domain_size) *
                     inv_primal_edge_length_gt_tv(edge_index + 2 * outer_domain_size)};
             int k_repetition{0};
-            for (auto k_index{blockIdx.z * blockDim.z + threadIdx.z}; k_index < KDim;
+            for (auto k_index{blockIdx.z * blockDim.z + threadIdx.z}; k_repetition < k_repetitions && k_index < KDim;
                  k_index += gridDim.z * blockDim.z) {
 #pragma unroll
                 for (auto color{0}; color < 3; ++color) {
@@ -213,10 +214,12 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_c
                                                 v_vert_gt_tv(E2C2V_2_c, k_index) * primal_normal_vert_v2_2[color] +
                                                 u_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v1_3[color] +
                                                 v_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v2_3[color];
+                    const auto k_level_cache_offset =
+                        3 * shared_mem_inner_domain * ((threadIdx.z * k_repetitions) + k_repetition);
                     const auto local_edge_index =
                         i_internal_block - (blockIdx.x * blockDim.x) + 1 - halo +
                         ((j_internal_block - (blockIdx.y * blockDim.y) + 1 - halo) * (blockDim.x + 1)) +
-                        color * shared_mem_inner_domain + k_repetition * shared_mem_inner_domain * 3;
+                        color * shared_mem_inner_domain + k_level_cache_offset;
                     z_nabla4_e2[local_edge_index] =
                         4.0 *
                         ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_tv(edge_index + color * outer_domain_size, k_index)) *
@@ -247,21 +250,21 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_c
         ptr_coeff_2_gt_ctv(vertex_index_internal, 4),
         ptr_coeff_2_gt_ctv(vertex_index_internal, 5)};
     int k_repetition{0};
-    for (auto k_index{blockIdx.z * blockDim.z + threadIdx.z}; k_index < KDim; k_index += gridDim.z * blockDim.z) {
-        p_u_out_gt_tv(vertex_index_internal, k_index) =
-            z_nabla4_e2[v2e[0] + k_repetition * shared_mem_inner_domain * 3] * coeff_1[0] +
-            z_nabla4_e2[v2e[1] + k_repetition * shared_mem_inner_domain * 3] * coeff_1[1] +
-            z_nabla4_e2[v2e[2] + k_repetition * shared_mem_inner_domain * 3] * coeff_1[2] +
-            z_nabla4_e2[v2e[3] + k_repetition * shared_mem_inner_domain * 3] * coeff_1[3] +
-            z_nabla4_e2[v2e[4] + k_repetition * shared_mem_inner_domain * 3] * coeff_1[4] +
-            z_nabla4_e2[v2e[5] + k_repetition * shared_mem_inner_domain * 3] * coeff_1[5];
-        p_v_out_gt_tv(vertex_index_internal, k_index) =
-            z_nabla4_e2[v2e[0] + k_repetition * shared_mem_inner_domain * 3] * coeff_2[0] +
-            z_nabla4_e2[v2e[1] + k_repetition * shared_mem_inner_domain * 3] * coeff_2[1] +
-            z_nabla4_e2[v2e[2] + k_repetition * shared_mem_inner_domain * 3] * coeff_2[2] +
-            z_nabla4_e2[v2e[3] + k_repetition * shared_mem_inner_domain * 3] * coeff_2[3] +
-            z_nabla4_e2[v2e[4] + k_repetition * shared_mem_inner_domain * 3] * coeff_2[4] +
-            z_nabla4_e2[v2e[5] + k_repetition * shared_mem_inner_domain * 3] * coeff_2[5];
+    for (auto k_index{blockIdx.z * blockDim.z + threadIdx.z}; k_repetition < k_repetitions && k_index < KDim;
+         k_index += gridDim.z * blockDim.z) {
+        const auto k_level_cache_offset = 3 * shared_mem_inner_domain * ((threadIdx.z * k_repetitions) + k_repetition);
+        p_u_out_gt_tv(vertex_index_internal, k_index) = z_nabla4_e2[v2e[0] + k_level_cache_offset] * coeff_1[0] +
+                                                        z_nabla4_e2[v2e[1] + k_level_cache_offset] * coeff_1[1] +
+                                                        z_nabla4_e2[v2e[2] + k_level_cache_offset] * coeff_1[2] +
+                                                        z_nabla4_e2[v2e[3] + k_level_cache_offset] * coeff_1[3] +
+                                                        z_nabla4_e2[v2e[4] + k_level_cache_offset] * coeff_1[4] +
+                                                        z_nabla4_e2[v2e[5] + k_level_cache_offset] * coeff_1[5];
+        p_v_out_gt_tv(vertex_index_internal, k_index) = z_nabla4_e2[v2e[0] + k_level_cache_offset] * coeff_2[0] +
+                                                        z_nabla4_e2[v2e[1] + k_level_cache_offset] * coeff_2[1] +
+                                                        z_nabla4_e2[v2e[2] + k_level_cache_offset] * coeff_2[2] +
+                                                        z_nabla4_e2[v2e[3] + k_level_cache_offset] * coeff_2[3] +
+                                                        z_nabla4_e2[v2e[4] + k_level_cache_offset] * coeff_2[4] +
+                                                        z_nabla4_e2[v2e[5] + k_level_cache_offset] * coeff_2[5];
         k_repetition++;
     }
 };
@@ -276,14 +279,15 @@ inline void nabla4_interpolate_structured_inlined_cached<T>::run_gpu_kloop_helpe
     const index_type outer_domain_size = interpolate_data.x_dim * interpolate_data.y_dim;
     const index_type inner_x_dim = interpolate_data.x_dim - 2 * interpolate_data.halo;
     const index_type inner_y_dim = interpolate_data.y_dim - 2 * interpolate_data.halo;
-    const index_type k_repetitions{5};
+    const int k_repetitions{5};
+    const int KDim_ceil = std::ceil(static_cast<double>(interpolate_data.KDim) / k_repetitions);
     dim3 grid((inner_x_dim + tblocks.x - 1) / tblocks.x,
         (inner_y_dim + tblocks.y - 1) / tblocks.y,
-        (ceil(interpolate_data.KDim / k_repetitions) + tblocks.z - 1) / tblocks.z);
+        (KDim_ceil + tblocks.z - 1) / tblocks.z);
     const index_type shared_mem_inner_domain = (tblocks.x + 1) * (tblocks.y + 2);
     run_gpu_kloop_nabla4_interpolate_inlined_cached_structured<<<grid,
         tblocks,
-        shared_mem_inner_domain * 3 * sizeof(WP_TYPE) * k_repetitions>>>(interpolate_data.KDim,
+        shared_mem_inner_domain * 3 * sizeof(WP_TYPE) * k_repetitions * tblocks.z>>>(interpolate_data.KDim,
         interpolate_data.x_dim,
         interpolate_data.y_dim,
         interpolate_data.halo,
@@ -291,6 +295,7 @@ inline void nabla4_interpolate_structured_inlined_cached<T>::run_gpu_kloop_helpe
         outer_domain_size,
         outer_domain_size * 3,
         shared_mem_inner_domain,
+        k_repetitions,
         nabla4_data.u_vert_gt_tv,
         nabla4_data.v_vert_gt_tv,
         nabla4_data.primal_normal_vert_v1_gt_tv,
