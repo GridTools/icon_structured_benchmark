@@ -626,7 +626,7 @@ constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_naive<std:
 
 template <>
 constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_naive<int>() {
-    return {32, 3, 6, 896};
+    return {32, 2, 9, 896};
 };
 
 constexpr block_dims block_dims_structured_nabla_interpol_inlined_naive =
