@@ -514,7 +514,7 @@ constexpr block_dims get_block_dims_unstructured_nabla_interpol_inlined_v2v_kloo
 
 template <>
 constexpr block_dims get_block_dims_unstructured_nabla_interpol_inlined_v2v_kloop<int>() {
-    return {32, 8, 1, 256};
+    return {32, 4, 1, 128};
 };
 
 constexpr block_dims block_dims_unstructured_nabla_interpol_inlined_v2v_kloop =
@@ -544,8 +544,8 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
     const auto vertex_index = blockIdx.x * blockDim.x + threadIdx.x;
     if (vertex_index >= interpolate_output_size)
         return;
-    // Number 10 needs to be hardcoded as (maxKDim / blockDim.y)
-    std::array<std::array<WP_TYPE, 10>, 6> z_nabla4_e2_wp;
+    // Number 20 needs to be hardcoded as (maxKDim / blockDim.y)
+    std::array<std::array<WP_TYPE, 20>, 6> z_nabla4_e2_wp;
     const std::array<index_type, 24> e2c2v{v2e2c2v_gt_ctv(vertex_index, 0),
         v2e2c2v_gt_ctv(vertex_index, 1),
         v2e2c2v_gt_ctv(vertex_index, 2),
@@ -642,9 +642,7 @@ inline void nabla4_interpolate_unstructured_inlined_v2v<T>::run_gpu_kloop_helper
     dim3 tblocks(block_dims_unstructured_nabla_interpol_inlined_v2v_kloop.x,
         block_dims_unstructured_nabla_interpol_inlined_v2v_kloop.y,
         block_dims_unstructured_nabla_interpol_inlined_v2v_kloop.z);
-    dim3 grid((interpolate_data.output_size + tblocks.x - 1) / tblocks.x,
-        (interpolate_data.KDim + tblocks.y - 1) / tblocks.y,
-        1);
+    dim3 grid((interpolate_data.output_size + tblocks.x - 1) / tblocks.x, 1, 1);
     run_gpu_kloop_nabla4_interpolate_inlined_v2v_unstructured<<<grid, tblocks>>>(nabla4_data.output_size,
         interpolate_data.output_size,
         nabla4_data.CellDim,
