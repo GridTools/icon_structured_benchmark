@@ -171,7 +171,9 @@ def generate_violin_plots(data, k, torus_name, output_dir):
 
     torus_size = torus_name.split("_")[-1]
     plt.figure(figsize=(10, 8))
-    plt.title(f"Runtime Distribution for {edges_size[torus_size]} Edges with k: {k}")
+    plt.title(
+        f"Nabla4 & Interpolation kernels runtime for {edges_size[torus_size]} Edges with {k} K-levels"
+    )
     plt.ylabel("Runtime (s)")
     plt.xlabel("Implementation")
     violin_data = []
@@ -186,32 +188,17 @@ def generate_violin_plots(data, k, torus_name, output_dir):
             or "gtfn" in implementation
         ):
             violin_data.append(runtimes)
-            labels.append(
-                "{}_{}".format(
-                    "unstructured"
-                    if "unstructured" in implementation
-                    else "structured",
-                    "cpu_ifirst"
-                    if "cpu_ifirst" in implementation
-                    else "cpu_kfirst"
-                    if "cpu_kfirst" in implementation
-                    else "gtfn"
-                    if "gtfn" in implementation
-                    else "cuda_naive"
-                    if "naive" in implementation
-                    else "cuda_kblock",
-                )
-            )
+            labels.append(implementation[29:])
             median_value = np.median(runtimes)
             medians.append(median_value)  # Calculating median for each set of runtimes
 
             plt.text(
                 len(labels),
-                median_value * 1.05,
+                median_value + 0.000035,
                 f"{median_value:.6f}",
                 ha="center",
                 va="bottom",
-                fontsize=8,
+                fontsize=9,
                 color="red",
             )
 
@@ -233,6 +220,74 @@ def generate_violin_plots(data, k, torus_name, output_dir):
     plt.legend()  # Show legend with median
     plt.savefig(
         "{}/runtimes_torus_{}_{}.png".format(output_dir, torus_size, k), dpi=800
+    )
+
+
+# Function to generate violin plots
+def generate_violin_plots_acceleration(
+    data,
+    k,
+    torus_name,
+    output_dir,
+    baseline_name="nabla4_interpolate_benchmark_unstructured_gpu_naive_separate",
+):
+    import matplotlib.pyplot as plt
+
+    torus_size = torus_name.split("_")[-1]
+    plt.figure(figsize=(10, 8))
+    plt.title(
+        f"Nabla4 & Interpolation kernels runtime for {edges_size[torus_size]} Edges with {k} K-levels"
+    )
+    plt.ylabel("Runtime (s)")
+    plt.xlabel("Implementation")
+    violin_data = []
+    labels = []
+    medians = []  # To store medians
+    baseline_median = np.median(data[baseline_name])
+    plt.axhline(baseline_median, linestyle="dotted", color="red")
+    for implementation, runtimes in data.items():
+        if (
+            "cpu_ifirst" in implementation
+            or "cpu_kfirst" in implementation
+            or "gpu" in implementation
+            or "gtfn" in implementation
+        ):
+            violin_data.append(runtimes)
+            labels.append(implementation[29:])
+            median_value = np.median(runtimes)
+            medians.append(median_value)  # Calculating median for each set of runtimes
+
+            percentage_diff = (median_value - baseline_median) / baseline_median * 100
+            plt.text(
+                len(labels),
+                median_value + 0.000035,
+                f"{median_value:.5f} ({percentage_diff:.2f}%)"
+                if implementation != baseline_name
+                else f"{median_value:.5f}",
+                ha="center",
+                va="bottom",
+                fontsize=9,
+                color="red",
+            )
+
+    plt.violinplot(violin_data)
+    plt.xticks(np.arange(1, len(labels) + 1), labels, rotation=45, ha="right")
+
+    # Plotting medians
+    plt.scatter(
+        np.arange(1, len(labels) + 1),
+        medians,
+        color="red",
+        zorder=3,
+        label="Median",
+        s=20,
+        marker="_",
+    )
+
+    plt.tight_layout()
+    plt.legend()  # Show legend with median
+    plt.savefig(
+        "{}/runtimes_torus_accel_{}_{}.png".format(output_dir, torus_size, k), dpi=800
     )
 
 

@@ -6,10 +6,11 @@ from analysis import (
     print_median_acceleration_over_k,
     filter_runtime_data,
     generate_violin_plots,
+    generate_violin_plots_acceleration,
 )
 
 if __name__ == "__main__":
-    git_commit = "3aa7b37"
+    git_commit = "68e91d7"
 
     backend = "gpu"
 
@@ -20,7 +21,7 @@ if __name__ == "__main__":
         "torus_100000_100000_64",
     ]
 
-    klevels = [1, 16, 65, 80]
+    klevels = [80]
 
     runtimes_output = read_torus_results_commit_backend_index_type(
         "results/nabla4_interpolate_output_{}_{}_{}".format(
@@ -53,34 +54,54 @@ if __name__ == "__main__":
     #     output_directory,
     # )
 
-    print_median_acceleration_over_k(
-        filter_runtime_data(
-            runtimes_output,
-            "nabla4_interpolate_benchmark_unstructured_gpu_naive",
-            "nabla4_interpolate_benchmark_structured_gpu_naive",
-        ),
-        "gpu_naive",
-        output_directory,
-    )
+    # print_median_acceleration_over_k(
+    #     filter_runtime_data(
+    #         runtimes_output,
+    #         "nabla4_interpolate_benchmark_unstructured_gpu_naive",
+    #         "nabla4_interpolate_benchmark_structured_gpu_naive",
+    #     ),
+    #     "gpu_naive",
+    #     output_directory,
+    # )
 
     # Generate violin plots for each torus size
+    for torus_size, runtime_data in runtimes_output.items():
+        for k in runtime_data.keys():
+            generate_violin_plots(runtime_data[k], k, torus_size, output_directory)
+
+    # Generate summary with violin plots and acceleration
     for torus_size, runtime_data in runtimes_output.items():
         for k in runtime_data.keys():
             runtime_data[k] = {
                 "nabla4_interpolate_benchmark_unstructured_gpu_naive_separate": runtime_data[
                     k
                 ]["nabla4_interpolate_benchmark_unstructured_gpu_naive_separate"],
-                "nabla4_interpolate_benchmark_unstructured_gpu_naive_inlined": runtime_data[
-                    k
-                ]["nabla4_interpolate_benchmark_unstructured_gpu_naive_inlined"],
                 "nabla4_interpolate_benchmark_structured_gpu_naive_separate": runtime_data[
                     k
                 ]["nabla4_interpolate_benchmark_structured_gpu_naive_separate"],
-                # "nabla4_benchmark_unstructured_gpu_kloop_gridtools": runtime_data[k][
-                #     "nabla4_benchmark_unstructured_gpu_kloop_gridtools"
-                # ],
-                # "nabla4_benchmark_structured_torus_gpu_kloop_gridtools_halo": runtime_data[k][
-                #     "nabla4_benchmark_structured_torus_gpu_kloop_gridtools_halo"
-                # ],
+                "nabla4_interpolate_benchmark_unstructured_gpu_naive_inlined": runtime_data[
+                    k
+                ]["nabla4_interpolate_benchmark_unstructured_gpu_naive_inlined"],
+                "nabla4_interpolate_benchmark_structured_gpu_naive_inlined": runtime_data[
+                    k
+                ]["nabla4_interpolate_benchmark_structured_gpu_naive_inlined"],
+                "nabla4_interpolate_benchmark_unstructured_gpu_kloop_separate": runtime_data[
+                    k
+                ]["nabla4_interpolate_benchmark_unstructured_gpu_kloop_separate"],
+                "nabla4_interpolate_benchmark_structured_gpu_kloop_separate": runtime_data[
+                    k
+                ]["nabla4_interpolate_benchmark_structured_gpu_kloop_separate"],
+                # "nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined": runtime_data[
+                #     k
+                # ]["nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined"],
+                "nabla4_interpolate_benchmark_structured_gpu_kloop_inlined": runtime_data[
+                    k
+                ]["nabla4_interpolate_benchmark_structured_gpu_kloop_inlined"],
             }
-            generate_violin_plots(runtime_data[k], k, torus_size, output_directory)
+            generate_violin_plots_acceleration(
+                runtime_data[k],
+                k,
+                torus_size,
+                output_directory,
+                "nabla4_interpolate_benchmark_unstructured_gpu_naive_separate",
+            )
