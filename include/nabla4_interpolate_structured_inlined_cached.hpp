@@ -278,12 +278,13 @@ inline void nabla4_interpolate_structured_inlined_cached<T>::run_gpu_kloop_helpe
     const index_type outer_domain_size = interpolate_data.x_dim * interpolate_data.y_dim;
     const index_type inner_x_dim = interpolate_data.x_dim - 2 * interpolate_data.halo;
     const index_type inner_y_dim = interpolate_data.y_dim - 2 * interpolate_data.halo;
-    const int k_repetitions{5};
+    constexpr int smemSize{49152}; // GH100
+    const index_type shared_mem_inner_domain = (tblocks.x + 1) * (tblocks.y + 2);
+    const long unsigned int k_repetitions{smemSize / (shared_mem_inner_domain * 3 * sizeof(WP_TYPE) * tblocks.z)};
     const int KDim_ceil = std::ceil(static_cast<double>(interpolate_data.KDim) / k_repetitions);
     dim3 grid((inner_x_dim + tblocks.x - 1) / tblocks.x,
         (inner_y_dim + tblocks.y - 1) / tblocks.y,
         (KDim_ceil + tblocks.z - 1) / tblocks.z);
-    const index_type shared_mem_inner_domain = (tblocks.x + 1) * (tblocks.y + 2);
     run_gpu_kloop_nabla4_interpolate_inlined_cached_structured<<<grid,
         tblocks,
         shared_mem_inner_domain * 3 * sizeof(WP_TYPE) * k_repetitions * tblocks.z>>>(interpolate_data.KDim,
