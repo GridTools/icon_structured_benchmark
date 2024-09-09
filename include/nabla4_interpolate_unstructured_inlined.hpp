@@ -270,7 +270,7 @@ constexpr block_dims get_block_dims_unstructured_nabla_interpol_inlined_kloop<st
 
 template <>
 constexpr block_dims get_block_dims_unstructured_nabla_interpol_inlined_kloop<int>() {
-    return {32, 4, 1, 128};
+    return {256, 1, 1, 256};
 };
 
 constexpr block_dims block_dims_unstructured_nabla_interpol_inlined_kloop =
@@ -299,8 +299,8 @@ __global__ void __maxnreg__(64) run_gpu_kloop_nabla4_interpolate_inlined_unstruc
     const auto vertex_index = blockIdx.x * blockDim.x + threadIdx.x;
     if (vertex_index >= interpolate_output_size)
         return;
-    // Number 20 needs to be hardcoded as (maxKDim / blockDim.y)
-    std::array<std::array<WP_TYPE, 20>, 6> z_nabla4_e2_wp;
+    // Number 80 needs to be hardcoded as (maxKDim / blockDim.y)
+    std::array<std::array<WP_TYPE, 80>, 6> z_nabla4_e2_wp;
 #pragma unroll
     for (int i{0}; i < 6; ++i) {
         const auto edge_index = v2e_gt_tv(vertex_index, i);
