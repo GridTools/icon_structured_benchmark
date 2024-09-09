@@ -569,8 +569,9 @@ __global__ void __maxnreg__(80) run_gpu_kloop_nabla4_interpolate_inlined_v2v_uns
         v2e2c2v_gt_ctv(vertex_index, 1),
         v2e2c2v_gt_ctv(vertex_index, 5),
         v2e2c2v_gt_ctv(vertex_index, 0)};
-#pragma unroll 6
+#pragma unroll
     for (int i{0}; i < 6; ++i) {
+        const auto edge_index = v2e_gt_ctv(vertex_index, i);
         const auto E2C2V_0 = e2c2v[i * 4];
         const auto E2C2V_1 = e2c2v[i * 4 + 1];
         const auto E2C2V_2 = e2c2v[i * 4 + 2];
@@ -579,7 +580,6 @@ __global__ void __maxnreg__(80) run_gpu_kloop_nabla4_interpolate_inlined_v2v_uns
         const auto E2ECV_1 = v2e2ecv_gt_ctv(vertex_index, i * 4 + 1);
         const auto E2ECV_2 = v2e2ecv_gt_ctv(vertex_index, i * 4 + 2);
         const auto E2ECV_3 = v2e2ecv_gt_ctv(vertex_index, i * 4 + 3);
-        const auto edge_index = v2e_gt_ctv(vertex_index, i);
         const WP_TYPE primal_normal_vert_v1[4] = {primal_normal_vert_v1_gt_tv(E2ECV_0),
             primal_normal_vert_v1_gt_tv(E2ECV_1),
             primal_normal_vert_v1_gt_tv(E2ECV_2),
