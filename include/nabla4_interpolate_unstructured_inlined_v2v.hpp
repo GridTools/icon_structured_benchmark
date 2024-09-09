@@ -520,7 +520,7 @@ constexpr block_dims get_block_dims_unstructured_nabla_interpol_inlined_v2v_kloo
 constexpr block_dims block_dims_unstructured_nabla_interpol_inlined_v2v_kloop =
     get_block_dims_unstructured_nabla_interpol_inlined_v2v_kloop<index_type>();
 
-__global__ void __maxnreg__(64) run_gpu_kloop_nabla4_interpolate_inlined_v2v_unstructured(index_type nabla4_output_size,
+__global__ void __maxnreg__(80) run_gpu_kloop_nabla4_interpolate_inlined_v2v_unstructured(index_type nabla4_output_size,
     index_type interpolate_output_size,
     index_type CellDim,
     index_type VertexDim,
