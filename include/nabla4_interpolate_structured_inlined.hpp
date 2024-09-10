@@ -626,13 +626,13 @@ constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_naive<std:
 
 template <>
 constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_naive<int>() {
-    return {32, 2, 9, 896};
+    return {32, 1, 18, 576};
 };
 
 constexpr block_dims block_dims_structured_nabla_interpol_inlined_naive =
     get_block_dims_structured_nabla_interpol_inlined_naive<index_type>();
 
-__global__ void __maxnreg__(52) run_gpu_naive_nabla4_interpolate_inlined_structured(index_type KDim,
+__global__ void __maxnreg__(56) run_gpu_naive_nabla4_interpolate_inlined_structured(index_type KDim,
     index_type x_dim,
     index_type y_dim,
     index_type halo,
