@@ -672,7 +672,7 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
         ptr_coeff_2_gt_ctv(vertex_index, 5)};
     std::array<WP_TYPE, 6> z_nabla4_e2_wp;
     for (auto k_index{blockIdx.z * blockDim.z + threadIdx.z}; k_index < KDim; k_index += gridDim.z * blockDim.z) {
-#pragma unroll 6
+#pragma unroll
         for (auto i{0}; i < 6; ++i) {
             const auto edge_index = v2e[i];
             const auto E2C2V_0 = v2e2c2v[i * 4];
@@ -687,10 +687,10 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
                                         v_vert_gt_tv(E2C2V_2, k_index) * primal_normal_vert_v2[4 * i + 2] +
                                         u_vert_gt_tv(E2C2V_3, k_index) * primal_normal_vert_v1[4 * i + 3] +
                                         v_vert_gt_tv(E2C2V_3, k_index) * primal_normal_vert_v2[4 * i + 3];
-            z_nabla4_e2_wp[i] = 4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_tv(edge_index, k_index)) *
-                                              (inv_vert_vert_length[i] * inv_vert_vert_length[i]) +
-                                          (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(edge_index, k_index)) *
-                                              (inv_primal_edge_length[i] * inv_primal_edge_length[i]));
+            const auto z_nabla4_e = z_nabla2_e_gt_tv(edge_index, k_index);
+            z_nabla4_e2_wp[i] =
+                4.0 * ((nabv_norm_wp - 2.0 * z_nabla4_e) * (inv_vert_vert_length[i] * inv_vert_vert_length[i]) +
+                          (nabv_tang_wp - 2.0 * z_nabla4_e) * (inv_primal_edge_length[i] * inv_primal_edge_length[i]));
         }
         p_u_out_gt_tv(vertex_index, k_index) = z_nabla4_e2_wp[0] * ptr_coeff_1[0] + z_nabla4_e2_wp[1] * ptr_coeff_1[1] +
                                                z_nabla4_e2_wp[2] * ptr_coeff_1[2] + z_nabla4_e2_wp[3] * ptr_coeff_1[3] +
