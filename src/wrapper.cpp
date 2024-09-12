@@ -27,6 +27,10 @@ std::vector<double> nabla4_benchmark_vector(std::tuple<Args...> &&args, int repe
         return run_benchmark<T<Data::ifirst>, I>(std::forward<decltype(args)>(args), repetitions, dry_runs);
     } else if constexpr (I == backend_impl::cpu_kfirst) {
         return run_benchmark<T<Data::kfirst>, I>(std::forward<decltype(args)>(args), repetitions, dry_runs);
+    } else if constexpr (I == backend_impl::cpu_kfirst_for_each) {
+        return run_benchmark<T<Data::kfirst>, I>(std::forward<decltype(args)>(args), repetitions, dry_runs);
+    } else if constexpr (I == backend_impl::cpu_kfirst_for_each_unseq) {
+        return run_benchmark<T<Data::kfirst>, I>(std::forward<decltype(args)>(args), repetitions, dry_runs);
     } else {
         throw std::runtime_error("Undefined backend implementation");
     }
@@ -142,6 +146,32 @@ std::vector<double> nabla4_benchmark_unstructured_cpu_kfirst(std::vector<std::ar
     int repetitions,
     int dry_runs) {
     return nabla4_benchmark_vector<cpu_kfirst, nabla4_unstructured>(
+        std::make_tuple(e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
+}
+
+std::vector<double> nabla4_benchmark_unstructured_cpu_kfirst_for_each(std::vector<std::array<std::size_t, 4>> &e2c2v,
+    std::vector<std::array<std::size_t, 4>> &e2ecv,
+    std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    int repetitions,
+    int dry_runs) {
+    return nabla4_benchmark_vector<cpu_kfirst_for_each, nabla4_unstructured>(
+        std::make_tuple(e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
+}
+
+std::vector<double> nabla4_benchmark_unstructured_cpu_kfirst_for_each_unseq(std::vector<std::array<std::size_t, 4>> &e2c2v,
+    std::vector<std::array<std::size_t, 4>> &e2ecv,
+    std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    int repetitions,
+    int dry_runs) {
+    return nabla4_benchmark_vector<cpu_kfirst_for_each_unseq, nabla4_unstructured>(
         std::make_tuple(e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
 }
 
