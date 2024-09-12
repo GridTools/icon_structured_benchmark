@@ -1,9 +1,9 @@
 #pragma once
 #include <array>
-#include <iostream>
-#include <vector>
 #include <execution>
+#include <iostream>
 #include <ranges>
+#include <vector>
 
 #include <experimental/simd>
 
@@ -176,39 +176,41 @@ class nabla4_unstructured : private nabla4_data<T> {
             const auto E2ECV_1 = e2ecv[edge_index][1];
             const auto E2ECV_2 = e2ecv[edge_index][2];
             const auto E2ECV_3 = e2ecv[edge_index][3];
-            auto kernel_fields = std::views::zip(u_vert[E2C2V_0], u_vert[E2C2V_1], u_vert[E2C2V_2], u_vert[E2C2V_3],
-                v_vert[E2C2V_0], v_vert[E2C2V_1], v_vert[E2C2V_2], v_vert[E2C2V_3], z_nabla2_e[edge_index]);
+            auto kernel_fields = std::views::zip(u_vert[E2C2V_0],
+                u_vert[E2C2V_1],
+                u_vert[E2C2V_2],
+                u_vert[E2C2V_3],
+                v_vert[E2C2V_0],
+                v_vert[E2C2V_1],
+                v_vert[E2C2V_2],
+                v_vert[E2C2V_3],
+                z_nabla2_e[edge_index]);
             const auto inv_vert_vert_length_sqr = inv_vert_vert_length[edge_index] * inv_vert_vert_length[edge_index];
-            const auto inv_primal_edge_length_sqr = inv_primal_edge_length[edge_index] * inv_primal_edge_length[edge_index];
+            const auto inv_primal_edge_length_sqr =
+                inv_primal_edge_length[edge_index] * inv_primal_edge_length[edge_index];
             const auto kernel_input_fields = std::views::enumerate(kernel_fields);
-            std::for_each(kernel_input_fields.begin(), kernel_input_fields.end(),
-                [&](const auto& pair) {
-                    const auto k_index = get<0>(pair);
-                    const auto kernel_fields = get<1>(pair);
-                    const auto u_vert_e2c2v_0 = get<0>(kernel_fields);
-                    const auto u_vert_e2c2v_1 = get<1>(kernel_fields);
-                    const auto u_vert_e2c2v_2 = get<2>(kernel_fields);
-                    const auto u_vert_e2c2v_3 = get<3>(kernel_fields);
-                    const auto v_vert_e2c2v_0 = get<4>(kernel_fields);
-                    const auto v_vert_e2c2v_1 = get<5>(kernel_fields);
-                    const auto v_vert_e2c2v_2 = get<6>(kernel_fields);
-                    const auto v_vert_e2c2v_3 = get<7>(kernel_fields);
-                    double nabv_tang_wp = u_vert_e2c2v_0 * primal_normal_vert_v1[E2ECV_0] +
-                                          v_vert_e2c2v_0 * primal_normal_vert_v2[E2ECV_0] +
-                                          u_vert_e2c2v_1 * primal_normal_vert_v1[E2ECV_1] +
-                                          v_vert_e2c2v_1 * primal_normal_vert_v2[E2ECV_1];
-                    double nabv_norm_wp = u_vert_e2c2v_2 * primal_normal_vert_v1[E2ECV_2] +
-                                            v_vert_e2c2v_2 * primal_normal_vert_v2[E2ECV_2] +
-                                            u_vert_e2c2v_3 * primal_normal_vert_v1[E2ECV_3] +
-                                            v_vert_e2c2v_3 * primal_normal_vert_v2[E2ECV_3];
-                    const auto z_nabla2_e_edge_index = get<8>(kernel_fields);
-                    z_nabla4_e2_wp[edge_index][k_index] =
-                        4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_edge_index) *
-                                      inv_vert_vert_length_sqr +
-                                  (nabv_tang_wp - 2.0 * z_nabla2_e_edge_index) *
-                                      inv_primal_edge_length_sqr);
-                }
-            );
+            std::for_each(kernel_input_fields.begin(), kernel_input_fields.end(), [&](const auto &pair) {
+                const auto k_index = get<0>(pair);
+                const auto kernel_fields = get<1>(pair);
+                const auto u_vert_e2c2v_0 = get<0>(kernel_fields);
+                const auto u_vert_e2c2v_1 = get<1>(kernel_fields);
+                const auto u_vert_e2c2v_2 = get<2>(kernel_fields);
+                const auto u_vert_e2c2v_3 = get<3>(kernel_fields);
+                const auto v_vert_e2c2v_0 = get<4>(kernel_fields);
+                const auto v_vert_e2c2v_1 = get<5>(kernel_fields);
+                const auto v_vert_e2c2v_2 = get<6>(kernel_fields);
+                const auto v_vert_e2c2v_3 = get<7>(kernel_fields);
+                double nabv_tang_wp =
+                    u_vert_e2c2v_0 * primal_normal_vert_v1[E2ECV_0] + v_vert_e2c2v_0 * primal_normal_vert_v2[E2ECV_0] +
+                    u_vert_e2c2v_1 * primal_normal_vert_v1[E2ECV_1] + v_vert_e2c2v_1 * primal_normal_vert_v2[E2ECV_1];
+                double nabv_norm_wp =
+                    u_vert_e2c2v_2 * primal_normal_vert_v1[E2ECV_2] + v_vert_e2c2v_2 * primal_normal_vert_v2[E2ECV_2] +
+                    u_vert_e2c2v_3 * primal_normal_vert_v1[E2ECV_3] + v_vert_e2c2v_3 * primal_normal_vert_v2[E2ECV_3];
+                const auto z_nabla2_e_edge_index = get<8>(kernel_fields);
+                z_nabla4_e2_wp[edge_index][k_index] =
+                    4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_edge_index) * inv_vert_vert_length_sqr +
+                              (nabv_tang_wp - 2.0 * z_nabla2_e_edge_index) * inv_primal_edge_length_sqr);
+            });
         };
     };
 
@@ -222,13 +224,21 @@ class nabla4_unstructured : private nabla4_data<T> {
             const auto E2ECV_1 = e2ecv[edge_index][1];
             const auto E2ECV_2 = e2ecv[edge_index][2];
             const auto E2ECV_3 = e2ecv[edge_index][3];
-            auto kernel_fields = std::views::zip(u_vert[E2C2V_0], u_vert[E2C2V_1], u_vert[E2C2V_2], u_vert[E2C2V_3],
-                v_vert[E2C2V_0], v_vert[E2C2V_1], v_vert[E2C2V_2], v_vert[E2C2V_3], z_nabla2_e[edge_index]);
+            auto kernel_fields = std::views::zip(u_vert[E2C2V_0],
+                u_vert[E2C2V_1],
+                u_vert[E2C2V_2],
+                u_vert[E2C2V_3],
+                v_vert[E2C2V_0],
+                v_vert[E2C2V_1],
+                v_vert[E2C2V_2],
+                v_vert[E2C2V_3],
+                z_nabla2_e[edge_index]);
             const auto inv_vert_vert_length_sqr = inv_vert_vert_length[edge_index] * inv_vert_vert_length[edge_index];
-            const auto inv_primal_edge_length_sqr = inv_primal_edge_length[edge_index] * inv_primal_edge_length[edge_index];
+            const auto inv_primal_edge_length_sqr =
+                inv_primal_edge_length[edge_index] * inv_primal_edge_length[edge_index];
             const auto kernel_input_fields = std::views::enumerate(kernel_fields);
-            std::for_each(std::execution::unseq, kernel_input_fields.begin(), kernel_input_fields.end(),
-                [&](const auto& pair) {
+            std::for_each(
+                std::execution::unseq, kernel_input_fields.begin(), kernel_input_fields.end(), [&](const auto &pair) {
                     const auto k_index = get<0>(pair);
                     const auto kernel_fields = get<1>(pair);
                     const auto u_vert_e2c2v_0 = get<0>(kernel_fields);
@@ -244,17 +254,14 @@ class nabla4_unstructured : private nabla4_data<T> {
                                           u_vert_e2c2v_1 * primal_normal_vert_v1[E2ECV_1] +
                                           v_vert_e2c2v_1 * primal_normal_vert_v2[E2ECV_1];
                     double nabv_norm_wp = u_vert_e2c2v_2 * primal_normal_vert_v1[E2ECV_2] +
-                                            v_vert_e2c2v_2 * primal_normal_vert_v2[E2ECV_2] +
-                                            u_vert_e2c2v_3 * primal_normal_vert_v1[E2ECV_3] +
-                                            v_vert_e2c2v_3 * primal_normal_vert_v2[E2ECV_3];
+                                          v_vert_e2c2v_2 * primal_normal_vert_v2[E2ECV_2] +
+                                          u_vert_e2c2v_3 * primal_normal_vert_v1[E2ECV_3] +
+                                          v_vert_e2c2v_3 * primal_normal_vert_v2[E2ECV_3];
                     const auto z_nabla2_e_edge_index = get<8>(kernel_fields);
                     z_nabla4_e2_wp[edge_index][k_index] =
-                        4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_edge_index) *
-                                      inv_vert_vert_length_sqr +
-                                  (nabv_tang_wp - 2.0 * z_nabla2_e_edge_index) *
-                                      inv_primal_edge_length_sqr);
-                }
-            );
+                        4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_edge_index) * inv_vert_vert_length_sqr +
+                                  (nabv_tang_wp - 2.0 * z_nabla2_e_edge_index) * inv_primal_edge_length_sqr);
+                });
         };
     };
 
@@ -281,16 +288,15 @@ class nabla4_unstructured : private nabla4_data<T> {
                 v_vert_e2c2v_1.copy_from(&v_vert[E2C2V_1][k_index], stdx::element_aligned);
                 v_vert_e2c2v_2.copy_from(&v_vert[E2C2V_2][k_index], stdx::element_aligned);
                 v_vert_e2c2v_3.copy_from(&v_vert[E2C2V_3][k_index], stdx::element_aligned);
-                const auto nabv_tang_wp = u_vert_e2c2v_0 * primal_normal_vert_v1[E2ECV_0] +
-                                      v_vert_e2c2v_0 * primal_normal_vert_v2[E2ECV_0] +
-                                      u_vert_e2c2v_1 * primal_normal_vert_v1[E2ECV_1] +
-                                      v_vert_e2c2v_1 * primal_normal_vert_v2[E2ECV_1];
-                const auto nabv_norm_wp = u_vert_e2c2v_2 * primal_normal_vert_v1[E2ECV_2] +
-                                      v_vert_e2c2v_2 * primal_normal_vert_v2[E2ECV_2] +
-                                      u_vert_e2c2v_3 * primal_normal_vert_v1[E2ECV_3] +
-                                      v_vert_e2c2v_3 * primal_normal_vert_v2[E2ECV_3];
+                const auto nabv_tang_wp =
+                    u_vert_e2c2v_0 * primal_normal_vert_v1[E2ECV_0] + v_vert_e2c2v_0 * primal_normal_vert_v2[E2ECV_0] +
+                    u_vert_e2c2v_1 * primal_normal_vert_v1[E2ECV_1] + v_vert_e2c2v_1 * primal_normal_vert_v2[E2ECV_1];
+                const auto nabv_norm_wp =
+                    u_vert_e2c2v_2 * primal_normal_vert_v1[E2ECV_2] + v_vert_e2c2v_2 * primal_normal_vert_v2[E2ECV_2] +
+                    u_vert_e2c2v_3 * primal_normal_vert_v1[E2ECV_3] + v_vert_e2c2v_3 * primal_normal_vert_v2[E2ECV_3];
                 z_nabla2_e_edge_index.copy_from(&z_nabla2_e[edge_index][k_index], stdx::element_aligned);
-                const auto z_nabla4_e2_wp_v = 4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_edge_index) *
+                const auto z_nabla4_e2_wp_v =
+                    4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_edge_index) *
                                   (inv_vert_vert_length[edge_index] * inv_vert_vert_length[edge_index]) +
                               (nabv_tang_wp - 2.0 * z_nabla2_e_edge_index) *
                                   (inv_primal_edge_length[edge_index] * inv_primal_edge_length[edge_index]));

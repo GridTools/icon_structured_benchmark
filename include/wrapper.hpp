@@ -48,7 +48,8 @@ std::vector<double> nabla4_benchmark_unstructured_cpu_kfirst_for_each(std::vecto
     int repetitions = 101,
     int dry_runs = 1);
 
-std::vector<double> nabla4_benchmark_unstructured_cpu_kfirst_for_each_unseq(std::vector<std::array<std::size_t, 4>> &e2c2v,
+std::vector<double> nabla4_benchmark_unstructured_cpu_kfirst_for_each_unseq(
+    std::vector<std::array<std::size_t, 4>> &e2c2v,
     std::vector<std::array<std::size_t, 4>> &e2ecv,
     std::size_t CellDim,
     std::size_t VertexDim,

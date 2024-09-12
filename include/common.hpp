@@ -15,7 +15,16 @@ using index_type = int;
 #define VP_TYPE double
 #define WP_TYPE double
 
-enum backend_impl { naive = 0, cpu_ifirst, cpu_kfirst, gpu_naive, gpu_kloop, cpu_kfirst_for_each, cpu_kfirst_for_each_unseq, cpu_kfirst_simd };
+enum backend_impl {
+    naive = 0,
+    cpu_ifirst,
+    cpu_kfirst,
+    gpu_naive,
+    gpu_kloop,
+    cpu_kfirst_for_each,
+    cpu_kfirst_for_each_unseq,
+    cpu_kfirst_simd
+};
 
 enum class Data { ifirst, kfirst };
 

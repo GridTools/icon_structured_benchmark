@@ -176,7 +176,8 @@ std::vector<double> nabla4_benchmark_unstructured_cpu_kfirst_for_each(std::vecto
         std::make_tuple(e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
 }
 
-std::vector<double> nabla4_benchmark_unstructured_cpu_kfirst_for_each_unseq(std::vector<std::array<std::size_t, 4>> &e2c2v,
+std::vector<double> nabla4_benchmark_unstructured_cpu_kfirst_for_each_unseq(
+    std::vector<std::array<std::size_t, 4>> &e2c2v,
     std::vector<std::array<std::size_t, 4>> &e2ecv,
     std::size_t CellDim,
     std::size_t VertexDim,
