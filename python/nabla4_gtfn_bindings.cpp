@@ -123,7 +123,7 @@ decltype(auto) calculate_nabla4_wrapper_gpu(int repetitions,
             gridtools::sid::shift_sid_origin(
                 gridtools::nanobind::as_sid(gt_conn_e2ecv.first, gridtools::nanobind::stride_spec<1, -1>{}),
                 gt_conn_e2ecv.second)),
-        gridtools::fn::backend::gpu<generated::thread_block_sizes_t, generated::loop_block_sizes_t>{});
+        gridtools::fn::backend::gpu<generated::thread_block_sizes_t>{});
 }
 #endif
 
