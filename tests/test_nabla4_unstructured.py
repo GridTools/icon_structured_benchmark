@@ -286,6 +286,37 @@ def test_validate_nabla4_unstructured_cpu_kfirst(request, grid):
 @pytest.mark.parametrize(
     "grid", ("simple_grid_kernel_input", "small_torus_grid_kernel_input")
 )
+def test_validate_nabla4_unstructured_cpu_kfirst(request, grid):
+    grid = request.getfixturevalue(grid)
+    z_nabla4_e2_comp = icon_benchmark.nabla4_validate_unstructured_cpu_kfirst_for_each_unseq(
+        grid.e2c2v,
+        grid.e2ecv,
+        grid.num_cells,
+        grid.num_vertices,
+        grid.num_edges,
+        grid.num_levels,
+        grid.E2C2VDim,
+        grid.u_vert,
+        grid.v_vert,
+        grid.primal_normal_vert_v1,
+        grid.primal_normal_vert_v2,
+        grid.z_nabla2_e,
+        grid.inv_vert_vert_length,
+        grid.inv_primal_edge_length,
+    )
+
+    assert np.allclose(
+        z_nabla4_e2_comp,
+        grid.ref_z_nabla4_e2,
+        equal_nan=True,
+        atol=1e-8,
+        rtol=1e-4,
+    )
+
+
+@pytest.mark.parametrize(
+    "grid", ("simple_grid_kernel_input", "small_torus_grid_kernel_input")
+)
 def test_validate_nabla4_unstructured_cpu_ifirst_gridtools(request, grid):
     grid = request.getfixturevalue(grid)
     z_nabla4_e2_comp = icon_benchmark.nabla4_validate_unstructured_cpu_kfirst_gridtools(
