@@ -5,7 +5,11 @@
 #include <execution>
 #include <ranges>
 
+#include <experimental/simd>
+
 #include "common.hpp"
+
+namespace stdx = std::experimental;
 
 template <Data T>
 class nabla4_unstructured : private nabla4_data<T> {
@@ -254,6 +258,62 @@ class nabla4_unstructured : private nabla4_data<T> {
         };
     };
 
+    void run_cpu_kfirst_simd() {
+        for (std::size_t edge_index{}; edge_index < e2c2v.size(); ++edge_index) {
+            const auto E2C2V_0 = e2c2v[edge_index][0];
+            const auto E2C2V_1 = e2c2v[edge_index][1];
+            const auto E2C2V_2 = e2c2v[edge_index][2];
+            const auto E2C2V_3 = e2c2v[edge_index][3];
+            const auto E2ECV_0 = e2ecv[edge_index][0];
+            const auto E2ECV_1 = e2ecv[edge_index][1];
+            const auto E2ECV_2 = e2ecv[edge_index][2];
+            const auto E2ECV_3 = e2ecv[edge_index][3];
+            stdx::native_simd<VP_TYPE> u_vert_e2c2v_0, u_vert_e2c2v_1, u_vert_e2c2v_2, u_vert_e2c2v_3;
+            stdx::native_simd<VP_TYPE> v_vert_e2c2v_0, v_vert_e2c2v_1, v_vert_e2c2v_2, v_vert_e2c2v_3;
+            stdx::native_simd<WP_TYPE> z_nabla2_e_edge_index;
+            std::size_t k_index{};
+            for (; k_index < KDim; k_index += stdx::native_simd<VP_TYPE>::size()) {
+                u_vert_e2c2v_0.copy_from(&u_vert[E2C2V_0][k_index], stdx::element_aligned);
+                u_vert_e2c2v_1.copy_from(&u_vert[E2C2V_1][k_index], stdx::element_aligned);
+                u_vert_e2c2v_2.copy_from(&u_vert[E2C2V_2][k_index], stdx::element_aligned);
+                u_vert_e2c2v_3.copy_from(&u_vert[E2C2V_3][k_index], stdx::element_aligned);
+                v_vert_e2c2v_0.copy_from(&v_vert[E2C2V_0][k_index], stdx::element_aligned);
+                v_vert_e2c2v_1.copy_from(&v_vert[E2C2V_1][k_index], stdx::element_aligned);
+                v_vert_e2c2v_2.copy_from(&v_vert[E2C2V_2][k_index], stdx::element_aligned);
+                v_vert_e2c2v_3.copy_from(&v_vert[E2C2V_3][k_index], stdx::element_aligned);
+                const auto nabv_tang_wp = u_vert_e2c2v_0 * primal_normal_vert_v1[E2ECV_0] +
+                                      v_vert_e2c2v_0 * primal_normal_vert_v2[E2ECV_0] +
+                                      u_vert_e2c2v_1 * primal_normal_vert_v1[E2ECV_1] +
+                                      v_vert_e2c2v_1 * primal_normal_vert_v2[E2ECV_1];
+                const auto nabv_norm_wp = u_vert_e2c2v_2 * primal_normal_vert_v1[E2ECV_2] +
+                                      v_vert_e2c2v_2 * primal_normal_vert_v2[E2ECV_2] +
+                                      u_vert_e2c2v_3 * primal_normal_vert_v1[E2ECV_3] +
+                                      v_vert_e2c2v_3 * primal_normal_vert_v2[E2ECV_3];
+                z_nabla2_e_edge_index.copy_from(&z_nabla2_e[edge_index][k_index], stdx::element_aligned);
+                const auto z_nabla4_e2_wp_v = 4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_edge_index) *
+                                  (inv_vert_vert_length[edge_index] * inv_vert_vert_length[edge_index]) +
+                              (nabv_tang_wp - 2.0 * z_nabla2_e_edge_index) *
+                                  (inv_primal_edge_length[edge_index] * inv_primal_edge_length[edge_index]));
+                z_nabla2_e_edge_index.copy_to(&z_nabla4_e2_wp[edge_index][k_index], stdx::element_aligned);
+            };
+            for (; k_index < KDim; ++k_index) {
+                double nabv_tang_wp = u_vert[E2C2V_0][k_index] * primal_normal_vert_v1[E2ECV_0] +
+                                      v_vert[E2C2V_0][k_index] * primal_normal_vert_v2[E2ECV_0] +
+                                      u_vert[E2C2V_1][k_index] * primal_normal_vert_v1[E2ECV_1] +
+                                      v_vert[E2C2V_1][k_index] * primal_normal_vert_v2[E2ECV_1];
+                double nabv_norm_wp = u_vert[E2C2V_2][k_index] * primal_normal_vert_v1[E2ECV_2] +
+                                      v_vert[E2C2V_2][k_index] * primal_normal_vert_v2[E2ECV_2] +
+                                      u_vert[E2C2V_3][k_index] * primal_normal_vert_v1[E2ECV_3] +
+                                      v_vert[E2C2V_3][k_index] * primal_normal_vert_v2[E2ECV_3];
+                z_nabla4_e2_wp[edge_index][k_index] =
+                    4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e[edge_index][k_index]) *
+                                  (inv_vert_vert_length[edge_index] * inv_vert_vert_length[edge_index]) +
+                              (nabv_tang_wp - 2.0 * z_nabla2_e[edge_index][k_index]) *
+                                  (inv_primal_edge_length[edge_index] * inv_primal_edge_length[edge_index]));
+            };
+        };
+    };
+
     /// Compute function timed for benchmarking
     template <backend_impl I>
     void run() {
@@ -267,6 +327,8 @@ class nabla4_unstructured : private nabla4_data<T> {
             run_cpu_kfirst_for_each();
         } else if constexpr (I == backend_impl::cpu_kfirst_for_each_unseq) {
             run_cpu_kfirst_for_each_unseq();
+        } else if constexpr (I == backend_impl::cpu_kfirst_simd) {
+            run_cpu_kfirst_simd();
         } else {
             throw std::runtime_error("Undefined backend implementation");
         }
