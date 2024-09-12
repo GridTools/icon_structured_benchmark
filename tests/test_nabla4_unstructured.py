@@ -286,7 +286,7 @@ def test_validate_nabla4_unstructured_cpu_kfirst(request, grid):
 @pytest.mark.parametrize(
     "grid", ("simple_grid_kernel_input", "small_torus_grid_kernel_input")
 )
-def test_validate_nabla4_unstructured_cpu_kfirst(request, grid):
+def test_validate_nabla4_unstructured_cpu_kfirst_for_each_unseq(request, grid):
     grid = request.getfixturevalue(grid)
     z_nabla4_e2_comp = icon_benchmark.nabla4_validate_unstructured_cpu_kfirst_for_each_unseq(
         grid.e2c2v,
