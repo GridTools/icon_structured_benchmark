@@ -37,6 +37,7 @@ NB_MODULE(icon_benchmark, m) {
     m.def("nabla4_validate_unstructured_cpu_kfirst_for_each_unseq",
         &nabla4_validate_unstructured_cpu_kfirst_for_each_unseq);
     m.def("nabla4_validate_unstructured_cpu_kfirst_simd", &nabla4_validate_unstructured_cpu_kfirst_simd);
+    m.def("nabla4_validate_unstructured_simd_cpu_kfirst_simd", &nabla4_validate_unstructured_simd_cpu_kfirst_simd);
     m.def("nabla4_validate_unstructured_cpu_kfirst_gridtools", &nabla4_validate_unstructured_cpu_kfirst_gridtools);
     m.def("nabla4_validate_unstructured_gpu_kloop_gridtools", &nabla4_validate_unstructured_gpu_kloop_gridtools);
     m.def("nabla4_validate_unstructured_gpu_naive_gridtools", &nabla4_validate_unstructured_gpu_naive_gridtools);

@@ -2,6 +2,9 @@
 
 #include <random>
 #include <vector>
+#include <experimental/simd>
+
+namespace stdx = std::experimental;
 
 class RandomUniformUtils {
     std::random_device _rd{};
@@ -39,6 +42,21 @@ class RandomUniformUtils {
         for (std::size_t i{}; i < domain_i_size; ++i) {
             for (std::size_t j{}; j < domain_j_size; ++j) {
                 vec[i][j] = get<T>();
+            }
+        }
+        return vec;
+    }
+
+    template <typename T = double>
+    std::vector<std::vector<stdx::native_simd<T>>> random_init_vec_2d_simd(std::size_t domain_i_size, std::size_t domain_j_size) {
+        std::vector<std::vector<stdx::native_simd<T>>> vec;
+        vec.resize(domain_i_size);
+        for (auto &jvec : vec) {
+            jvec.resize(domain_j_size);
+        }
+        for (std::size_t i{}; i < domain_i_size; ++i) {
+            for (std::size_t j{}; j < domain_j_size; ++j) {
+                vec[i][j] = stdx::native_simd<T>([&](int i){ return get<T>(); });
             }
         }
         return vec;

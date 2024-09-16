@@ -5,8 +5,6 @@
 #include <ranges>
 #include <vector>
 
-#include <experimental/simd>
-
 #include "common.hpp"
 
 namespace stdx = std::experimental;
@@ -144,12 +142,10 @@ class nabla4_unstructured : private nabla4_data<T> {
             const auto E2ECV_2 = e2ecv[edge_index][2];
             const auto E2ECV_3 = e2ecv[edge_index][3];
             for (std::size_t k_index = 0; k_index < KDim; ++k_index) {
-                std::cout << "u_vert["  << E2C2V_0 << "][" << k_index << "] = " << u_vert[E2C2V_0][k_index] << std::endl;
                 double nabv_tang_wp = u_vert[E2C2V_0][k_index] * primal_normal_vert_v1[E2ECV_0] +
                                       v_vert[E2C2V_0][k_index] * primal_normal_vert_v2[E2ECV_0] +
                                       u_vert[E2C2V_1][k_index] * primal_normal_vert_v1[E2ECV_1] +
                                       v_vert[E2C2V_1][k_index] * primal_normal_vert_v2[E2ECV_1];
-                std::cout << "nabv_tang_wp[" << edge_index << "][" << k_index << "] = " << nabv_tang_wp << std::endl;
                 double nabv_norm_wp = u_vert[E2C2V_2][k_index] * primal_normal_vert_v1[E2ECV_2] +
                                       v_vert[E2C2V_2][k_index] * primal_normal_vert_v2[E2ECV_2] +
                                       u_vert[E2C2V_3][k_index] * primal_normal_vert_v1[E2ECV_3] +

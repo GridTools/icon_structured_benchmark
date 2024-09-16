@@ -25277,5 +25277,14 @@ int main(int argc, char *argv[]) {
                   << nabla4_benchmark_unstructured_torus_cpu_kfirst_simd_runtimes
                          [nabla4_benchmark_unstructured_torus_cpu_kfirst_simd_runtimes.size() / 2]
                   << std::endl;
+        auto nabla4_benchmark_unstructured_simd_torus_cpu_kfirst_simd_runtimes =
+            nabla4_benchmark_unstructured_simd_cpu_kfirst_simd(
+                E2C2V_torus_1024, E2ECV_torus_1024, 9472, 4736, E2C2V_torus_1024.size(), 80, 4, repetitions, dry_runs);
+        std::sort(nabla4_benchmark_unstructured_simd_torus_cpu_kfirst_simd_runtimes.begin(),
+            nabla4_benchmark_unstructured_simd_torus_cpu_kfirst_simd_runtimes.end());
+        std::cout << "Unstructured Torus 1024 cpu_kfirst_simd opt nabla4 median runtime: "
+                  << nabla4_benchmark_unstructured_simd_torus_cpu_kfirst_simd_runtimes
+                         [nabla4_benchmark_unstructured_simd_torus_cpu_kfirst_simd_runtimes.size() / 2]
+                  << std::endl;
     };
 }

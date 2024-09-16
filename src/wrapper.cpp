@@ -222,6 +222,19 @@ std::vector<double> nabla4_benchmark_unstructured_cpu_kfirst_simd(std::vector<st
         std::make_tuple(e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
 }
 
+std::vector<double> nabla4_benchmark_unstructured_simd_cpu_kfirst_simd(std::vector<std::array<std::size_t, 4>> &e2c2v,
+    std::vector<std::array<std::size_t, 4>> &e2ecv,
+    std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    int repetitions,
+    int dry_runs) {
+    return nabla4_benchmark_vector<cpu_kfirst_simd, nabla4_unstructured_simd>(
+        std::make_tuple(e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
+}
+
 std::vector<double> nabla4_benchmark_unstructured_cpu_kfirst_gridtools(std::vector<std::array<index_type, 4>> &e2c2v,
     std::vector<std::array<index_type, 4>> &e2ecv,
     index_type CellDim,
@@ -462,6 +475,37 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_kfirst_simd(
     std::vector<WP_TYPE> &inv_vert_vert_length,
     std::vector<WP_TYPE> &inv_primal_edge_length) {
     return nabla4_validate_vector<cpu_kfirst_simd, nabla4_unstructured>(std::make_tuple(e2c2v,
+        e2ecv,
+        CellDim,
+        VertexDim,
+        EdgeDim,
+        KDim,
+        ECVDim,
+        u_vert,
+        v_vert,
+        primal_normal_vert_v1,
+        primal_normal_vert_v2,
+        z_nabla2_e,
+        inv_vert_vert_length,
+        inv_primal_edge_length));
+}
+
+std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_simd_cpu_kfirst_simd(
+    std::vector<std::array<std::size_t, 4>> &e2c2v,
+    std::vector<std::array<std::size_t, 4>> &e2ecv,
+    std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::vector<std::vector<VP_TYPE>> &u_vert,
+    std::vector<std::vector<VP_TYPE>> &v_vert,
+    std::vector<WP_TYPE> &primal_normal_vert_v1,
+    std::vector<WP_TYPE> &primal_normal_vert_v2,
+    std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+    std::vector<WP_TYPE> &inv_vert_vert_length,
+    std::vector<WP_TYPE> &inv_primal_edge_length) {
+    return nabla4_validate_vector<cpu_kfirst_simd, nabla4_unstructured_simd>(std::make_tuple(e2c2v,
         e2ecv,
         CellDim,
         VertexDim,

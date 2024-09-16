@@ -1,6 +1,9 @@
 #pragma once
 
 #include "random_init.hpp"
+#include <experimental/simd>
+
+namespace stdx = std::experimental;
 
 #if defined(INDEX_TYPE_SIZE_T)
 using index_type = std::size_t;
