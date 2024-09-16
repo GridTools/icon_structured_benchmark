@@ -27,6 +27,8 @@ std::vector<double> nabla4_benchmark_vector(std::tuple<Args...> &&args, int repe
         return run_benchmark<T<Data::ifirst>, I>(std::forward<decltype(args)>(args), repetitions, dry_runs);
     } else if constexpr (I == backend_impl::cpu_kfirst) {
         return run_benchmark<T<Data::kfirst>, I>(std::forward<decltype(args)>(args), repetitions, dry_runs);
+    } else if constexpr (I == backend_impl::cpu_kfirst_pragma) {
+        return run_benchmark<T<Data::kfirst>, I>(std::forward<decltype(args)>(args), repetitions, dry_runs);
     } else if constexpr (I == backend_impl::cpu_kfirst_for_each) {
         return run_benchmark<T<Data::kfirst>, I>(std::forward<decltype(args)>(args), repetitions, dry_runs);
     } else if constexpr (I == backend_impl::cpu_kfirst_for_each_unseq) {
@@ -43,27 +45,31 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_vector(std::tuple<Args...> &&a
     if constexpr (I == backend_impl::naive) {
         T<Data::ifirst> benchmark_object{
             std::apply([](auto &&...args) { return T<Data::ifirst>{std::forward<decltype(args)>(args)...}; }, args)};
-        return run_validation<T<Data::ifirst>, naive>(benchmark_object);
+        return run_validation<T<Data::ifirst>, I>(benchmark_object);
     } else if constexpr (I == backend_impl::cpu_ifirst) {
         T<Data::ifirst> benchmark_object{
             std::apply([](auto &&...args) { return T<Data::ifirst>{std::forward<decltype(args)>(args)...}; }, args)};
-        return run_validation<T<Data::ifirst>, cpu_ifirst>(benchmark_object);
+        return run_validation<T<Data::ifirst>, I>(benchmark_object);
     } else if constexpr (I == backend_impl::cpu_kfirst) {
         T<Data::kfirst> benchmark_object{
             std::apply([](auto &&...args) { return T<Data::kfirst>{std::forward<decltype(args)>(args)...}; }, args)};
-        return run_validation<T<Data::kfirst>, cpu_kfirst>(benchmark_object);
+        return run_validation<T<Data::kfirst>, I>(benchmark_object);
+    } else if constexpr (I == backend_impl::cpu_kfirst_pragma) {
+        T<Data::kfirst> benchmark_object{
+            std::apply([](auto &&...args) { return T<Data::kfirst>{std::forward<decltype(args)>(args)...}; }, args)};
+        return run_validation<T<Data::kfirst>, I>(benchmark_object);
     } else if constexpr (I == backend_impl::cpu_kfirst_for_each) {
         T<Data::kfirst> benchmark_object{
             std::apply([](auto &&...args) { return T<Data::kfirst>{std::forward<decltype(args)>(args)...}; }, args)};
-        return run_validation<T<Data::kfirst>, cpu_kfirst>(benchmark_object);
+        return run_validation<T<Data::kfirst>, I>(benchmark_object);
     } else if constexpr (I == backend_impl::cpu_kfirst_for_each_unseq) {
         T<Data::kfirst> benchmark_object{
             std::apply([](auto &&...args) { return T<Data::kfirst>{std::forward<decltype(args)>(args)...}; }, args)};
-        return run_validation<T<Data::kfirst>, cpu_kfirst>(benchmark_object);
+        return run_validation<T<Data::kfirst>, I>(benchmark_object);
     } else if constexpr (I == backend_impl::cpu_kfirst_simd) {
         T<Data::kfirst> benchmark_object{
             std::apply([](auto &&...args) { return T<Data::kfirst>{std::forward<decltype(args)>(args)...}; }, args)};
-        return run_validation<T<Data::kfirst>, cpu_kfirst>(benchmark_object);
+        return run_validation<T<Data::kfirst>, I>(benchmark_object);
     } else {
         throw std::runtime_error("[wrapper] Undefined backend implementation");
     }
@@ -160,6 +166,19 @@ std::vector<double> nabla4_benchmark_unstructured_cpu_kfirst(std::vector<std::ar
     int repetitions,
     int dry_runs) {
     return nabla4_benchmark_vector<cpu_kfirst, nabla4_unstructured>(
+        std::make_tuple(e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
+}
+
+std::vector<double> nabla4_benchmark_unstructured_cpu_kfirst_pragma(std::vector<std::array<std::size_t, 4>> &e2c2v,
+    std::vector<std::array<std::size_t, 4>> &e2ecv,
+    std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    int repetitions,
+    int dry_runs) {
+    return nabla4_benchmark_vector<cpu_kfirst_pragma, nabla4_unstructured>(
         std::make_tuple(e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
 }
 
@@ -350,6 +369,37 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_kfirst(
     std::vector<WP_TYPE> &inv_vert_vert_length,
     std::vector<WP_TYPE> &inv_primal_edge_length) {
     return nabla4_validate_vector<cpu_kfirst, nabla4_unstructured>(std::make_tuple(e2c2v,
+        e2ecv,
+        CellDim,
+        VertexDim,
+        EdgeDim,
+        KDim,
+        ECVDim,
+        u_vert,
+        v_vert,
+        primal_normal_vert_v1,
+        primal_normal_vert_v2,
+        z_nabla2_e,
+        inv_vert_vert_length,
+        inv_primal_edge_length));
+}
+
+std::vector<std::vector<VP_TYPE>> nabla4_validate_unstructured_cpu_kfirst_pragma(
+    std::vector<std::array<std::size_t, 4>> &e2c2v,
+    std::vector<std::array<std::size_t, 4>> &e2ecv,
+    std::size_t CellDim,
+    std::size_t VertexDim,
+    std::size_t EdgeDim,
+    std::size_t KDim,
+    std::size_t ECVDim,
+    std::vector<std::vector<VP_TYPE>> &u_vert,
+    std::vector<std::vector<VP_TYPE>> &v_vert,
+    std::vector<WP_TYPE> &primal_normal_vert_v1,
+    std::vector<WP_TYPE> &primal_normal_vert_v2,
+    std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+    std::vector<WP_TYPE> &inv_vert_vert_length,
+    std::vector<WP_TYPE> &inv_primal_edge_length) {
+    return nabla4_validate_vector<cpu_kfirst_pragma, nabla4_unstructured>(std::make_tuple(e2c2v,
         e2ecv,
         CellDim,
         VertexDim,

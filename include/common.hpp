@@ -21,6 +21,7 @@ enum backend_impl {
     cpu_kfirst,
     gpu_naive,
     gpu_kloop,
+    cpu_kfirst_pragma,
     cpu_kfirst_for_each,
     cpu_kfirst_for_each_unseq,
     cpu_kfirst_simd
