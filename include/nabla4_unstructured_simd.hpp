@@ -78,11 +78,14 @@ class nabla4_unstructured_simd : private nabla4_data_simd<T> {
         for (std::size_t edge_index{}; edge_index < e2c2v.size(); ++edge_index) {
             output[edge_index].resize(KDim);
             for (int k_index{}; k_index < KDim / stdx::native_simd<VP_TYPE>::size(); ++k_index) {
-                z_nabla4_e2_wp[edge_index][k_index].copy_to(&output[edge_index][k_index * stdx::native_simd<VP_TYPE>::size()], stdx::element_aligned);
+                z_nabla4_e2_wp[edge_index][k_index].copy_to(
+                    &output[edge_index][k_index * stdx::native_simd<VP_TYPE>::size()], stdx::element_aligned);
             };
             for (int k_index{}; k_index < KDim % stdx::native_simd<VP_TYPE>::size(); ++k_index) {
-                const auto final_k_index = (KDim / stdx::native_simd<VP_TYPE>::size()) * stdx::native_simd<VP_TYPE>::size() + k_index;
-                output[edge_index][final_k_index] = z_nabla4_e2_wp[edge_index][(KDim / stdx::native_simd<VP_TYPE>::size())][k_index];
+                const auto final_k_index =
+                    (KDim / stdx::native_simd<VP_TYPE>::size()) * stdx::native_simd<VP_TYPE>::size() + k_index;
+                output[edge_index][final_k_index] =
+                    z_nabla4_e2_wp[edge_index][(KDim / stdx::native_simd<VP_TYPE>::size())][k_index];
             };
         };
         return output;
@@ -109,31 +112,29 @@ class nabla4_unstructured_simd : private nabla4_data_simd<T> {
             const auto inv_vert_vert_length_sqr = inv_vert_vert_length[edge_index] * inv_vert_vert_length[edge_index];
             const auto inv_primal_edge_length_sqr =
                 inv_primal_edge_length[edge_index] * inv_primal_edge_length[edge_index];
-            for (int k_index{}; k_index < KDim / stdx::native_simd<VP_TYPE>::size(); ++k_index) {
-                const auto nabv_tang_wp = u_vert[E2C2V_0][k_index] * primal_normal_vert_v1_e2ecv[0] +
-                                      v_vert[E2C2V_0][k_index] * primal_normal_vert_v2_e2ecv[0] +
-                                      u_vert[E2C2V_1][k_index] * primal_normal_vert_v1_e2ecv[1] +
-                                      v_vert[E2C2V_1][k_index] * primal_normal_vert_v2_e2ecv[1];
-                const auto nabv_norm_wp = u_vert[E2C2V_2][k_index] * primal_normal_vert_v1_e2ecv[2] +
-                                      v_vert[E2C2V_2][k_index] * primal_normal_vert_v2_e2ecv[2] +
-                                      u_vert[E2C2V_3][k_index] * primal_normal_vert_v1_e2ecv[3] +
-                                      v_vert[E2C2V_3][k_index] * primal_normal_vert_v2_e2ecv[3];
-                z_nabla4_e2_wp[edge_index][k_index] =
-                    4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e[edge_index][k_index]) *
-                                  inv_vert_vert_length_sqr +
-                              (nabv_tang_wp - 2.0 * z_nabla2_e[edge_index][k_index]) *
-                                  inv_primal_edge_length_sqr);
-            };
             const auto k_index_epilogue = KDim / stdx::native_simd<VP_TYPE>::size();
+            for (int k_index{}; k_index < k_index_epilogue; ++k_index) {
+                const auto nabv_tang_wp = u_vert[E2C2V_0][k_index] * primal_normal_vert_v1_e2ecv[0] +
+                                          v_vert[E2C2V_0][k_index] * primal_normal_vert_v2_e2ecv[0] +
+                                          u_vert[E2C2V_1][k_index] * primal_normal_vert_v1_e2ecv[1] +
+                                          v_vert[E2C2V_1][k_index] * primal_normal_vert_v2_e2ecv[1];
+                const auto nabv_norm_wp = u_vert[E2C2V_2][k_index] * primal_normal_vert_v1_e2ecv[2] +
+                                          v_vert[E2C2V_2][k_index] * primal_normal_vert_v2_e2ecv[2] +
+                                          u_vert[E2C2V_3][k_index] * primal_normal_vert_v1_e2ecv[3] +
+                                          v_vert[E2C2V_3][k_index] * primal_normal_vert_v2_e2ecv[3];
+                z_nabla4_e2_wp[edge_index][k_index] =
+                    4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e[edge_index][k_index]) * inv_vert_vert_length_sqr +
+                              (nabv_tang_wp - 2.0 * z_nabla2_e[edge_index][k_index]) * inv_primal_edge_length_sqr);
+            };
             for (int k_index{}; k_index < KDim % stdx::native_simd<VP_TYPE>::size(); ++k_index) {
                 const auto nabv_tang_wp = u_vert[E2C2V_0][k_index_epilogue][k_index] * primal_normal_vert_v1_e2ecv[0] +
-                                      v_vert[E2C2V_0][k_index_epilogue][k_index] * primal_normal_vert_v2_e2ecv[0] +
-                                      u_vert[E2C2V_1][k_index_epilogue][k_index] * primal_normal_vert_v1_e2ecv[1] +
-                                      v_vert[E2C2V_1][k_index_epilogue][k_index] * primal_normal_vert_v2_e2ecv[1];
+                                          v_vert[E2C2V_0][k_index_epilogue][k_index] * primal_normal_vert_v2_e2ecv[0] +
+                                          u_vert[E2C2V_1][k_index_epilogue][k_index] * primal_normal_vert_v1_e2ecv[1] +
+                                          v_vert[E2C2V_1][k_index_epilogue][k_index] * primal_normal_vert_v2_e2ecv[1];
                 const auto nabv_norm_wp = u_vert[E2C2V_2][k_index_epilogue][k_index] * primal_normal_vert_v1_e2ecv[2] +
-                                      v_vert[E2C2V_2][k_index_epilogue][k_index] * primal_normal_vert_v2_e2ecv[2] +
-                                      u_vert[E2C2V_3][k_index_epilogue][k_index] * primal_normal_vert_v1_e2ecv[3] +
-                                      v_vert[E2C2V_3][k_index_epilogue][k_index] * primal_normal_vert_v2_e2ecv[3];
+                                          v_vert[E2C2V_2][k_index_epilogue][k_index] * primal_normal_vert_v2_e2ecv[2] +
+                                          u_vert[E2C2V_3][k_index_epilogue][k_index] * primal_normal_vert_v1_e2ecv[3] +
+                                          v_vert[E2C2V_3][k_index_epilogue][k_index] * primal_normal_vert_v2_e2ecv[3];
                 z_nabla4_e2_wp[edge_index][k_index_epilogue][k_index] =
                     4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e[edge_index][k_index_epilogue][k_index]) *
                                   inv_vert_vert_length_sqr +
