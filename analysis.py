@@ -219,7 +219,7 @@ def generate_violin_plots(data, k, torus_name, output_dir):
     plt.tight_layout()
     plt.legend()  # Show legend with median
     plt.savefig(
-        "{}/runtimes_torus_{}_{}.png".format(output_dir, torus_size, k), dpi=800
+        "{}/runtimes_torus_{}_{}.png".format(output_dir, torus_size, k), dpi=500
     )
 
 
@@ -261,12 +261,12 @@ def generate_violin_plots_acceleration(
             plt.text(
                 len(labels),
                 median_value + 0.000035,
-                f"{median_value:.5f} ({percentage_diff:.2f}%)"
+                f"{median_value:.6f}\n({percentage_diff:.2f}%)"
                 if implementation != baseline_name
                 else f"{median_value:.5f}",
                 ha="center",
                 va="bottom",
-                fontsize=9,
+                fontsize=8,
                 color="red",
             )
 
@@ -287,7 +287,7 @@ def generate_violin_plots_acceleration(
     plt.tight_layout()
     plt.legend()  # Show legend with median
     plt.savefig(
-        "{}/runtimes_torus_accel_{}_{}.png".format(output_dir, torus_size, k), dpi=800
+        "{}/runtimes_torus_accel_{}_{}.png".format(output_dir, torus_size, k), dpi=600
     )
 
 
