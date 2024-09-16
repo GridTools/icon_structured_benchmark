@@ -282,6 +282,7 @@ def test_validate_nabla4_unstructured_cpu_kfirst(request, grid):
         rtol=1e-4,
     )
 
+
 @pytest.mark.parametrize(
     "grid", ("simple_grid_kernel_input", "small_torus_grid_kernel_input")
 )
@@ -311,6 +312,7 @@ def test_validate_nabla4_unstructured_cpu_kfirst_pragma(request, grid):
         atol=1e-8,
         rtol=1e-4,
     )
+
 
 @pytest.mark.parametrize(
     "grid", ("simple_grid_kernel_input", "small_torus_grid_kernel_input")
@@ -375,6 +377,7 @@ def test_validate_nabla4_unstructured_cpu_kfirst_simd(request, grid):
         rtol=1e-4,
     )
 
+
 @pytest.mark.parametrize(
     "grid", ("simple_grid_kernel_input", "small_torus_grid_kernel_input")
 )
@@ -404,6 +407,7 @@ def test_validate_nabla4_unstructured_simd_cpu_kfirst_simd(request, grid):
         atol=1e-8,
         rtol=1e-4,
     )
+
 
 @pytest.mark.parametrize(
     "grid", ("simple_grid_kernel_input", "small_torus_grid_kernel_input")

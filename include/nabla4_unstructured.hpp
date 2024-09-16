@@ -162,10 +162,8 @@ class nabla4_unstructured : private nabla4_data<T> {
                                       u_vert[E2C2V_3][k_index] * primal_normal_vert_v1_e2ecv[3] +
                                       v_vert[E2C2V_3][k_index] * primal_normal_vert_v2_e2ecv[3];
                 z_nabla4_e2_wp[edge_index][k_index] =
-                    4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e[edge_index][k_index]) *
-                                  inv_vert_vert_length_sqr +
-                              (nabv_tang_wp - 2.0 * z_nabla2_e[edge_index][k_index]) *
-                                  inv_primal_edge_length_sqr);
+                    4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e[edge_index][k_index]) * inv_vert_vert_length_sqr +
+                              (nabv_tang_wp - 2.0 * z_nabla2_e[edge_index][k_index]) * inv_primal_edge_length_sqr);
             };
         };
     };
@@ -206,10 +204,8 @@ class nabla4_unstructured : private nabla4_data<T> {
                                       u_vert[E2C2V_3][k_index] * primal_normal_vert_v1_e2ecv[3] +
                                       v_vert[E2C2V_3][k_index] * primal_normal_vert_v2_e2ecv[3];
                 z_nabla4_e2_wp[edge_index][k_index] =
-                    4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e[edge_index][k_index]) *
-                                  inv_vert_vert_length_sqr +
-                              (nabv_tang_wp - 2.0 * z_nabla2_e[edge_index][k_index]) *
-                                  inv_primal_edge_length_sqr);
+                    4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e[edge_index][k_index]) * inv_vert_vert_length_sqr +
+                              (nabv_tang_wp - 2.0 * z_nabla2_e[edge_index][k_index]) * inv_primal_edge_length_sqr);
             };
         };
     };
@@ -246,29 +242,27 @@ class nabla4_unstructured : private nabla4_data<T> {
                 inv_primal_edge_length[edge_index] * inv_primal_edge_length[edge_index];
             const auto kernel_input_fields = std::views::enumerate(kernel_fields);
             std::for_each(kernel_input_fields.begin(), kernel_input_fields.end(), [&](const auto &pair) {
-                    const auto k_index = get<0>(pair);
-                    const auto kernel_fields = get<1>(pair);
-                    const auto u_vert_e2c2v_0 = get<0>(kernel_fields);
-                    const auto u_vert_e2c2v_1 = get<1>(kernel_fields);
-                    const auto u_vert_e2c2v_2 = get<2>(kernel_fields);
-                    const auto u_vert_e2c2v_3 = get<3>(kernel_fields);
-                    const auto v_vert_e2c2v_0 = get<4>(kernel_fields);
-                    const auto v_vert_e2c2v_1 = get<5>(kernel_fields);
-                    const auto v_vert_e2c2v_2 = get<6>(kernel_fields);
-                    const auto v_vert_e2c2v_3 = get<7>(kernel_fields);
-                    double nabv_tang_wp = u_vert_e2c2v_0 * primal_normal_vert_v1_e2ecv[0] +
-                                          v_vert_e2c2v_0 * primal_normal_vert_v2_e2ecv[0] +
-                                          u_vert_e2c2v_1 * primal_normal_vert_v1_e2ecv[1] +
-                                          v_vert_e2c2v_1 * primal_normal_vert_v2_e2ecv[1];
-                    double nabv_norm_wp = u_vert_e2c2v_2 * primal_normal_vert_v1_e2ecv[2] +
-                                          v_vert_e2c2v_2 * primal_normal_vert_v2_e2ecv[2] +
-                                          u_vert_e2c2v_3 * primal_normal_vert_v1_e2ecv[3] +
-                                          v_vert_e2c2v_3 * primal_normal_vert_v2_e2ecv[4];
-                    const auto z_nabla2_e_edge_index = get<8>(kernel_fields);
-                    z_nabla4_e2_wp[edge_index][k_index] =
-                        4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_edge_index) * inv_vert_vert_length_sqr +
-                                  (nabv_tang_wp - 2.0 * z_nabla2_e_edge_index) * inv_primal_edge_length_sqr);
-                });
+                const auto k_index = get<0>(pair);
+                const auto kernel_fields = get<1>(pair);
+                const auto u_vert_e2c2v_0 = get<0>(kernel_fields);
+                const auto u_vert_e2c2v_1 = get<1>(kernel_fields);
+                const auto u_vert_e2c2v_2 = get<2>(kernel_fields);
+                const auto u_vert_e2c2v_3 = get<3>(kernel_fields);
+                const auto v_vert_e2c2v_0 = get<4>(kernel_fields);
+                const auto v_vert_e2c2v_1 = get<5>(kernel_fields);
+                const auto v_vert_e2c2v_2 = get<6>(kernel_fields);
+                const auto v_vert_e2c2v_3 = get<7>(kernel_fields);
+                double nabv_tang_wp =
+                    u_vert_e2c2v_0 * primal_normal_vert_v1_e2ecv[0] + v_vert_e2c2v_0 * primal_normal_vert_v2_e2ecv[0] +
+                    u_vert_e2c2v_1 * primal_normal_vert_v1_e2ecv[1] + v_vert_e2c2v_1 * primal_normal_vert_v2_e2ecv[1];
+                double nabv_norm_wp =
+                    u_vert_e2c2v_2 * primal_normal_vert_v1_e2ecv[2] + v_vert_e2c2v_2 * primal_normal_vert_v2_e2ecv[2] +
+                    u_vert_e2c2v_3 * primal_normal_vert_v1_e2ecv[3] + v_vert_e2c2v_3 * primal_normal_vert_v2_e2ecv[4];
+                const auto z_nabla2_e_edge_index = get<8>(kernel_fields);
+                z_nabla4_e2_wp[edge_index][k_index] =
+                    4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_edge_index) * inv_vert_vert_length_sqr +
+                              (nabv_tang_wp - 2.0 * z_nabla2_e_edge_index) * inv_primal_edge_length_sqr);
+            });
         };
     };
 
@@ -356,7 +350,8 @@ class nabla4_unstructured : private nabla4_data<T> {
             stdx::native_simd<VP_TYPE> v_vert_e2c2v_0, v_vert_e2c2v_1, v_vert_e2c2v_2, v_vert_e2c2v_3;
             stdx::native_simd<WP_TYPE> z_nabla2_e_edge_index;
             std::size_t k_index{};
-            for (; k_index < KDim - (KDim % stdx::native_simd<VP_TYPE>::size()); k_index += stdx::native_simd<VP_TYPE>::size()) {
+            for (; k_index < KDim - (KDim % stdx::native_simd<VP_TYPE>::size());
+                 k_index += stdx::native_simd<VP_TYPE>::size()) {
                 u_vert_e2c2v_0.copy_from(&u_vert[E2C2V_0][k_index], stdx::element_aligned);
                 u_vert_e2c2v_1.copy_from(&u_vert[E2C2V_1][k_index], stdx::element_aligned);
                 u_vert_e2c2v_2.copy_from(&u_vert[E2C2V_2][k_index], stdx::element_aligned);
@@ -373,10 +368,8 @@ class nabla4_unstructured : private nabla4_data<T> {
                     u_vert_e2c2v_3 * primal_normal_vert_v1_e2ecv[3] + v_vert_e2c2v_3 * primal_normal_vert_v2_e2ecv[3];
                 z_nabla2_e_edge_index.copy_from(&z_nabla2_e[edge_index][k_index], stdx::element_aligned);
                 const auto z_nabla4_e2_wp_v =
-                    4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_edge_index) *
-                                  inv_vert_vert_length_sqr +
-                              (nabv_tang_wp - 2.0 * z_nabla2_e_edge_index) *
-                                  inv_primal_edge_length_sqr);
+                    4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_edge_index) * inv_vert_vert_length_sqr +
+                              (nabv_tang_wp - 2.0 * z_nabla2_e_edge_index) * inv_primal_edge_length_sqr);
                 z_nabla4_e2_wp_v.copy_to(&(z_nabla4_e2_wp[edge_index][k_index]), stdx::element_aligned);
             };
             for (; k_index < KDim; ++k_index) {
@@ -389,10 +382,8 @@ class nabla4_unstructured : private nabla4_data<T> {
                                       u_vert[E2C2V_3][k_index] * primal_normal_vert_v1_e2ecv[3] +
                                       v_vert[E2C2V_3][k_index] * primal_normal_vert_v2_e2ecv[3];
                 z_nabla4_e2_wp[edge_index][k_index] =
-                    4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e[edge_index][k_index]) *
-                                  inv_vert_vert_length_sqr +
-                              (nabv_tang_wp - 2.0 * z_nabla2_e[edge_index][k_index]) *
-                                  inv_primal_edge_length_sqr);
+                    4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e[edge_index][k_index]) * inv_vert_vert_length_sqr +
+                              (nabv_tang_wp - 2.0 * z_nabla2_e[edge_index][k_index]) * inv_primal_edge_length_sqr);
             };
         };
     };
