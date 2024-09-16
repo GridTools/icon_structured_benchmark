@@ -25210,13 +25210,13 @@ int main(int argc, char *argv[]) {
         {55028, 55029, 55030, 55031}};
 
     if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <mode>, where mode: {all, scalar, pragma, for_each, for_each_unseq, simd}"
+        std::cerr << "Usage: " << argv[0] << " <mode>, where mode: {all, scalar, pragma, for_each, for_each_unseq, simd, simd_opt}"
                   << std::endl;
         return 1;
     }
 
     std::string mode = argv[1];
-    if (mode != "all" && mode != "scalar" && mode != "pragma" && mode != "for_each" && mode != "for_each_unseq" && mode != "simd") {
+    if (mode != "all" && mode != "scalar" && mode != "pragma" && mode != "for_each" && mode != "for_each_unseq" && mode != "simd" && mode != "simd_opt") {
         std::cerr << "Invalid mode. Choose one of: default, for_each, for_each_unseq, simd" << std::endl;
         return 1;
     }
@@ -25277,6 +25277,9 @@ int main(int argc, char *argv[]) {
                   << nabla4_benchmark_unstructured_torus_cpu_kfirst_simd_runtimes
                          [nabla4_benchmark_unstructured_torus_cpu_kfirst_simd_runtimes.size() / 2]
                   << std::endl;
+    };
+
+    if (mode == "simd_opt" || mode == "all") {
         auto nabla4_benchmark_unstructured_simd_torus_cpu_kfirst_simd_runtimes =
             nabla4_benchmark_unstructured_simd_cpu_kfirst_simd(
                 E2C2V_torus_1024, E2ECV_torus_1024, 9472, 4736, E2C2V_torus_1024.size(), 80, 4, repetitions, dry_runs);
