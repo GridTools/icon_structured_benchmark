@@ -26,6 +26,12 @@ NB_MODULE(icon_benchmark, m) {
     m.def("nabla4_benchmark_unstructured_cpu_ifirst", &nabla4_benchmark_unstructured_cpu_ifirst);
     m.def("nabla4_benchmark_unstructured_cpu_ifirst_gridtools", &nabla4_benchmark_unstructured_cpu_ifirst_gridtools);
     m.def("nabla4_benchmark_unstructured_cpu_kfirst", &nabla4_benchmark_unstructured_cpu_kfirst);
+    m.def("nabla4_benchmark_unstructured_cpu_kfirst_pragma", &nabla4_benchmark_unstructured_cpu_kfirst_pragma);
+    m.def("nabla4_benchmark_unstructured_cpu_kfirst_for_each", &nabla4_benchmark_unstructured_cpu_kfirst_for_each);
+    m.def("nabla4_benchmark_unstructured_cpu_kfirst_for_each_unseq",
+        &nabla4_benchmark_unstructured_cpu_kfirst_for_each_unseq);
+    m.def("nabla4_benchmark_unstructured_cpu_kfirst_simd", &nabla4_benchmark_unstructured_cpu_kfirst_simd);
+    m.def("nabla4_benchmark_unstructured_simd_cpu_kfirst_simd", &nabla4_benchmark_unstructured_simd_cpu_kfirst_simd);
     m.def("nabla4_benchmark_unstructured_cpu_kfirst_gridtools", &nabla4_benchmark_unstructured_cpu_kfirst_gridtools);
     m.def("nabla4_benchmark_unstructured_gpu_kloop_gridtools", &nabla4_benchmark_unstructured_gpu_kloop_gridtools);
     m.def("nabla4_benchmark_unstructured_gpu_naive_gridtools", &nabla4_benchmark_unstructured_gpu_naive_gridtools);
