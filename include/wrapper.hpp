@@ -389,6 +389,17 @@ std::vector<double> nabla4_benchmark_structured_torus_gpu_kloop_gridtools_halo(i
     int repetitions = 101,
     int dry_runs = 1);
 
+std::vector<double> nabla4_benchmark_structured_torus_gpu_kloop_gridtools_halo_pipeline(index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    index_type longitude_dim,
+    index_type latitude_dim,
+    index_type halo,
+    int repetitions = 101,
+    int dry_runs = 1);
+
 std::vector<double> nabla4_vertical_benchmark_structured_torus_gpu_kloop_gridtools_halo(index_type CellDim,
     index_type VertexDim,
     index_type EdgeDim,
@@ -530,6 +541,22 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_cpu_kfirst_gr
     std::vector<WP_TYPE> &inv_primal_edge_length);
 
 std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_gpu_kloop_gridtools_halo(index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    index_type longitude_dim,
+    index_type latitude_dim,
+    index_type halo,
+    std::vector<std::vector<VP_TYPE>> &u_vert,
+    std::vector<std::vector<VP_TYPE>> &v_vert,
+    std::vector<WP_TYPE> &primal_normal_vert_v1,
+    std::vector<WP_TYPE> &primal_normal_vert_v2,
+    std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+    std::vector<WP_TYPE> &inv_vert_vert_length,
+    std::vector<WP_TYPE> &inv_primal_edge_length);
+
+std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_gpu_kloop_gridtools_halo_pipeline(index_type CellDim,
     index_type VertexDim,
     index_type EdgeDim,
     index_type KDim,
