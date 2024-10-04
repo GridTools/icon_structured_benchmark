@@ -223,10 +223,16 @@ __global__ void __launch_bounds__(block_dims_structured_kloop_pipeline.size)
                                         v_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v2_3[color];
             const auto local_edge_index = local_edge_index_start + color * inner_grid_size;
             pipeline.producer_acquire();
-            const auto z_nabla2_e_ptr{&(z_nabla2_e_gt_tv(local_edge_index, k_index))};
             const auto shared_mem_index{threadIdx.z * blockDim.x * blockDim.y + threadIdx.x + threadIdx.y * blockDim.x};
-            cuda::memcpy_async(
-                thread, &smem[shared_mem_index], z_nabla2_e_ptr, cuda::aligned_size_t<8>(sizeof(WP_TYPE)), pipeline);
+            if (shared_mem_index % 2 == 0) {
+                const auto z_nabla2_e_ptr{&(z_nabla2_e_gt_tv(local_edge_index, k_index))};
+                cuda::memcpy_async(thread,
+                    &smem[shared_mem_index],
+                    z_nabla2_e_ptr,
+                    cuda::aligned_size_t<16>(sizeof(double2)),
+                    pipeline);
+            }
+            __syncwarp();
             pipeline.producer_commit();
             pipeline.consumer_wait();
             z_nabla4_e2_wp_gt_tv(local_edge_index, k_index) =
