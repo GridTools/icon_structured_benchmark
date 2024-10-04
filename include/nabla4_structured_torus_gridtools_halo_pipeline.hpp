@@ -7,6 +7,9 @@
 #include "nabla4_gridtools.hpp"
 
 #if defined(__CUDACC__)
+#include <cooperative_groups.h>
+#include <cuda/pipeline>
+
 template <typename T>
 constexpr block_dims get_block_dims_structured_kloop_pipeline() {
     throw std::runtime_error("Undefined block dimensions for type " + T::name + " in GPU backend");
@@ -197,6 +200,12 @@ __global__ void __launch_bounds__(block_dims_structured_kloop_pipeline.size)
             inv_primal_edge_length_gt_tv(local_edge_index_start + inner_grid_size),
         inv_primal_edge_length_gt_tv(local_edge_index_start + inner_grid_size + inner_grid_size) *
             inv_primal_edge_length_gt_tv(local_edge_index_start + inner_grid_size + inner_grid_size)};
+    auto grid = cooperative_groups::this_grid();
+    auto block = cooperative_groups::this_thread_block();
+    auto warp = cooperative_groups::tiled_partition<32>(block);
+    auto thread = cooperative_groups::this_thread();
+    extern __shared__ WP_TYPE smem[];
+    auto pipeline = cuda::make_pipeline();
     for (auto k_index{blockIdx.z * blockDim.z + threadIdx.z}; k_index < KDim; k_index += gridDim.z * blockDim.z) {
 #pragma unroll
         for (auto color{0}; color < 3; ++color) {
@@ -213,20 +222,34 @@ __global__ void __launch_bounds__(block_dims_structured_kloop_pipeline.size)
                                         u_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v1_3[color] +
                                         v_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v2_3[color];
             const auto local_edge_index = local_edge_index_start + color * inner_grid_size;
-            const auto z_nabla2_e = z_nabla2_e_gt_tv(local_edge_index, k_index);
+            pipeline.producer_acquire();
+            const auto z_nabla2_e_ptr{&(z_nabla2_e_gt_tv(local_edge_index, k_index))};
+            const auto shared_mem_index{threadIdx.z * blockDim.x * blockDim.y + threadIdx.x + threadIdx.y * blockDim.x};
+            cuda::memcpy_async(
+                thread, &smem[shared_mem_index], z_nabla2_e_ptr, cuda::aligned_size_t<8>(sizeof(WP_TYPE)), pipeline);
+            pipeline.producer_commit();
+            pipeline.consumer_wait();
             z_nabla4_e2_wp_gt_tv(local_edge_index, k_index) =
-                4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e) * inv_vert_vert_length_sqr[color] +
-                          (nabv_tang_wp - 2.0 * z_nabla2_e) * inv_primal_edge_length_sqr[color]);
+                4.0 * ((nabv_norm_wp - 2.0 * smem[shared_mem_index]) * inv_vert_vert_length_sqr[color] +
+                          (nabv_tang_wp - 2.0 * smem[shared_mem_index]) * inv_primal_edge_length_sqr[color]);
+            pipeline.consumer_release();
         };
     };
 };
 
 template <typename T>
 inline void nabla4_structured_torus_halo_gt_pipeline<T>::run_gpu_kloop_helper() {
-    dim3 tblocks(block_dims_structured_kloop.x, block_dims_structured_kloop.y, block_dims_structured_kloop.z);
+    dim3 tblocks(block_dims_structured_kloop_pipeline.x,
+        block_dims_structured_kloop_pipeline.y,
+        block_dims_structured_kloop_pipeline.z);
     const index_type inner_grid_size = (x_dim - 2 * halo) * (y_dim - halo * 2);
     dim3 grid((x_dim - 2 * halo + tblocks.x - 1) / tblocks.x, (y_dim - 2 * halo + tblocks.y - 1) / tblocks.y, 1);
-    run_gpu_kloop_pipeline_nabla4_structured<<<grid, tblocks>>>(KDim,
+    const auto shared_mem_size = block_dims_structured_kloop_pipeline.x * block_dims_structured_kloop_pipeline.y *
+                                 block_dims_structured_kloop_pipeline.z * sizeof(WP_TYPE);
+    // printf("Shared memory size: %d\n", shared_mem_size);
+    // printf("grid: (%d, %d, %d)\n", grid.x, grid.y, grid.z);
+    // printf("tblocks: (%d, %d, %d)\n", tblocks.x, tblocks.y, tblocks.z);
+    run_gpu_kloop_pipeline_nabla4_structured<<<grid, tblocks, shared_mem_size>>>(KDim,
         x_dim,
         x_dim - 2 * halo,
         y_dim,
