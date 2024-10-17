@@ -269,17 +269,18 @@ __global__ void __launch_bounds__(block_dims_unstructured_kloop.size, 2)
     const WP_TYPE inv_primal_edge_length_sqr =
         inv_primal_edge_length_gt_tv(edge_index) * inv_primal_edge_length_gt_tv(edge_index);
     for (auto k_index{blockIdx.y * blockDim.y + threadIdx.y}; k_index < KDim; k_index += gridDim.y * blockDim.y) {
-        double nabv_tang_wp = u_vert_gt_tv(E2C2V_0, k_index) * primal_normal_vert_v1_0 +
-                              v_vert_gt_tv(E2C2V_0, k_index) * primal_normal_vert_v2_0 +
-                              u_vert_gt_tv(E2C2V_1, k_index) * primal_normal_vert_v1_1 +
-                              v_vert_gt_tv(E2C2V_1, k_index) * primal_normal_vert_v2_1;
-        double nabv_norm_wp = u_vert_gt_tv(E2C2V_2, k_index) * primal_normal_vert_v1_2 +
-                              v_vert_gt_tv(E2C2V_2, k_index) * primal_normal_vert_v2_2 +
-                              u_vert_gt_tv(E2C2V_3, k_index) * primal_normal_vert_v1_3 +
-                              v_vert_gt_tv(E2C2V_3, k_index) * primal_normal_vert_v2_3;
+        const double nabv_tang_wp = u_vert_gt_tv(E2C2V_0, k_index) * primal_normal_vert_v1_0 +
+                                    v_vert_gt_tv(E2C2V_0, k_index) * primal_normal_vert_v2_0 +
+                                    u_vert_gt_tv(E2C2V_1, k_index) * primal_normal_vert_v1_1 +
+                                    v_vert_gt_tv(E2C2V_1, k_index) * primal_normal_vert_v2_1;
+        const double nabv_norm_wp = u_vert_gt_tv(E2C2V_2, k_index) * primal_normal_vert_v1_2 +
+                                    v_vert_gt_tv(E2C2V_2, k_index) * primal_normal_vert_v2_2 +
+                                    u_vert_gt_tv(E2C2V_3, k_index) * primal_normal_vert_v1_3 +
+                                    v_vert_gt_tv(E2C2V_3, k_index) * primal_normal_vert_v2_3;
+        const WP_TYPE z_nabla2_e = z_nabla2_e_gt_tv(edge_index, k_index);
         z_nabla4_e2_wp_gt_tv(edge_index, k_index) =
-            4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_tv(edge_index, k_index)) * inv_vert_vert_length_sqr +
-                      (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(edge_index, k_index)) * inv_primal_edge_length_sqr);
+            4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e) * inv_vert_vert_length_sqr +
+                      (nabv_tang_wp - 2.0 * z_nabla2_e) * inv_primal_edge_length_sqr);
     };
 };
 

@@ -83,10 +83,10 @@ namespace generated {
 
         using thread_block_sizes_t = gridtools::meta::list<
             gridtools::meta::list<gtfn::unstructured::dim::horizontal, gridtools::integral_constant<int, 32>>,
-            gridtools::meta::list<gtfn::unstructured::dim::vertical, gridtools::integral_constant<int, 8>>>;
+            gridtools::meta::list<gtfn::unstructured::dim::vertical, gridtools::integral_constant<int, 9>>>;
         using loop_block_sizes_t = gridtools::meta::list<
             gridtools::meta::list<gtfn::unstructured::dim::horizontal, gridtools::integral_constant<int, 1>>,
-            gridtools::meta::list<gtfn::unstructured::dim::vertical, gridtools::integral_constant<int, 1>>>;
+            gridtools::meta::list<gtfn::unstructured::dim::vertical, gridtools::integral_constant<int, 9>>>;
 
         inline auto calculate_nabla4 = [](auto... connectivities__) {
             return [connectivities__...](int repetitions,
