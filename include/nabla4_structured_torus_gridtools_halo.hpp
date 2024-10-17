@@ -337,11 +337,10 @@ __global__ void __launch_bounds__(block_dims_structured_kloop.size) run_gpu_kloo
                                         u_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v1_3[color] +
                                         v_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v2_3[color];
             const auto local_edge_index = local_edge_index_start + color * inner_grid_size;
+            const WP_TYPE z_nabla2_e = z_nabla2_e_gt_tv(local_edge_index, k_index);
             z_nabla4_e2_wp_gt_tv(local_edge_index, k_index) =
-                4.0 *
-                ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_tv(local_edge_index, k_index)) * inv_vert_vert_length_sqr[color] +
-                    (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(local_edge_index, k_index)) *
-                        inv_primal_edge_length_sqr[color]);
+                4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e) * inv_vert_vert_length_sqr[color] +
+                          (nabv_tang_wp - 2.0 * z_nabla2_e) * inv_primal_edge_length_sqr[color]);
         };
     };
 };
@@ -466,10 +465,10 @@ __global__ void __launch_bounds__(block_dims_structured_naive.size) run_gpu_naiv
                                     u_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v1_3[color] +
                                     v_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v2_3[color];
         const auto local_edge_index = local_edge_index_start + color * inner_grid_size;
+        const WP_TYPE z_nabla2_e = z_nabla2_e_gt_tv(local_edge_index, k_index);
         z_nabla4_e2_wp_gt_tv(local_edge_index, k_index) =
-            4.0 *
-            ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_tv(local_edge_index, k_index)) * inv_vert_vert_length_sqr[color] +
-                (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(local_edge_index, k_index)) * inv_primal_edge_length_sqr[color]);
+            4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e) * inv_vert_vert_length_sqr[color] +
+                      (nabv_tang_wp - 2.0 * z_nabla2_e) * inv_primal_edge_length_sqr[color]);
     };
 };
 

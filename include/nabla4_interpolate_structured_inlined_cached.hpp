@@ -409,9 +409,9 @@ __global__ void __maxnreg__(64) run_gpu_naive_nabla4_interpolate_inlined_cached_
         const auto local_edge_index = i - (blockIdx.x * blockDim.x) + 1 - halo +
                                       ((j_internal_block - (blockIdx.y * blockDim.y) + 1 - halo) * (blockDim.x + 1)) +
                                       k_level_cache_offset;
-        z_nabla4_e2[local_edge_index] =
-            4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_tv(edge_index, k_index)) * inv_vert_vert_length_sqr +
-                      (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(edge_index, k_index)) * inv_primal_edge_length_sqr);
+        const WP_TYPE z_nabla2_e = z_nabla2_e_gt_tv(edge_index, k_index);
+        z_nabla4_e2[local_edge_index] = 4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e) * inv_vert_vert_length_sqr +
+                                                  (nabv_tang_wp - 2.0 * z_nabla2_e) * inv_primal_edge_length_sqr);
     }
     // left
     {
@@ -474,12 +474,10 @@ __global__ void __maxnreg__(64) run_gpu_naive_nabla4_interpolate_inlined_cached_
                     i_internal_block - (blockIdx.x * blockDim.x) + 1 - halo +
                     ((j_internal_block - (blockIdx.y * blockDim.y) + 1 - halo) * (blockDim.x + 1)) +
                     (color + 1) * shared_mem_inner_domain + k_level_cache_offset;
+                const WP_TYPE z_nabla2_e = z_nabla2_e_gt_tv(edge_index + (color + 1) * outer_domain_size, k_index);
                 z_nabla4_e2[local_edge_index] =
-                    4.0 *
-                    ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_tv(edge_index + (color + 1) * outer_domain_size, k_index)) *
-                            inv_vert_vert_length_sqr[color] +
-                        (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(edge_index + (color + 1) * outer_domain_size, k_index)) *
-                            inv_primal_edge_length_sqr[color]);
+                    4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e) * inv_vert_vert_length_sqr[color] +
+                              (nabv_tang_wp - 2.0 * z_nabla2_e) * inv_primal_edge_length_sqr[color]);
             };
         }
     }
@@ -553,11 +551,10 @@ __global__ void __maxnreg__(64) run_gpu_naive_nabla4_interpolate_inlined_cached_
             const auto local_edge_index = i - (blockIdx.x * blockDim.x) + 1 - halo +
                                           ((j - (blockIdx.y * blockDim.y) + 1 - halo) * (blockDim.x + 1)) +
                                           color * shared_mem_inner_domain + k_level_cache_offset;
+            const WP_TYPE z_nabla2_e = z_nabla2_e_gt_tv(edge_index + color * outer_domain_size, k_index);
             z_nabla4_e2[local_edge_index] =
-                4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_tv(edge_index + color * outer_domain_size, k_index)) *
-                              inv_vert_vert_length_sqr[color] +
-                          (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(edge_index + color * outer_domain_size, k_index)) *
-                              inv_primal_edge_length_sqr[color]);
+                4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e) * inv_vert_vert_length_sqr[color] +
+                          (nabv_tang_wp - 2.0 * z_nabla2_e) * inv_primal_edge_length_sqr[color]);
         };
     }
     // top
@@ -606,11 +603,9 @@ __global__ void __maxnreg__(64) run_gpu_naive_nabla4_interpolate_inlined_cached_
         const auto local_edge_index = i - (blockIdx.x * blockDim.x) + 1 - halo +
                                       ((j_internal_block - (blockIdx.y * blockDim.y) + 1 - halo) * (blockDim.x + 1)) +
                                       2 * shared_mem_inner_domain + k_level_cache_offset;
-        z_nabla4_e2[local_edge_index] =
-            4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_tv(edge_index + 2 * outer_domain_size, k_index)) *
-                          inv_vert_vert_length_sqr +
-                      (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(edge_index + 2 * outer_domain_size, k_index)) *
-                          inv_primal_edge_length_sqr);
+        const WP_TYPE z_nabla2_e = z_nabla2_e_gt_tv(edge_index + 2 * outer_domain_size, k_index);
+        z_nabla4_e2[local_edge_index] = 4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e) * inv_vert_vert_length_sqr +
+                                                  (nabv_tang_wp - 2.0 * z_nabla2_e) * inv_primal_edge_length_sqr);
     }
     __syncthreads();
     const std::array<index_type, 6> v2e{get_v2e_per_orientation(i - halo + 1 - (blockIdx.x * blockDim.x),
