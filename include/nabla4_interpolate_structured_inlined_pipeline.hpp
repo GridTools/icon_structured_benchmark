@@ -105,7 +105,7 @@ constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_pipeline_k
 
 template <>
 constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_pipeline_kloop<int>() {
-    return {32, 6, 2, 384};
+    return {32, 4, 2, 256};
 };
 
 constexpr block_dims block_dims_structured_nabla_interpol_inlined_pipeline_kloop =
@@ -185,6 +185,54 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_p
         v2e2c2v_compressed[1],
         v2e2c2v_compressed[5],
         v2e2c2v_compressed[0]};
+    const std::array<WP_TYPE, 24> primal_normal_vert_v1{primal_normal_vert_v1_gt_tv(v2e2ecv[0]),
+        primal_normal_vert_v1_gt_tv(v2e2ecv[1]),
+        primal_normal_vert_v1_gt_tv(v2e2ecv[2]),
+        primal_normal_vert_v1_gt_tv(v2e2ecv[3]),
+        primal_normal_vert_v1_gt_tv(v2e2ecv[4]),
+        primal_normal_vert_v1_gt_tv(v2e2ecv[5]),
+        primal_normal_vert_v1_gt_tv(v2e2ecv[6]),
+        primal_normal_vert_v1_gt_tv(v2e2ecv[7]),
+        primal_normal_vert_v1_gt_tv(v2e2ecv[8]),
+        primal_normal_vert_v1_gt_tv(v2e2ecv[9]),
+        primal_normal_vert_v1_gt_tv(v2e2ecv[10]),
+        primal_normal_vert_v1_gt_tv(v2e2ecv[11]),
+        primal_normal_vert_v1_gt_tv(v2e2ecv[12]),
+        primal_normal_vert_v1_gt_tv(v2e2ecv[13]),
+        primal_normal_vert_v1_gt_tv(v2e2ecv[14]),
+        primal_normal_vert_v1_gt_tv(v2e2ecv[15]),
+        primal_normal_vert_v1_gt_tv(v2e2ecv[16]),
+        primal_normal_vert_v1_gt_tv(v2e2ecv[17]),
+        primal_normal_vert_v1_gt_tv(v2e2ecv[18]),
+        primal_normal_vert_v1_gt_tv(v2e2ecv[19]),
+        primal_normal_vert_v1_gt_tv(v2e2ecv[20]),
+        primal_normal_vert_v1_gt_tv(v2e2ecv[21]),
+        primal_normal_vert_v1_gt_tv(v2e2ecv[22]),
+        primal_normal_vert_v1_gt_tv(v2e2ecv[23])};
+    const std::array<WP_TYPE, 24> primal_normal_vert_v2{primal_normal_vert_v2_gt_tv(v2e2ecv[0]),
+        primal_normal_vert_v2_gt_tv(v2e2ecv[1]),
+        primal_normal_vert_v2_gt_tv(v2e2ecv[2]),
+        primal_normal_vert_v2_gt_tv(v2e2ecv[3]),
+        primal_normal_vert_v2_gt_tv(v2e2ecv[4]),
+        primal_normal_vert_v2_gt_tv(v2e2ecv[5]),
+        primal_normal_vert_v2_gt_tv(v2e2ecv[6]),
+        primal_normal_vert_v2_gt_tv(v2e2ecv[7]),
+        primal_normal_vert_v2_gt_tv(v2e2ecv[8]),
+        primal_normal_vert_v2_gt_tv(v2e2ecv[9]),
+        primal_normal_vert_v2_gt_tv(v2e2ecv[10]),
+        primal_normal_vert_v2_gt_tv(v2e2ecv[11]),
+        primal_normal_vert_v2_gt_tv(v2e2ecv[12]),
+        primal_normal_vert_v2_gt_tv(v2e2ecv[13]),
+        primal_normal_vert_v2_gt_tv(v2e2ecv[14]),
+        primal_normal_vert_v2_gt_tv(v2e2ecv[15]),
+        primal_normal_vert_v2_gt_tv(v2e2ecv[16]),
+        primal_normal_vert_v2_gt_tv(v2e2ecv[17]),
+        primal_normal_vert_v2_gt_tv(v2e2ecv[18]),
+        primal_normal_vert_v2_gt_tv(v2e2ecv[19]),
+        primal_normal_vert_v2_gt_tv(v2e2ecv[20]),
+        primal_normal_vert_v2_gt_tv(v2e2ecv[21]),
+        primal_normal_vert_v2_gt_tv(v2e2ecv[22]),
+        primal_normal_vert_v2_gt_tv(v2e2ecv[23])};
     const std::array<WP_TYPE, 6> inv_vert_vert_length{inv_vert_vert_length_gt_tv(v2e[0]),
         inv_vert_vert_length_gt_tv(v2e[1]),
         inv_vert_vert_length_gt_tv(v2e[2]),
@@ -235,65 +283,62 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_p
             pipeline.producer_acquire();
             cuda::memcpy_async(thread,
                 &smem[shared_mem_index_offset0],
-                &(primal_normal_vert_v1_gt_tv(v2e2ecv[4 * i])),
+                &(u_vert_gt_tv(E2C2V_0, k_index)),
                 cuda::aligned_size_t<8>(sizeof(WP_TYPE)),
                 pipeline);
             cuda::memcpy_async(thread,
                 &smem[shared_mem_index_offset1],
-                &(primal_normal_vert_v2_gt_tv(v2e2ecv[4 * i])),
+                &(v_vert_gt_tv(E2C2V_0, k_index)),
                 cuda::aligned_size_t<8>(sizeof(WP_TYPE)),
                 pipeline);
             cuda::memcpy_async(thread,
                 &smem[shared_mem_index_offset2],
-                &(primal_normal_vert_v1_gt_tv(v2e2ecv[4 * i + 1])),
+                &(u_vert_gt_tv(E2C2V_1, k_index)),
                 cuda::aligned_size_t<8>(sizeof(WP_TYPE)),
                 pipeline);
             cuda::memcpy_async(thread,
                 &smem[shared_mem_index_offset3],
-                &(primal_normal_vert_v2_gt_tv(v2e2ecv[4 * i + 1])),
+                &(v_vert_gt_tv(E2C2V_1, k_index)),
                 cuda::aligned_size_t<8>(sizeof(WP_TYPE)),
                 pipeline);
             cuda::memcpy_async(thread,
                 &smem[shared_mem_index_offset4],
-                &(primal_normal_vert_v1_gt_tv(v2e2ecv[4 * i + 2])),
+                &(u_vert_gt_tv(E2C2V_2, k_index)),
                 cuda::aligned_size_t<8>(sizeof(WP_TYPE)),
                 pipeline);
             cuda::memcpy_async(thread,
                 &smem[shared_mem_index_offset5],
-                &(primal_normal_vert_v2_gt_tv(v2e2ecv[4 * i + 2])),
+                &(v_vert_gt_tv(E2C2V_2, k_index)),
                 cuda::aligned_size_t<8>(sizeof(WP_TYPE)),
                 pipeline);
             cuda::memcpy_async(thread,
                 &smem[shared_mem_index_offset6],
-                &(primal_normal_vert_v1_gt_tv(v2e2ecv[4 * i + 3])),
+                &(u_vert_gt_tv(E2C2V_3, k_index)),
                 cuda::aligned_size_t<8>(sizeof(WP_TYPE)),
                 pipeline);
             cuda::memcpy_async(thread,
                 &smem[shared_mem_index_offset7],
-                &(primal_normal_vert_v2_gt_tv(v2e2ecv[4 * i + 3])),
+                &(v_vert_gt_tv(E2C2V_3, k_index)),
                 cuda::aligned_size_t<8>(sizeof(WP_TYPE)),
                 pipeline);
             pipeline.producer_commit();
             pipeline.consumer_wait();
-            const double nabv_tang_wp = u_vert_gt_tv(E2C2V_0, k_index) * smem[shared_mem_index_offset0] +
-                                        v_vert_gt_tv(E2C2V_0, k_index) * smem[shared_mem_index_offset1] +
-                                        u_vert_gt_tv(E2C2V_1, k_index) * smem[shared_mem_index_offset2] +
-                                        v_vert_gt_tv(E2C2V_1, k_index) * smem[shared_mem_index_offset3];
-            const double nabv_norm_wp = u_vert_gt_tv(E2C2V_2, k_index) * smem[shared_mem_index_offset4] +
-                                        v_vert_gt_tv(E2C2V_2, k_index) * smem[shared_mem_index_offset5] +
-                                        u_vert_gt_tv(E2C2V_3, k_index) * smem[shared_mem_index_offset6] +
-                                        v_vert_gt_tv(E2C2V_3, k_index) * smem[shared_mem_index_offset7];
+            const double nabv_tang_wp = smem[shared_mem_index_offset0] * primal_normal_vert_v1[4 * i] +
+                                        smem[shared_mem_index_offset1] * primal_normal_vert_v2[4 * i] +
+                                        smem[shared_mem_index_offset2] * primal_normal_vert_v1[4 * i + 1] +
+                                        smem[shared_mem_index_offset3] * primal_normal_vert_v2[4 * i + 1];
+            const double nabv_norm_wp = smem[shared_mem_index_offset4] * primal_normal_vert_v1[4 * i + 2] +
+                                        smem[shared_mem_index_offset5] * primal_normal_vert_v2[4 * i + 2] +
+                                        smem[shared_mem_index_offset6] * primal_normal_vert_v1[4 * i + 3] +
+                                        smem[shared_mem_index_offset7] * primal_normal_vert_v2[4 * i + 3];
             pipeline.consumer_release();
             pipeline.producer_acquire();
-            // if (shared_mem_index_offset0 % 2 == 0) {
-                const auto z_nabla2_e_ptr{&(z_nabla2_e_gt_tv(edge_index, k_index))};
-                cuda::memcpy_async(thread,
-                    &smem[shared_mem_index_offset0],
-                    z_nabla2_e_ptr,
-                    cuda::aligned_size_t<8>(sizeof(WP_TYPE)),
-                    pipeline);
-            // }
-            // __syncwarp();
+            const auto z_nabla2_e_ptr{&(z_nabla2_e_gt_tv(edge_index, k_index))};
+            cuda::memcpy_async(thread,
+                &smem[shared_mem_index_offset0],
+                z_nabla2_e_ptr,
+                cuda::aligned_size_t<8>(sizeof(WP_TYPE)),
+                pipeline);
             pipeline.producer_commit();
             pipeline.consumer_wait();
             const WP_TYPE z_nabla2_e = smem[shared_mem_index_offset0];
@@ -301,10 +346,6 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_p
                 4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e) * (inv_vert_vert_length[i] * inv_vert_vert_length[i]) +
                           (nabv_tang_wp - 2.0 * z_nabla2_e) * (inv_primal_edge_length[i] * inv_primal_edge_length[i]));
             pipeline.consumer_release();
-            // const WP_TYPE z_nabla2_e = z_nabla2_e_gt_tv(edge_index, k_index);
-            // z_nabla4_e2_wp[i] =
-            //     4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e) * (inv_vert_vert_length[i] * inv_vert_vert_length[i]) +
-            //               (nabv_tang_wp - 2.0 * z_nabla2_e) * (inv_primal_edge_length[i] * inv_primal_edge_length[i]));
         }
         p_u_out_gt_tv(vertex_index_internal, k_index) =
             z_nabla4_e2_wp[0] * ptr_coeff_1[0] + z_nabla4_e2_wp[1] * ptr_coeff_1[1] +
