@@ -4,6 +4,7 @@
 #include "interpolate_unstructured_gridtools.hpp"
 #include "nabla4_interpolate_structured_inlined.hpp"
 #include "nabla4_interpolate_structured_inlined_cached.hpp"
+#include "nabla4_interpolate_structured_inlined_pipeline.hpp"
 #include "nabla4_interpolate_structured_separate.hpp"
 #include "nabla4_interpolate_unstructured_inlined.hpp"
 #include "nabla4_interpolate_unstructured_inlined_v2v.hpp"
