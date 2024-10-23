@@ -71,13 +71,13 @@ decltype(auto) calculate_nabla4_wrapper_cpu(int repetitions,
 #if defined(IS_GPU)
 decltype(auto) calculate_nabla4_wrapper_gpu(int repetitions,
     int dry_runs,
-    std::pair<nanobind::ndarray<double, nanobind::shape<-1, -1>>, std::tuple<ptrdiff_t, ptrdiff_t>> u_vert,
-    std::pair<nanobind::ndarray<double, nanobind::shape<-1, -1>>, std::tuple<ptrdiff_t, ptrdiff_t>> v_vert,
-    std::pair<nanobind::ndarray<double, nanobind::shape<-1>>, std::tuple<ptrdiff_t>> primal_normal_vert_v1,
-    std::pair<nanobind::ndarray<double, nanobind::shape<-1>>, std::tuple<ptrdiff_t>> primal_normal_vert_v2,
-    std::pair<nanobind::ndarray<double, nanobind::shape<-1, -1>>, std::tuple<ptrdiff_t, ptrdiff_t>> z_nabla2_e,
-    std::pair<nanobind::ndarray<double, nanobind::shape<-1>>, std::tuple<ptrdiff_t>> inv_vert_vert_length,
-    std::pair<nanobind::ndarray<double, nanobind::shape<-1>>, std::tuple<ptrdiff_t>> inv_primal_edge_length,
+    std::pair<nanobind::ndarray<const double, nanobind::shape<-1, -1>>, std::tuple<ptrdiff_t, ptrdiff_t>> u_vert,
+    std::pair<nanobind::ndarray<const double, nanobind::shape<-1, -1>>, std::tuple<ptrdiff_t, ptrdiff_t>> v_vert,
+    std::pair<nanobind::ndarray<const double, nanobind::shape<-1>>, std::tuple<ptrdiff_t>> primal_normal_vert_v1,
+    std::pair<nanobind::ndarray<const double, nanobind::shape<-1>>, std::tuple<ptrdiff_t>> primal_normal_vert_v2,
+    std::pair<nanobind::ndarray<const double, nanobind::shape<-1, -1>>, std::tuple<ptrdiff_t, ptrdiff_t>> z_nabla2_e,
+    std::pair<nanobind::ndarray<const double, nanobind::shape<-1>>, std::tuple<ptrdiff_t>> inv_vert_vert_length,
+    std::pair<nanobind::ndarray<const double, nanobind::shape<-1>>, std::tuple<ptrdiff_t>> inv_primal_edge_length,
     std::pair<nanobind::ndarray<double, nanobind::shape<-1, -1>>, std::tuple<ptrdiff_t, ptrdiff_t>> z_nabla4_e2,
     std::int32_t horizontal_start,
     std::int32_t horizontal_end,
@@ -89,24 +89,24 @@ decltype(auto) calculate_nabla4_wrapper_gpu(int repetitions,
         dry_runs,
         gridtools::sid::rename_numbered_dimensions<generated::Vertex_t, generated::K_t>(
             gridtools::sid::shift_sid_origin(
-                gridtools::nanobind::as_const_sid(u_vert.first, gridtools::nanobind::stride_spec<1, -1>{}), u_vert.second)),
+                gridtools::nanobind::as_sid(u_vert.first, gridtools::nanobind::stride_spec<1, -1>{}), u_vert.second)),
         gridtools::sid::rename_numbered_dimensions<generated::Vertex_t, generated::K_t>(
             gridtools::sid::shift_sid_origin(
-                gridtools::nanobind::as_const_sid(v_vert.first, gridtools::nanobind::stride_spec<1, -1>{}), v_vert.second)),
+                gridtools::nanobind::as_sid(v_vert.first, gridtools::nanobind::stride_spec<1, -1>{}), v_vert.second)),
         gridtools::sid::rename_numbered_dimensions<generated::ECV_t>(gridtools::sid::shift_sid_origin(
-            gridtools::nanobind::as_const_sid(primal_normal_vert_v1.first, gridtools::nanobind::stride_spec<1>{}),
+            gridtools::nanobind::as_sid(primal_normal_vert_v1.first, gridtools::nanobind::stride_spec<1>{}),
             primal_normal_vert_v1.second)),
         gridtools::sid::rename_numbered_dimensions<generated::ECV_t>(gridtools::sid::shift_sid_origin(
-            gridtools::nanobind::as_const_sid(primal_normal_vert_v2.first, gridtools::nanobind::stride_spec<1>{}),
+            gridtools::nanobind::as_sid(primal_normal_vert_v2.first, gridtools::nanobind::stride_spec<1>{}),
             primal_normal_vert_v2.second)),
         gridtools::sid::rename_numbered_dimensions<generated::Edge_t, generated::K_t>(gridtools::sid::shift_sid_origin(
-            gridtools::nanobind::as_const_sid(z_nabla2_e.first, gridtools::nanobind::stride_spec<1, -1>{}),
+            gridtools::nanobind::as_sid(z_nabla2_e.first, gridtools::nanobind::stride_spec<1, -1>{}),
             z_nabla2_e.second)),
         gridtools::sid::rename_numbered_dimensions<generated::Edge_t>(gridtools::sid::shift_sid_origin(
-            gridtools::nanobind::as_const_sid(inv_vert_vert_length.first, gridtools::nanobind::stride_spec<1>{}),
+            gridtools::nanobind::as_sid(inv_vert_vert_length.first, gridtools::nanobind::stride_spec<1>{}),
             inv_vert_vert_length.second)),
         gridtools::sid::rename_numbered_dimensions<generated::Edge_t>(gridtools::sid::shift_sid_origin(
-            gridtools::nanobind::as_const_sid(inv_primal_edge_length.first, gridtools::nanobind::stride_spec<1>{}),
+            gridtools::nanobind::as_sid(inv_primal_edge_length.first, gridtools::nanobind::stride_spec<1>{}),
             inv_primal_edge_length.second)),
         gridtools::sid::rename_numbered_dimensions<generated::Edge_t, generated::K_t>(gridtools::sid::shift_sid_origin(
             gridtools::nanobind::as_sid(z_nabla4_e2.first, gridtools::nanobind::stride_spec<1, -1>{}),
