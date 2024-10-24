@@ -217,26 +217,33 @@ __global__ void __launch_bounds__(block_dims_structured_kloop_pipeline.size)
             const auto shared_mem_index_offset2{shared_mem_index_offset1 + shared_mem_offset};
             const auto shared_mem_index_offset3{shared_mem_index_offset2 + shared_mem_offset};
             pipeline.producer_acquire();
-            cuda::memcpy_async(thread,
-                &smem[shared_mem_index_offset0],
-                &(u_vert_gt_tv(E2C2V_0_c, k_index)),
-                cuda::aligned_size_t<8>(sizeof(WP_TYPE)),
-                pipeline);
-            cuda::memcpy_async(thread,
-                &smem[shared_mem_index_offset1],
-                &(v_vert_gt_tv(E2C2V_0_c, k_index)),
-                cuda::aligned_size_t<8>(sizeof(WP_TYPE)),
-                pipeline);
-            cuda::memcpy_async(thread,
-                &smem[shared_mem_index_offset2],
-                &(u_vert_gt_tv(E2C2V_1_c, k_index)),
-                cuda::aligned_size_t<8>(sizeof(WP_TYPE)),
-                pipeline);
-            cuda::memcpy_async(thread,
-                &smem[shared_mem_index_offset3],
-                &(v_vert_gt_tv(E2C2V_1_c, k_index)),
-                cuda::aligned_size_t<8>(sizeof(WP_TYPE)),
-                pipeline);
+            if (shared_mem_index_offset0 % 4 == 0) {
+                const auto* u_vert_e2c2v_0_ptr{&(u_vert_gt_tv(E2C2V_0_c, k_index))};
+                cuda::memcpy_async(thread,
+                    &smem[shared_mem_index_offset0],
+                    u_vert_e2c2v_0_ptr,
+                    (sizeof(double4)),
+                    pipeline);
+                const auto* v_vert_e2c2v_0_ptr{&(v_vert_gt_tv(E2C2V_0_c, k_index))};
+                cuda::memcpy_async(thread,
+                    &smem[shared_mem_index_offset1],
+                    v_vert_e2c2v_0_ptr,
+                    (sizeof(double4)),
+                    pipeline);
+                const auto* u_vert_e2c2v_1_ptr{&(u_vert_gt_tv(E2C2V_1_c, k_index))};
+                cuda::memcpy_async(thread,
+                    &smem[shared_mem_index_offset2],
+                    u_vert_e2c2v_1_ptr,
+                    (sizeof(double4)),
+                    pipeline);
+                const auto* v_vert_e2c2v_1_ptr{&(v_vert_gt_tv(E2C2V_1_c, k_index))};
+                cuda::memcpy_async(thread,
+                    &smem[shared_mem_index_offset3],
+                    v_vert_e2c2v_1_ptr,
+                    (sizeof(double4)),
+                    pipeline);
+            }
+            __syncwarp();
             pipeline.producer_commit();
             pipeline.consumer_wait();
             const double nabv_tang_wp = smem[shared_mem_index_offset0] * primal_normal_vert_v1_0[color] +
@@ -245,26 +252,33 @@ __global__ void __launch_bounds__(block_dims_structured_kloop_pipeline.size)
                                         smem[shared_mem_index_offset3] * primal_normal_vert_v2_1[color];
             pipeline.consumer_release();
             pipeline.producer_acquire();
-            cuda::memcpy_async(thread,
-                &smem[shared_mem_index_offset0],
-                &(u_vert_gt_tv(E2C2V_2_c, k_index)),
-                cuda::aligned_size_t<8>(sizeof(WP_TYPE)),
-                pipeline);
-            cuda::memcpy_async(thread,
-                &smem[shared_mem_index_offset1],
-                &(v_vert_gt_tv(E2C2V_2_c, k_index)),
-                cuda::aligned_size_t<8>(sizeof(WP_TYPE)),
-                pipeline);
-            cuda::memcpy_async(thread,
-                &smem[shared_mem_index_offset2],
-                &(u_vert_gt_tv(E2C2V_3_c, k_index)),
-                cuda::aligned_size_t<8>(sizeof(WP_TYPE)),
-                pipeline);
-            cuda::memcpy_async(thread,
-                &smem[shared_mem_index_offset3],
-                &(v_vert_gt_tv(E2C2V_3_c, k_index)),
-                cuda::aligned_size_t<8>(sizeof(WP_TYPE)),
-                pipeline);
+            if (shared_mem_index_offset0 % 4 == 0) {
+                const auto* u_vert_e2c2v_2_ptr{&(u_vert_gt_tv(E2C2V_2_c, k_index))};
+                cuda::memcpy_async(thread,
+                    &smem[shared_mem_index_offset0],
+                    u_vert_e2c2v_2_ptr,
+                    (sizeof(double4)),
+                    pipeline);
+                const auto* v_vert_e2c2v_2_ptr{&(v_vert_gt_tv(E2C2V_2_c, k_index))};
+                cuda::memcpy_async(thread,
+                    &smem[shared_mem_index_offset1],
+                    v_vert_e2c2v_2_ptr,
+                    (sizeof(double4)),
+                    pipeline);
+                const auto* u_vert_e2c2v_3_ptr{&(u_vert_gt_tv(E2C2V_3_c, k_index))};
+                cuda::memcpy_async(thread,
+                    &smem[shared_mem_index_offset2],
+                    u_vert_e2c2v_3_ptr,
+                    (sizeof(double4)),
+                    pipeline);
+                const auto* v_vert_e2c2v_3_ptr{&(v_vert_gt_tv(E2C2V_3_c, k_index))};
+                cuda::memcpy_async(thread,
+                    &smem[shared_mem_index_offset3],
+                    v_vert_e2c2v_3_ptr,
+                    (sizeof(double4)),
+                    pipeline);
+            }
+            __syncwarp();
             pipeline.producer_commit();
             pipeline.consumer_wait();
             const double nabv_norm_wp = smem[shared_mem_index_offset0] * primal_normal_vert_v1_2[color] +
@@ -275,7 +289,7 @@ __global__ void __launch_bounds__(block_dims_structured_kloop_pipeline.size)
             const auto local_edge_index = local_edge_index_start + color * inner_grid_size;
             pipeline.producer_acquire();
             if (shared_mem_index_offset0 % 2 == 0) {
-                const auto z_nabla2_e_ptr{&(z_nabla2_e_gt_tv(local_edge_index, k_index))};
+                const auto* z_nabla2_e_ptr{&(z_nabla2_e_gt_tv(local_edge_index, k_index))};
                 cuda::memcpy_async(thread,
                     &smem[shared_mem_index_offset0],
                     z_nabla2_e_ptr,
