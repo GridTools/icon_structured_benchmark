@@ -137,23 +137,24 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
         v2e_gt_tv(vertex_index, 3),
         v2e_gt_tv(vertex_index, 4),
         v2e_gt_tv(vertex_index, 5)};
-    const bool calculated_edge = true; // i == x_dim - 1 || threadIdx.x == blockDim.x - 1 || threadIdx.x + x_dim > blockDim.x;
+    //                               0 == 510   - 1 || 0           == 127            || 0           + 510    >= 128           510   <= 128         || 0           + 510   >= 510 * 590
+    const bool calculate_edges_1_3 = i == x_dim - 1 || threadIdx.x == blockDim.x - 1 || (threadIdx.x + x_dim >= blockDim.x && x_dim <= blockDim.x) || i + j * x_dim + x_dim >= interpolate_output_size;
     const std::array<index_type, 24> e2c2v{e2c2v_gt_tv(v2e[0], 0),
         e2c2v_gt_tv(v2e[0], 1),
         e2c2v_gt_tv(v2e[0], 2),
         e2c2v_gt_tv(v2e[0], 3),
-        calculated_edge ? e2c2v_gt_tv(v2e[1], 0) : 0,
-        calculated_edge ? e2c2v_gt_tv(v2e[1], 1) : 0,
-        calculated_edge ? e2c2v_gt_tv(v2e[1], 2) : 0,
-        calculated_edge ? e2c2v_gt_tv(v2e[1], 3) : 0,
+        calculate_edges_1_3 ? e2c2v_gt_tv(v2e[1], 0) : 0,
+        calculate_edges_1_3 ? e2c2v_gt_tv(v2e[1], 1) : 0,
+        calculate_edges_1_3 ? e2c2v_gt_tv(v2e[1], 2) : 0,
+        calculate_edges_1_3 ? e2c2v_gt_tv(v2e[1], 3) : 0,
         e2c2v_gt_tv(v2e[2], 0),
         e2c2v_gt_tv(v2e[2], 1),
         e2c2v_gt_tv(v2e[2], 2),
         e2c2v_gt_tv(v2e[2], 3),
-        calculated_edge ? e2c2v_gt_tv(v2e[3], 0) : 0,
-        calculated_edge ? e2c2v_gt_tv(v2e[3], 1) : 0,
-        calculated_edge ? e2c2v_gt_tv(v2e[3], 2) : 0,
-        calculated_edge ? e2c2v_gt_tv(v2e[3], 3) : 0,
+        calculate_edges_1_3 ? e2c2v_gt_tv(v2e[3], 0) : 0,
+        calculate_edges_1_3 ? e2c2v_gt_tv(v2e[3], 1) : 0,
+        calculate_edges_1_3 ? e2c2v_gt_tv(v2e[3], 2) : 0,
+        calculate_edges_1_3 ? e2c2v_gt_tv(v2e[3], 3) : 0,
         e2c2v_gt_tv(v2e[4], 0),
         e2c2v_gt_tv(v2e[4], 1),
         e2c2v_gt_tv(v2e[4], 2),
@@ -166,18 +167,18 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
         e2ecv_gt_tv(v2e[0], 1),
         e2ecv_gt_tv(v2e[0], 2),
         e2ecv_gt_tv(v2e[0], 3),
-        calculated_edge ? e2ecv_gt_tv(v2e[1], 0) : 0,
-        calculated_edge ? e2ecv_gt_tv(v2e[1], 1) : 0,
-        calculated_edge ? e2ecv_gt_tv(v2e[1], 2) : 0,
-        calculated_edge ? e2ecv_gt_tv(v2e[1], 3) : 0,
+        calculate_edges_1_3 ? e2ecv_gt_tv(v2e[1], 0) : 0,
+        calculate_edges_1_3 ? e2ecv_gt_tv(v2e[1], 1) : 0,
+        calculate_edges_1_3 ? e2ecv_gt_tv(v2e[1], 2) : 0,
+        calculate_edges_1_3 ? e2ecv_gt_tv(v2e[1], 3) : 0,
         e2ecv_gt_tv(v2e[2], 0),
         e2ecv_gt_tv(v2e[2], 1),
         e2ecv_gt_tv(v2e[2], 2),
         e2ecv_gt_tv(v2e[2], 3),
-        calculated_edge ? e2ecv_gt_tv(v2e[3], 0) : 0,
-        calculated_edge ? e2ecv_gt_tv(v2e[3], 1) : 0,
-        calculated_edge ? e2ecv_gt_tv(v2e[3], 2) : 0,
-        calculated_edge ? e2ecv_gt_tv(v2e[3], 3) : 0,
+        calculate_edges_1_3 ? e2ecv_gt_tv(v2e[3], 0) : 0,
+        calculate_edges_1_3 ? e2ecv_gt_tv(v2e[3], 1) : 0,
+        calculate_edges_1_3 ? e2ecv_gt_tv(v2e[3], 2) : 0,
+        calculate_edges_1_3 ? e2ecv_gt_tv(v2e[3], 3) : 0,
         e2ecv_gt_tv(v2e[4], 0),
         e2ecv_gt_tv(v2e[4], 1),
         e2ecv_gt_tv(v2e[4], 2),
@@ -190,18 +191,18 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
         primal_normal_vert_v1_gt_tv(e2ecv[1]),
         primal_normal_vert_v1_gt_tv(e2ecv[2]),
         primal_normal_vert_v1_gt_tv(e2ecv[3]),
-        calculated_edge ? primal_normal_vert_v1_gt_tv(e2ecv[4]) : 0,
-        calculated_edge ? primal_normal_vert_v1_gt_tv(e2ecv[5]) : 0,
-        calculated_edge ? primal_normal_vert_v1_gt_tv(e2ecv[6]) : 0,
-        calculated_edge ? primal_normal_vert_v1_gt_tv(e2ecv[7]) : 0,
+        calculate_edges_1_3 ? primal_normal_vert_v1_gt_tv(e2ecv[4]) : 0,
+        calculate_edges_1_3 ? primal_normal_vert_v1_gt_tv(e2ecv[5]) : 0,
+        calculate_edges_1_3 ? primal_normal_vert_v1_gt_tv(e2ecv[6]) : 0,
+        calculate_edges_1_3 ? primal_normal_vert_v1_gt_tv(e2ecv[7]) : 0,
         primal_normal_vert_v1_gt_tv(e2ecv[8]),
         primal_normal_vert_v1_gt_tv(e2ecv[9]),
         primal_normal_vert_v1_gt_tv(e2ecv[10]),
         primal_normal_vert_v1_gt_tv(e2ecv[11]),
-        calculated_edge ? primal_normal_vert_v1_gt_tv(e2ecv[12]) : 0,
-        calculated_edge ? primal_normal_vert_v1_gt_tv(e2ecv[13]) : 0,
-        calculated_edge ? primal_normal_vert_v1_gt_tv(e2ecv[14]) : 0,
-        calculated_edge ? primal_normal_vert_v1_gt_tv(e2ecv[15]) : 0,
+        calculate_edges_1_3 ? primal_normal_vert_v1_gt_tv(e2ecv[12]) : 0,
+        calculate_edges_1_3 ? primal_normal_vert_v1_gt_tv(e2ecv[13]) : 0,
+        calculate_edges_1_3 ? primal_normal_vert_v1_gt_tv(e2ecv[14]) : 0,
+        calculate_edges_1_3 ? primal_normal_vert_v1_gt_tv(e2ecv[15]) : 0,
         primal_normal_vert_v1_gt_tv(e2ecv[16]),
         primal_normal_vert_v1_gt_tv(e2ecv[17]),
         primal_normal_vert_v1_gt_tv(e2ecv[18]),
@@ -214,18 +215,18 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
         primal_normal_vert_v2_gt_tv(e2ecv[1]),
         primal_normal_vert_v2_gt_tv(e2ecv[2]),
         primal_normal_vert_v2_gt_tv(e2ecv[3]),
-        calculated_edge ? primal_normal_vert_v2_gt_tv(e2ecv[4]) : 0,
-        calculated_edge ? primal_normal_vert_v2_gt_tv(e2ecv[5]) : 0,
-        calculated_edge ? primal_normal_vert_v2_gt_tv(e2ecv[6]) : 0,
-        calculated_edge ? primal_normal_vert_v2_gt_tv(e2ecv[7]) : 0,
+        calculate_edges_1_3 ? primal_normal_vert_v2_gt_tv(e2ecv[4]) : 0,
+        calculate_edges_1_3 ? primal_normal_vert_v2_gt_tv(e2ecv[5]) : 0,
+        calculate_edges_1_3 ? primal_normal_vert_v2_gt_tv(e2ecv[6]) : 0,
+        calculate_edges_1_3 ? primal_normal_vert_v2_gt_tv(e2ecv[7]) : 0,
         primal_normal_vert_v2_gt_tv(e2ecv[8]),
         primal_normal_vert_v2_gt_tv(e2ecv[9]),
         primal_normal_vert_v2_gt_tv(e2ecv[10]),
         primal_normal_vert_v2_gt_tv(e2ecv[11]),
-        calculated_edge ? primal_normal_vert_v2_gt_tv(e2ecv[12]) : 0,
-        calculated_edge ? primal_normal_vert_v2_gt_tv(e2ecv[13]) : 0,
-        calculated_edge ? primal_normal_vert_v2_gt_tv(e2ecv[14]) : 0,
-        calculated_edge ? primal_normal_vert_v2_gt_tv(e2ecv[15]) : 0,
+        calculate_edges_1_3 ? primal_normal_vert_v2_gt_tv(e2ecv[12]) : 0,
+        calculate_edges_1_3 ? primal_normal_vert_v2_gt_tv(e2ecv[13]) : 0,
+        calculate_edges_1_3 ? primal_normal_vert_v2_gt_tv(e2ecv[14]) : 0,
+        calculate_edges_1_3 ? primal_normal_vert_v2_gt_tv(e2ecv[15]) : 0,
         primal_normal_vert_v2_gt_tv(e2ecv[16]),
         primal_normal_vert_v2_gt_tv(e2ecv[17]),
         primal_normal_vert_v2_gt_tv(e2ecv[18]),
@@ -235,29 +236,26 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
         primal_normal_vert_v2_gt_tv(e2ecv[22]),
         primal_normal_vert_v2_gt_tv(e2ecv[23])};
     const std::array<WP_TYPE, 6> inv_vert_vert_length{inv_vert_vert_length_gt_tv(v2e[0]),
-        calculated_edge ? inv_vert_vert_length_gt_tv(v2e[1]) : 0,
+        calculate_edges_1_3 ? inv_vert_vert_length_gt_tv(v2e[1]) : 0,
         inv_vert_vert_length_gt_tv(v2e[2]),
-        calculated_edge ? inv_vert_vert_length_gt_tv(v2e[3]) : 0,
+        calculate_edges_1_3 ? inv_vert_vert_length_gt_tv(v2e[3]) : 0,
         inv_vert_vert_length_gt_tv(v2e[4]),
         inv_vert_vert_length_gt_tv(v2e[5])};
     const std::array<WP_TYPE, 6> inv_primal_edge_length{inv_primal_edge_length_gt_tv(v2e[0]),
-        calculated_edge ? inv_primal_edge_length_gt_tv(v2e[1]) : 0,
+        calculate_edges_1_3 ? inv_primal_edge_length_gt_tv(v2e[1]) : 0,
         inv_primal_edge_length_gt_tv(v2e[2]),
-        calculated_edge ? inv_primal_edge_length_gt_tv(v2e[3]) : 0,
+        calculate_edges_1_3 ? inv_primal_edge_length_gt_tv(v2e[3]) : 0,
         inv_primal_edge_length_gt_tv(v2e[4]),
         inv_primal_edge_length_gt_tv(v2e[5])};
     const int initial_k_index{blockIdx.y * blockDim.y + threadIdx.y};
     int k_repetition{0};
     for (int k_index{initial_k_index}; k_index < KDim && k_repetition < k_repetitions; k_index += gridDim.y * blockDim.y) {
-        if (!calculated_edge) {
-            continue;
-        }
         const auto shared_mem_vertex_index{(threadIdx.x + k_repetition * blockDim.x) * 6};
 #pragma unroll
         for (int edge_id{}; edge_id < 6; ++edge_id) {
-            // if (!((edge_id == 1 || edge_id == 3) && calculated_edge)) {
-            //     continue;
-            // }
+            if ((edge_id == 1 || edge_id == 3) && !calculate_edges_1_3) {
+                continue;
+            }
             const auto edge_index = v2e[edge_id];
             const auto E2C2V_0 = e2c2v[edge_id * 4];
             const auto E2C2V_1 = e2c2v[edge_id * 4 + 1];
@@ -275,14 +273,14 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
             z_nabla4_e2[shared_mem_vertex_index + edge_id] =
                 4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e) * inv_vert_vert_length[edge_id] * inv_vert_vert_length[edge_id] +
                         (nabv_tang_wp - 2.0 * z_nabla2_e) * inv_primal_edge_length[edge_id] * inv_primal_edge_length[edge_id]);
-            // if (threadIdx.x == 0 && i > 0) {
-            //     const auto neighbor_vertex_index{((threadIdx.x - 1) + k_repetition * blockDim.x) * 6 + 1};
-            //     z_nabla4_e2[neighbor_vertex_index] = z_nabla4_e2[shared_mem_vertex_index];
-            // }
-            // if (threadIdx.x == x_dim - 1 && i < x_dim - 1) {
-            //     const auto neighbor_vertex_index{((threadIdx.x + 1) + k_repetition * blockDim.x) * 6};
-            //     z_nabla4_e2[neighbor_vertex_index] = z_nabla4_e2[shared_mem_vertex_index];
-            // }
+            if (i > 0 && threadIdx.x >= 1) {
+                const auto neighbor_vertex_index{((threadIdx.x - 1) + k_repetition * blockDim.x) * 6 + 1};
+                z_nabla4_e2[neighbor_vertex_index] = z_nabla4_e2[shared_mem_vertex_index];
+            }
+            if (j > 0 && threadIdx.x >= x_dim) {
+                const auto neighbor_vertex_index{((threadIdx.x - x_dim) + k_repetition * blockDim.x) * 6};
+                z_nabla4_e2[neighbor_vertex_index] = z_nabla4_e2[shared_mem_vertex_index];
+            }
         }
         k_repetition++;
     }
@@ -308,7 +306,6 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
             z_nabla4_e2[shared_mem_vertex_index + 3],
             z_nabla4_e2[shared_mem_vertex_index + 4],
             z_nabla4_e2[shared_mem_vertex_index + 5]};
-        // const std::array<WP_TYPE, 6> z_nabla4_e2_wp{1, 1, 1, 1, 1, 1};
         p_u_out_gt_tv(vertex_index, k_index) = z_nabla4_e2_wp[0] * ptr_coeff_1[0] + z_nabla4_e2_wp[1] * ptr_coeff_1[1] +
                                                z_nabla4_e2_wp[2] * ptr_coeff_1[2] + z_nabla4_e2_wp[3] * ptr_coeff_1[3] +
                                                z_nabla4_e2_wp[4] * ptr_coeff_1[4] + z_nabla4_e2_wp[5] * ptr_coeff_1[5];
