@@ -761,7 +761,13 @@ constexpr block_dims get_block_dims_unstructured_nabla_interpol_inlined_v2v_naiv
 constexpr block_dims block_dims_unstructured_nabla_interpol_inlined_v2v_naive =
     get_block_dims_unstructured_nabla_interpol_inlined_v2v_naive<index_type>();
 
-__global__ void __maxnreg__(80) run_gpu_naive_nabla4_interpolate_inlined_v2v_unstructured(index_type nabla4_output_size,
+__global__ void
+#if __CUDACC_VER_MAJOR__ < 12 || (__CUDACC_VER_MAJOR__ == 12 && __CUDACC_VER_MINOR__ < 5)
+__launch_bounds__(block_dims_unstructured_nabla_interpol_inlined_v2v_naive.size)
+#else
+__maxnreg__(80)
+#endif
+run_gpu_naive_nabla4_interpolate_inlined_v2v_unstructured(index_type nabla4_output_size,
     index_type interpolate_output_size,
     index_type CellDim,
     index_type VertexDim,
