@@ -1167,10 +1167,6 @@ def run_sanity_checks(
                 ptr_coeff_1,
                 ptr_coeff_2,
             )
-            # print("p_u_out_gpu_kloop_unstructured_inlined_cached")
-            # print(p_u_out_gpu_kloop_unstructured_inlined_cached)
-            # print("p_u_out_ref_separate")
-            # print(p_u_out_ref_separate)
             assert np.allclose(
                 p_u_out_gpu_kloop_unstructured_inlined_cached, p_u_out_ref_separate
             )
