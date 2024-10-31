@@ -142,9 +142,9 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
     for (int internal_edge_id{}; internal_edge_id < 6; ++internal_edge_id) {
         // calculate 4 edges (south & west) [0, 2, 4, 5]
         // if threadIdx.x + x_dim > blockDim.x || i == x_dim - 1, then we need to calculate the rest 2 edges (north & east) [1, 3]
-        if ((internal_edge_id == 1 || internal_edge_id == 3) && !(i == x_dim - 1 || threadIdx.x + x_dim > blockDim.x)) {
-            continue;
-        }
+        // if ((internal_edge_id == 1 || internal_edge_id == 3) && !(i == x_dim - 1 || threadIdx.x + x_dim > blockDim.x)) {
+        //     continue;
+        // }
         const index_type edge_index{v2e[internal_edge_id]};
         const std::array<index_type, 4> e2c2v{e2c2v_gt_tv(edge_index, 0),
             e2c2v_gt_tv(edge_index, 1),
@@ -181,14 +181,14 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
             z_nabla4_e2[shared_mem_vertex_index] =
                 4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e) * inv_vert_vert_length_sqr +
                           (nabv_tang_wp - 2.0 * z_nabla2_e) * inv_primal_edge_length_sqr);
-            if (internal_edge_id == 0 && vertex_index > 0) {
-                const auto neighbor_vertex_index{((threadIdx.x - 1) + k_repetition * blockDim.x) * 6 + 1};
-                z_nabla4_e2[neighbor_vertex_index] = z_nabla4_e2[shared_mem_vertex_index];
-            }
-            if (internal_edge_id == 2 && vertex_index > x_dim) {
-                const auto neighbor_vertex_index{((threadIdx.x - x_dim) + k_repetition * blockDim.x) * 6 + 3};
-                z_nabla4_e2[neighbor_vertex_index] = z_nabla4_e2[shared_mem_vertex_index];
-            }
+            // if (internal_edge_id == 0 && vertex_index > 0) {
+            //     const auto neighbor_vertex_index{((threadIdx.x - 1) + k_repetition * blockDim.x) * 6 + 1};
+            //     z_nabla4_e2[neighbor_vertex_index] = z_nabla4_e2[shared_mem_vertex_index];
+            // }
+            // if (internal_edge_id == 2 && vertex_index > x_dim) {
+            //     const auto neighbor_vertex_index{((threadIdx.x - x_dim) + k_repetition * blockDim.x) * 6 + 3};
+            //     z_nabla4_e2[neighbor_vertex_index] = z_nabla4_e2[shared_mem_vertex_index];
+            // }
             k_repetition++;
         }
     }
@@ -208,13 +208,13 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
     int k_repetition{0};
     for (int k_index{initial_k_index}; k_index < KDim && k_repetition < k_repetitions; k_index += gridDim.y * blockDim.y) {
         const auto shared_mem_vertex_index{(threadIdx.x + k_repetition * blockDim.x) * 6};
-        // const std::array<WP_TYPE, 6> z_nabla4_e2_wp{z_nabla4_e2[shared_mem_vertex_index],
-        //     z_nabla4_e2[shared_mem_vertex_index + 1],
-        //     z_nabla4_e2[shared_mem_vertex_index + 2],
-        //     z_nabla4_e2[shared_mem_vertex_index + 3],
-        //     z_nabla4_e2[shared_mem_vertex_index + 4],
-        //     z_nabla4_e2[shared_mem_vertex_index + 5]};
-        const std::array<WP_TYPE, 6> z_nabla4_e2_wp{1, 1, 1, 1, 1, 1};
+        const std::array<WP_TYPE, 6> z_nabla4_e2_wp{z_nabla4_e2[shared_mem_vertex_index],
+            z_nabla4_e2[shared_mem_vertex_index + 1],
+            z_nabla4_e2[shared_mem_vertex_index + 2],
+            z_nabla4_e2[shared_mem_vertex_index + 3],
+            z_nabla4_e2[shared_mem_vertex_index + 4],
+            z_nabla4_e2[shared_mem_vertex_index + 5]};
+        // const std::array<WP_TYPE, 6> z_nabla4_e2_wp{1, 1, 1, 1, 1, 1};
         p_u_out_gt_tv(vertex_index, k_index) = z_nabla4_e2_wp[0] * ptr_coeff_1[0] + z_nabla4_e2_wp[1] * ptr_coeff_1[1] +
                                                z_nabla4_e2_wp[2] * ptr_coeff_1[2] + z_nabla4_e2_wp[3] * ptr_coeff_1[3] +
                                                z_nabla4_e2_wp[4] * ptr_coeff_1[4] + z_nabla4_e2_wp[5] * ptr_coeff_1[5];
@@ -230,7 +230,8 @@ inline void nabla4_interpolate_unstructured_inlined_cached<T>::run_gpu_kloop_hel
     dim3 tblocks(block_dims_unstructured_nabla_interpol_inlined_cached_kloop.x,
         block_dims_unstructured_nabla_interpol_inlined_cached_kloop.y,
         block_dims_unstructured_nabla_interpol_inlined_cached_kloop.z);
-    dim3 grid((interpolate_data.output_size + tblocks.x - 1) / tblocks.x, 1, 1);
+    const int KDim_ceil = std::ceil(static_cast<double>(interpolate_data.KDim) / k_repetitions);
+    dim3 grid((interpolate_data.output_size + tblocks.x - 1) / tblocks.x, (KDim_ceil + tblocks.y - 1) / tblocks.y , 1);
     const auto shared_mem_size{tblocks.x * k_repetitions * 6 * sizeof(WP_TYPE)};
     run_gpu_kloop_nabla4_interpolate_inlined_cached_unstructured<<<grid, tblocks, shared_mem_size>>>(nabla4_data.output_size,
         interpolate_data.output_size,

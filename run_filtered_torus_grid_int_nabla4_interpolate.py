@@ -885,10 +885,10 @@ def run_sanity_checks(
                 ptr_coeff_1,
                 ptr_coeff_2,
             )
-            print("p_u_out_gpu_kloop_unstructured_inlined_cached")
-            print(p_u_out_gpu_kloop_unstructured_inlined_cached)
-            print("p_u_out_ref_separate")
-            print(p_u_out_ref_separate)
+            # print("p_u_out_gpu_kloop_unstructured_inlined_cached")
+            # print(p_u_out_gpu_kloop_unstructured_inlined_cached)
+            # print("p_u_out_ref_separate")
+            # print(p_u_out_ref_separate)
             assert np.allclose(
                 p_u_out_gpu_kloop_unstructured_inlined_cached, p_u_out_ref_separate
             )
@@ -1531,6 +1531,21 @@ def run_benchmarks():
                 torus_grid.num_edges,
                 torus_grid.num_levels,
                 torus_grid.size[E2C2VDim],
+                repetitions,
+                dry_runs,
+            )
+            runtimes[
+                "nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined_cached"
+            ] = icon_benchmark.nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined_cached(
+                filtered_e2c2v_inlined,
+                filtered_e2ecv_inlined,
+                filtered_v2e_inlined,
+                torus_grid.num_cells,
+                torus_grid.num_vertices,
+                torus_grid.num_edges,
+                torus_grid.num_levels,
+                torus_grid.size[E2C2VDim],
+                grid_cartesian_dimensions[0],
                 repetitions,
                 dry_runs,
             )
