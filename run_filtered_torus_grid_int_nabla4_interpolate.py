@@ -861,6 +861,42 @@ def run_sanity_checks(
             )
             print("unstructured gpu_kloop inlined sanity check passed")
 
+            print("Running unstructured gpu_kloop inlined cached sanity check")
+            (
+                p_u_out_gpu_kloop_unstructured_inlined_cached,
+                p_v_out_gpu_kloop_unstructured_inlined_cached,
+            ) = icon_benchmark.nabla4_interpolate_validate_unstructured_gpu_kloop_inlined_cached(
+                filtered_e2c2v_inlined,
+                filtered_e2ecv_inlined,
+                filtered_e2v_inlined,
+                random_validation_data_separate.CellDim,
+                random_validation_data_separate.VertexDim,
+                random_validation_data_separate.EdgeDim,
+                random_validation_data_separate.KDim,
+                random_validation_data_separate.ECVDim,
+                lon_dim,
+                np.array(random_validation_data_separate.u_vert).T,
+                np.array(random_validation_data_separate.v_vert).T,
+                random_validation_data_separate.primal_normal_vert_v1,
+                random_validation_data_separate.primal_normal_vert_v2,
+                z_nabla2_e_inlined,
+                inv_vert_vert_length_inlined,
+                inv_primal_edge_length_inlined,
+                ptr_coeff_1,
+                ptr_coeff_2,
+            )
+            print("p_u_out_gpu_kloop_unstructured_inlined_cached")
+            print(p_u_out_gpu_kloop_unstructured_inlined_cached)
+            print("p_u_out_ref_separate")
+            print(p_u_out_ref_separate)
+            assert np.allclose(
+                p_u_out_gpu_kloop_unstructured_inlined_cached, p_u_out_ref_separate
+            )
+            assert np.allclose(
+                p_v_out_gpu_kloop_unstructured_inlined_cached, p_v_out_ref_separate
+            )
+            print("unstructured gpu_kloop inlined cached sanity check passed")
+
             print("Running unstructured gpu_kloop inlined v2v sanity check")
             (
                 p_u_out_gpu_kloop_unstructured_inlined,
