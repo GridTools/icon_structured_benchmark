@@ -1167,10 +1167,10 @@ def run_sanity_checks(
                 ptr_coeff_1,
                 ptr_coeff_2,
             )
-            print("p_u_out_gpu_kloop_unstructured_inlined_cached")
-            print(p_u_out_gpu_kloop_unstructured_inlined_cached)
-            print("p_u_out_ref_separate")
-            print(p_u_out_ref_separate)
+            # print("p_u_out_gpu_kloop_unstructured_inlined_cached")
+            # print(p_u_out_gpu_kloop_unstructured_inlined_cached)
+            # print("p_u_out_ref_separate")
+            # print(p_u_out_ref_separate)
             assert np.allclose(
                 p_u_out_gpu_kloop_unstructured_inlined_cached, p_u_out_ref_separate
             )
@@ -2262,198 +2262,79 @@ def run_benchmarks():
                 )
 
         if args.combination in ["all", "inlined"]:
-            if not args.vertical:
-                runtimes[
-                    "nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined"
-                ] = icon_benchmark.nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined(
-                    filtered_e2c2v_inlined,
-                    filtered_e2ecv_inlined,
-                    filtered_v2e_inlined,
-                    torus_grid.num_cells,
-                    torus_grid.num_vertices,
-                    torus_grid.num_edges,
-                    torus_grid.num_levels,
-                    torus_grid.size[E2C2VDim],
-                    repetitions,
-                    dry_runs,
-                )
-                print(
-                    "nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined median: {}".format(
-                        np.median(
-                            runtimes[
-                                "nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined"
-                            ]
-                        )
-                    )
-                )
-            else:
-                runtimes[
-                    "nabla4_vertical_interpolate_benchmark_unstructured_gpu_kloop_inlined"
-                ] = icon_benchmark.nabla4_vertical_interpolate_benchmark_unstructured_gpu_kloop_inlined(
-                    filtered_e2c2v_inlined,
-                    filtered_e2ecv_inlined,
-                    filtered_v2e_inlined,
-                    torus_grid.num_cells,
-                    torus_grid.num_vertices,
-                    torus_grid.num_edges,
-                    torus_grid.num_levels,
-                    torus_grid.size[E2C2VDim],
-                    repetitions,
-                    dry_runs,
-                )
-                print(
-                    "nabla4_vertical_interpolate_benchmark_unstructured_gpu_kloop_inlined median: {}".format(
-                        np.median(
-                            runtimes[
-                                "nabla4_vertical_interpolate_benchmark_unstructured_gpu_kloop_inlined"
-                            ]
-                        )
-                    )
-                )
-            if not args.vertical:
-                runtimes[
-                    "nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined_v2v"
-                ] = icon_benchmark.nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined_v2v(
-                    filtered_e2c2v_inlined,
-                    filtered_e2ecv_inlined,
-                    filtered_v2e_inlined,
-                    torus_grid.num_cells,
-                    torus_grid.num_vertices,
-                    torus_grid.num_edges,
-                    torus_grid.num_levels,
-                    torus_grid.size[E2C2VDim],
-                    repetitions,
-                    dry_runs,
-                )
-                print(
-                    "nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined_v2v median: {}".format(
-                        np.median(
-                            runtimes[
-                                "nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined_v2v"
-                            ]
-                        )
-                    )
-                )
-            else:
-                runtimes[
-                    "nabla4_vertical_interpolate_benchmark_unstructured_gpu_kloop_inlined_v2v"
-                ] = icon_benchmark.nabla4_vertical_interpolate_benchmark_unstructured_gpu_kloop_inlined_v2v(
-                    filtered_e2c2v_inlined,
-                    filtered_e2ecv_inlined,
-                    filtered_v2e_inlined,
-                    torus_grid.num_cells,
-                    torus_grid.num_vertices,
-                    torus_grid.num_edges,
-                    torus_grid.num_levels,
-                    torus_grid.size[E2C2VDim],
-                    repetitions,
-                    dry_runs,
-                )
-                print(
-                    "nabla4_vertical_interpolate_benchmark_unstructured_gpu_kloop_inlined_v2v median: {}".format(
-                        np.median(
-                            runtimes[
-                                "nabla4_vertical_interpolate_benchmark_unstructured_gpu_kloop_inlined_v2v"
-                            ]
-                        )
-                    )
-                )
-            if not args.vertical:
-                runtimes[
-                    "nabla4_interpolate_benchmark_structured_gpu_kloop_inlined"
-                ] = icon_benchmark.nabla4_interpolate_benchmark_structured_gpu_kloop_inlined(
-                    torus_grid.num_cells,
-                    torus_grid.num_vertices,
-                    torus_grid.num_edges,
-                    torus_grid.num_levels,
-                    torus_grid.size[E2C2VDim],
-                    grid_cartesian_dimensions[0],
-                    grid_cartesian_dimensions[1],
-                    halo,
-                    repetitions,
-                    dry_runs,
-                )
-                print(
-                    "nabla4_interpolate_benchmark_structured_gpu_kloop_inlined median: {}".format(
-                        np.median(
-                            runtimes[
-                                "nabla4_interpolate_benchmark_structured_gpu_kloop_inlined"
-                            ]
-                        )
-                    )
-                )
-            else:
-                runtimes[
-                    "nabla4_vertical_interpolate_benchmark_structured_gpu_kloop_inlined"
-                ] = icon_benchmark.nabla4_vertical_interpolate_benchmark_structured_gpu_kloop_inlined(
-                    torus_grid.num_cells,
-                    torus_grid.num_vertices,
-                    torus_grid.num_edges,
-                    torus_grid.num_levels,
-                    torus_grid.size[E2C2VDim],
-                    grid_cartesian_dimensions[0],
-                    grid_cartesian_dimensions[1],
-                    halo,
-                    repetitions,
-                    dry_runs,
-                )
-                print(
-                    "nabla4_vertical_interpolate_benchmark_structured_gpu_kloop_inlined median: {}".format(
-                        np.median(
-                            runtimes[
-                                "nabla4_vertical_interpolate_benchmark_structured_gpu_kloop_inlined"
-                            ]
-                        )
-                    )
-                )
-            if not args.vertical:
-                runtimes[
-                    "nabla4_interpolate_benchmark_structured_gpu_kloop_inlined_cached"
-                ] = icon_benchmark.nabla4_interpolate_benchmark_structured_gpu_kloop_inlined_cached(
-                    torus_grid.num_cells,
-                    torus_grid.num_vertices,
-                    torus_grid.num_edges,
-                    torus_grid.num_levels,
-                    torus_grid.size[E2C2VDim],
-                    grid_cartesian_dimensions[0],
-                    grid_cartesian_dimensions[1],
-                    halo,
-                    repetitions,
-                    dry_runs,
-                )
-                print(
-                    "nabla4_interpolate_benchmark_structured_gpu_kloop_inlined_cached median: {}".format(
-                        np.median(
-                            runtimes[
-                                "nabla4_interpolate_benchmark_structured_gpu_kloop_inlined_cached"
-                            ]
-                        )
-                    )
-                )
-            else:
-                runtimes[
-                    "nabla4_vertical_interpolate_benchmark_structured_gpu_kloop_inlined_cached"
-                ] = icon_benchmark.nabla4_vertical_interpolate_benchmark_structured_gpu_kloop_inlined_cached(
-                    torus_grid.num_cells,
-                    torus_grid.num_vertices,
-                    torus_grid.num_edges,
-                    torus_grid.num_levels,
-                    torus_grid.size[E2C2VDim],
-                    grid_cartesian_dimensions[0],
-                    grid_cartesian_dimensions[1],
-                    halo,
-                    repetitions,
-                    dry_runs,
-                )
-                print(
-                    "nabla4_vertical_interpolate_benchmark_structured_gpu_kloop_inlined_cached median: {}".format(
-                        np.median(
-                            runtimes[
-                                "nabla4_vertical_interpolate_benchmark_structured_gpu_kloop_inlined_cached"
-                            ]
-                        )
-                    )
-                )
+            runtimes[
+                "nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined"
+            ] = icon_benchmark.nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined(
+                filtered_e2c2v_inlined,
+                filtered_e2ecv_inlined,
+                filtered_v2e_inlined,
+                torus_grid.num_cells,
+                torus_grid.num_vertices,
+                torus_grid.num_edges,
+                torus_grid.num_levels,
+                torus_grid.size[E2C2VDim],
+                repetitions,
+                dry_runs,
+            )
+            runtimes[
+                "nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined_cached"
+            ] = icon_benchmark.nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined_cached(
+                filtered_e2c2v_inlined,
+                filtered_e2ecv_inlined,
+                filtered_v2e_inlined,
+                torus_grid.num_cells,
+                torus_grid.num_vertices,
+                torus_grid.num_edges,
+                torus_grid.num_levels,
+                torus_grid.size[E2C2VDim],
+                grid_cartesian_dimensions[0],
+                repetitions,
+                dry_runs,
+            )
+            runtimes[
+                "nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined_v2v"
+            ] = icon_benchmark.nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined_v2v(
+                filtered_e2c2v_inlined,
+                filtered_e2ecv_inlined,
+                filtered_v2e_inlined,
+                torus_grid.num_cells,
+                torus_grid.num_vertices,
+                torus_grid.num_edges,
+                torus_grid.num_levels,
+                torus_grid.size[E2C2VDim],
+                repetitions,
+                dry_runs,
+            )
+            runtimes[
+                "nabla4_interpolate_benchmark_structured_gpu_kloop_inlined"
+            ] = icon_benchmark.nabla4_interpolate_benchmark_structured_gpu_kloop_inlined(
+                torus_grid.num_cells,
+                torus_grid.num_vertices,
+                torus_grid.num_edges,
+                torus_grid.num_levels,
+                torus_grid.size[E2C2VDim],
+                grid_cartesian_dimensions[0],
+                grid_cartesian_dimensions[1],
+                halo,
+                repetitions,
+                dry_runs,
+            )
+            runtimes[
+                "nabla4_interpolate_benchmark_structured_gpu_kloop_inlined_cached"
+            ] = icon_benchmark.nabla4_interpolate_benchmark_structured_gpu_kloop_inlined_cached(
+                torus_grid.num_cells,
+                torus_grid.num_vertices,
+                torus_grid.num_edges,
+                torus_grid.num_levels,
+                torus_grid.size[E2C2VDim],
+                grid_cartesian_dimensions[0],
+                grid_cartesian_dimensions[1],
+                halo,
+                repetitions,
+                dry_runs,
+            )
+
+    print_median_runtimes(runtimes)
 
     with open(args.output.split(".")[0] + ".json", "w") as file:
         dump(runtimes, file)
