@@ -1157,7 +1157,7 @@ def run_sanity_checks(
                 random_validation_data_separate.EdgeDim,
                 random_validation_data_separate.KDim,
                 random_validation_data_separate.ECVDim,
-                lon_dim,
+                lon_dim - 2 * (halo + 1),
                 np.array(random_validation_data_separate.u_vert).T,
                 np.array(random_validation_data_separate.v_vert).T,
                 random_validation_data_separate.primal_normal_vert_v1,
