@@ -4,12 +4,12 @@
 #include <vector>
 
 class RandomUniformUtils {
-    std::random_device _rd{};
-    std::mt19937 _gen{_rd()};
+    std::mt19937 _gen;
     std::uniform_real_distribution<double> _dist;
 
   public:
-    RandomUniformUtils(double low = 0.0, double high = 10.0) {
+    RandomUniformUtils(double low = 0.0, double high = 10.0, unsigned int seed = 42) 
+        : _gen(seed) {
         std::uniform_real_distribution<double>::param_type param(low, high);
         _dist.param(param);
     }

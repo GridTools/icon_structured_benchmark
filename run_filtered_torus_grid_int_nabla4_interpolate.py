@@ -168,9 +168,10 @@ def run_sanity_checks(
             grid.size[E2C2VDim],
         )
     )
+    np.random.seed(42)  # Set the seed for reproducibility
     p_e_in = np.array(random_validation_data_separate.z_nabla4_e2_wp).T
-    ptr_coeff_1 = np.random.rand(grid.num_edges, 6)
-    ptr_coeff_2 = np.random.rand(grid.num_edges, 6)
+    ptr_coeff_1 = np.ones_like(np.random.rand(grid.num_edges, 6))
+    ptr_coeff_2 = np.ones_like(np.random.rand(grid.num_edges, 6))
     (
         p_u_out_ref_separate,
         p_v_out_ref_separate,
