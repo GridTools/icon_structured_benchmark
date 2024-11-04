@@ -192,8 +192,10 @@ __maxnreg__(116)
                         ((j_internal_block - (blockIdx.y * blockDim.y) + 1 - halo) * (blockDim.x + 1)) +
                         color * shared_mem_inner_domain + k_level_cache_offset;
                     const auto z_nabla2_e = z_nabla2_e_gt_tv(edge_index + color * outer_domain_size, k_index);
-                    const auto inv_vert_vert_length = inv_vert_vert_length_gt_tv(edge_index, k_index);
-                    const auto inv_primal_edge_length = inv_primal_edge_length_gt_tv(edge_index, k_index);
+                    const auto inv_vert_vert_length =
+                        inv_vert_vert_length_gt_tv(edge_index + color * outer_domain_size, k_index);
+                    const auto inv_primal_edge_length =
+                        inv_primal_edge_length_gt_tv(edge_index + color * outer_domain_size, k_index);
                     const auto inv_vert_vert_length_sqr = inv_vert_vert_length * inv_vert_vert_length;
                     const auto inv_primal_edge_length_sqr = inv_primal_edge_length * inv_primal_edge_length;
                     z_nabla4_e2[local_edge_index] =
