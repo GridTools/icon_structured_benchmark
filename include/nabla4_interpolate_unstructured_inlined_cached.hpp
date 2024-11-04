@@ -139,7 +139,7 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
         v2e_gt_tv(vertex_index, 5)};
     //                                 0 == 510   - 1 || 0           == 127            || 0           + 510    >= 128           510   <= 128         || 0             + 510   >= 510 * 590
     // const bool calculate_edges_1_3_5 = i == x_dim - 1 || threadIdx.x == blockDim.x - 1 || (threadIdx.x + x_dim >= blockDim.x && x_dim <= blockDim.x) || i + j * x_dim + x_dim >= interpolate_output_size;
-    const bool calculate_1 = i == x_dim - 1 || threadIdx.x == blockDim.x - 1;
+    const bool calculate_1 = i == x_dim - 1 || threadIdx.x == blockDim.x - 1 || vertex_index == interpolate_output_size - 1;
     // const bool calculate_3{true};
     // const bool calculate_5{true};
     const std::array<index_type, 24> e2c2v{e2c2v_gt_tv(v2e[0], 0),
@@ -259,9 +259,9 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
             if (edge_id == 1 && !calculate_1) {
                 continue;
             }
-            if (edge_id == 1) {
-                printf("[1] threadIdx.x: %d, blockIdx.x: %d, threadIdx.y: %d, shared_mem_vertex_index: %d, edge_id: %d\n", threadIdx.x, blockIdx.x, threadIdx.y, shared_mem_vertex_index, edge_id);
-            }
+            // if (edge_id == 1) {
+            //     printf("[1] threadIdx.x: %d, blockIdx.x: %d, threadIdx.y: %d, shared_mem_vertex_index: %d, edge_id: %d\n", threadIdx.x, blockIdx.x, threadIdx.y, shared_mem_vertex_index, edge_id);
+            // }
             // if (edge_id == 3 && !calculate_edges_1_3_5 && !calculate_3) {
             //     continue;
             // }
@@ -285,10 +285,12 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
             z_nabla4_e2[shared_mem_vertex_index + edge_id] =
                 4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e) * inv_vert_vert_length[edge_id] * inv_vert_vert_length[edge_id] +
                         (nabv_tang_wp - 2.0 * z_nabla2_e) * inv_primal_edge_length[edge_id] * inv_primal_edge_length[edge_id]);
-            if (edge_id == 0 && threadIdx.x > 0) {
+            printf("Setting z_nabla4_e2 %d = %lf, i: %d, j: %d, threadIdx.x: %d, edge_id: %d\n", shared_mem_vertex_index + edge_id, z_nabla4_e2[shared_mem_vertex_index + edge_id], i, j, threadIdx.x, edge_id);
+            if (edge_id == 0 && threadIdx.x > 0 && i != 0) {
                 const auto neighbor_vertex_index{((threadIdx.x - 1) + k_repetition * blockDim.x) * 6 + 1};
                 z_nabla4_e2[neighbor_vertex_index] = z_nabla4_e2[shared_mem_vertex_index + edge_id];
-                printf("[0->1] threadIdx.x: %d, blockIdx.x: %d, threadIdx.y: %d, neighbor_vertex_index: %d, shared_mem_vertex_index: %d, edge_id: %d\n", threadIdx.x, blockIdx.x, threadIdx.y, neighbor_vertex_index, shared_mem_vertex_index, edge_id);
+                printf("Setting z_nabla4_e2 %d = %lf, i: %d, j: %d, threadIdx.x: %d, edge_id: %d\n", neighbor_vertex_index, z_nabla4_e2[neighbor_vertex_index], i, j, threadIdx.x, edge_id);
+                // printf("[0->1] threadIdx.x: %d, blockIdx.x: %d, threadIdx.y: %d, neighbor_vertex_index: %d, shared_mem_vertex_index: %d, edge_id: %d\n", threadIdx.x, blockIdx.x, threadIdx.y, neighbor_vertex_index, shared_mem_vertex_index, edge_id);
             }
             // if (edge_id == 2 && j > 0 && threadIdx.x >= x_dim) {
             //     const auto neighbor_vertex_index{((threadIdx.x - x_dim) + k_repetition * blockDim.x) * 6 + 3};
@@ -325,7 +327,7 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
             z_nabla4_e2[shared_mem_vertex_index + 3],
             z_nabla4_e2[shared_mem_vertex_index + 4],
             z_nabla4_e2[shared_mem_vertex_index + 5]};
-        printf("threadIdx.x: %d, blockIdx.x: %d, threadIdx.y: %d, shared_mem_vertex_index: %d, shared_mem: [%lf %lf %lf %lf %lf %lf]\n", threadIdx.x, blockIdx.x, threadIdx.y, shared_mem_vertex_index, z_nabla4_e2_wp[0], z_nabla4_e2_wp[1], z_nabla4_e2_wp[2], z_nabla4_e2_wp[3], z_nabla4_e2_wp[4], z_nabla4_e2_wp[5]);
+        // printf("threadIdx.x: %d, blockIdx.x: %d, threadIdx.y: %d, i: %d, j: %d, shared_mem_vertex_index: %d, shared_mem: [%lf %lf %lf %lf %lf %lf]\n", threadIdx.x, blockIdx.x, threadIdx.y, i, j, shared_mem_vertex_index, z_nabla4_e2_wp[0], z_nabla4_e2_wp[1], z_nabla4_e2_wp[2], z_nabla4_e2_wp[3], z_nabla4_e2_wp[4], z_nabla4_e2_wp[5]);
         p_u_out_gt_tv(vertex_index, k_index) = z_nabla4_e2_wp[0] * ptr_coeff_1[0] + z_nabla4_e2_wp[1] * ptr_coeff_1[1] +
                                                z_nabla4_e2_wp[2] * ptr_coeff_1[2] + z_nabla4_e2_wp[3] * ptr_coeff_1[3] +
                                                z_nabla4_e2_wp[4] * ptr_coeff_1[4] + z_nabla4_e2_wp[5] * ptr_coeff_1[5];
@@ -344,6 +346,7 @@ inline void nabla4_interpolate_unstructured_inlined_cached<T>::run_gpu_kloop_hel
     const int KDim_ceil = std::ceil(static_cast<double>(interpolate_data.KDim) / k_repetitions);
     dim3 grid((interpolate_data.output_size + tblocks.x - 1) / tblocks.x, (KDim_ceil + tblocks.y - 1) / tblocks.y , 1);
     const auto shared_mem_size{tblocks.x * k_repetitions * 6 * sizeof(WP_TYPE)};
+    std::cout << "x_dim: " << x_dim << std::endl;
     run_gpu_kloop_nabla4_interpolate_inlined_cached_unstructured<<<grid, tblocks, shared_mem_size>>>(nabla4_data.output_size,
         interpolate_data.output_size,
         nabla4_data.CellDim,
