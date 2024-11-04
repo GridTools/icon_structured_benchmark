@@ -14,6 +14,14 @@
 #include "nabla4_structured_torus_gridtools_halo.hpp"
 #include "nabla4_unstructured.hpp"
 #include "nabla4_unstructured_gridtools.hpp"
+#include "nabla4_vertical_interpolate_structured_inlined.hpp"
+#include "nabla4_vertical_interpolate_structured_inlined_cached.hpp"
+#include "nabla4_vertical_interpolate_structured_separate.hpp"
+#include "nabla4_vertical_interpolate_unstructured_inlined.hpp"
+#include "nabla4_vertical_interpolate_unstructured_inlined_v2v.hpp"
+#include "nabla4_vertical_interpolate_unstructured_separate.hpp"
+#include "nabla4_vertical_structured_torus_gridtools_halo.hpp"
+#include "nabla4_vertical_unstructured_gridtools.hpp"
 #include "timer.hpp"
 
 template <typename T, backend_impl I>

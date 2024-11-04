@@ -433,6 +433,31 @@ def run_sanity_checks(
         )
         print("unstructured gpu kloop sanity check passed")
 
+        print("Running unstructured gpu kloop vertical sanity check")
+        z_nabla4_e2_comp_unstructured_gpu_kloop_vertical_gridtools = (
+            icon_benchmark.nabla4_vertical_validate_unstructured_gpu_kloop_gridtools(
+                filtered_e2c2v,
+                filtered_e2ecv,
+                random_validation_data.CellDim,
+                random_validation_data.VertexDim,
+                random_validation_data.EdgeDim,
+                random_validation_data.KDim,
+                random_validation_data.ECVDim,
+                np.array(random_validation_data.u_vert).T,
+                np.array(random_validation_data.v_vert).T,
+                random_validation_data.primal_normal_vert_v1,
+                random_validation_data.primal_normal_vert_v2,
+                np.array(random_validation_data.z_nabla2_e).T,
+                random_validation_data.inv_vert_vert_length,
+                random_validation_data.inv_primal_edge_length,
+            )
+        )
+        assert np.allclose(
+            z_nabla4_e2_comp_unstructured_gpu_kloop_vertical_gridtools,
+            random_validation_data.z_nabla4_e2_wp,
+        )
+        print("unstructured gpu kloop sanity check passed")
+
     if backend in ["all_gpu", "gpu_naive"]:
         print("Running unstructured gpu_naive sanity check")
         z_nabla4_e2_comp_unstructured_gpu_naive_gridtools = (
@@ -458,6 +483,31 @@ def run_sanity_checks(
             random_validation_data.z_nabla4_e2_wp,
         )
         print("unstructured gpu_naive sanity check passed")
+
+        print("Running unstructured gpu_naive vertical sanity check")
+        z_nabla4_e2_comp_unstructured_gpu_naive_vertical_gridtools = (
+            icon_benchmark.nabla4_vertical_validate_unstructured_gpu_naive_gridtools(
+                filtered_e2c2v,
+                filtered_e2ecv,
+                random_validation_data.CellDim,
+                random_validation_data.VertexDim,
+                random_validation_data.EdgeDim,
+                random_validation_data.KDim,
+                random_validation_data.ECVDim,
+                np.array(random_validation_data.u_vert).T,
+                np.array(random_validation_data.v_vert).T,
+                random_validation_data.primal_normal_vert_v1,
+                random_validation_data.primal_normal_vert_v2,
+                np.array(random_validation_data.z_nabla2_e).T,
+                random_validation_data.inv_vert_vert_length,
+                random_validation_data.inv_primal_edge_length,
+            )
+        )
+        assert np.allclose(
+            z_nabla4_e2_comp_unstructured_gpu_naive_vertical_gridtools,
+            random_validation_data.z_nabla4_e2_wp,
+        )
+        print("unstructured gpu_naive vertical sanity check passed")
 
     if backend in ["all_cpu", "cpu_ifirst"]:
         print("Running structured cpu_ifirst sanity check")
@@ -540,6 +590,30 @@ def run_sanity_checks(
         )
         print("structured gpu kloop sanity check passed")
 
+        print("Running structured gpu kloop vertical sanity check")
+        z_nabla4_e2_comp_structured_torus_gpu_kloop_vertical_gridtools_halo = icon_benchmark.nabla4_vertical_validate_structured_torus_gpu_kloop_gridtools_halo(
+            random_validation_data.CellDim,
+            random_validation_data.VertexDim,
+            random_validation_data.EdgeDim,
+            random_validation_data.KDim,
+            random_validation_data.ECVDim,
+            lon_dim,
+            lat_dim,
+            halo,
+            np.array(random_validation_data.u_vert).T,
+            np.array(random_validation_data.v_vert).T,
+            random_validation_data.primal_normal_vert_v1,
+            random_validation_data.primal_normal_vert_v2,
+            np.array(random_validation_data.z_nabla2_e).T,
+            random_validation_data.inv_vert_vert_length,
+            random_validation_data.inv_primal_edge_length,
+        )
+        assert np.allclose(
+            z_nabla4_e2_comp_structured_torus_gpu_kloop_vertical_gridtools_halo,
+            random_validation_data.z_nabla4_e2_wp,
+        )
+        print("structured gpu kloop vertical sanity check passed")
+
     if backend in ["all_gpu", "gpu_naive"]:
         print("Running structured gpu_naive sanity check")
         z_nabla4_e2_comp_structured_torus_gpu_naive_gridtools_halo = (
@@ -566,6 +640,30 @@ def run_sanity_checks(
             random_validation_data.z_nabla4_e2_wp,
         )
         print("structured gpu_naive sanity check passed")
+
+        print("Running structured gpu_naive vertical sanity check")
+        z_nabla4_e2_comp_structured_torus_gpu_naive_vertical_gridtools_halo = icon_benchmark.nabla4_vertical_validate_structured_torus_gpu_naive_gridtools_halo(
+            random_validation_data.CellDim,
+            random_validation_data.VertexDim,
+            random_validation_data.EdgeDim,
+            random_validation_data.KDim,
+            random_validation_data.ECVDim,
+            lon_dim,
+            lat_dim,
+            halo,
+            np.array(random_validation_data.u_vert).T,
+            np.array(random_validation_data.v_vert).T,
+            random_validation_data.primal_normal_vert_v1,
+            random_validation_data.primal_normal_vert_v2,
+            np.array(random_validation_data.z_nabla2_e).T,
+            random_validation_data.inv_vert_vert_length,
+            random_validation_data.inv_primal_edge_length,
+        )
+        assert np.allclose(
+            z_nabla4_e2_comp_structured_torus_gpu_naive_vertical_gridtools_halo,
+            random_validation_data.z_nabla4_e2_wp,
+        )
+        print("structured gpu_naive vertical sanity check passed")
 
     print("Sanity checks pass")
 
@@ -755,82 +853,109 @@ def run_benchmarks():
         runtimes["nabla4_benchmark_unstructured_gtfn_gpu"] = runtimes_gtfn
 
     if args.backend in ["all_cpu", "cpu_ifirst"]:
-        runtimes[
-            "nabla4_benchmark_unstructured_cpu_ifirst_gridtools"
-        ] = icon_benchmark.nabla4_benchmark_unstructured_cpu_ifirst_gridtools(
-            filtered_e2c2v,
-            filtered_e2ecv,
-            torus_grid.num_cells,
-            torus_grid.num_vertices,
-            torus_grid.num_edges,
-            torus_grid.num_levels,
-            torus_grid.size[E2C2VDim],
-            repetitions,
-            dry_runs,
+        runtimes["nabla4_benchmark_unstructured_cpu_ifirst_gridtools"] = (
+            icon_benchmark.nabla4_benchmark_unstructured_cpu_ifirst_gridtools(
+                filtered_e2c2v,
+                filtered_e2ecv,
+                torus_grid.num_cells,
+                torus_grid.num_vertices,
+                torus_grid.num_edges,
+                torus_grid.num_levels,
+                torus_grid.size[E2C2VDim],
+                repetitions,
+                dry_runs,
+            )
         )
 
-        runtimes[
-            "nabla4_benchmark_structured_torus_cpu_ifirst_gridtools_halo"
-        ] = icon_benchmark.nabla4_benchmark_structured_torus_cpu_ifirst_gridtools_halo(
-            torus_grid.num_cells,
-            torus_grid.num_vertices,
-            torus_grid.num_edges,
-            torus_grid.num_levels,
-            torus_grid.size[E2C2VDim],
-            grid_cartesian_dimensions[0],
-            grid_cartesian_dimensions[1],
-            halo,
-            repetitions,
-            dry_runs,
+        runtimes["nabla4_benchmark_structured_torus_cpu_ifirst_gridtools_halo"] = (
+            icon_benchmark.nabla4_benchmark_structured_torus_cpu_ifirst_gridtools_halo(
+                torus_grid.num_cells,
+                torus_grid.num_vertices,
+                torus_grid.num_edges,
+                torus_grid.num_levels,
+                torus_grid.size[E2C2VDim],
+                grid_cartesian_dimensions[0],
+                grid_cartesian_dimensions[1],
+                halo,
+                repetitions,
+                dry_runs,
+            )
         )
 
     if args.backend in ["all_cpu", "cpu_kfirst"]:
-        runtimes[
-            "nabla4_benchmark_unstructured_cpu_kfirst_gridtools"
-        ] = icon_benchmark.nabla4_benchmark_unstructured_cpu_kfirst_gridtools(
-            filtered_e2c2v,
-            filtered_e2ecv,
-            torus_grid.num_cells,
-            torus_grid.num_vertices,
-            torus_grid.num_edges,
-            torus_grid.num_levels,
-            torus_grid.size[E2C2VDim],
-            repetitions,
-            dry_runs,
+        runtimes["nabla4_benchmark_unstructured_cpu_kfirst_gridtools"] = (
+            icon_benchmark.nabla4_benchmark_unstructured_cpu_kfirst_gridtools(
+                filtered_e2c2v,
+                filtered_e2ecv,
+                torus_grid.num_cells,
+                torus_grid.num_vertices,
+                torus_grid.num_edges,
+                torus_grid.num_levels,
+                torus_grid.size[E2C2VDim],
+                repetitions,
+                dry_runs,
+            )
         )
 
-        runtimes[
-            "nabla4_benchmark_structured_torus_cpu_kfirst_gridtools_halo"
-        ] = icon_benchmark.nabla4_benchmark_structured_torus_cpu_kfirst_gridtools_halo(
-            torus_grid.num_cells,
-            torus_grid.num_vertices,
-            torus_grid.num_edges,
-            torus_grid.num_levels,
-            torus_grid.size[E2C2VDim],
-            grid_cartesian_dimensions[0],
-            grid_cartesian_dimensions[1],
-            halo,
-            repetitions,
-            dry_runs,
+        runtimes["nabla4_benchmark_structured_torus_cpu_kfirst_gridtools_halo"] = (
+            icon_benchmark.nabla4_benchmark_structured_torus_cpu_kfirst_gridtools_halo(
+                torus_grid.num_cells,
+                torus_grid.num_vertices,
+                torus_grid.num_edges,
+                torus_grid.num_levels,
+                torus_grid.size[E2C2VDim],
+                grid_cartesian_dimensions[0],
+                grid_cartesian_dimensions[1],
+                halo,
+                repetitions,
+                dry_runs,
+            )
         )
 
     if args.backend in ["all_gpu", "gpu_kloop"]:
-        runtimes[
-            "nabla4_benchmark_unstructured_gpu_kloop_gridtools"
-        ] = icon_benchmark.nabla4_benchmark_unstructured_gpu_kloop_gridtools(
-            filtered_e2c2v,
-            filtered_e2ecv,
-            torus_grid.num_cells,
-            torus_grid.num_vertices,
-            torus_grid.num_edges,
-            torus_grid.num_levels,
-            torus_grid.size[E2C2VDim],
-            repetitions,
-            dry_runs,
+        runtimes["nabla4_benchmark_unstructured_gpu_kloop_gridtools"] = (
+            icon_benchmark.nabla4_benchmark_unstructured_gpu_kloop_gridtools(
+                filtered_e2c2v,
+                filtered_e2ecv,
+                torus_grid.num_cells,
+                torus_grid.num_vertices,
+                torus_grid.num_edges,
+                torus_grid.num_levels,
+                torus_grid.size[E2C2VDim],
+                repetitions,
+                dry_runs,
+            )
+        )
+        runtimes["nabla4_vertical_benchmark_unstructured_gpu_kloop_gridtools"] = (
+            icon_benchmark.nabla4_vertical_benchmark_unstructured_gpu_kloop_gridtools(
+                filtered_e2c2v,
+                filtered_e2ecv,
+                torus_grid.num_cells,
+                torus_grid.num_vertices,
+                torus_grid.num_edges,
+                torus_grid.num_levels,
+                torus_grid.size[E2C2VDim],
+                repetitions,
+                dry_runs,
+            )
+        )
+        runtimes["nabla4_benchmark_structured_torus_gpu_kloop_gridtools_halo"] = (
+            icon_benchmark.nabla4_benchmark_structured_torus_gpu_kloop_gridtools_halo(
+                torus_grid.num_cells,
+                torus_grid.num_vertices,
+                torus_grid.num_edges,
+                torus_grid.num_levels,
+                torus_grid.size[E2C2VDim],
+                grid_cartesian_dimensions[0],
+                grid_cartesian_dimensions[1],
+                halo,
+                repetitions,
+                dry_runs,
+            )
         )
         runtimes[
-            "nabla4_benchmark_structured_torus_gpu_kloop_gridtools_halo"
-        ] = icon_benchmark.nabla4_benchmark_structured_torus_gpu_kloop_gridtools_halo(
+            "nabla4_vertical_benchmark_structured_torus_gpu_kloop_gridtools_halo"
+        ] = icon_benchmark.nabla4_vertical_benchmark_structured_torus_gpu_kloop_gridtools_halo(
             torus_grid.num_cells,
             torus_grid.num_vertices,
             torus_grid.num_edges,
@@ -844,22 +969,49 @@ def run_benchmarks():
         )
 
     if args.backend in ["all_gpu", "gpu_naive"]:
-        runtimes[
-            "nabla4_benchmark_unstructured_gpu_naive_gridtools"
-        ] = icon_benchmark.nabla4_benchmark_unstructured_gpu_naive_gridtools(
-            filtered_e2c2v,
-            filtered_e2ecv,
-            torus_grid.num_cells,
-            torus_grid.num_vertices,
-            torus_grid.num_edges,
-            torus_grid.num_levels,
-            torus_grid.size[E2C2VDim],
-            repetitions,
-            dry_runs,
+        runtimes["nabla4_benchmark_unstructured_gpu_naive_gridtools"] = (
+            icon_benchmark.nabla4_benchmark_unstructured_gpu_naive_gridtools(
+                filtered_e2c2v,
+                filtered_e2ecv,
+                torus_grid.num_cells,
+                torus_grid.num_vertices,
+                torus_grid.num_edges,
+                torus_grid.num_levels,
+                torus_grid.size[E2C2VDim],
+                repetitions,
+                dry_runs,
+            )
+        )
+        runtimes["nabla4_vertical_benchmark_unstructured_gpu_naive_gridtools"] = (
+            icon_benchmark.nabla4_vertical_benchmark_unstructured_gpu_naive_gridtools(
+                filtered_e2c2v,
+                filtered_e2ecv,
+                torus_grid.num_cells,
+                torus_grid.num_vertices,
+                torus_grid.num_edges,
+                torus_grid.num_levels,
+                torus_grid.size[E2C2VDim],
+                repetitions,
+                dry_runs,
+            )
+        )
+        runtimes["nabla4_benchmark_structured_torus_gpu_naive_gridtools_halo"] = (
+            icon_benchmark.nabla4_benchmark_structured_torus_gpu_naive_gridtools_halo(
+                torus_grid.num_cells,
+                torus_grid.num_vertices,
+                torus_grid.num_edges,
+                torus_grid.num_levels,
+                torus_grid.size[E2C2VDim],
+                grid_cartesian_dimensions[0],
+                grid_cartesian_dimensions[1],
+                halo,
+                repetitions,
+                dry_runs,
+            )
         )
         runtimes[
-            "nabla4_benchmark_structured_torus_gpu_naive_gridtools_halo"
-        ] = icon_benchmark.nabla4_benchmark_structured_torus_gpu_naive_gridtools_halo(
+            "nabla4_vertical_benchmark_structured_torus_gpu_naive_gridtools_halo"
+        ] = icon_benchmark.nabla4_vertical_benchmark_structured_torus_gpu_naive_gridtools_halo(
             torus_grid.num_cells,
             torus_grid.num_vertices,
             torus_grid.num_edges,

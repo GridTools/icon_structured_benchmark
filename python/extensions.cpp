@@ -28,14 +28,22 @@ NB_MODULE(icon_benchmark, m) {
     m.def("nabla4_benchmark_unstructured_cpu_kfirst", &nabla4_benchmark_unstructured_cpu_kfirst);
     m.def("nabla4_benchmark_unstructured_cpu_kfirst_gridtools", &nabla4_benchmark_unstructured_cpu_kfirst_gridtools);
     m.def("nabla4_benchmark_unstructured_gpu_kloop_gridtools", &nabla4_benchmark_unstructured_gpu_kloop_gridtools);
+    m.def("nabla4_vertical_benchmark_unstructured_gpu_kloop_gridtools",
+        &nabla4_vertical_benchmark_unstructured_gpu_kloop_gridtools);
     m.def("nabla4_benchmark_unstructured_gpu_naive_gridtools", &nabla4_benchmark_unstructured_gpu_naive_gridtools);
+    m.def("nabla4_vertical_benchmark_unstructured_gpu_naive_gridtools",
+        &nabla4_vertical_benchmark_unstructured_gpu_naive_gridtools);
     m.def("nabla4_validate_unstructured_naive", &nabla4_validate_unstructured_naive);
     m.def("nabla4_validate_unstructured_cpu_ifirst", &nabla4_validate_unstructured_cpu_ifirst);
     m.def("nabla4_validate_unstructured_cpu_ifirst_gridtools", &nabla4_validate_unstructured_cpu_ifirst_gridtools);
     m.def("nabla4_validate_unstructured_cpu_kfirst", &nabla4_validate_unstructured_cpu_kfirst);
     m.def("nabla4_validate_unstructured_cpu_kfirst_gridtools", &nabla4_validate_unstructured_cpu_kfirst_gridtools);
     m.def("nabla4_validate_unstructured_gpu_kloop_gridtools", &nabla4_validate_unstructured_gpu_kloop_gridtools);
+    m.def("nabla4_vertical_validate_unstructured_gpu_kloop_gridtools",
+        &nabla4_vertical_validate_unstructured_gpu_kloop_gridtools);
     m.def("nabla4_validate_unstructured_gpu_naive_gridtools", &nabla4_validate_unstructured_gpu_naive_gridtools);
+    m.def("nabla4_vertical_validate_unstructured_gpu_naive_gridtools",
+        &nabla4_vertical_validate_unstructured_gpu_naive_gridtools);
     /// Structured
     m.def("nabla4_benchmark_structured_simple_naive", &nabla4_benchmark_structured_simple_naive);
     m.def("nabla4_benchmark_structured_simple_cpu_ifirst", &nabla4_benchmark_structured_simple_cpu_ifirst);
@@ -57,8 +65,12 @@ NB_MODULE(icon_benchmark, m) {
         &nabla4_benchmark_structured_torus_cpu_kfirst_gridtools_halo);
     m.def("nabla4_benchmark_structured_torus_gpu_kloop_gridtools_halo",
         &nabla4_benchmark_structured_torus_gpu_kloop_gridtools_halo);
+    m.def("nabla4_vertical_benchmark_structured_torus_gpu_kloop_gridtools_halo",
+        &nabla4_vertical_benchmark_structured_torus_gpu_kloop_gridtools_halo);
     m.def("nabla4_benchmark_structured_torus_gpu_naive_gridtools_halo",
         &nabla4_benchmark_structured_torus_gpu_naive_gridtools_halo);
+    m.def("nabla4_vertical_benchmark_structured_torus_gpu_naive_gridtools_halo",
+        &nabla4_vertical_benchmark_structured_torus_gpu_naive_gridtools_halo);
     m.def("nabla4_validate_structured_torus_naive", &nabla4_validate_structured_torus_naive);
     m.def("nabla4_validate_structured_torus_cpu_ifirst", &nabla4_validate_structured_torus_cpu_ifirst);
     m.def("nabla4_validate_structured_torus_cpu_ifirst_gridtools",
@@ -72,8 +84,12 @@ NB_MODULE(icon_benchmark, m) {
         &nabla4_validate_structured_torus_cpu_kfirst_gridtools_halo);
     m.def("nabla4_validate_structured_torus_gpu_kloop_gridtools_halo",
         &nabla4_validate_structured_torus_gpu_kloop_gridtools_halo);
+    m.def("nabla4_vertical_validate_structured_torus_gpu_kloop_gridtools_halo",
+        &nabla4_vertical_validate_structured_torus_gpu_kloop_gridtools_halo);
     m.def("nabla4_validate_structured_torus_gpu_naive_gridtools_halo",
         &nabla4_validate_structured_torus_gpu_naive_gridtools_halo);
+    m.def("nabla4_vertical_validate_structured_torus_gpu_naive_gridtools_halo",
+        &nabla4_vertical_validate_structured_torus_gpu_naive_gridtools_halo);
     /// Interpolate
     m.def("interpolate_validate_unstructured_cpu_ifirst", &interpolate_validate_unstructured_cpu_ifirst);
     m.def("interpolate_validate_unstructured_cpu_kfirst", &interpolate_validate_unstructured_cpu_kfirst);
@@ -102,12 +118,20 @@ NB_MODULE(icon_benchmark, m) {
         &nabla4_interpolate_validate_structured_cpu_kfirst_separate);
     m.def("nabla4_interpolate_validate_unstructured_gpu_naive_separate",
         &nabla4_interpolate_validate_unstructured_gpu_naive_separate);
+    m.def("nabla4_vertical_interpolate_validate_unstructured_gpu_naive_separate",
+        &nabla4_vertical_interpolate_validate_unstructured_gpu_naive_separate);
     m.def("nabla4_interpolate_validate_unstructured_gpu_kloop_separate",
         &nabla4_interpolate_validate_unstructured_gpu_kloop_separate);
+    m.def("nabla4_vertical_interpolate_validate_unstructured_gpu_kloop_separate",
+        &nabla4_vertical_interpolate_validate_unstructured_gpu_kloop_separate);
     m.def("nabla4_interpolate_validate_structured_gpu_naive_separate",
         &nabla4_interpolate_validate_structured_gpu_naive_separate);
+    m.def("nabla4_vertical_interpolate_validate_structured_gpu_naive_separate",
+        &nabla4_vertical_interpolate_validate_structured_gpu_naive_separate);
     m.def("nabla4_interpolate_validate_structured_gpu_kloop_separate",
         &nabla4_interpolate_validate_structured_gpu_kloop_separate);
+    m.def("nabla4_vertical_interpolate_validate_structured_gpu_kloop_separate",
+        &nabla4_vertical_interpolate_validate_structured_gpu_kloop_separate);
     m.def("nabla4_interpolate_benchmark_unstructured_cpu_ifirst_separate",
         &nabla4_interpolate_benchmark_unstructured_cpu_ifirst_separate);
     m.def("nabla4_interpolate_benchmark_structured_cpu_ifirst_separate",
@@ -118,12 +142,20 @@ NB_MODULE(icon_benchmark, m) {
         &nabla4_interpolate_benchmark_structured_cpu_kfirst_separate);
     m.def("nabla4_interpolate_benchmark_unstructured_gpu_naive_separate",
         &nabla4_interpolate_benchmark_unstructured_gpu_naive_separate);
+    m.def("nabla4_vertical_interpolate_benchmark_unstructured_gpu_naive_separate",
+        &nabla4_vertical_interpolate_benchmark_unstructured_gpu_naive_separate);
     m.def("nabla4_interpolate_benchmark_unstructured_gpu_kloop_separate",
         &nabla4_interpolate_benchmark_unstructured_gpu_kloop_separate);
+    m.def("nabla4_vertical_interpolate_benchmark_unstructured_gpu_kloop_separate",
+        &nabla4_vertical_interpolate_benchmark_unstructured_gpu_kloop_separate);
     m.def("nabla4_interpolate_benchmark_structured_gpu_naive_separate",
         &nabla4_interpolate_benchmark_structured_gpu_naive_separate);
+    m.def("nabla4_vertical_interpolate_benchmark_structured_gpu_naive_separate",
+        &nabla4_vertical_interpolate_benchmark_structured_gpu_naive_separate);
     m.def("nabla4_interpolate_benchmark_structured_gpu_kloop_separate",
         &nabla4_interpolate_benchmark_structured_gpu_kloop_separate);
+    m.def("nabla4_vertical_interpolate_benchmark_structured_gpu_kloop_separate",
+        &nabla4_vertical_interpolate_benchmark_structured_gpu_kloop_separate);
     // Nabla4 & Interpolate inlined
     m.def("nabla4_interpolate_validate_unstructured_cpu_ifirst_inlined",
         &nabla4_interpolate_validate_unstructured_cpu_ifirst_inlined);
@@ -143,28 +175,52 @@ NB_MODULE(icon_benchmark, m) {
         &nabla4_interpolate_benchmark_structured_cpu_kfirst_inlined);
     m.def("nabla4_interpolate_validate_unstructured_gpu_naive_inlined",
         &nabla4_interpolate_validate_unstructured_gpu_naive_inlined);
+    m.def("nabla4_vertical_interpolate_validate_unstructured_gpu_naive_inlined",
+        &nabla4_vertical_interpolate_validate_unstructured_gpu_naive_inlined);
     m.def("nabla4_interpolate_validate_unstructured_gpu_kloop_inlined",
         &nabla4_interpolate_validate_unstructured_gpu_kloop_inlined);
+    m.def("nabla4_vertical_interpolate_validate_unstructured_gpu_kloop_inlined",
+        &nabla4_vertical_interpolate_validate_unstructured_gpu_kloop_inlined);
     m.def("nabla4_interpolate_validate_structured_gpu_naive_inlined",
         &nabla4_interpolate_validate_structured_gpu_naive_inlined);
+    m.def("nabla4_vertical_interpolate_validate_structured_gpu_naive_inlined",
+        &nabla4_vertical_interpolate_validate_structured_gpu_naive_inlined);
     m.def("nabla4_interpolate_validate_structured_gpu_naive_inlined_cached",
         &nabla4_interpolate_validate_structured_gpu_naive_inlined_cached);
+    m.def("nabla4_vertical_interpolate_validate_structured_gpu_naive_inlined_cached",
+        &nabla4_vertical_interpolate_validate_structured_gpu_naive_inlined_cached);
     m.def("nabla4_interpolate_validate_structured_gpu_kloop_inlined",
         &nabla4_interpolate_validate_structured_gpu_kloop_inlined);
+    m.def("nabla4_vertical_interpolate_validate_structured_gpu_kloop_inlined",
+        &nabla4_vertical_interpolate_validate_structured_gpu_kloop_inlined);
     m.def("nabla4_interpolate_validate_structured_gpu_kloop_inlined_cached",
         &nabla4_interpolate_validate_structured_gpu_kloop_inlined_cached);
+    m.def("nabla4_vertical_interpolate_validate_structured_gpu_kloop_inlined_cached",
+        &nabla4_vertical_interpolate_validate_structured_gpu_kloop_inlined_cached);
     m.def("nabla4_interpolate_benchmark_unstructured_gpu_naive_inlined",
         &nabla4_interpolate_benchmark_unstructured_gpu_naive_inlined);
+    m.def("nabla4_vertical_interpolate_benchmark_unstructured_gpu_naive_inlined",
+        &nabla4_vertical_interpolate_benchmark_unstructured_gpu_naive_inlined);
     m.def("nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined",
         &nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined);
+    m.def("nabla4_vertical_interpolate_benchmark_unstructured_gpu_kloop_inlined",
+        &nabla4_vertical_interpolate_benchmark_unstructured_gpu_kloop_inlined);
     m.def("nabla4_interpolate_benchmark_structured_gpu_naive_inlined",
         &nabla4_interpolate_benchmark_structured_gpu_naive_inlined);
+    m.def("nabla4_vertical_interpolate_benchmark_structured_gpu_naive_inlined",
+        &nabla4_vertical_interpolate_benchmark_structured_gpu_naive_inlined);
     m.def("nabla4_interpolate_benchmark_structured_gpu_naive_inlined_cached",
         &nabla4_interpolate_benchmark_structured_gpu_naive_inlined_cached);
+    m.def("nabla4_vertical_interpolate_benchmark_structured_gpu_naive_inlined_cached",
+        &nabla4_vertical_interpolate_benchmark_structured_gpu_naive_inlined_cached);
     m.def("nabla4_interpolate_benchmark_structured_gpu_kloop_inlined",
         &nabla4_interpolate_benchmark_structured_gpu_kloop_inlined);
+    m.def("nabla4_vertical_interpolate_benchmark_structured_gpu_kloop_inlined",
+        &nabla4_vertical_interpolate_benchmark_structured_gpu_kloop_inlined);
     m.def("nabla4_interpolate_benchmark_structured_gpu_kloop_inlined_cached",
         &nabla4_interpolate_benchmark_structured_gpu_kloop_inlined_cached);
+    m.def("nabla4_vertical_interpolate_benchmark_structured_gpu_kloop_inlined_cached",
+        &nabla4_vertical_interpolate_benchmark_structured_gpu_kloop_inlined_cached);
     // Nabla4 & Interpolate inlined v2v
     m.def("nabla4_interpolate_validate_unstructured_cpu_ifirst_inlined_v2v",
         &nabla4_interpolate_validate_unstructured_cpu_ifirst_inlined_v2v);
@@ -176,10 +232,18 @@ NB_MODULE(icon_benchmark, m) {
         &nabla4_interpolate_benchmark_unstructured_cpu_kfirst_inlined_v2v);
     m.def("nabla4_interpolate_validate_unstructured_gpu_naive_inlined_v2v",
         &nabla4_interpolate_validate_unstructured_gpu_naive_inlined_v2v);
+    m.def("nabla4_vertical_interpolate_validate_unstructured_gpu_naive_inlined_v2v",
+        &nabla4_vertical_interpolate_validate_unstructured_gpu_naive_inlined_v2v);
     m.def("nabla4_interpolate_validate_unstructured_gpu_kloop_inlined_v2v",
         &nabla4_interpolate_validate_unstructured_gpu_kloop_inlined_v2v);
+    m.def("nabla4_vertical_interpolate_validate_unstructured_gpu_kloop_inlined_v2v",
+        &nabla4_vertical_interpolate_validate_unstructured_gpu_kloop_inlined_v2v);
     m.def("nabla4_interpolate_benchmark_unstructured_gpu_naive_inlined_v2v",
         &nabla4_interpolate_benchmark_unstructured_gpu_naive_inlined_v2v);
+    m.def("nabla4_vertical_interpolate_benchmark_unstructured_gpu_naive_inlined_v2v",
+        &nabla4_vertical_interpolate_benchmark_unstructured_gpu_naive_inlined_v2v);
     m.def("nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined_v2v",
         &nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined_v2v);
+    m.def("nabla4_vertical_interpolate_benchmark_unstructured_gpu_kloop_inlined_v2v",
+        &nabla4_vertical_interpolate_benchmark_unstructured_gpu_kloop_inlined_v2v);
 }
