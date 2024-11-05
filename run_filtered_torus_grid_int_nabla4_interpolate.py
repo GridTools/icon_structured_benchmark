@@ -1611,9 +1611,11 @@ def run_benchmarks():
             )
             print(
                 "nabla4_interpolate_benchmark_unstructured_cpu_ifirst_separate median: {}".format(
-                    runtimes[
-                        "nabla4_interpolate_benchmark_unstructured_cpu_ifirst_separate"
-                    ]
+                    np.median(
+                        runtimes[
+                            "nabla4_interpolate_benchmark_unstructured_cpu_ifirst_separate"
+                        ]
+                    )
                 )
             )
             runtimes["nabla4_interpolate_benchmark_structured_cpu_ifirst_separate"] = (
@@ -1632,9 +1634,11 @@ def run_benchmarks():
             )
             print(
                 "nabla4_interpolate_benchmark_structured_cpu_ifirst_separate median: {}".format(
-                    runtimes[
-                        "nabla4_interpolate_benchmark_structured_cpu_ifirst_separate"
-                    ]
+                    np.median(
+                        runtimes[
+                            "nabla4_interpolate_benchmark_structured_cpu_ifirst_separate"
+                        ]
+                    )
                 )
             )
         if args.combination in ["all", "inlined"]:
@@ -1654,9 +1658,11 @@ def run_benchmarks():
             )
             print(
                 "nabla4_interpolate_benchmark_unstructured_cpu_ifirst_inlined median: {}".format(
-                    runtimes[
-                        "nabla4_interpolate_benchmark_unstructured_cpu_ifirst_inlined"
-                    ]
+                    np.median(
+                        runtimes[
+                            "nabla4_interpolate_benchmark_unstructured_cpu_ifirst_inlined"
+                        ]
+                    )
                 )
             )
             runtimes[
@@ -1675,9 +1681,11 @@ def run_benchmarks():
             )
             print(
                 "nabla4_interpolate_benchmark_unstructured_cpu_ifirst_inlined_v2v median: {}".format(
-                    runtimes[
-                        "nabla4_interpolate_benchmark_unstructured_cpu_ifirst_inlined_v2v"
-                    ]
+                    np.median(
+                        runtimes[
+                            "nabla4_interpolate_benchmark_unstructured_cpu_ifirst_inlined_v2v"
+                        ]
+                    )
                 )
             )
             runtimes["nabla4_interpolate_benchmark_structured_cpu_ifirst_inlined"] = (
@@ -1696,9 +1704,11 @@ def run_benchmarks():
             )
             print(
                 "nabla4_interpolate_benchmark_structured_cpu_ifirst_inlined median: {}".format(
-                    runtimes[
-                        "nabla4_interpolate_benchmark_structured_cpu_ifirst_inlined"
-                    ]
+                    np.median(
+                        runtimes[
+                            "nabla4_interpolate_benchmark_structured_cpu_ifirst_inlined"
+                        ]
+                    )
                 )
             )
 
@@ -1720,9 +1730,11 @@ def run_benchmarks():
             )
             print(
                 "nabla4_interpolate_benchmark_unstructured_cpu_kfirst_separate median: {}".format(
-                    runtimes[
-                        "nabla4_interpolate_benchmark_unstructured_cpu_kfirst_separate"
-                    ]
+                    np.median(
+                        runtimes[
+                            "nabla4_interpolate_benchmark_unstructured_cpu_kfirst_separate"
+                        ]
+                    )
                 )
             )
             runtimes["nabla4_interpolate_benchmark_structured_cpu_kfirst_separate"] = (
@@ -1741,9 +1753,11 @@ def run_benchmarks():
             )
             print(
                 "nabla4_interpolate_benchmark_structured_cpu_kfirst_separate median: {}".format(
-                    runtimes[
-                        "nabla4_interpolate_benchmark_structured_cpu_kfirst_separate"
-                    ]
+                    np.median(
+                        runtimes[
+                            "nabla4_interpolate_benchmark_structured_cpu_kfirst_separate"
+                        ]
+                    )
                 )
             )
 
@@ -1764,9 +1778,11 @@ def run_benchmarks():
             )
             print(
                 "nabla4_interpolate_benchmark_unstructured_cpu_kfirst_inlined median: {}".format(
-                    runtimes[
-                        "nabla4_interpolate_benchmark_unstructured_cpu_kfirst_inlined"
-                    ]
+                    np.median(
+                        runtimes[
+                            "nabla4_interpolate_benchmark_unstructured_cpu_kfirst_inlined"
+                        ]
+                    )
                 )
             )
             runtimes[
@@ -1785,9 +1801,11 @@ def run_benchmarks():
             )
             print(
                 "nabla4_interpolate_benchmark_unstructured_cpu_kfirst_inlined_v2v median: {}".format(
-                    runtimes[
-                        "nabla4_interpolate_benchmark_unstructured_cpu_kfirst_inlined_v2v"
-                    ]
+                    np.median(
+                        runtimes[
+                            "nabla4_interpolate_benchmark_unstructured_cpu_kfirst_inlined_v2v"
+                        ]
+                    )
                 )
             )
             runtimes["nabla4_interpolate_benchmark_structured_cpu_kfirst_inlined"] = (
@@ -1806,9 +1824,11 @@ def run_benchmarks():
             )
             print(
                 "nabla4_interpolate_benchmark_structured_cpu_kfirst_inlined median: {}".format(
-                    runtimes[
-                        "nabla4_interpolate_benchmark_structured_cpu_kfirst_inlined"
-                    ]
+                    np.median(
+                        runtimes[
+                            "nabla4_interpolate_benchmark_structured_cpu_kfirst_inlined"
+                        ]
+                    )
                 )
             )
 
@@ -1831,9 +1851,11 @@ def run_benchmarks():
                 )
                 print(
                     "nabla4_interpolate_benchmark_unstructured_gpu_naive_separate median: {}".format(
-                        runtimes[
-                            "nabla4_interpolate_benchmark_unstructured_gpu_naive_separate"
-                        ]
+                        np.median(
+                            runtimes[
+                                "nabla4_interpolate_benchmark_unstructured_gpu_naive_separate"
+                            ]
+                        )
                     )
                 )
             else:
@@ -1853,9 +1875,11 @@ def run_benchmarks():
                 )
                 print(
                     "nabla4_vertical_interpolate_benchmark_unstructured_gpu_naive_separate median: {}".format(
-                        runtimes[
-                            "nabla4_vertical_interpolate_benchmark_unstructured_gpu_naive_separate"
-                        ]
+                        np.median(
+                            runtimes[
+                                "nabla4_vertical_interpolate_benchmark_unstructured_gpu_naive_separate"
+                            ]
+                        )
                     )
                 )
             if not args.vertical:
@@ -1875,9 +1899,11 @@ def run_benchmarks():
                 )
                 print(
                     "nabla4_interpolate_benchmark_structured_gpu_naive_separate median: {}".format(
-                        runtimes[
-                            "nabla4_interpolate_benchmark_structured_gpu_naive_separate"
-                        ]
+                        np.median(
+                            runtimes[
+                                "nabla4_interpolate_benchmark_structured_gpu_naive_separate"
+                            ]
+                        )
                     )
                 )
             else:
@@ -1897,9 +1923,11 @@ def run_benchmarks():
                 )
                 print(
                     "nabla4_vertical_interpolate_benchmark_structured_gpu_naive_separate median: {}".format(
-                        runtimes[
-                            "nabla4_vertical_interpolate_benchmark_structured_gpu_naive_separate"
-                        ]
+                        np.median(
+                            runtimes[
+                                "nabla4_vertical_interpolate_benchmark_structured_gpu_naive_separate"
+                            ]
+                        )
                     )
                 )
 
@@ -1921,9 +1949,11 @@ def run_benchmarks():
                 )
                 print(
                     "nabla4_interpolate_benchmark_unstructured_gpu_naive_inlined median: {}".format(
-                        runtimes[
-                            "nabla4_interpolate_benchmark_unstructured_gpu_naive_inlined"
-                        ]
+                        np.median(
+                            runtimes[
+                                "nabla4_interpolate_benchmark_unstructured_gpu_naive_inlined"
+                            ]
+                        )
                     )
                 )
             else:
@@ -1943,9 +1973,11 @@ def run_benchmarks():
                 )
                 print(
                     "nabla4_vertical_interpolate_benchmark_unstructured_gpu_naive_inlined median: {}".format(
-                        runtimes[
-                            "nabla4_vertical_interpolate_benchmark_unstructured_gpu_naive_inlined"
-                        ]
+                        np.median(
+                            runtimes[
+                                "nabla4_vertical_interpolate_benchmark_unstructured_gpu_naive_inlined"
+                            ]
+                        )
                     )
                 )
             if not args.vertical:
@@ -1965,9 +1997,11 @@ def run_benchmarks():
                 )
                 print(
                     "nabla4_interpolate_benchmark_unstructured_gpu_naive_inlined_v2v median: {}".format(
-                        runtimes[
-                            "nabla4_interpolate_benchmark_unstructured_gpu_naive_inlined_v2v"
-                        ]
+                        np.median(
+                            runtimes[
+                                "nabla4_interpolate_benchmark_unstructured_gpu_naive_inlined_v2v"
+                            ]
+                        )
                     )
                 )
             else:
@@ -1987,9 +2021,11 @@ def run_benchmarks():
                 )
                 print(
                     "nabla4_vertical_interpolate_benchmark_unstructured_gpu_naive_inlined_v2v median: {}".format(
-                        runtimes[
-                            "nabla4_vertical_interpolate_benchmark_unstructured_gpu_naive_inlined_v2v"
-                        ]
+                        np.median(
+                            runtimes[
+                                "nabla4_vertical_interpolate_benchmark_unstructured_gpu_naive_inlined_v2v"
+                            ]
+                        )
                     )
                 )
             if not args.vertical:
@@ -2009,9 +2045,11 @@ def run_benchmarks():
                 )
                 print(
                     "nabla4_interpolate_benchmark_structured_gpu_naive_inlined median: {}".format(
-                        runtimes[
-                            "nabla4_interpolate_benchmark_structured_gpu_naive_inlined"
-                        ]
+                        np.median(
+                            runtimes[
+                                "nabla4_interpolate_benchmark_structured_gpu_naive_inlined"
+                            ]
+                        )
                     )
                 )
             else:
@@ -2031,9 +2069,11 @@ def run_benchmarks():
                 )
                 print(
                     "nabla4_vertical_interpolate_benchmark_structured_gpu_naive_inlined median: {}".format(
-                        runtimes[
-                            "nabla4_vertical_interpolate_benchmark_structured_gpu_naive_inlined"
-                        ]
+                        np.median(
+                            runtimes[
+                                "nabla4_vertical_interpolate_benchmark_structured_gpu_naive_inlined"
+                            ]
+                        )
                     )
                 )
             if not args.vertical:
@@ -2053,9 +2093,11 @@ def run_benchmarks():
                 )
                 print(
                     "nabla4_interpolate_benchmark_structured_gpu_naive_inlined_cached median: {}".format(
-                        runtimes[
-                            "nabla4_interpolate_benchmark_structured_gpu_naive_inlined_cached"
-                        ]
+                        np.median(
+                            runtimes[
+                                "nabla4_interpolate_benchmark_structured_gpu_naive_inlined_cached"
+                            ]
+                        )
                     )
                 )
             else:
@@ -2075,9 +2117,11 @@ def run_benchmarks():
                 )
                 print(
                     "nabla4_vertical_interpolate_benchmark_structured_gpu_naive_inlined_cached median: {}".format(
-                        runtimes[
-                            "nabla4_vertical_interpolate_benchmark_structured_gpu_naive_inlined_cached"
-                        ]
+                        np.median(
+                            runtimes[
+                                "nabla4_vertical_interpolate_benchmark_structured_gpu_naive_inlined_cached"
+                            ]
+                        )
                     )
                 )
 
@@ -2100,9 +2144,11 @@ def run_benchmarks():
                 )
                 print(
                     "nabla4_interpolate_benchmark_unstructured_gpu_kloop_separate median: {}".format(
-                        runtimes[
-                            "nabla4_interpolate_benchmark_unstructured_gpu_kloop_separate"
-                        ]
+                        np.median(
+                            runtimes[
+                                "nabla4_interpolate_benchmark_unstructured_gpu_kloop_separate"
+                            ]
+                        )
                     )
                 )
             else:
@@ -2122,9 +2168,11 @@ def run_benchmarks():
                 )
                 print(
                     "nabla4_vertical_interpolate_benchmark_unstructured_gpu_kloop_separate median: {}".format(
-                        runtimes[
-                            "nabla4_vertical_interpolate_benchmark_unstructured_gpu_kloop_separate"
-                        ]
+                        np.median(
+                            runtimes[
+                                "nabla4_vertical_interpolate_benchmark_unstructured_gpu_kloop_separate"
+                            ]
+                        )
                     )
                 )
             if not args.vertical:
@@ -2144,9 +2192,11 @@ def run_benchmarks():
                 )
                 print(
                     "nabla4_interpolate_benchmark_structured_gpu_kloop_separate median: {}".format(
-                        runtimes[
-                            "nabla4_interpolate_benchmark_structured_gpu_kloop_separate"
-                        ]
+                        np.median(
+                            runtimes[
+                                "nabla4_interpolate_benchmark_structured_gpu_kloop_separate"
+                            ]
+                        )
                     )
                 )
             else:
@@ -2166,9 +2216,11 @@ def run_benchmarks():
                 )
                 print(
                     "nabla4_vertical_interpolate_benchmark_structured_gpu_kloop_separate median: {}".format(
-                        runtimes[
-                            "nabla4_vertical_interpolate_benchmark_structured_gpu_kloop_separate"
-                        ]
+                        np.median(
+                            runtimes[
+                                "nabla4_vertical_interpolate_benchmark_structured_gpu_kloop_separate"
+                            ]
+                        )
                     )
                 )
 
@@ -2190,9 +2242,11 @@ def run_benchmarks():
                 )
                 print(
                     "nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined median: {}".format(
-                        runtimes[
-                            "nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined"
-                        ]
+                        np.median(
+                            runtimes[
+                                "nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined"
+                            ]
+                        )
                     )
                 )
             else:
@@ -2212,9 +2266,11 @@ def run_benchmarks():
                 )
                 print(
                     "nabla4_vertical_interpolate_benchmark_unstructured_gpu_kloop_inlined median: {}".format(
-                        runtimes[
-                            "nabla4_vertical_interpolate_benchmark_unstructured_gpu_kloop_inlined"
-                        ]
+                        np.median(
+                            runtimes[
+                                "nabla4_vertical_interpolate_benchmark_unstructured_gpu_kloop_inlined"
+                            ]
+                        )
                     )
                 )
             if not args.vertical:
@@ -2234,9 +2290,11 @@ def run_benchmarks():
                 )
                 print(
                     "nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined_v2v median: {}".format(
-                        runtimes[
-                            "nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined_v2v"
-                        ]
+                        np.median(
+                            runtimes[
+                                "nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined_v2v"
+                            ]
+                        )
                     )
                 )
             else:
@@ -2256,9 +2314,11 @@ def run_benchmarks():
                 )
                 print(
                     "nabla4_vertical_interpolate_benchmark_unstructured_gpu_kloop_inlined_v2v median: {}".format(
-                        runtimes[
-                            "nabla4_vertical_interpolate_benchmark_unstructured_gpu_kloop_inlined_v2v"
-                        ]
+                        np.median(
+                            runtimes[
+                                "nabla4_vertical_interpolate_benchmark_unstructured_gpu_kloop_inlined_v2v"
+                            ]
+                        )
                     )
                 )
             if not args.vertical:
@@ -2278,9 +2338,11 @@ def run_benchmarks():
                 )
                 print(
                     "nabla4_interpolate_benchmark_structured_gpu_kloop_inlined median: {}".format(
-                        runtimes[
-                            "nabla4_interpolate_benchmark_structured_gpu_kloop_inlined"
-                        ]
+                        np.median(
+                            runtimes[
+                                "nabla4_interpolate_benchmark_structured_gpu_kloop_inlined"
+                            ]
+                        )
                     )
                 )
             else:
@@ -2300,9 +2362,11 @@ def run_benchmarks():
                 )
                 print(
                     "nabla4_vertical_interpolate_benchmark_structured_gpu_kloop_inlined median: {}".format(
-                        runtimes[
-                            "nabla4_vertical_interpolate_benchmark_structured_gpu_kloop_inlined"
-                        ]
+                        np.median(
+                            runtimes[
+                                "nabla4_vertical_interpolate_benchmark_structured_gpu_kloop_inlined"
+                            ]
+                        )
                     )
                 )
             if not args.vertical:
@@ -2322,9 +2386,11 @@ def run_benchmarks():
                 )
                 print(
                     "nabla4_interpolate_benchmark_structured_gpu_kloop_inlined_cached median: {}".format(
-                        runtimes[
-                            "nabla4_interpolate_benchmark_structured_gpu_kloop_inlined_cached"
-                        ]
+                        np.median(
+                            runtimes[
+                                "nabla4_interpolate_benchmark_structured_gpu_kloop_inlined_cached"
+                            ]
+                        )
                     )
                 )
             else:
@@ -2344,13 +2410,13 @@ def run_benchmarks():
                 )
                 print(
                     "nabla4_vertical_interpolate_benchmark_structured_gpu_kloop_inlined_cached median: {}".format(
-                        runtimes[
-                            "nabla4_vertical_interpolate_benchmark_structured_gpu_kloop_inlined_cached"
-                        ]
+                        np.median(
+                            runtimes[
+                                "nabla4_vertical_interpolate_benchmark_structured_gpu_kloop_inlined_cached"
+                            ]
+                        )
                     )
                 )
-
-    print_median_runtimes(runtimes)
 
     with open(args.output.split(".")[0] + ".json", "w") as file:
         dump(runtimes, file)
