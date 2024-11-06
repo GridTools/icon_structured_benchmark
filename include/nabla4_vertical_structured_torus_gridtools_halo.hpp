@@ -30,7 +30,7 @@ constexpr block_dims get_block_dims_structured_kloop_vertical<std::uint32_t>() {
 
 template <>
 constexpr block_dims get_block_dims_structured_kloop_vertical<int>() {
-    return {32, 2, 4, 672};
+    return {32, 1, 8, 256};
 };
 
 constexpr block_dims block_dims_structured_kloop_vertical = get_block_dims_structured_kloop_vertical<index_type>();

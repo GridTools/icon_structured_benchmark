@@ -28,7 +28,7 @@ constexpr block_dims get_block_dims_unstructured_kloop_vertical<std::uint32_t>()
 
 template <>
 constexpr block_dims get_block_dims_unstructured_kloop_vertical<int>() {
-    return {32, 14, 1, 448};
+    return {32, 8, 1, 256};
 };
 
 constexpr block_dims block_dims_unstructured_kloop_vertical = get_block_dims_unstructured_kloop_vertical<index_type>();
