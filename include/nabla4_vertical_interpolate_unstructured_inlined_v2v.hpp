@@ -152,7 +152,7 @@ constexpr block_dims get_block_dims_unstructured_nabla_interpol_inlined_v2v_kloo
 
 template <>
 constexpr block_dims get_block_dims_unstructured_nabla_interpol_inlined_v2v_kloop_vertical<int>() {
-    return {256, 1, 1, 256};
+    return {128, 4, 1, 512};
 };
 
 constexpr block_dims block_dims_unstructured_nabla_interpol_inlined_v2v_kloop_vertical =

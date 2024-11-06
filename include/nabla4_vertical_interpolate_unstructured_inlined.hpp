@@ -93,7 +93,7 @@ constexpr block_dims get_block_dims_unstructured_nabla_interpol_inlined_kloop_ve
 
 template <>
 constexpr block_dims get_block_dims_unstructured_nabla_interpol_inlined_kloop_vertical<int>() {
-    return {128, 1, 1, 128};
+    return {128, 4, 1, 512};
 };
 
 constexpr block_dims block_dims_unstructured_nabla_interpol_inlined_kloop_vertical =
