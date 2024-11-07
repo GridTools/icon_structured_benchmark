@@ -291,7 +291,7 @@ constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_naive_vert
 
 template <>
 constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_naive_vertical<int>() {
-    return {32, 1, 18, 576};
+    return {32, 1, 18, 576}; // Not optimized
 };
 
 constexpr block_dims block_dims_structured_nabla_interpol_inlined_naive_vertical =

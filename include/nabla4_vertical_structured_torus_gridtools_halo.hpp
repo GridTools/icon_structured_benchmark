@@ -58,7 +58,7 @@ constexpr block_dims get_block_dims_structured_naive_vertical<std::uint32_t>() {
 
 template <>
 constexpr block_dims get_block_dims_structured_naive_vertical<int>() {
-    return {32, 2, 4, 672};
+    return {32, 2, 4, 672}; // Not optimized
 };
 
 constexpr block_dims block_dims_structured_naive_vertical = get_block_dims_structured_naive_vertical<index_type>();
