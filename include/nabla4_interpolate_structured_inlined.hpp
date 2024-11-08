@@ -555,36 +555,11 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_k
                                         u_vert_gt_tv(E2C2V_3, k_index) * primal_normal_vert_v1[4 * color + 3] +
                                         v_vert_gt_tv(E2C2V_3, k_index) * primal_normal_vert_v2[4 * color + 3];
             const WP_TYPE z_nabla2_e = z_nabla2_e_gt_tv(edge_index, k_index);
-            // printf("t[%d, %d, %d]b[%d, %d, %d] i: %d, j: %d, edge_index %d\n", threadIdx.x, threadIdx.y, threadIdx.z,
-            // blockIdx.x, blockIdx.y, blockIdx.z, i, j, edge_index);
             z_nabla4_e2_wp[color] =
                 4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e) * (inv_vert_vert_length[color] * inv_vert_vert_length[color]) +
                           (nabv_tang_wp - 2.0 * z_nabla2_e) *
                               (inv_primal_edge_length[color] * inv_primal_edge_length[color]));
         }
-        printf("t[%d, %d, %d]b[%d, %d, %d] i: %d, j: %d, vertex_index_internal %d, z_nabal4_e2: [%lf, %lf, %lf, %lf, "
-               "%lf, %lf], ptr_coeff_1: [%lf, %lf, %lf, %lf, %lf, %lf]\n",
-            threadIdx.x,
-            threadIdx.y,
-            threadIdx.z,
-            blockIdx.x,
-            blockIdx.y,
-            blockIdx.z,
-            i,
-            j,
-            vertex_index_internal,
-            z_nabla4_e2_wp[0],
-            z_nabla4_e2_wp[1],
-            z_nabla4_e2_wp[2],
-            z_nabla4_e2_wp[3],
-            z_nabla4_e2_wp[4],
-            z_nabla4_e2_wp[5],
-            ptr_coeff_1[0],
-            ptr_coeff_1[1],
-            ptr_coeff_1[2],
-            ptr_coeff_1[3],
-            ptr_coeff_1[4],
-            ptr_coeff_1[5]);
         p_u_out_gt_tv(vertex_index_internal, k_index) =
             z_nabla4_e2_wp[0] * ptr_coeff_1[0] + z_nabla4_e2_wp[1] * ptr_coeff_1[1] +
             z_nabla4_e2_wp[2] * ptr_coeff_1[2] + z_nabla4_e2_wp[3] * ptr_coeff_1[3] +

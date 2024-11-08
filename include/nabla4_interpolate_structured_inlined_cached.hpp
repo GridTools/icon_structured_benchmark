@@ -212,12 +212,7 @@ __launch_bounds__(block_dims_structured_nabla_interpol_inlined_cached_kloop.size
                 const auto k_level_cache_offset =
                     3 * shared_mem_inner_domain * ((threadIdx.z * k_repetitions) + k_repetition);
                 const auto local_edge_index =
-                    threadIdx.x +
-                    threadIdx.y * blockDim.x + // need to understand if here this should be blockDim.x or blockDim.x+1
-                    color * shared_mem_inner_domain + k_level_cache_offset;
-                // printf("t[%d, %d, %d]b[%d, %d, %d] i: %d, j: %d, local_edge_index %d, global_edge_index: %d\n",
-                // threadIdx.x, threadIdx.y, threadIdx.z, blockIdx.x, blockIdx.y, blockIdx.z, i, j, local_edge_index,
-                // edge_index + color * outer_domain_size);
+                    threadIdx.x + threadIdx.y * blockDim.x + color * shared_mem_inner_domain + k_level_cache_offset;
                 z_nabla4_e2[local_edge_index] =
                     4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_tv(edge_index + color * outer_domain_size, k_index)) *
                                   inv_vert_vert_length_sqr[color] +
@@ -236,21 +231,6 @@ __launch_bounds__(block_dims_structured_nabla_interpol_inlined_cached_kloop.size
     }
     const std::array<index_type, 6> v2e{
         get_v2e_per_orientation(threadIdx.x + 1, threadIdx.y + 1, blockDim.x, blockDim.y)};
-    // printf("t[%d, %d, %d]b[%d, %d, %d] i: %d j: %d v2e: [%d, %d, %d, %d, %d, %d]\n",
-    //     threadIdx.x,
-    //     threadIdx.y,
-    //     threadIdx.z,
-    //     blockIdx.x,
-    //     blockIdx.y,
-    //     blockIdx.z,
-    //     i_interpolate,
-    //     j_interpolate,
-    //     v2e[0],
-    //     v2e[1],
-    //     v2e[2],
-    //     v2e[3],
-    //     v2e[4],
-    //     v2e[5]);
     const index_type vertex_index_internal = i_interpolate - halo + (j_interpolate - halo) * (x_dim - 2 * halo);
     const std::array<WP_TYPE, 6> coeff_1{ptr_coeff_1_gt_ctv(vertex_index_internal, 0),
         ptr_coeff_1_gt_ctv(vertex_index_internal, 1),
@@ -268,27 +248,6 @@ __launch_bounds__(block_dims_structured_nabla_interpol_inlined_cached_kloop.size
     for (auto k_index{blockIdx.z * blockDim.z + threadIdx.z}; k_repetition < k_repetitions && k_index < KDim;
          k_index += gridDim.z * blockDim.z) {
         const auto k_level_cache_offset = 3 * shared_mem_inner_domain * ((threadIdx.z * k_repetitions) + k_repetition);
-        // printf("t[%d, %d, %d]b[%d, %d, %d] vertex_index_internal: %d, z_nabla4_e2: [%lf, %lf, %lf, %lf, %lf, %lf], "
-        //    "coeff_1: [%lf, %lf, %lf, %lf, %lf, %lf]\n",
-        // threadIdx.x,
-        // threadIdx.y,
-        // threadIdx.z,
-        // blockIdx.x,
-        // blockIdx.y,
-        // blockIdx.z,
-        // vertex_index_internal,
-        // z_nabla4_e2[v2e[0] + k_level_cache_offset],
-        // z_nabla4_e2[v2e[1] + k_level_cache_offset],
-        // z_nabla4_e2[v2e[2] + k_level_cache_offset],
-        // z_nabla4_e2[v2e[3] + k_level_cache_offset],
-        // z_nabla4_e2[v2e[4] + k_level_cache_offset],
-        // z_nabla4_e2[v2e[5] + k_level_cache_offset],
-        // coeff_1[0],
-        // coeff_1[1],
-        // coeff_1[2],
-        // coeff_1[3],
-        // coeff_1[4],
-        // coeff_1[5]);
         p_u_out_gt_tv(vertex_index_internal, k_index) = z_nabla4_e2[v2e[0] + k_level_cache_offset] * coeff_1[0] +
                                                         z_nabla4_e2[v2e[1] + k_level_cache_offset] * coeff_1[1] +
                                                         z_nabla4_e2[v2e[2] + k_level_cache_offset] * coeff_1[2] +
