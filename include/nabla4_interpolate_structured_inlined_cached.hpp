@@ -208,11 +208,10 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_c
                     3 * shared_mem_inner_domain * ((threadIdx.z * k_repetitions) + k_repetition);
                 const auto local_edge_index =
                     threadIdx.x + threadIdx.y * blockDim.x + color * shared_mem_inner_domain + k_level_cache_offset;
+                const WP_TYPE z_nabla2_e = z_nabla2_e_gt_tv(edge_index + color * outer_domain_size, k_index);
                 z_nabla4_e2[local_edge_index] =
-                    4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e_gt_tv(edge_index + color * outer_domain_size, k_index)) *
-                                  inv_vert_vert_length_sqr[color] +
-                              (nabv_tang_wp - 2.0 * z_nabla2_e_gt_tv(edge_index + color * outer_domain_size, k_index)) *
-                                  inv_primal_edge_length_sqr[color]);
+                    4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e) * inv_vert_vert_length_sqr[color] +
+                              (nabv_tang_wp - 2.0 * z_nabla2_e) * inv_primal_edge_length_sqr[color]);
             };
             k_repetition++;
         }
