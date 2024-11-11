@@ -443,7 +443,7 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
                                         v_vert_gt_tv(E2C2V_2, k_index) * primal_normal_vert_v2[4 * i + 2] +
                                         u_vert_gt_tv(E2C2V_3, k_index) * primal_normal_vert_v1[4 * i + 3] +
                                         v_vert_gt_tv(E2C2V_3, k_index) * primal_normal_vert_v2[4 * i + 3];
-            const double z_nabla2_e = z_nabla2_e_gt_tv(edge_index, k_index);
+            const WP_TYPE z_nabla2_e = z_nabla2_e_gt_tv(edge_index, k_index);
             z_nabla4_e2_wp[i] =
                 4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e) * (inv_vert_vert_length[i] * inv_vert_vert_length[i]) +
                           (nabv_tang_wp - 2.0 * z_nabla2_e) * (inv_primal_edge_length[i] * inv_primal_edge_length[i]));

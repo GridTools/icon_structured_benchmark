@@ -687,10 +687,10 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
                                         v_vert_gt_tv(E2C2V_2, k_index) * primal_normal_vert_v2[4 * i + 2] +
                                         u_vert_gt_tv(E2C2V_3, k_index) * primal_normal_vert_v1[4 * i + 3] +
                                         v_vert_gt_tv(E2C2V_3, k_index) * primal_normal_vert_v2[4 * i + 3];
-            const auto z_nabla4_e = z_nabla2_e_gt_tv(edge_index, k_index);
+            const WP_TYPE z_nabla2_e = z_nabla2_e_gt_tv(edge_index, k_index);
             z_nabla4_e2_wp[i] =
-                4.0 * ((nabv_norm_wp - 2.0 * z_nabla4_e) * (inv_vert_vert_length[i] * inv_vert_vert_length[i]) +
-                          (nabv_tang_wp - 2.0 * z_nabla4_e) * (inv_primal_edge_length[i] * inv_primal_edge_length[i]));
+                4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e) * (inv_vert_vert_length[i] * inv_vert_vert_length[i]) +
+                          (nabv_tang_wp - 2.0 * z_nabla2_e) * (inv_primal_edge_length[i] * inv_primal_edge_length[i]));
         }
         p_u_out_gt_tv(vertex_index, k_index) = z_nabla4_e2_wp[0] * ptr_coeff_1[0] + z_nabla4_e2_wp[1] * ptr_coeff_1[1] +
                                                z_nabla4_e2_wp[2] * ptr_coeff_1[2] + z_nabla4_e2_wp[3] * ptr_coeff_1[3] +
@@ -767,26 +767,26 @@ __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined_v2v_naive.size)
 #else
 __maxnreg__(80)
 #endif
-run_gpu_naive_nabla4_interpolate_inlined_v2v_unstructured(index_type nabla4_output_size,
-    index_type interpolate_output_size,
-    index_type CellDim,
-    index_type VertexDim,
-    index_type EdgeDim,
-    index_type KDim,
-    nabla4_interpolate_unstructured_inlined_v2v<storage::gpu>::neighbors_e2c2v_gt_ctv_t v2e2c2v_gt_ctv,
-    nabla4_interpolate_unstructured_inlined_v2v<storage::gpu>::neighbors_e2ecv_gt_ctv_t v2e2ecv_gt_ctv,
-    interpolate_unstructured<storage::gpu>::neighbors_gt_ctv_t v2e_gt_ctv,
-    nabla4_unstructured_gt<storage::gpu>::data_store_2d_ctv_VP_t u_vert_gt_tv,
-    nabla4_unstructured_gt<storage::gpu>::data_store_2d_ctv_VP_t v_vert_gt_tv,
-    nabla4_unstructured_gt<storage::gpu>::data_store_1d_ctv_WP_t primal_normal_vert_v1_gt_tv,
-    nabla4_unstructured_gt<storage::gpu>::data_store_1d_ctv_WP_t primal_normal_vert_v2_gt_tv,
-    nabla4_unstructured_gt<storage::gpu>::data_store_2d_ctv_WP_t z_nabla2_e_gt_tv,
-    nabla4_unstructured_gt<storage::gpu>::data_store_1d_ctv_WP_t inv_vert_vert_length_gt_tv,
-    nabla4_unstructured_gt<storage::gpu>::data_store_1d_ctv_WP_t inv_primal_edge_length_gt_tv,
-    interpolate_unstructured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_1_gt_ctv,
-    interpolate_unstructured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_2_gt_ctv,
-    interpolate_unstructured<storage::gpu>::data_store_2d_tv_WP_t p_u_out_gt_tv,
-    interpolate_unstructured<storage::gpu>::data_store_2d_tv_WP_t p_v_out_gt_tv) {
+    run_gpu_naive_nabla4_interpolate_inlined_v2v_unstructured(index_type nabla4_output_size,
+        index_type interpolate_output_size,
+        index_type CellDim,
+        index_type VertexDim,
+        index_type EdgeDim,
+        index_type KDim,
+        nabla4_interpolate_unstructured_inlined_v2v<storage::gpu>::neighbors_e2c2v_gt_ctv_t v2e2c2v_gt_ctv,
+        nabla4_interpolate_unstructured_inlined_v2v<storage::gpu>::neighbors_e2ecv_gt_ctv_t v2e2ecv_gt_ctv,
+        interpolate_unstructured<storage::gpu>::neighbors_gt_ctv_t v2e_gt_ctv,
+        nabla4_unstructured_gt<storage::gpu>::data_store_2d_ctv_VP_t u_vert_gt_tv,
+        nabla4_unstructured_gt<storage::gpu>::data_store_2d_ctv_VP_t v_vert_gt_tv,
+        nabla4_unstructured_gt<storage::gpu>::data_store_1d_ctv_WP_t primal_normal_vert_v1_gt_tv,
+        nabla4_unstructured_gt<storage::gpu>::data_store_1d_ctv_WP_t primal_normal_vert_v2_gt_tv,
+        nabla4_unstructured_gt<storage::gpu>::data_store_2d_ctv_WP_t z_nabla2_e_gt_tv,
+        nabla4_unstructured_gt<storage::gpu>::data_store_1d_ctv_WP_t inv_vert_vert_length_gt_tv,
+        nabla4_unstructured_gt<storage::gpu>::data_store_1d_ctv_WP_t inv_primal_edge_length_gt_tv,
+        interpolate_unstructured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_1_gt_ctv,
+        interpolate_unstructured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_2_gt_ctv,
+        interpolate_unstructured<storage::gpu>::data_store_2d_tv_WP_t p_u_out_gt_tv,
+        interpolate_unstructured<storage::gpu>::data_store_2d_tv_WP_t p_v_out_gt_tv) {
     const auto vertex_index = blockIdx.x * blockDim.x + threadIdx.x;
     const auto k_index = blockIdx.y * blockDim.y + threadIdx.y;
     if (vertex_index >= interpolate_output_size || k_index >= KDim)
