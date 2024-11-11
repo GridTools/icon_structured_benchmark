@@ -970,6 +970,7 @@ std::vector<double> nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined_
     index_type EdgeDim,
     index_type KDim,
     index_type ECVDim,
+    index_type x_dim,
     int repetitions = 101,
     int dry_runs = 1);
 
@@ -982,7 +983,6 @@ std::vector<double> nabla4_vertical_interpolate_benchmark_unstructured_gpu_kloop
     index_type EdgeDim,
     index_type KDim,
     index_type ECVDim,
-    index_type x_dim,
     int repetitions = 101,
     int dry_runs = 1);
 
@@ -1512,6 +1512,7 @@ nabla4_interpolate_validate_unstructured_gpu_kloop_inlined_cached(std::vector<st
     index_type EdgeDim,
     index_type KDim,
     index_type ECVDim,
+    index_type x_dim,
     std::vector<std::vector<VP_TYPE>> &u_vert,
     std::vector<std::vector<VP_TYPE>> &v_vert,
     std::vector<WP_TYPE> &primal_normal_vert_v1,
@@ -1531,7 +1532,6 @@ nabla4_vertical_interpolate_validate_unstructured_gpu_kloop_inlined(std::vector<
     index_type EdgeDim,
     index_type KDim,
     index_type ECVDim,
-    index_type x_dim,
     std::vector<std::vector<VP_TYPE>> &u_vert,
     std::vector<std::vector<VP_TYPE>> &v_vert,
     std::vector<WP_TYPE> &primal_normal_vert_v1,

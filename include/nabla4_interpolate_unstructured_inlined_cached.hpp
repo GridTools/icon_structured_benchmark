@@ -101,8 +101,6 @@ constexpr block_dims get_block_dims_unstructured_nabla_interpol_inlined_cached_k
 constexpr block_dims block_dims_unstructured_nabla_interpol_inlined_cached_kloop =
     get_block_dims_unstructured_nabla_interpol_inlined_cached_kloop<index_type>();
 
-constexpr int k_repetitions{4};
-
 __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined_cached_kloop.size)
     run_gpu_kloop_nabla4_interpolate_inlined_cached_unstructured(index_type nabla4_output_size,
         index_type interpolate_output_size,
@@ -110,7 +108,7 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
         index_type VertexDim,
         index_type EdgeDim,
         index_type KDim,
-        index_type x_dim,
+        int k_repetitions,
         nabla4_unstructured_gt<storage::gpu>::neighbors_gt_ctv_t e2c2v_gt_tv,
         nabla4_unstructured_gt<storage::gpu>::neighbors_gt_ctv_t e2ecv_gt_tv,
         interpolate_unstructured<storage::gpu>::neighbors_gt_ctv_t v2e_gt_tv,
@@ -128,8 +126,6 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
     const auto vertex_index = blockIdx.x * blockDim.x + threadIdx.x;
     if (vertex_index >= interpolate_output_size)
         return;
-    const index_type i{vertex_index % x_dim};
-    const index_type j{vertex_index / x_dim};
     extern __shared__ WP_TYPE z_nabla4_e2[];
     const std::array<index_type, 6> v2e{v2e_gt_tv(vertex_index, 0),
         v2e_gt_tv(vertex_index, 1),
@@ -137,19 +133,14 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
         v2e_gt_tv(vertex_index, 3),
         v2e_gt_tv(vertex_index, 4),
         v2e_gt_tv(vertex_index, 5)};
-    //                                 0 == 510   - 1 || 0           == 127            || 0           + 510    >= 128           510   <= 128         || 0             + 510   >= 510 * 590
-    // const bool calculate_edges_1_3_5 = i == x_dim - 1 || threadIdx.x == blockDim.x - 1 || (threadIdx.x + x_dim >= blockDim.x && x_dim <= blockDim.x) || i + j * x_dim + x_dim >= interpolate_output_size;
-    const bool calculate_1 = i == x_dim - 1 || threadIdx.x == blockDim.x - 1 || vertex_index == interpolate_output_size - 1;
-    // const bool calculate_3{true};
-    // const bool calculate_5{true};
     const std::array<index_type, 24> e2c2v{e2c2v_gt_tv(v2e[0], 0),
         e2c2v_gt_tv(v2e[0], 1),
         e2c2v_gt_tv(v2e[0], 2),
         e2c2v_gt_tv(v2e[0], 3),
-        calculate_1 ? e2c2v_gt_tv(v2e[1], 0) : 0,
-        calculate_1 ? e2c2v_gt_tv(v2e[1], 1) : 0,
-        calculate_1 ? e2c2v_gt_tv(v2e[1], 2) : 0,
-        calculate_1 ? e2c2v_gt_tv(v2e[1], 3) : 0,
+        e2c2v_gt_tv(v2e[1], 0),
+        e2c2v_gt_tv(v2e[1], 1),
+        e2c2v_gt_tv(v2e[1], 2),
+        e2c2v_gt_tv(v2e[1], 3),
         e2c2v_gt_tv(v2e[2], 0),
         e2c2v_gt_tv(v2e[2], 1),
         e2c2v_gt_tv(v2e[2], 2),
@@ -170,10 +161,10 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
         e2ecv_gt_tv(v2e[0], 1),
         e2ecv_gt_tv(v2e[0], 2),
         e2ecv_gt_tv(v2e[0], 3),
-        calculate_1 ? e2ecv_gt_tv(v2e[1], 0) : 0,
-        calculate_1 ? e2ecv_gt_tv(v2e[1], 1) : 0,
-        calculate_1 ? e2ecv_gt_tv(v2e[1], 2) : 0,
-        calculate_1 ? e2ecv_gt_tv(v2e[1], 3) : 0,
+        e2ecv_gt_tv(v2e[1], 0),
+        e2ecv_gt_tv(v2e[1], 1),
+        e2ecv_gt_tv(v2e[1], 2),
+        e2ecv_gt_tv(v2e[1], 3),
         e2ecv_gt_tv(v2e[2], 0),
         e2ecv_gt_tv(v2e[2], 1),
         e2ecv_gt_tv(v2e[2], 2),
@@ -194,10 +185,10 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
         primal_normal_vert_v1_gt_tv(e2ecv[1]),
         primal_normal_vert_v1_gt_tv(e2ecv[2]),
         primal_normal_vert_v1_gt_tv(e2ecv[3]),
-        calculate_1 ? primal_normal_vert_v1_gt_tv(e2ecv[4]) : 0,
-        calculate_1 ? primal_normal_vert_v1_gt_tv(e2ecv[5]) : 0,
-        calculate_1 ? primal_normal_vert_v1_gt_tv(e2ecv[6]) : 0,
-        calculate_1 ? primal_normal_vert_v1_gt_tv(e2ecv[7]) : 0,
+        primal_normal_vert_v1_gt_tv(e2ecv[4]),
+        primal_normal_vert_v1_gt_tv(e2ecv[5]),
+        primal_normal_vert_v1_gt_tv(e2ecv[6]),
+        primal_normal_vert_v1_gt_tv(e2ecv[7]),
         primal_normal_vert_v1_gt_tv(e2ecv[8]),
         primal_normal_vert_v1_gt_tv(e2ecv[9]),
         primal_normal_vert_v1_gt_tv(e2ecv[10]),
@@ -218,10 +209,10 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
         primal_normal_vert_v2_gt_tv(e2ecv[1]),
         primal_normal_vert_v2_gt_tv(e2ecv[2]),
         primal_normal_vert_v2_gt_tv(e2ecv[3]),
-        calculate_1 ? primal_normal_vert_v2_gt_tv(e2ecv[4]) : 0,
-        calculate_1 ? primal_normal_vert_v2_gt_tv(e2ecv[5]) : 0,
-        calculate_1 ? primal_normal_vert_v2_gt_tv(e2ecv[6]) : 0,
-        calculate_1 ? primal_normal_vert_v2_gt_tv(e2ecv[7]) : 0,
+        primal_normal_vert_v2_gt_tv(e2ecv[4]),
+        primal_normal_vert_v2_gt_tv(e2ecv[5]),
+        primal_normal_vert_v2_gt_tv(e2ecv[6]),
+        primal_normal_vert_v2_gt_tv(e2ecv[7]),
         primal_normal_vert_v2_gt_tv(e2ecv[8]),
         primal_normal_vert_v2_gt_tv(e2ecv[9]),
         primal_normal_vert_v2_gt_tv(e2ecv[10]),
@@ -239,13 +230,13 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
         primal_normal_vert_v2_gt_tv(e2ecv[22]),
         primal_normal_vert_v2_gt_tv(e2ecv[23])};
     const std::array<WP_TYPE, 6> inv_vert_vert_length{inv_vert_vert_length_gt_tv(v2e[0]),
-        calculate_1 ? inv_vert_vert_length_gt_tv(v2e[1]) : 0,
+        inv_vert_vert_length_gt_tv(v2e[1]),
         inv_vert_vert_length_gt_tv(v2e[2]),
         inv_vert_vert_length_gt_tv(v2e[3]),
         inv_vert_vert_length_gt_tv(v2e[4]),
         inv_vert_vert_length_gt_tv(v2e[5])};
     const std::array<WP_TYPE, 6> inv_primal_edge_length{inv_primal_edge_length_gt_tv(v2e[0]),
-        calculate_1 ? inv_primal_edge_length_gt_tv(v2e[1]) : 0,
+        inv_primal_edge_length_gt_tv(v2e[1]),
         inv_primal_edge_length_gt_tv(v2e[2]),
         inv_primal_edge_length_gt_tv(v2e[3]),
         inv_primal_edge_length_gt_tv(v2e[4]),
@@ -256,18 +247,6 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
         const auto shared_mem_vertex_index{(threadIdx.x + k_repetition * blockDim.x) * 6};
 #pragma unroll
         for (int edge_id{0}; edge_id < 6; ++edge_id) {
-            if (edge_id == 1 && !calculate_1) {
-                continue;
-            }
-            // if (edge_id == 1) {
-            //     printf("[1] threadIdx.x: %d, blockIdx.x: %d, threadIdx.y: %d, shared_mem_vertex_index: %d, edge_id: %d\n", threadIdx.x, blockIdx.x, threadIdx.y, shared_mem_vertex_index, edge_id);
-            // }
-            // if (edge_id == 3 && !calculate_edges_1_3_5 && !calculate_3) {
-            //     continue;
-            // }
-            // if (edge_id == 5 && !calculate_edges_1_3_5 && !calculate_5) {
-            //     continue;
-            // }
             const auto edge_index = v2e[edge_id];
             const auto E2C2V_0 = e2c2v[edge_id * 4];
             const auto E2C2V_1 = e2c2v[edge_id * 4 + 1];
@@ -285,23 +264,6 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
             z_nabla4_e2[shared_mem_vertex_index + edge_id] =
                 4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e) * inv_vert_vert_length[edge_id] * inv_vert_vert_length[edge_id] +
                         (nabv_tang_wp - 2.0 * z_nabla2_e) * inv_primal_edge_length[edge_id] * inv_primal_edge_length[edge_id]);
-            printf("Setting z_nabla4_e2 %d = %lf, i: %d, j: %d, threadIdx.x: %d, edge_id: %d\n", shared_mem_vertex_index + edge_id, z_nabla4_e2[shared_mem_vertex_index + edge_id], i, j, threadIdx.x, edge_id);
-            if (edge_id == 0 && threadIdx.x > 0 && i != 0) {
-                const auto neighbor_vertex_index{((threadIdx.x - 1) + k_repetition * blockDim.x) * 6 + 1};
-                z_nabla4_e2[neighbor_vertex_index] = z_nabla4_e2[shared_mem_vertex_index + edge_id];
-                printf("Setting z_nabla4_e2 %d = %lf, i: %d, j: %d, threadIdx.x: %d, edge_id: %d\n", neighbor_vertex_index, z_nabla4_e2[neighbor_vertex_index], i, j, threadIdx.x, edge_id);
-                // printf("[0->1] threadIdx.x: %d, blockIdx.x: %d, threadIdx.y: %d, neighbor_vertex_index: %d, shared_mem_vertex_index: %d, edge_id: %d\n", threadIdx.x, blockIdx.x, threadIdx.y, neighbor_vertex_index, shared_mem_vertex_index, edge_id);
-            }
-            // if (edge_id == 2 && j > 0 && threadIdx.x >= x_dim) {
-            //     const auto neighbor_vertex_index{((threadIdx.x - x_dim) + k_repetition * blockDim.x) * 6 + 3};
-            //     z_nabla4_e2[neighbor_vertex_index] = z_nabla4_e2[shared_mem_vertex_index + edge_id];
-            //     printf("[2->3] threadIdx.x: %d, blockIdx.x: %d, threadIdx.y: %d, neighbor_vertex_index: %d, shared_mem_vertex_index: %d, edge_id: %d\n", threadIdx.x, blockIdx.x, threadIdx.y, neighbor_vertex_index, shared_mem_vertex_index, edge_id);
-            // }
-            // if (edge_id == 4 && j > 0 && threadIdx.x + 1 >= x_dim && !calculate_5) {
-            //     const auto neighbor_vertex_index{((threadIdx.x - x_dim + 1) + k_repetition * blockDim.x) * 6 + 5};
-            //     z_nabla4_e2[neighbor_vertex_index] = z_nabla4_e2[shared_mem_vertex_index + edge_id];
-            //     printf("[4->5] threadIdx.x: %d, blockIdx.x: %d, threadIdx.y: %d, neighbor_vertex_index: %d, shared_mem_vertex_index: %d, edge_id: %d\n", threadIdx.x, blockIdx.x, threadIdx.y, neighbor_vertex_index, shared_mem_vertex_index, edge_id);
-            // }
         }
         k_repetition++;
     }
@@ -327,7 +289,6 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
             z_nabla4_e2[shared_mem_vertex_index + 3],
             z_nabla4_e2[shared_mem_vertex_index + 4],
             z_nabla4_e2[shared_mem_vertex_index + 5]};
-        // printf("threadIdx.x: %d, blockIdx.x: %d, threadIdx.y: %d, i: %d, j: %d, shared_mem_vertex_index: %d, shared_mem: [%lf %lf %lf %lf %lf %lf]\n", threadIdx.x, blockIdx.x, threadIdx.y, i, j, shared_mem_vertex_index, z_nabla4_e2_wp[0], z_nabla4_e2_wp[1], z_nabla4_e2_wp[2], z_nabla4_e2_wp[3], z_nabla4_e2_wp[4], z_nabla4_e2_wp[5]);
         p_u_out_gt_tv(vertex_index, k_index) = z_nabla4_e2_wp[0] * ptr_coeff_1[0] + z_nabla4_e2_wp[1] * ptr_coeff_1[1] +
                                                z_nabla4_e2_wp[2] * ptr_coeff_1[2] + z_nabla4_e2_wp[3] * ptr_coeff_1[3] +
                                                z_nabla4_e2_wp[4] * ptr_coeff_1[4] + z_nabla4_e2_wp[5] * ptr_coeff_1[5];
@@ -340,20 +301,22 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
 
 template <typename T>
 inline void nabla4_interpolate_unstructured_inlined_cached<T>::run_gpu_kloop_helper() {
-    dim3 tblocks(block_dims_unstructured_nabla_interpol_inlined_cached_kloop.x,
+    constexpr dim3 tblocks(block_dims_unstructured_nabla_interpol_inlined_cached_kloop.x,
         block_dims_unstructured_nabla_interpol_inlined_cached_kloop.y,
         block_dims_unstructured_nabla_interpol_inlined_cached_kloop.z);
+    constexpr int smemSize{49152}; // GH200
+    constexpr index_type shared_mem_inner_domain = tblocks.x;
+    constexpr long unsigned int k_repetitions{smemSize / (shared_mem_inner_domain * 6 * sizeof(WP_TYPE) * tblocks.z)};
     const int KDim_ceil = std::ceil(static_cast<double>(interpolate_data.KDim) / k_repetitions);
     dim3 grid((interpolate_data.output_size + tblocks.x - 1) / tblocks.x, (KDim_ceil + tblocks.y - 1) / tblocks.y , 1);
-    const auto shared_mem_size{tblocks.x * k_repetitions * 6 * sizeof(WP_TYPE)};
-    std::cout << "x_dim: " << x_dim << std::endl;
+    constexpr int shared_mem_size = shared_mem_inner_domain * 6 * sizeof(WP_TYPE) * k_repetitions * tblocks.z;
     run_gpu_kloop_nabla4_interpolate_inlined_cached_unstructured<<<grid, tblocks, shared_mem_size>>>(nabla4_data.output_size,
         interpolate_data.output_size,
         nabla4_data.CellDim,
         interpolate_data.VertexDim,
         interpolate_data.EdgeDim,
         interpolate_data.KDim,
-        x_dim,
+        k_repetitions,
         nabla4_data.e2c2v_gt_tv,
         nabla4_data.e2ecv_gt_tv,
         interpolate_data.v2e_gt_ctv,

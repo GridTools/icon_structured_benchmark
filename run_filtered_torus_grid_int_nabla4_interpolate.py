@@ -1124,6 +1124,7 @@ def run_sanity_checks(
                 random_validation_data_separate.EdgeDim,
                 random_validation_data_separate.KDim,
                 random_validation_data_separate.ECVDim,
+                lon_dim,
                 np.array(random_validation_data_separate.u_vert).T,
                 np.array(random_validation_data_separate.v_vert).T,
                 random_validation_data_separate.primal_normal_vert_v1,
@@ -2282,7 +2283,7 @@ def run_benchmarks():
                 )
                 runtimes[
                     "nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined_cached"
-                ] = icon_benchmark.nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined(
+                ] = icon_benchmark.nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined_cached(
                     filtered_e2c2v_inlined,
                     filtered_e2ecv_inlined,
                     filtered_v2e_inlined,
@@ -2291,6 +2292,7 @@ def run_benchmarks():
                     torus_grid.num_edges,
                     torus_grid.num_levels,
                     torus_grid.size[E2C2VDim],
+                    grid_cartesian_dimensions[0],
                     repetitions,
                     dry_runs,
                 )

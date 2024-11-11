@@ -260,7 +260,7 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_c
 
 template <typename T>
 inline void nabla4_interpolate_structured_inlined_cached<T>::run_gpu_kloop_helper() {
-    dim3 tblocks(block_dims_structured_nabla_interpol_inlined_cached_kloop.x,
+    constexpr dim3 tblocks(block_dims_structured_nabla_interpol_inlined_cached_kloop.x,
         block_dims_structured_nabla_interpol_inlined_cached_kloop.y,
         block_dims_structured_nabla_interpol_inlined_cached_kloop.z);
     const index_type inner_domain_size =
@@ -269,8 +269,8 @@ inline void nabla4_interpolate_structured_inlined_cached<T>::run_gpu_kloop_helpe
     const index_type inner_x_dim = interpolate_data.x_dim - 2 * interpolate_data.halo + 2;
     const index_type inner_y_dim = interpolate_data.y_dim - 2 * interpolate_data.halo + 2;
     constexpr int smemSize{49152}; // GH200
-    const index_type shared_mem_inner_domain = tblocks.x * tblocks.y;
-    const long unsigned int k_repetitions{smemSize / (shared_mem_inner_domain * 3 * sizeof(WP_TYPE) * tblocks.z)};
+    constexpr index_type shared_mem_inner_domain = tblocks.x * tblocks.y;
+    constexpr long unsigned int k_repetitions{smemSize / (shared_mem_inner_domain * 3 * sizeof(WP_TYPE) * tblocks.z)};
     const int KDim_ceil = std::ceil(static_cast<double>(interpolate_data.KDim) / k_repetitions);
     dim3 grid((inner_x_dim - 1 + tblocks.x - 1) / (tblocks.x - 1),
         (inner_y_dim - 2 + tblocks.y - 1) / (tblocks.y - 2),
