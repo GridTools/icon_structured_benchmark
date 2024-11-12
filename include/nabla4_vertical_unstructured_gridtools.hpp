@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 #pragma once
 #include <array>
 #include <iostream>
@@ -5,10 +6,10 @@
 
 #include "nabla4_vertical_gridtools.hpp"
 
-#if defined(__CUDACC__)
+#if defined(__HIPCC__)
 template <typename T>
 constexpr block_dims get_block_dims_unstructured_kloop_vertical() {
-    throw std::runtime_error("Undefined block dimensions for type " + T::name + " in GPU backend");
+    return {};
 };
 
 template <>
@@ -35,7 +36,7 @@ constexpr block_dims block_dims_unstructured_kloop_vertical = get_block_dims_uns
 
 template <typename T>
 constexpr block_dims get_block_dims_unstructured_naive_vertical() {
-    throw std::runtime_error("Undefined block dimensions for type " + T::name + " in GPU backend");
+    return {};
 };
 
 template <>
@@ -155,7 +156,7 @@ class nabla4_vertical_unstructured_gt : public nabla4_vertical_gt_data<T> {
     }
 };
 
-#if defined(__CUDACC__)
+#if defined(__HIPCC__)
 __global__ void __launch_bounds__(block_dims_unstructured_kloop_vertical.size)
     run_gpu_kloop_vertical_nabla4_unstructured(index_type EdgeDim,
         index_type KDim,
@@ -219,7 +220,7 @@ inline void nabla4_vertical_unstructured_gt<T>::run_gpu_kloop_helper() {
         inv_vert_vert_length_gt_tv,
         inv_primal_edge_length_gt_tv,
         z_nabla4_e2_wp_gt_tv);
-    GT_CUDA_CHECK(cudaGetLastError());
+    GT_CUDA_CHECK(hipGetLastError());
 };
 
 __global__ void __launch_bounds__(block_dims_unstructured_naive_vertical.size)
@@ -283,7 +284,7 @@ inline void nabla4_vertical_unstructured_gt<T>::run_gpu_naive_helper() {
         inv_vert_vert_length_gt_tv,
         inv_primal_edge_length_gt_tv,
         z_nabla4_e2_wp_gt_tv);
-    GT_CUDA_CHECK(cudaGetLastError());
+    GT_CUDA_CHECK(hipGetLastError());
 };
 #else
 template <typename T>

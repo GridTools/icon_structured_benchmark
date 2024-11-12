@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 #include <interpolate_unstructured_gridtools.hpp>
 #include <nabla4_unstructured_gridtools.hpp>
 
@@ -488,10 +489,10 @@ struct nabla4_interpolate_unstructured_inlined_v2v {
     }
 };
 
-#if defined(__CUDACC__)
+#if defined(__HIPCC__)
 template <typename T>
 constexpr block_dims get_block_dims_unstructured_nabla_interpol_inlined_v2v_kloop() {
-    throw std::runtime_error("Undefined block dimensions for type " + T::name + " in GPU backend");
+    return {};
 };
 
 template <>
@@ -727,12 +728,12 @@ inline void nabla4_interpolate_unstructured_inlined_v2v<T>::run_gpu_kloop_helper
         interpolate_data.ptr_coeff_2_gt_ctv,
         interpolate_data.p_u_out_gt_tv,
         interpolate_data.p_v_out_gt_tv);
-    GT_CUDA_CHECK(cudaGetLastError());
+    GT_CUDA_CHECK(hipGetLastError());
 };
 
 template <typename T>
 constexpr block_dims get_block_dims_unstructured_nabla_interpol_inlined_v2v_naive() {
-    throw std::runtime_error("Undefined block dimensions for type " + T::name + " in GPU backend");
+    return {};
 };
 
 template <>
@@ -885,7 +886,7 @@ inline void nabla4_interpolate_unstructured_inlined_v2v<T>::run_gpu_naive_helper
         interpolate_data.ptr_coeff_2_gt_ctv,
         interpolate_data.p_u_out_gt_tv,
         interpolate_data.p_v_out_gt_tv);
-    GT_CUDA_CHECK(cudaGetLastError());
+    GT_CUDA_CHECK(hipGetLastError());
 };
 #else
 template <typename T>

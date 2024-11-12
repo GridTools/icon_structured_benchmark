@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 #pragma once
 #include <array>
 #include <cmath>
@@ -6,10 +7,10 @@
 
 #include "nabla4_gridtools.hpp"
 
-#if defined(__CUDACC__)
+#if defined(__HIPCC__)
 template <typename T>
 constexpr block_dims get_block_dims_structured_kloop() {
-    throw std::runtime_error("Undefined block dimensions for type " + T::name + " in GPU backend");
+    return {};
 };
 
 template <>
@@ -37,7 +38,7 @@ constexpr block_dims block_dims_structured_kloop = get_block_dims_structured_klo
 
 template <typename T>
 constexpr block_dims get_block_dims_structured_naive() {
-    throw std::runtime_error("Undefined block dimensions for type " + T::name + " in GPU backend");
+    return {};
 };
 
 template <>
@@ -241,7 +242,7 @@ class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
     };
 };
 
-#if defined(__CUDACC__)
+#if defined(__HIPCC__)
 __global__ void __launch_bounds__(block_dims_structured_kloop.size) run_gpu_kloop_nabla4_structured(index_type KDim,
     index_type x_dim,
     index_type x_dim_inner,
@@ -367,7 +368,7 @@ inline void nabla4_structured_torus_halo_gt<T>::run_gpu_kloop_helper() {
         inv_vert_vert_length_gt_tv,
         inv_primal_edge_length_gt_tv,
         z_nabla4_e2_wp_gt_tv);
-    GT_CUDA_CHECK(cudaGetLastError());
+    GT_CUDA_CHECK(hipGetLastError());
 };
 
 __global__ void __launch_bounds__(block_dims_structured_naive.size) run_gpu_naive_nabla4_structured(index_type KDim,
@@ -496,7 +497,7 @@ inline void nabla4_structured_torus_halo_gt<T>::run_gpu_naive_helper() {
         inv_vert_vert_length_gt_tv,
         inv_primal_edge_length_gt_tv,
         z_nabla4_e2_wp_gt_tv);
-    GT_CUDA_CHECK(cudaGetLastError());
+    GT_CUDA_CHECK(hipGetLastError());
 };
 #else
 template <typename T>

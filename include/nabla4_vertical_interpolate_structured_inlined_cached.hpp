@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 #include <interpolate_structured_gridtools.hpp>
 #include <nabla4_vertical_structured_torus_gridtools_halo.hpp>
 
@@ -77,10 +78,10 @@ struct nabla4_vertical_interpolate_structured_inlined_cached {
     }
 };
 
-#if defined(__CUDACC__)
+#if defined(__HIPCC__)
 template <typename T>
 constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_cached_kloop_vertical() {
-    throw std::runtime_error("Undefined block dimensions for type " + T::name + " in GPU backend");
+    return {};
 };
 
 template <>
@@ -172,8 +173,8 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_c
                     v_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_3[color], k_index);
                 const auto k_level_cache_offset =
                     3 * shared_mem_inner_domain * ((threadIdx.z * k_repetitions) + k_repetition);
-                const auto local_edge_index =
-                    threadIdx.x + threadIdx.y * blockDim.x + color * shared_mem_inner_domain + k_level_cache_offset;
+                const int local_edge_index = static_cast<int>(
+                    threadIdx.x + threadIdx.y * blockDim.x + color * shared_mem_inner_domain + k_level_cache_offset);
                 const auto inv_vert_vert_length =
                     inv_vert_vert_length_gt_tv(edge_index + color * outer_domain_size, k_index);
                 const auto inv_primal_edge_length =
@@ -269,12 +270,12 @@ inline void nabla4_vertical_interpolate_structured_inlined_cached<T>::run_gpu_kl
         interpolate_data.ptr_coeff_2_gt_ctv,
         interpolate_data.p_u_out_gt_tv,
         interpolate_data.p_v_out_gt_tv);
-    GT_CUDA_CHECK(cudaGetLastError());
+    GT_CUDA_CHECK(hipGetLastError());
 };
 
 template <typename T>
 constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_cached_naive_vertical() {
-    throw std::runtime_error("Undefined block dimensions for type " + T::name + " in GPU backend");
+    return {};
 };
 
 template <>
@@ -340,7 +341,7 @@ __maxnreg__(64)
     const auto j_limit = min(halo + (blockIdx.y + 1) * blockDim.y + 1, y_dim - halo + 1);
     // bottom
     {
-        const int j_internal_block{j - 1};
+        const auto j_internal_block{j - 1};
         const index_type i_j = j_internal_block * x_dim + i;
         const index_type i_jp1 = (j_internal_block + 1) * x_dim + i;
         const index_type im1_jp1 = (j_internal_block + 1) * x_dim + i - 1;
@@ -374,17 +375,17 @@ __maxnreg__(64)
                                     v_vert_gt_tv(E2C2V_2, k_index) * primal_normal_vert_v2_2 +
                                     u_vert_gt_tv(E2C2V_3, k_index) * primal_normal_vert_v1_3 +
                                     v_vert_gt_tv(E2C2V_3, k_index) * primal_normal_vert_v2_3;
-        const auto local_edge_index = i - (blockIdx.x * blockDim.x) + 1 - halo +
+        const int local_edge_index = static_cast<int>(i - (blockIdx.x * blockDim.x) + 1 - halo +
                                       ((j_internal_block - (blockIdx.y * blockDim.y) + 1 - halo) * (blockDim.x + 1)) +
-                                      k_level_cache_offset;
+                                      k_level_cache_offset);
         const WP_TYPE z_nabla2_e = z_nabla2_e_gt_tv(edge_index, k_index);
         z_nabla4_e2[local_edge_index] = 4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e) * inv_vert_vert_length_sqr +
                                                   (nabv_tang_wp - 2.0 * z_nabla2_e) * inv_primal_edge_length_sqr);
     }
     // left
     {
-        const int i_internal_block{i - 1};
-        for (int j_internal_block{j}; j_internal_block < j_limit; j_internal_block += j_step) {
+        const auto i_internal_block{i - 1};
+        for (int j_internal_block{static_cast<int>(j)}; j_internal_block < j_limit; j_internal_block += j_step) {
             const index_type i_j = j_internal_block * x_dim + i_internal_block;
             const index_type i_jp1 = (j_internal_block + 1) * x_dim + i_internal_block;
             const index_type ip1_j = j_internal_block * x_dim + i_internal_block + 1;
@@ -415,10 +416,10 @@ __maxnreg__(64)
                     v_vert_gt_tv(E2C2V_2_c, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_2[color], k_index) +
                     u_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_3[color], k_index) +
                     v_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_3[color], k_index);
-                const auto local_edge_index =
+                const int local_edge_index = static_cast<int>(
                     i_internal_block - (blockIdx.x * blockDim.x) + 1 - halo +
                     ((j_internal_block - (blockIdx.y * blockDim.y) + 1 - halo) * (blockDim.x + 1)) +
-                    (color + 1) * shared_mem_inner_domain + k_level_cache_offset;
+                    (color + 1) * shared_mem_inner_domain + k_level_cache_offset);
                 const WP_TYPE z_nabla2_e = z_nabla2_e_gt_tv(edge_index + (color + 1) * outer_domain_size, k_index);
                 const auto inv_vert_vert_length =
                     inv_vert_vert_length_gt_tv(edge_index + (color + 1) * outer_domain_size, k_index);
@@ -465,9 +466,9 @@ __maxnreg__(64)
                 v_vert_gt_tv(E2C2V_2_c, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_2[color], k_index) +
                 u_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_3[color], k_index) +
                 v_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_3[color], k_index);
-            const auto local_edge_index = i - (blockIdx.x * blockDim.x) + 1 - halo +
+            const int local_edge_index = static_cast<int>(i - (blockIdx.x * blockDim.x) + 1 - halo +
                                           ((j - (blockIdx.y * blockDim.y) + 1 - halo) * (blockDim.x + 1)) +
-                                          color * shared_mem_inner_domain + k_level_cache_offset;
+                                          color * shared_mem_inner_domain + k_level_cache_offset);
             const WP_TYPE z_nabla2_e = z_nabla2_e_gt_tv(edge_index + color * outer_domain_size, k_index);
             const auto inv_vert_vert_length =
                 inv_vert_vert_length_gt_tv(edge_index + color * outer_domain_size, k_index);
@@ -481,8 +482,8 @@ __maxnreg__(64)
     }
     // top
     {
-        const int j_internal_block{j_limit - 1};
-        const int i_internal_block{i};
+        const auto j_internal_block{j_limit - 1};
+        const auto i_internal_block{i};
         const index_type i_j = j_internal_block * x_dim + i;
         const index_type i_jp1 = (j_internal_block + 1) * x_dim + i;
         const index_type im1_jp1 = (j_internal_block + 1) * x_dim + i - 1;
@@ -523,9 +524,9 @@ __maxnreg__(64)
                                     v_vert_gt_tv(E2C2V_2_c, k_index) * primal_normal_vert_v2_2 +
                                     u_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v1_3 +
                                     v_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v2_3;
-        const auto local_edge_index = i - (blockIdx.x * blockDim.x) + 1 - halo +
+        const int local_edge_index = static_cast<int>(i - (blockIdx.x * blockDim.x) + 1 - halo +
                                       ((j_internal_block - (blockIdx.y * blockDim.y) + 1 - halo) * (blockDim.x + 1)) +
-                                      2 * shared_mem_inner_domain + k_level_cache_offset;
+                                      2 * shared_mem_inner_domain + k_level_cache_offset);
         const WP_TYPE z_nabla2_e = z_nabla2_e_gt_tv(edge_index + 2 * outer_domain_size, k_index);
         z_nabla4_e2[local_edge_index] = 4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e) * inv_vert_vert_length_sqr +
                                                   (nabv_tang_wp - 2.0 * z_nabla2_e) * inv_primal_edge_length_sqr);
@@ -587,7 +588,7 @@ inline void nabla4_vertical_interpolate_structured_inlined_cached<T>::run_gpu_na
         interpolate_data.ptr_coeff_2_gt_ctv,
         interpolate_data.p_u_out_gt_tv,
         interpolate_data.p_v_out_gt_tv);
-    GT_CUDA_CHECK(cudaGetLastError());
+    GT_CUDA_CHECK(hipGetLastError());
 };
 #else
 template <typename T>

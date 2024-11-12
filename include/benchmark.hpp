@@ -27,8 +27,8 @@
 
 template <typename T, backend_impl I>
 std::vector<double> run_benchmark(T &benchmark_object, int repetitions, int dry_runs) {
-#if defined(__CUDACC__)
-    GT_CUDA_CHECK(cudaDeviceSetSharedMemConfig(cudaSharedMemBankSizeEightByte));
+#if defined(__HIPCC__)
+    GT_CUDA_CHECK(hipDeviceSetSharedMemConfig(hipSharedMemBankSizeEightByte));
 #endif
     for (int dry_run{}; dry_run < dry_runs; ++dry_run) {
         benchmark_object.template run<I>();
@@ -46,8 +46,8 @@ std::vector<double> run_benchmark(T &benchmark_object, int repetitions, int dry_
 
 template <typename T, backend_impl I, typename... Args>
 std::vector<double> run_benchmark(std::tuple<Args...> &&args, int repetitions, int dry_runs) {
-#if defined(__CUDACC__)
-    GT_CUDA_CHECK(cudaDeviceSetSharedMemConfig(cudaSharedMemBankSizeEightByte));
+#if defined(__HIPCC__)
+    GT_CUDA_CHECK(hipDeviceSetSharedMemConfig(hipSharedMemBankSizeEightByte));
 #endif
     T benchmark_object{std::make_from_tuple<T>(args)};
     for (int dry_run{}; dry_run < dry_runs; ++dry_run) {

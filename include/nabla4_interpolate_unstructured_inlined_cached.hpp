@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 #include <interpolate_unstructured_gridtools.hpp>
 #include <nabla4_unstructured_gridtools.hpp>
 
@@ -69,10 +70,10 @@ struct nabla4_interpolate_unstructured_inlined_cached {
     }
 };
 
-#if defined(__CUDACC__)
+#if defined(__HIPCC__)
 template <typename T>
 constexpr block_dims get_block_dims_unstructured_nabla_interpol_inlined_cached_kloop() {
-    throw std::runtime_error("Undefined block dimensions for type " + T::name + " in GPU backend");
+    return {};
 };
 
 template <>
@@ -241,9 +242,9 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
         inv_primal_edge_length_gt_tv(v2e[3]),
         inv_primal_edge_length_gt_tv(v2e[4]),
         inv_primal_edge_length_gt_tv(v2e[5])};
-    const int initial_k_index{blockIdx.y * blockDim.y + threadIdx.y};
+    const auto initial_k_index{blockIdx.y * blockDim.y + threadIdx.y};
     int k_repetition{0};
-    for (int k_index{initial_k_index}; k_index < KDim && k_repetition < k_repetitions; k_index += gridDim.y * blockDim.y) {
+    for (int k_index{static_cast<int>(initial_k_index)}; k_index < KDim && k_repetition < k_repetitions; k_index += gridDim.y * blockDim.y) {
         const auto shared_mem_vertex_index{(threadIdx.x + k_repetition * blockDim.x) * 6};
 #pragma unroll
         for (int edge_id{0}; edge_id < 6; ++edge_id) {
@@ -281,7 +282,7 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
         ptr_coeff_2_gt_ctv(vertex_index, 4),
         ptr_coeff_2_gt_ctv(vertex_index, 5)};
     k_repetition = 0;
-    for (int k_index{initial_k_index}; k_index < KDim && k_repetition < k_repetitions; k_index += gridDim.y * blockDim.y) {
+    for (int k_index{static_cast<int>(initial_k_index)}; k_index < KDim && k_repetition < k_repetitions; k_index += gridDim.y * blockDim.y) {
         const auto shared_mem_vertex_index{(threadIdx.x + k_repetition * blockDim.x) * 6};
         const std::array<WP_TYPE, 6> z_nabla4_e2_wp{z_nabla4_e2[shared_mem_vertex_index],
             z_nabla4_e2[shared_mem_vertex_index + 1],
@@ -331,7 +332,7 @@ inline void nabla4_interpolate_unstructured_inlined_cached<T>::run_gpu_kloop_hel
         interpolate_data.ptr_coeff_2_gt_ctv,
         interpolate_data.p_u_out_gt_tv,
         interpolate_data.p_v_out_gt_tv);
-    GT_CUDA_CHECK(cudaGetLastError());
+    GT_CUDA_CHECK(hipGetLastError());
 };
 
 #else

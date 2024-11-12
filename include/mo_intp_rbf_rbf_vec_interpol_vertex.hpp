@@ -10,7 +10,7 @@ using namespace gridtools;
 #include <gridtools/storage/cpu_ifirst.hpp>
 #include <gridtools/storage/cpu_kfirst.hpp>
 
-#ifdef __CUDACC__
+#ifdef __HIPCC__
 #include <gridtools/storage/gpu.hpp>
 #endif
 

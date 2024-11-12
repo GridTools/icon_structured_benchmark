@@ -1,11 +1,12 @@
+#include "hip/hip_runtime.h"
 #pragma once
 
 #include "mo_intp_rbf_rbf_vec_interpol_vertex.hpp"
 
-#if defined(__CUDACC__)
+#if defined(__HIPCC__)
 template <typename S>
 constexpr block_dims get_block_dims_structured_interpol_kloop() {
-    throw std::runtime_error("Undefined block dimensions for type " + S::name + " in GPU backend");
+    return {};
 };
 
 template <>
@@ -35,7 +36,7 @@ constexpr block_dims block_dims_structured_interpol_kloop = get_block_dims_struc
 
 template <typename S>
 constexpr block_dims get_block_dims_structured_interpol_naive() {
-    throw std::runtime_error("Undefined block dimensions for type " + S::name + " in GPU backend");
+    return {};
 };
 
 template <>
@@ -248,7 +249,7 @@ class interpolate_structured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
     }
 };
 
-#if defined(__CUDACC__)
+#if defined(__HIPCC__)
 __global__ void __launch_bounds__(block_dims_structured_interpol_kloop.size)
     run_gpu_kloop_interpol_structured(index_type KDim,
         index_type x_dim,
@@ -303,7 +304,7 @@ inline void interpolate_structured<S>::run_gpu_kloop_helper() {
         ptr_coeff_2_gt_ctv,
         p_u_out_gt_tv,
         p_v_out_gt_tv);
-    GT_CUDA_CHECK(cudaGetLastError());
+    GT_CUDA_CHECK(hipGetLastError());
 };
 
 __global__ void __launch_bounds__(block_dims_structured_interpol_naive.size)
@@ -354,7 +355,7 @@ inline void interpolate_structured<S>::run_gpu_naive_helper() {
         ptr_coeff_2_gt_ctv,
         p_u_out_gt_tv,
         p_v_out_gt_tv);
-    GT_CUDA_CHECK(cudaGetLastError());
+    GT_CUDA_CHECK(hipGetLastError());
 };
 #else
 template <typename S>
