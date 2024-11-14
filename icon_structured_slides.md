@@ -171,6 +171,79 @@ size: 16:9
 
 ---
 
+## Kernel implementations
+
+- Grid structure
+  - Unstructured
+    - Indirect accesses via neighbor tables
+  - Structred
+    - Neighbor accesses via strides
+- Iteration strategies
+  - `gpu_naive`
+    - Default iteration strategy in gridtools C++
+    - One GPU thread calculates 1 element in horizontal and vertical axis
+  - `gpu_kloop`
+    - Optional iteration strategy in gridtools C++
+    - One GPU thread calculates 1 element in horizontal axis but multiple vertical levels
+    - Save neighbors and vertically independent fields in registers and iterate over multiple vertical fields
+
+---
+
+## Kernel implementations
+
+- Kernel combinations
+  - Separate
+    - Execute `nabla4` kernel and then `interpolate`
+  - Inlined
+    - Compute `nabla4` output for every input of `interpolate` kernel
+    - More computations
+    - Less writes to device memory
+  - Inlined v2v (unstructured only)
+    - Compress `v2e[e2c2v]` neighbor accesses to `v2e2c2v`
+      - Read fields for 7 vertices instead of (6\*4=) 24 vertices
+    - Assumes certain order of vertices in `e2c2v` and edges in `v2e`
+  - Inlined_cached
+    - Save `nabla4` output in shared memory and then use it in `interpolate` kernel
+    - Reduce overcomputations compared to `inlined` implementation
+
+---
+
+## General kernel optimizations
+
+- Occupancy
+  - All kernels have been optimized for best occupancy
+- `__launch_bounds__` and `__maxnreg__`
+  - Launch bounds are applied to all kernels except some that were performing better with register limitation to a certain register number
+- Thread Block size
+  - Especially for `gpu_naive` implementations, increasing the vertical axis thread block size (`ThreadBlockDim.y/z`) was beneficial since there are more chances to find neighbor tables and vertically independent fields in cache
+  - 4-8-9 most used number with 80 vertical levels in total
+- `gpu_kloop`
+  - For this implementation vertical `GridDim` is set to 1. Iteration number is set based on the `ThreadBlockDim.y/z` and `KDim`. Exception are the `inline_cached` versions where the shared memory size is limiting the number of iterations possible
+  - Optimized number of iterations per kernel. 8-40 iterations. 8-20 usually have the best performance
+
+---
+
+## Notes for specific kernels
+
+---
+
+## Results
+
+- Nabla4
+- Interpolate
+- Nabla4 & interpolate
+- Nabla4_vertical & interpolate
+
+---
+
+## Conclusions
+
+---
+
+## Next steps
+
+---
+
 # Questions?
 
 ![bg cover](../slides-support/common/title-bg2.png)
