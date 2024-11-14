@@ -4,7 +4,7 @@ function(add_marp_slides name source)
     find_file(source_full ${source} PATHS ${CMAKE_CURRENT_LIST_DIR} NO_CACHE)
     set(source ${source_full})
 
-    set(output_pdf "${CMAKE_BINARY_DIR}/${name}.pdf")
+    set(output_pdf "${CMAKE_SOURCE_DIR}/${name}.pdf")
     add_custom_command(
         OUTPUT ${output_pdf}
         COMMAND
@@ -19,7 +19,7 @@ function(add_marp_slides name source)
     )
     add_custom_target(${name}_pdf ALL DEPENDS ${output_pdf})
 
-    set(output_html "${CMAKE_BINARY_DIR}/${name}.html")
+    set(output_html "${CMAKE_SOURCE_DIR}/${name}.html")
     add_custom_command(
         OUTPUT ${output_html}
         COMMAND

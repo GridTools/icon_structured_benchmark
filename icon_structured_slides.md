@@ -4,13 +4,13 @@ theme: cscs
 # class: lead
 paginate: true
 backgroundColor: #fff
-backgroundImage: url('../slides-support/common/4k-slide-bg-white.png')
+backgroundImage: url('slides-support/common/4k-slide-bg-white.png')
 size: 16:9
 ---
 
 # ICON structured grid benchmark
 
-![bg cover](../slides-support/common/title-bg3.png)
+![bg cover](slides-support/common/title-bg3.png)
 
 <!-- _paginate: skip  -->
 <!-- _class: titlecover -->
@@ -34,7 +34,7 @@ size: 16:9
 
 </div>
 <div>
-<img src="../slides-images/icon_grid.png" style="width: 80%" align="right"/>
+<img src="slides-images/icon_grid.png" style="width: 80%" align="right"/>
 </div>
 </div>
 
@@ -64,7 +64,7 @@ size: 16:9
 
 </div>
 <div>
-<img src="../slides-images/full_torus.png" style="width: 120%" align="right"/>
+<img src="slides-images/full_torus.png" style="width: 120%" align="right"/>
 </div>
 </div>
 
@@ -89,7 +89,7 @@ size: 16:9
 
 </div>
 <div>
-<img src="../slides-images/torus_computation_domain.png" style="width: 110%" align="right"/>
+<img src="slides-images/torus_computation_domain.png" style="width: 110%" align="right"/>
 </div>
 </div>
 
@@ -111,7 +111,7 @@ size: 16:9
 
 </div>
 <div>
-<img src="../slides-images/torus_computation_domain.png" style="width: 110%" align="right"/>
+<img src="slides-images/torus_computation_domain.png" style="width: 110%" align="right"/>
 </div>
 </div>
 
@@ -281,7 +281,7 @@ size: 16:9
 
 # Questions?
 
-![bg cover](../slides-support/common/title-bg2.png)
+![bg cover](slides-support/common/title-bg2.png)
 
 <!-- _paginate: skip  -->
 <!-- _class: titlecover -->
