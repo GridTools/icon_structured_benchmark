@@ -4,6 +4,7 @@ project(Nabla4Benchmark)
 
 option(IS_GPU "Enable GPU execution" OFF)
 option(INDEX_TYPE "Index type" "int")
+option(BUILD_SLIDES "Build slides" OFF)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -98,4 +99,9 @@ if(IS_GPU)
   target_compile_definitions(nabla4_gtfn PRIVATE IS_GPU)
   target_link_libraries(nabla4_gtfn PUBLIC GridTools::storage_gpu)
   set_source_files_properties(python/nabla4_gtfn_bindings.cpp PROPERTIES LANGUAGE CUDA)
+endif()
+
+if(BUILD_SLIDES)
+  include(slides-support/Marp.cmake)
+  add_marp_slides(icon-structured-slides icon_structured_slides.md)
 endif()
