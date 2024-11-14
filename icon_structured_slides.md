@@ -243,14 +243,31 @@ size: 16:9
 
 ## Notes for specific kernels
 
+- `structured_gpu_kloop_inlined_cached`: Tried 2 different implementations, number of threads same as input but then deactivate for the output some of them and number of threads same as output where each thread caclulates multiple elements. Former is better
+- `{un,}structured_gpu_naive_inlined_cached`: Not implemented in the former way
+- `structured_*_inlined`: calculate only necessary indexes, similar to `v2v`
+- `unstructured_*_inlined_v2v`: pass `v2e2c2v` as input
+- `unstructured`: `nabla4` iterates on edges (`per-orientation` - 1 edge per thread)
+- `structured`: `nabla4` iterates on vertices (`per-vertex` - 3 edges per vertex/thread)
+  - This way is more beneficial in the `unstructured` implementation if we assume the grid is structured and certain ordering
+- Both `structured` and `unstructured` versions operate on data with same ordering in memory
+- `structured`: `e2ecv` is also computed
+
 ---
 
 ## Results
 
 - Nabla4
+  - gpu_naive & gpu_kloop
 - Interpolate
+  - gpu_naive & gpu_kloop
 - Nabla4 & interpolate
+  - gpu_naive & gpu_kloop
+  - See if gpu_naive has anything interesting
+    - Check which ones to present in the output
 - Nabla4_vertical & interpolate
+  - Same as above
+- Decide whether it makes more sense to use 256 or 128 torus grid for results or both
 
 ---
 
