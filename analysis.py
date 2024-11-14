@@ -188,7 +188,7 @@ def generate_violin_plots(data, k, torus_name, output_dir):
             or "gtfn" in implementation
         ):
             violin_data.append(runtimes)
-            labels.append(implementation[29:])
+            labels.append(implementation.split("benchmark_")[-1])
             median_value = np.median(runtimes)
             medians.append(median_value)  # Calculating median for each set of runtimes
 
@@ -230,13 +230,14 @@ def generate_violin_plots_acceleration(
     torus_name,
     output_dir,
     baseline_name="nabla4_interpolate_benchmark_unstructured_gpu_naive_separate",
+    kernel_name="nabla4",
 ):
     import matplotlib.pyplot as plt
 
     torus_size = torus_name.split("_")[-1]
     plt.figure(figsize=(10, 8))
     plt.title(
-        f"Nabla4 & Interpolation kernels runtime for {edges_size[torus_size]} Edges with {k} K-levels"
+        f"{kernel_name} runtime for {edges_size[torus_size]} Edges with {k} K-levels"
     )
     plt.ylabel("Runtime (s)")
     plt.xlabel("Implementation")
@@ -253,14 +254,14 @@ def generate_violin_plots_acceleration(
             or "gtfn" in implementation
         ):
             violin_data.append(runtimes)
-            labels.append(implementation[29:])
+            labels.append(implementation.split("benchmark_")[-1])
             median_value = np.median(runtimes)
             medians.append(median_value)  # Calculating median for each set of runtimes
 
             percentage_diff = (median_value - baseline_median) / baseline_median * 100
             plt.text(
                 len(labels),
-                median_value + 0.000035,
+                median_value + 0.000025,
                 f"{median_value:.6f}\n({percentage_diff:.2f}%)"
                 if implementation != baseline_name
                 else f"{median_value:.5f}",
@@ -287,7 +288,7 @@ def generate_violin_plots_acceleration(
     plt.tight_layout()
     plt.legend()  # Show legend with median
     plt.savefig(
-        "{}/runtimes_torus_accel_{}_{}.png".format(output_dir, torus_size, k), dpi=600
+        "{}/runtimes_torus_accel_{}_{}.png".format(output_dir, torus_size, k), dpi=400
     )
 
 
