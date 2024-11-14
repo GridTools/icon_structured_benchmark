@@ -949,7 +949,6 @@ def run_benchmarks():
                 dry_runs,
             )
         )
-<<<<<<< HEAD
         runtimes["nabla4_vertical_benchmark_unstructured_gpu_kloop_gridtools"] = (
             icon_benchmark.nabla4_vertical_benchmark_unstructured_gpu_kloop_gridtools(
                 filtered_e2c2v,
@@ -963,8 +962,6 @@ def run_benchmarks():
                 dry_runs,
             )
         )
-=======
->>>>>>> 874797e (Initial version)
         runtimes["nabla4_benchmark_structured_torus_gpu_kloop_gridtools_halo"] = (
             icon_benchmark.nabla4_benchmark_structured_torus_gpu_kloop_gridtools_halo(
                 torus_grid.num_cells,
@@ -980,13 +977,8 @@ def run_benchmarks():
             )
         )
         runtimes[
-<<<<<<< HEAD
-            "nabla4_vertical_benchmark_structured_torus_gpu_kloop_gridtools_halo"
-        ] = icon_benchmark.nabla4_vertical_benchmark_structured_torus_gpu_kloop_gridtools_halo(
-=======
             "nabla4_benchmark_structured_torus_gpu_kloop_gridtools_halo_pipeline"
         ] = icon_benchmark.nabla4_benchmark_structured_torus_gpu_kloop_gridtools_halo_pipeline(
->>>>>>> 874797e (Initial version)
             torus_grid.num_cells,
             torus_grid.num_vertices,
             torus_grid.num_edges,
@@ -998,7 +990,20 @@ def run_benchmarks():
             repetitions,
             dry_runs,
         )
-
+        runtimes[
+            "nabla4_vertical_benchmark_structured_torus_gpu_kloop_gridtools_halo"
+        ] = icon_benchmark.nabla4_vertical_benchmark_structured_torus_gpu_kloop_gridtools_halo(
+            torus_grid.num_cells,
+            torus_grid.num_vertices,
+            torus_grid.num_edges,
+            torus_grid.num_levels,
+            torus_grid.size[E2C2VDim],
+            grid_cartesian_dimensions[0],
+            grid_cartesian_dimensions[1],
+            halo,
+            repetitions,
+            dry_runs,
+        )
     if args.backend in ["all_gpu", "gpu_naive"]:
         runtimes["nabla4_benchmark_unstructured_gpu_naive_gridtools"] = (
             icon_benchmark.nabla4_benchmark_unstructured_gpu_naive_gridtools(
@@ -1012,7 +1017,6 @@ def run_benchmarks():
                 repetitions,
                 dry_runs,
             )
-<<<<<<< HEAD
         )
         runtimes["nabla4_vertical_benchmark_unstructured_gpu_naive_gridtools"] = (
             icon_benchmark.nabla4_vertical_benchmark_unstructured_gpu_naive_gridtools(
@@ -1054,22 +1058,6 @@ def run_benchmarks():
             halo,
             repetitions,
             dry_runs,
-=======
-        )
-        runtimes["nabla4_benchmark_structured_torus_gpu_naive_gridtools_halo"] = (
-            icon_benchmark.nabla4_benchmark_structured_torus_gpu_naive_gridtools_halo(
-                torus_grid.num_cells,
-                torus_grid.num_vertices,
-                torus_grid.num_edges,
-                torus_grid.num_levels,
-                torus_grid.size[E2C2VDim],
-                grid_cartesian_dimensions[0],
-                grid_cartesian_dimensions[1],
-                halo,
-                repetitions,
-                dry_runs,
-            )
->>>>>>> 874797e (Initial version)
         )
 
     print_median_runtimes(runtimes)
