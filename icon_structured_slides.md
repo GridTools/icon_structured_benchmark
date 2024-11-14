@@ -46,7 +46,7 @@ size: 16:9
 
 - `netcdf` file with neighbor lists
 - Use of structured torus grid
-  - Generated using [grid-generator](https://gitlab.dkrz.de/mpim-sw/grid-generator) from `DKRZ` by `David Strassman`
+  - Generated using [grid-generator](https://gitlab.dkrz.de/mpim-sw/grid-generator) from `DKRZ` by **David Strassman**
   - Read using [icon4py GridManager](https://github.com/C2SM/icon4py/blob/main/model/common/src/icon4py/model/common/grid/grid_manager.py)
 
 ---
@@ -180,10 +180,10 @@ size: 16:9
     - Neighbor accesses via strides
 - Iteration strategies
   - `gpu_naive`
-    - Default iteration strategy in gridtools C++
+    - Default iteration strategy in `GridTools C++`
     - One GPU thread calculates 1 element in horizontal and vertical axis
   - `gpu_kloop`
-    - Optional iteration strategy in gridtools C++
+    - Optional iteration strategy in `GridTools C++`
     - One GPU thread calculates 1 element in horizontal axis but multiple vertical levels
     - Save neighbors and vertically independent fields in registers and iterate over multiple vertical fields
 
@@ -205,6 +205,24 @@ size: 16:9
   - Inlined_cached
     - Save `nabla4` output in shared memory and then use it in `interpolate` kernel
     - Reduce overcomputations compared to `inlined` implementation
+
+---
+
+## Kernel implementations
+
+- `gtfn`
+  - Only `unstructured`
+  - Based on `GridTools C++`
+  - Improved `GridTools C++`
+    - `const` neighbor tables and input fields
+    - Memory loads via `__ldg`
+    - `gpu_kloop` option
+    - Kudos to **Felix Thaler**
+- `CUDA`
+  - Plain cuda kernels
+  - Launched by python script
+  - Random input in benchmarks
+  - Validated kernels with serialized data from `GT4Py`
 
 ---
 
