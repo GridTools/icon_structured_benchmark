@@ -200,8 +200,7 @@ __global__ void __launch_bounds__(block_dims_structured_kloop_pipeline.size)
         inv_primal_edge_length_gt_tv(local_edge_index_start + inner_grid_size + inner_grid_size) *
             inv_primal_edge_length_gt_tv(local_edge_index_start + inner_grid_size + inner_grid_size)};
     auto thread = cooperative_groups::this_thread();
-    const auto shared_mem_size{block_dims_structured_kloop_pipeline.x * block_dims_structured_kloop_pipeline.y * block_dims_structured_kloop_pipeline.z * 4};
-    // printf("[%d, %d, %d: %d, %d, %d] shared_mem_size: %d\n", threadIdx.x, threadIdx.y, threadIdx.z, blockIdx.x, blockIdx.y, blockIdx.z, shared_mem_size);
+    const auto shared_mem_size{block_dims_structured_kloop_pipeline.x * block_dims_structured_kloop_pipeline.y * block_dims_structured_kloop_pipeline.z * 8};
     __shared__ alignas(16) WP_TYPE smem[shared_mem_size];
     #pragma nv_diag_suppress static_var_with_dynamic_init
     __shared__ barrier bar;
@@ -224,6 +223,10 @@ __global__ void __launch_bounds__(block_dims_structured_kloop_pipeline.size)
             const auto shared_mem_index_offset1{shared_mem_index_offset0 + shared_mem_offset};
             const auto shared_mem_index_offset2{shared_mem_index_offset1 + shared_mem_offset};
             const auto shared_mem_index_offset3{shared_mem_index_offset2 + shared_mem_offset};
+            const auto shared_mem_index_offset4{shared_mem_index_offset3 + shared_mem_offset};
+            const auto shared_mem_index_offset5{shared_mem_index_offset4 + shared_mem_offset};
+            const auto shared_mem_index_offset6{shared_mem_index_offset5 + shared_mem_offset};
+            const auto shared_mem_index_offset7{shared_mem_index_offset6 + shared_mem_offset};
             if (threadIdx.x == 0) {
                 const auto* u_vert_e2c2v_0_ptr{&(u_vert_gt_tv(E2C2V_0_c, k_index))};
                 cuda::memcpy_async(
@@ -253,6 +256,34 @@ __global__ void __launch_bounds__(block_dims_structured_kloop_pipeline.size)
                     cuda::aligned_size_t<4>(shared_mem_read_length * sizeof(WP_TYPE)),
                     bar
                 );
+                const auto* u_vert_e2c2v_2_ptr{&(u_vert_gt_tv(E2C2V_2_c, k_index))};
+                cuda::memcpy_async(
+                    &smem[shared_mem_offset*4],
+                    u_vert_e2c2v_2_ptr,
+                    cuda::aligned_size_t<4>(shared_mem_read_length * sizeof(WP_TYPE)),
+                    bar
+                );
+                const auto* v_vert_e2c2v_2_ptr{&(v_vert_gt_tv(E2C2V_2_c, k_index))};
+                cuda::memcpy_async(
+                    &smem[shared_mem_offset*5],
+                    v_vert_e2c2v_2_ptr,
+                    cuda::aligned_size_t<4>(shared_mem_read_length * sizeof(WP_TYPE)),
+                    bar
+                );
+                const auto* u_vert_e2c2v_3_ptr{&(u_vert_gt_tv(E2C2V_3_c, k_index))};
+                cuda::memcpy_async(
+                    &smem[shared_mem_offset*6],
+                    u_vert_e2c2v_3_ptr,
+                    cuda::aligned_size_t<4>(shared_mem_read_length * sizeof(WP_TYPE)),
+                    bar
+                );
+                const auto* v_vert_e2c2v_3_ptr{&(v_vert_gt_tv(E2C2V_3_c, k_index))};
+                cuda::memcpy_async(
+                    &smem[shared_mem_offset*7],
+                    v_vert_e2c2v_3_ptr,
+                    cuda::aligned_size_t<4>(shared_mem_read_length * sizeof(WP_TYPE)),
+                    bar
+                );
             }
             barrier::arrival_token token = bar.arrive();
             bar.wait(std::move(token));
@@ -260,13 +291,10 @@ __global__ void __launch_bounds__(block_dims_structured_kloop_pipeline.size)
                                         smem[shared_mem_index_offset1] * primal_normal_vert_v2_0[color] +
                                         smem[shared_mem_index_offset2] * primal_normal_vert_v1_1[color] +
                                         smem[shared_mem_index_offset3] * primal_normal_vert_v2_1[color];
-            cuda::ptx::fence_proxy_async(cuda::ptx::space_shared);
-            __syncthreads();
-            const double nabv_norm_wp = u_vert_gt_tv(E2C2V_2_c, k_index) * primal_normal_vert_v1_2[color] +
-                                    v_vert_gt_tv(E2C2V_2_c, k_index) * primal_normal_vert_v2_2[color] +
-                                    u_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v1_3[color] +
-                                    v_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v2_3[color];
-            // pipeline.consumer_release();
+            const double nabv_norm_wp = smem[shared_mem_index_offset4] * primal_normal_vert_v1_2[color] +
+                                        smem[shared_mem_index_offset5] * primal_normal_vert_v2_2[color] +
+                                        smem[shared_mem_index_offset6] * primal_normal_vert_v1_3[color] +
+                                        smem[shared_mem_index_offset7] * primal_normal_vert_v2_3[color];
             const auto local_edge_index = local_edge_index_start + color * inner_grid_size;
             const WP_TYPE z_nabla2_e = z_nabla2_e_gt_tv(local_edge_index, k_index);
             if (i < x_dim - halo && j < y_dim - halo) {
@@ -286,7 +314,7 @@ inline void nabla4_structured_torus_halo_gt_pipeline<T>::run_gpu_kloop_helper() 
     const index_type inner_grid_size = (x_dim - 2 * halo) * (y_dim - halo * 2);
     dim3 grid((x_dim - 2 * halo + tblocks.x - 1) / tblocks.x, (y_dim - 2 * halo + tblocks.y - 1) / tblocks.y, 1);
     const auto shared_mem_size = block_dims_structured_kloop_pipeline.x * block_dims_structured_kloop_pipeline.y *
-                                 block_dims_structured_kloop_pipeline.z * sizeof(WP_TYPE) * 4;
+                                 block_dims_structured_kloop_pipeline.z * sizeof(WP_TYPE) * 8;
     run_gpu_kloop_pipeline_nabla4_structured_pipeline<<<grid, tblocks, shared_mem_size>>>(KDim,
         x_dim,
         x_dim - 2 * halo,
