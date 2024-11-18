@@ -82,8 +82,8 @@ size: 16:9
   - Discard periodic edges
 - Calculate `X` and `Y` dimensions based on the distribution of vertices in space
 - Order edges and vertices in memory
-  - `per-vertex`: `edges` are ordered in memory based on `vertex` id
-  - `per-orientation`: `edges` are ordered in memory based on their orientation
+  - `per-vertex`: `edges` are ordered in memory based on `vertex` id and then orientation
+  - `per-orientation`: `edges` are ordered in memory based on their orientation and then their corresponding vertex coordinates
 
 ### Computation domain in <span style="color:red">red</span>
 
@@ -249,25 +249,21 @@ size: 16:9
 - `unstructured_*_inlined_v2v`: pass `v2e2c2v` as input
 - `unstructured`: `nabla4` iterates on edges (`per-orientation` - 1 edge per thread)
 - `structured`: `nabla4` iterates on vertices (`per-vertex` - 3 edges per vertex/thread)
-  - This way is more beneficial in the `unstructured` implementation if we assume the grid is structured and certain ordering
 - Both `structured` and `unstructured` versions operate on data with same ordering in memory
+  - No SFC. Vertices are indered per `i` and `j` coordinates and `edges` per `orientation/vertices`
 - `structured`: `e2ecv` is also computed
 
 ---
 
 ## Results
 
-- Nabla4
-  - gpu_naive & gpu_kloop
-- Interpolate
-  - gpu_naive & gpu_kloop
-- Nabla4 & interpolate
-  - gpu_naive & gpu_kloop
-  - See if gpu_naive has anything interesting
-    - Check which ones to present in the output
-- Nabla4_vertical & interpolate
-  - Same as above
-- Decide whether it makes more sense to use 256 or 128 torus grid for results or both
+- `Nabla4` & `interpolate`
+  - `gpu_naive` & `gpu_kloop`
+  - See if `gpu_naive` has anything interesting
+    - Probably nice to show improvement over starting point (`gpu_naive` `unstructured` to fastest `gpu_kloop` `inlined` version)
+- `Nabla4_vertical` & `interpolate`
+  - Compare to normal `nabla4`
+- Use `256` torus grid
 
 ---
 
@@ -275,7 +271,31 @@ size: 16:9
 
 ---
 
+## Notes
+
+- `LDGSTS` for `nabla4` `structured`
+  - Initial implementation for loading vertical input fields to memory per vertical level
+    - Big slowdown
+    - `LDGSTS.BYPASS` can be used only for certain fields
+- `TMA` for `nabla4` `structured`
+  - Used in a similar way
+    - Slowdown and problematic implementation
+    - Probably `TMA` is not properly used
+  - Alignment requirements need a different approach
+    - Aligned loads for `blockDim.x` in `j`, `j-1` and `j+1` to calculate `i`, `j` in `j`
+    - Similar to `gpu_kloop_inlined_structured_cached`
+
+---
+
 ## Next steps
+
+- Try `cached` approach for `unstructured` implementation
+  - Compute border coordinates for each Thread Block (should be the same as `structured` for our grid)
+  - Load them to shared memory
+- Add another kernel with `c2v` neighbor to see implact in `inlined` versions due to overcomputations
+  - `c2v` neighbor will require computing 3 vertices per cell = 3 times the computations
+  - Try `c2v2e2c2v` compressed neighbor in `unstructured` version as well
+- Improve `TMA` implementation
 
 ---
 
