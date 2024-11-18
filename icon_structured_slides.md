@@ -243,9 +243,8 @@ size: 16:9
 
 ## Notes for specific kernels
 
-- `structured_gpu_kloop_inlined_cached`: Tried 2 different implementations, number of threads same as input but then deactivate for the output some of them and number of threads same as output where each thread caclulates multiple elements. Former is better
-- `{un,}structured_gpu_naive_inlined_cached`: Not implemented in the former way
-- `structured_*_inlined`: calculate only necessary indexes, similar to `v2v`
+- `structured_gpu_{naive,kloop}_inlined_cached`: Tried 2 different implementations, number of threads same as input but then deactivate for the output some of them and number of threads same as output where each thread caclulates multiple elements. Former is better
+- `structured_*_inlined`: calculate only necessary indexes, similar to `v2e2c2v`
 - `unstructured_*_inlined_v2v`: pass `v2e2c2v` as input
 - `unstructured`: `nabla4` iterates on edges (`per-orientation` - 1 edge per thread)
 - `structured`: `nabla4` iterates on vertices (`per-vertex` - 3 edges per vertex/thread)
