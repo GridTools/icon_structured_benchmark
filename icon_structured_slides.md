@@ -64,7 +64,7 @@ size: 16:9
 
 </div>
 <div>
-<img src="slides-images/full_torus.png" style="width: 120%" align="right"/>
+<img src="slides-images/full_torus.png" style="width: 100%" align="right"/>
 </div>
 </div>
 
@@ -82,7 +82,7 @@ size: 16:9
   - Discard periodic edges
 - Calculate `X` and `Y` dimensions based on the distribution of vertices in space
 - Order edges and vertices in memory
-  - `per-vertex`: `edges` are ordered in memory based on `vertex` id and then orientation
+  - `per-vertex`: `edges` are ordered in memory based on a corresponding `vertex` id and then based on their orientation
   - `per-orientation`: `edges` are ordered in memory based on their orientation and then their corresponding vertex coordinates
 
 ### Computation domain in <span style="color:red">red</span>
@@ -267,17 +267,29 @@ size: 16:9
 
 ---
 
+<div class="twocolumns">
 <div>
-<img src="slides-images/runtimes_torus_accel_nabla4_inter_256_80.png" style="width: 70%" align="center"/>
+<img src="slides-images/runtimes_torus_accel_nabla4_inter_256_80.png" style="width: 145%" align="center"/>
+</div>
+
+<div style="margin-left: 380px;">
+
+- `structured` `separate` kernels **~10%** speed up
+- Inlining in `gpu_naive` doesn't help without extra optimizations due to overcomputations in both cases
+- `cached` approach another **~20%** speedup
+- `gpu_kloop` **~10-20%** speedup compared to `gpu_naive` for `separate` kernels
+- `unstructured` `gpu_kloop` `inlined_v2v` and `structured` `gpu_kloop` `inlined` **~2x** faster
+
+</div>
 </div>
 
 ---
 
-<div>
+<!-- <div>
 <img src="slides-images/runtimes_torus_accel_nabla4_inter_128_80.png" style="width: 70%" align="center"/>
 </div>
 
----
+--- -->
 
 <div>
 <img src="slides-images/runtimes_torus_accel_nabla4_vertical_inter_256_80.png" style="width: 70%" align="center"/>
@@ -285,11 +297,11 @@ size: 16:9
 
 ---
 
-<div>
+<!-- <div>
 <img src="slides-images/runtimes_torus_accel_nabla4_vertical_inter_128_80.png" style="width: 70%" align="center"/>
 </div>
 
----
+--- -->
 
 ## Conclusions
 
