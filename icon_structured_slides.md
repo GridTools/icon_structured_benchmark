@@ -64,7 +64,7 @@ size: 16:9
 
 </div>
 <div>
-<img src="slides-images/full_torus.png" style="width: 100%" align="right"/>
+<img src="slides-images/full_torus.png" style="width: 98%" align="right"/>
 </div>
 </div>
 
@@ -87,7 +87,7 @@ size: 16:9
 
 </div>
 <div>
-<img src="slides-images/torus_computation_domain.png" style="width: 110%" align="right"/>
+<img src="slides-images/torus_computation_domain.png" style="width: 98%" align="right"/>
 </div>
 </div>
 
@@ -97,8 +97,13 @@ size: 16:9
 
 ### Organization of edges in memory
 
+<div class="twocolumns">
 <div>
-<img src="slides-images/per-vertex-orientation.svg" style="width: 80%" align="center"/>
+<img src="slides-images/per-vertex.svg" style="width: 100%" align="center"/>
+</div>
+<div>
+<img src="slides-images/per-orientation.svg" style="width: 100%" align="center"/>
+</div>
 </div>
 
 ---
@@ -119,7 +124,7 @@ size: 16:9
 
 </div>
 <div>
-<img src="slides-images/torus_computation_domain.png" style="width: 110%" align="right"/>
+<img src="slides-images/torus_computation_domain.png" style="width: 98%" align="right"/>
 </div>
 </div>
 
@@ -137,8 +142,8 @@ size: 16:9
     - **primal_normal_vert_v1[<span style="color:DarkGreen">EdgeDim</span> * <span style="color:Tan">ECVDim</span>]**
     - **primal_normal_vert_v2[<span style="color:DarkGreen">EdgeDim</span> * <span style="color:Tan">ECVDim</span>]**
     - **z_nabla2_e[<span style="color:OliveDrab">OutputEdgeDim</span>, <span style="color:blue">KDim</span>]**
-    - **inv_vert_vert_length_gt[<span style="color:OliveDrab">OutputEdgeDim</span>]**
-    - **inv_primal_edge_length_gt[<span style="color:OliveDrab">OutputEdgeDim</span>]**
+    - **inv_vert_vert_length[<span style="color:OliveDrab">OutputEdgeDim</span>]**
+    - **inv_primal_edge_length[<span style="color:OliveDrab">OutputEdgeDim</span>]**
   - Output field
     - **z_nabla4_e2[<span style="color:OliveDrab">OutputEdgeDim</span>, <span style="color:blue">KDim</span>]**
 
@@ -157,8 +162,8 @@ size: 16:9
     - **primal_normal_vert_v1[<span style="color:DarkGreen">EdgeDim</span> * <span style="color:Tan">ECVDim</span>, <span style="color:DeepSkyBlue">KDim</span>]**
     - **primal_normal_vert_v2[<span style="color:DarkGreen">EdgeDim</span> * <span style="color:Tan">ECVDim</span>, <span style="color:DeepSkyBlue">KDim</span>]**
     - **z_nabla2_e[<span style="color:OliveDrab">OutputEdgeDim</span>, <span style="color:blue">KDim</span>]**
-    - **inv_vert_vert_length_gt[<span style="color:OliveDrab">OutputEdgeDim</span>, <span style="color:DeepSkyBlue">KDim</span>]**
-    - **inv_primal_edge_length_gt[<span style="color:OliveDrab">OutputEdgeDim</span>, <span style="color:DeepSkyBlue">KDim</span>]**
+    - **inv_vert_vert_length[<span style="color:OliveDrab">OutputEdgeDim</span>, <span style="color:DeepSkyBlue">KDim</span>]**
+    - **inv_primal_edge_length[<span style="color:OliveDrab">OutputEdgeDim</span>, <span style="color:DeepSkyBlue">KDim</span>]**
   - Output field
     - **z_nabla4_e2[<span style="color:OliveDrab">OutputEdgeDim</span>, <span style="color:blue">KDim</span>]**
 
@@ -199,20 +204,48 @@ size: 16:9
 
 ## Kernel implementations
 
-- Kernel combinations
-  - Separate
-    - Execute `nabla4` kernel and then `interpolate`
-  - Inlined
-    - Compute `nabla4` output for every input of `interpolate` kernel
-    - More computations
-    - Less writes to device memory
-  - Inlined v2v (unstructured only)
-    - Compress `v2e[e2c2v]` neighbor accesses to `v2e2c2v`
-      - Read fields for 7 vertices instead of (6\*4=) 24 vertices
-    - Assumes certain order of vertices in `e2c2v` and edges in `v2e`
-  - Inlined_cached
-    - Save `nabla4` output in shared memory and then use it in `interpolate` kernel
-    - Reduce overcomputations compared to `inlined` implementation
+<div class="twocolumns">
+<div>
+
+- Separate
+  - Execute `nabla4` kernel and then `interpolate`
+- Inlined
+  - Compute `nabla4` output for every input of `interpolate` kernel
+  - More computations
+  - Less writes to device memory
+- Inlined v2v (unstructured only)
+  - Compress `v2e[e2c2v]` neighbor accesses to `v2e2c2v`
+    - Read fields for 7 vertices instead of (6\*4=) 24 vertices
+  - Assumes certain order of vertices in `e2c2v` and edges in `v2e`
+
+</div>
+
+<div>
+
+<img src="slides-images/stencil-computation.svg" style="width: 110%" align="left"/>
+
+</div>
+</div>
+
+---
+
+## Kernel implementations
+
+<div class="twocolumns">
+<div>
+
+- Inlined_cached
+  - Save `nabla4` output in shared memory and then use it in `interpolate` kernel
+  - Reduces overcomputations compared to `inlined` implementation
+
+</div>
+
+<div>
+
+<img src="slides-images/stencil-computation.svg" style="width: 110%" align="left"/>
+
+</div>
+</div>
 
 ---
 
