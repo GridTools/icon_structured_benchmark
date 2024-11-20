@@ -81,9 +81,7 @@ size: 16:9
   - 1 would also be sufficient
   - Discard periodic edges
 - Calculate `X` and `Y` dimensions based on the distribution of vertices in space
-- Order edges and vertices in memory
-  - `per-vertex`: `edges` are ordered in memory based on a corresponding `vertex` id and then based on their orientation
-  - `per-orientation`: `edges` are ordered in memory based on their orientation and then their corresponding vertex coordinates
+  - `x_dim` equals the number of vertices with `y == 0`
 
 ### Computation domain in <span style="color:red">red</span>
 
@@ -91,6 +89,16 @@ size: 16:9
 <div>
 <img src="slides-images/torus_computation_domain.png" style="width: 110%" align="right"/>
 </div>
+</div>
+
+---
+
+## Manipulation of ICON grid
+
+### Organization of edges in memory
+
+<div>
+<img src="slides-images/per-vertex-orientation.svg" style="width: 80%" align="center"/>
 </div>
 
 ---
@@ -257,13 +265,12 @@ size: 16:9
 
 ## Results
 
-- `Nabla4` & `interpolate`
-  - `gpu_naive` & `gpu_kloop`
-  - See if `gpu_naive` has anything interesting
-    - Probably nice to show improvement over starting point (`gpu_naive` `unstructured` to fastest `gpu_kloop` `inlined` version)
-- `Nabla4_vertical` & `interpolate`
-  - Compare to normal `nabla4`
-- Use `256` torus grid
+- `GH200` GPU
+- Median runtime presented
+  - 10 dry runs (not taken into account)
+  - 101 runs to select median
+- 229758 edges
+  - Close to the amount of edges that fit in a single GPU for ICON runs
 
 ---
 
