@@ -137,8 +137,8 @@ size: 16:9
     - **e2c2v[4]**
     - **e2ecv[4]**
   - Input fields
-    - **u_vert[<span style="color:DarkGreen">EdgeDim</span>, <span style="color:blue">KDim</span>]**
-    - **v_vert[<span style="color:DarkGreen">EdgeDim</span>, <span style="color:blue">KDim</span>]**
+    - **u_vert[<span style="color:SandyBrown">VertexDim</span>, <span style="color:blue">KDim</span>]**
+    - **v_vert[<span style="color:SandyBrown">VertexDim</span>, <span style="color:blue">KDim</span>]**
     - **primal_normal_vert_v1[<span style="color:DarkGreen">EdgeDim</span> * <span style="color:Tan">ECVDim</span>]**
     - **primal_normal_vert_v2[<span style="color:DarkGreen">EdgeDim</span> * <span style="color:Tan">ECVDim</span>]**
     - **z_nabla2_e[<span style="color:OliveDrab">OutputEdgeDim</span>, <span style="color:blue">KDim</span>]**
@@ -157,8 +157,8 @@ size: 16:9
     - **e2c2v[4]**
     - **e2ecv[4]**
   - Input fields
-    - **u_vert[<span style="color:DarkGreen">EdgeDim</span>, <span style="color:blue">KDim</span>]**
-    - **v_vert[<span style="color:DarkGreen">EdgeDim</span>, <span style="color:blue">KDim</span>]**
+    - **u_vert[<span style="color:SandyBrown">VertexDim</span>, <span style="color:blue">KDim</span>]**
+    - **v_vert[<span style="color:SandyBrown">VertexDim</span>, <span style="color:blue">KDim</span>]**
     - **primal_normal_vert_v1[<span style="color:DarkGreen">EdgeDim</span> * <span style="color:Tan">ECVDim</span>, <span style="color:DeepSkyBlue">KDim</span>]**
     - **primal_normal_vert_v2[<span style="color:DarkGreen">EdgeDim</span> * <span style="color:Tan">ECVDim</span>, <span style="color:DeepSkyBlue">KDim</span>]**
     - **z_nabla2_e[<span style="color:OliveDrab">OutputEdgeDim</span>, <span style="color:blue">KDim</span>]**
@@ -175,7 +175,7 @@ size: 16:9
   - - Neighbor tables
     - **v2e[6]**
   - Input fields
-    - **p_e_in[<span style="color:SandyBrown">VertexDim</span>, <span style="color:blue">KDim</span>]**
+    - **p_e_in[<span style="color:DarkGreen">EdgeDim</span>, <span style="color:blue">KDim</span>]**
     - **ptr_coeff_1[<span style="color:BurlyWood">OutputVertexDim</span>, 6]**
     - **ptr_coeff_2[<span style="color:BurlyWood">OutputVertexDim</span>, 6]**
   - Output fields
