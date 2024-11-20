@@ -37,15 +37,15 @@ def read_torus_results_commit(directory, torus_filenames, k_levels, commit):
 
 
 def read_torus_results_commit_backend_index_type(
-    directory, torus_filenames, k_levels, commit, backend, index_type
+    directory, torus_filenames, k_levels, commit, backend, index_type, suffix=""
 ):
     runtimes = {}
     for filename in torus_filenames:
         runtimes[filename] = {}
         for k in k_levels:
             with open(
-                "{}/{}_k{}_{}_{}_{}.json".format(
-                    directory, filename, k, commit, backend, index_type
+                "{}/{}_k{}_{}_{}_{}{}.json".format(
+                    directory, filename, k, commit, backend, index_type, suffix
                 )
             ) as f:
                 runtimes[filename][k] = json.load(f)

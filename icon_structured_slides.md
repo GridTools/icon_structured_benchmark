@@ -251,6 +251,7 @@ size: 16:9
 - Both `structured` and `unstructured` versions operate on data with same ordering in memory
   - No SFC. Vertices are indered per `i` and `j` coordinates and `edges` per `orientation/vertices`
 - `structured`: `e2ecv` is also computed
+- Smaller grids benefit by more threads and less `k level` iterations
 
 ---
 
@@ -263,6 +264,30 @@ size: 16:9
 - `Nabla4_vertical` & `interpolate`
   - Compare to normal `nabla4`
 - Use `256` torus grid
+
+---
+
+<div>
+<img src="slides-images/runtimes_torus_accel_nabla4_inter_256_80.png" style="width: 70%" align="center"/>
+</div>
+
+---
+
+<div>
+<img src="slides-images/runtimes_torus_accel_nabla4_inter_128_80.png" style="width: 70%" align="center"/>
+</div>
+
+---
+
+<div>
+<img src="slides-images/runtimes_torus_accel_nabla4_vertical_inter_256_80.png" style="width: 70%" align="center"/>
+</div>
+
+---
+
+<div>
+<img src="slides-images/runtimes_torus_accel_nabla4_vertical_inter_128_80.png" style="width: 70%" align="center"/>
+</div>
 
 ---
 
