@@ -291,18 +291,14 @@ constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_naive_vert
 
 template <>
 constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_naive_vertical<int>() {
-    return {32, 1, 18, 576}; // Not optimized
+    return {32, 2, 8, 512};
 };
 
 constexpr block_dims block_dims_structured_nabla_interpol_inlined_naive_vertical =
     get_block_dims_structured_nabla_interpol_inlined_naive_vertical<index_type>();
 
 __global__ void
-#if __CUDACC_VER_MAJOR__ < 12 || (__CUDACC_VER_MAJOR__ == 12 && __CUDACC_VER_MINOR__ < 5)
 __launch_bounds__(block_dims_structured_nabla_interpol_inlined_naive_vertical.size)
-#else
-__maxnreg__(56)
-#endif
     run_gpu_naive_nabla4_vertical_interpolate_inlined_structured(index_type KDim,
         index_type x_dim,
         index_type y_dim,

@@ -514,7 +514,7 @@ constexpr block_dims get_block_dims_unstructured_nabla_interpol_inlined_v2v_kloo
 
 template <>
 constexpr block_dims get_block_dims_unstructured_nabla_interpol_inlined_v2v_kloop<int>() {
-    return {256, 1, 1, 256};
+    return {64, 2, 1, 128};
 };
 
 constexpr block_dims block_dims_unstructured_nabla_interpol_inlined_v2v_kloop =
@@ -703,7 +703,7 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
 
 template <typename T>
 inline void nabla4_interpolate_unstructured_inlined_v2v<T>::run_gpu_kloop_helper() {
-    dim3 tblocks(block_dims_unstructured_nabla_interpol_inlined_v2v_kloop.x,
+    constexpr dim3 tblocks(block_dims_unstructured_nabla_interpol_inlined_v2v_kloop.x,
         block_dims_unstructured_nabla_interpol_inlined_v2v_kloop.y,
         block_dims_unstructured_nabla_interpol_inlined_v2v_kloop.z);
     dim3 grid((interpolate_data.output_size + tblocks.x - 1) / tblocks.x, 1, 1);
