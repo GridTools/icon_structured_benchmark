@@ -184,6 +184,46 @@ size: 16:9
 
 ---
 
+## Nabla4 execution
+
+<div style="text-align: center;">
+  <img src="slides-images/nabla4_0.svg" style="width: 86%;"/>
+</div>
+
+---
+
+## Nabla4 execution
+
+<div style="text-align: center;">
+  <img src="slides-images/nabla4_1.svg" style="width: 86%;"/>
+</div>
+
+---
+
+## Interpolate execution
+
+<div style="text-align: center;">
+  <img src="slides-images/interpolate_0.svg" style="width: 86%;"/>
+</div>
+
+---
+
+## Nabla4 & Interpolate execution
+
+<div style="text-align: center;">
+  <img src="slides-images/nabla4_interpolate.svg" style="width: 86%;"/>
+</div>
+
+---
+
+## Nabla4 & Interpolate v2v execution
+
+<div style="text-align: center;">
+  <img src="slides-images/interpolate_v2v.svg" style="width: 86%;"/>
+</div>
+
+---
+
 ## Kernel implementations
 
 - Grid structure
@@ -220,10 +260,8 @@ size: 16:9
 
 </div>
 
-<div>
-
-<img src="slides-images/stencil-computation.svg" style="width: 110%" align="left"/>
-
+<div style="text-align: left;">
+  <img src="slides-images/stencil-computation.svg" style="width: 110%"/>
 </div>
 </div>
 
@@ -240,10 +278,8 @@ size: 16:9
 
 </div>
 
-<div>
-
-<img src="slides-images/stencil-computation.svg" style="width: 110%" align="left"/>
-
+<div style="text-align: left;">
+  <img src="slides-images/stencil-computation.svg" style="width: 110%"/>
 </div>
 </div>
 
@@ -304,15 +340,25 @@ size: 16:9
   - 101 runs to select median
 - 229758 edges
   - Close to the amount of edges that fit in a single GPU for ICON runs
+- 915948 edges
+  - For exploration
+
+---
+
+## gtfn improvements
+
+<div style="text-align: center;">
+  <img src="slides-images/runtimes_torus_accel_gtfn_128_80.png" style="width: 62%;"/>
+</div>
 
 ---
 
 <div class="twocolumns">
-<div>
-<img src="slides-images/runtimes_torus_accel_nabla4_inter_256_80.png" style="width: 145%" align="center"/>
+<div style="text-align: center;">
+  <img src="slides-images/runtimes_torus_accel_nabla4_inter_256_80.png" style="width: 133%"/>
 </div>
 
-<div style="margin-left: 380px;">
+<div style="margin-left: 320px;">
 
 - `structured` `separate` kernels **~10%** speed up
 - Inlining in `gpu_naive` doesn't help without extra optimizations due to overcomputations in both cases
@@ -331,8 +377,8 @@ size: 16:9
 
 --- -->
 
-<div>
-<img src="slides-images/runtimes_torus_accel_nabla4_vertical_inter_256_80.png" style="width: 70%" align="center"/>
+<div style="text-align: center;">
+  <img src="slides-images/runtimes_torus_accel_nabla4_vertical_inter_256_80.png" style="width: 68%"/>
 </div>
 
 ---
@@ -345,33 +391,34 @@ size: 16:9
 
 ## Conclusions
 
----
-
-## Notes
-
-- `LDGSTS` for `nabla4` `structured`
-  - Initial implementation for loading vertical input fields to memory per vertical level
-    - Big slowdown
-    - `LDGSTS.BYPASS` can be used only for certain fields
-- `TMA` for `nabla4` `structured`
-  - Used in a similar way
-    - Slowdown and problematic implementation
-    - Probably `TMA` is not properly used
-  - Alignment requirements need a different approach
-    - Aligned loads for `blockDim.x` in `j`, `j-1` and `j+1` to calculate `i`, `j` in `j`
-    - Similar to `gpu_kloop_inlined_structured_cached`
+- WIP
 
 ---
 
 ## Next steps
 
-- Try `cached` approach for `unstructured` implementation
-  - Compute border coordinates for each Thread Block (should be the same as `structured` for our grid)
-  - Load them to shared memory
-- Add another kernel with `c2v` neighbor to see implact in `inlined` versions due to overcomputations
+- Add interpolation stencil with `c2v` neighbor to see implact in `inlined` versions due to overcomputations
   - `c2v` neighbor will require computing 3 vertices per cell = 3 times the computations
   - Try `c2v2e2c2v` compressed neighbor in `unstructured` version as well
-- Improve `TMA` implementation
+- Try `cached` approach for `unstructured` implementation
+  - Compute border coordinates for each Thread Block (should be the same as `structured` for our grid)
+    - `per-vertex` ordering should be better due to smaller range of vertices/edges that need to be saved to shared memory
+  - Load them to shared memory
+- Try `TMA` implementation
+  - Tried `cuda::pipeline` to use `LDGSTS`/`LDGSTS.BYPASS` instructions for loading the input fields of `nabla4` kernel
+    - Big slowdown
+    - Probably because computations are not enough to hide memory latencies
+  - Try with `TMA` to see if it improves
+  - More complex due to memory alignment requirements
+
+---
+
+## Next steps
+
+- Compile time strides
+  - `x_dim` is necessary to calculate the strides in `structured` version
+    - Can be given in case of JIT compilation
+- Use cache hints for loads and non temporal stores
 
 ---
 
