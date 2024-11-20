@@ -261,7 +261,7 @@ size: 16:9
 </div>
 
 <div style="text-align: left;">
-  <img src="slides-images/stencil-computation.svg" style="width: 110%"/>
+  <img src="slides-images/nabla4_interpolate.svg" style="width: 110%"/>
 </div>
 </div>
 
@@ -279,7 +279,7 @@ size: 16:9
 </div>
 
 <div style="text-align: left;">
-  <img src="slides-images/stencil-computation.svg" style="width: 110%"/>
+  <img src="slides-images/nabla4_interpolate.svg" style="width: 110%"/>
 </div>
 </div>
 
