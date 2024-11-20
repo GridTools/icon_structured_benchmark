@@ -308,13 +308,13 @@ size: 16:9
 - Occupancy
   - All kernels have been optimized for best occupancy
 - `__launch_bounds__` and `__maxnreg__`
-  - Launch bounds are applied to all kernels except some that were performing better with register limitation to a certain register number
+  - Launch bounds are applied to all kernels except some that were performing better with register limitation to a certain number of registers
 - Thread Block size
-  - Especially for `gpu_naive` implementations, increasing the vertical axis thread block size (`ThreadBlockDim.y/z`) was beneficial since there are more chances to find neighbor tables and vertically independent fields in cache
-  - 4-8-9 most used number with 80 vertical levels in total
+  - Specifically for `gpu_naive` implementations, increasing the vertical axis thread block size (`ThreadBlockDim.y/z`) was beneficial since there are more chances to find neighbor tables and vertically independent fields in cache
+  - 4-8-9 most used number with 80 vertical levels in total. For some kernels 12 or 16
 - `gpu_kloop`
-  - For this implementation vertical `GridDim` is set to 1. Iteration number is set based on the `ThreadBlockDim.y/z` and `KDim`. Exception are the `inline_cached` versions where the shared memory size is limiting the number of iterations possible
-  - Optimized number of iterations per kernel. 8-40 iterations. 8-20 usually have the best performance
+  - For this implementation vertical `GridDim` is set to 1. Iteration number is controlled by `ThreadBlockDim.y/z` and `KDim`. Exceptions are the `inline_cached` versions where the shared memory size is limiting the number of iterations possible
+  - Optimized number of iterations per kernel. 5-40 iterations. 8-20 usually have the best performance
 
 ---
 
@@ -329,6 +329,9 @@ size: 16:9
   - No SFC. Vertices are indered per `i` and `j` coordinates and `edges` per `orientation/vertices`
 - `structured`: `e2ecv` is also computed
 - Smaller grids benefit by more threads and less `k level` iterations
+- Loop in `k` is done with stride `blockDim.y/z * gridDim.y/z`
+  - It would be more beneficial for kernels that read data from adjacent `k` levels to do the looping with stride `1` in each thread
+    - Current implementation in `gtfn`, not on the `CUDA` kernels since we don't evaluate such case
 
 ---
 
