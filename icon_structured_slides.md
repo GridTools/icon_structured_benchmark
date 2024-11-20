@@ -124,15 +124,15 @@ size: 16:9
     - **e2c2v[4]**
     - **e2ecv[4]**
   - Input fields
-    - **u_vert[EdgeDim, KDim]**
-    - **v_vert[EdgeDim, KDim]**
-    - **primal_normal_vert_v1[EdgeDim * ECVDim]**
-    - **primal_normal_vert_v2[EdgeDim * ECVDim]**
-    - **z_nabla2_e[OutputEdgeDim, KDim]**
-    - **inv_vert_vert_length_gt[OutputEdgeDim]**
-    - **inv_primal_edge_length_gt[OutputEdgeDim]**
+    - **u_vert[<span style="color:DarkGreen">EdgeDim</span>, <span style="color:blue">KDim</span>]**
+    - **v_vert[<span style="color:DarkGreen">EdgeDim</span>, <span style="color:blue">KDim</span>]**
+    - **primal_normal_vert_v1[<span style="color:DarkGreen">EdgeDim</span> * <span style="color:Tan">ECVDim</span>]**
+    - **primal_normal_vert_v2[<span style="color:DarkGreen">EdgeDim</span> * <span style="color:Tan">ECVDim</span>]**
+    - **z_nabla2_e[<span style="color:OliveDrab">OutputEdgeDim</span>, <span style="color:blue">KDim</span>]**
+    - **inv_vert_vert_length_gt[<span style="color:OliveDrab">OutputEdgeDim</span>]**
+    - **inv_primal_edge_length_gt[<span style="color:OliveDrab">OutputEdgeDim</span>]**
   - Output field
-    - **z_nabla4_e2[OutputEdgeDim, KDim]**
+    - **z_nabla4_e2[<span style="color:OliveDrab">OutputEdgeDim</span>, <span style="color:blue">KDim</span>]**
 
 ---
 
@@ -144,15 +144,15 @@ size: 16:9
     - **e2c2v[4]**
     - **e2ecv[4]**
   - Input fields
-    - **u_vert[EdgeDim, KDim]**
-    - **v_vert[EdgeDim, KDim]**
-    - **primal_normal_vert_v1[EdgeDim * ECVDim, KDim]**
-    - **primal_normal_vert_v2[EdgeDim * ECVDim, KDim]**
-    - **z_nabla2_e[OutputEdgeDim, KDim]**
-    - **inv_vert_vert_length_gt[OutputEdgeDim, KDim]**
-    - **inv_primal_edge_length_gt[OutputEdgeDim, KDim]**
+    - **u_vert[<span style="color:DarkGreen">EdgeDim</span>, <span style="color:blue">KDim</span>]**
+    - **v_vert[<span style="color:DarkGreen">EdgeDim</span>, <span style="color:blue">KDim</span>]**
+    - **primal_normal_vert_v1[<span style="color:DarkGreen">EdgeDim</span> * <span style="color:Tan">ECVDim</span>, <span style="color:DeepSkyBlue">KDim</span>]**
+    - **primal_normal_vert_v2[<span style="color:DarkGreen">EdgeDim</span> * <span style="color:Tan">ECVDim</span>, <span style="color:DeepSkyBlue">KDim</span>]**
+    - **z_nabla2_e[<span style="color:OliveDrab">OutputEdgeDim</span>, <span style="color:blue">KDim</span>]**
+    - **inv_vert_vert_length_gt[<span style="color:OliveDrab">OutputEdgeDim</span>, <span style="color:DeepSkyBlue">KDim</span>]**
+    - **inv_primal_edge_length_gt[<span style="color:OliveDrab">OutputEdgeDim</span>, <span style="color:DeepSkyBlue">KDim</span>]**
   - Output field
-    - **z_nabla4_e2[OutputEdgeDim, KDim]**
+    - **z_nabla4_e2[<span style="color:OliveDrab">OutputEdgeDim</span>, <span style="color:blue">KDim</span>]**
 
 ---
 
@@ -162,12 +162,12 @@ size: 16:9
   - - Neighbor tables
     - **v2e[6]**
   - Input fields
-    - **p_e_in[EdgeDim, KDim]**
-    - **ptr_coeff_1[OutputVertexDim, 6]**
-    - **ptr_coeff_2[OutputVertexDim, 6]**
+    - **p_e_in[<span style="color:SandyBrown">VertexDim</span>, <span style="color:blue">KDim</span>]**
+    - **ptr_coeff_1[<span style="color:BurlyWood">OutputVertexDim</span>, 6]**
+    - **ptr_coeff_2[<span style="color:BurlyWood">OutputVertexDim</span>, 6]**
   - Output fields
-    - **p_u_out[OutputVertexDim, KDim]**
-    - **p_v_out[OutputVertexDim, KDim]**
+    - **p_u_out[<span style="color:BurlyWood">OutputVertexDim</span>, <span style="color:blue">KDim</span>]**
+    - **p_v_out[<span style="color:BurlyWood">OutputVertexDim</span>, <span style="color:blue">KDim</span>]**
 
 ---
 
