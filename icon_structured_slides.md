@@ -208,18 +208,18 @@ size: 16:9
 
 ---
 
-## Nabla4 & Interpolate execution
+## Nabla4 & Interpolate inlined v2e[e2c2v] execution
 
 <div style="text-align: center;">
-  <img src="slides-images/nabla4_interpolate.svg" style="width: 86%;"/>
+  <img src="slides-images/nabla4_interpolate_inlined.svg" style="width: 86%;"/>
 </div>
 
 ---
 
-## Nabla4 & Interpolate v2v execution
+## Nabla4 & Interpolate inlined v2e2c2v execution
 
 <div style="text-align: center;">
-  <img src="slides-images/interpolate_v2v.svg" style="width: 86%;"/>
+  <img src="slides-images/nabla4_interpolate_inlined_v2v.svg" style="width: 86%;"/>
 </div>
 
 ---
@@ -326,7 +326,7 @@ size: 16:9
 - `unstructured`: `nabla4` iterates on edges (`per-orientation` - 1 edge per thread)
 - `structured`: `nabla4` iterates on vertices (`per-vertex` - 3 edges per vertex/thread)
 - Both `structured` and `unstructured` versions operate on data with same ordering in memory
-  - No SFC. Vertices are indered per `i` and `j` coordinates and `edges` per `orientation/vertices`
+  - No SFC. Vertices are ordered per `i` and `j` coordinates and `edges` per `orientation/vertices`
 - `structured`: `e2ecv` is also computed
 - Smaller grids benefit by more threads and less `k level` iterations
 - Loop in `k` is done with stride `blockDim.y/z * gridDim.y/z`
@@ -364,7 +364,7 @@ size: 16:9
 <div style="margin-left: 320px;">
 
 - `structured` `separate` kernels **~10%** speed up
-- Inlining in `gpu_naive` doesn't help without extra optimizations due to overcomputations in both cases
+- Inlining in `gpu_naive` doesn't help without extra optimizations due to overcomputations
 - `cached` approach another **~20%** speedup
 - `gpu_kloop` **~10-20%** speedup compared to `gpu_naive` for `separate` kernels
 - `unstructured` `gpu_kloop` `inlined_v2v` and `structured` `gpu_kloop` `inlined` **~2x** faster
@@ -394,7 +394,15 @@ size: 16:9
 
 ## Conclusions
 
-- WIP
+- For `separate` kernels `structured` is faster than `unstructured` by **8-10%**
+- For `nabla4_interpolate` where there are vertically independent fields `gpu_kloop` is beneficial
+  - For `nabla4_vertical_interpolate` where there aren't many vertically independent fields `gpu_kloop` is not necessaarily beneficial due to more register usage and lower occupancy
+- `structured` is only slightly faster than `unstructured_v2v` in `nabla4_interpolate` but much faster than `unstructured`
+  - **???** Check about `nabla4_vertical_interpolate` as well in `gpu_kloop`
+- `inlined` `unstructured` versions are always slower due to the overcomputations and more memory accesses
+  - Neighbor compression helps with that
+- Cost of less overcumputations and memory accesses in `inlined` versions is better than the synchronization penalty from `inlined_cached` in `structured` with current kernels
+- Overcomputations in `nabla4_vertical_interpolate` `inlined` implementations are not enough to hide the cost of saving data to the shared memory
 
 ---
 
