@@ -254,14 +254,18 @@ def generate_violin_plots_acceleration(
             or "gtfn" in implementation
         ):
             violin_data.append(runtimes)
-            labels.append(implementation.split("benchmark_")[-1])
+            labels.append(
+                implementation.split("benchmark_")[-1]
+                .replace("unstructured", "indirect")
+                .replace("structured", "strided")
+            )
             median_value = np.median(runtimes)
             medians.append(median_value)  # Calculating median for each set of runtimes
 
             percentage_diff = (median_value - baseline_median) / baseline_median * 100
             plt.text(
                 len(labels),
-                median_value + 0.000025,
+                median_value + 0.000004,
                 f"{median_value:.6f}\n({percentage_diff:.2f}%)"
                 if implementation != baseline_name
                 else f"{median_value:.5f}",
