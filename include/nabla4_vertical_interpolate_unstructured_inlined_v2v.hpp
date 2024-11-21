@@ -338,7 +338,7 @@ constexpr block_dims get_block_dims_unstructured_nabla_interpol_inlined_v2v_naiv
 
 template <>
 constexpr block_dims get_block_dims_unstructured_nabla_interpol_inlined_v2v_naive_vertical<int>() {
-    return {32, 12, 1, 384}; // Not optimized
+    return {32, 12, 1, 384};
 };
 
 constexpr block_dims block_dims_unstructured_nabla_interpol_inlined_v2v_naive_vertical =
