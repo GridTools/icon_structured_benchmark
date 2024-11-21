@@ -511,7 +511,7 @@ constexpr block_dims get_block_dims_unstructured_nabla_interpol_inlined_naive<st
 
 template <>
 constexpr block_dims get_block_dims_unstructured_nabla_interpol_inlined_naive<int>() {
-    return {32, 16, 1, 512};
+    return {32, 1, 8, 256};
 };
 
 constexpr block_dims block_dims_unstructured_nabla_interpol_inlined_naive =
