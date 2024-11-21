@@ -627,7 +627,7 @@ constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_naive<std:
 
 template <>
 constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_naive<int>() {
-    return {32, 1, 18, 576};
+    return {32, 8, 2, 256};
 };
 
 constexpr block_dims block_dims_structured_nabla_interpol_inlined_naive =
@@ -637,7 +637,7 @@ __global__ void
 #if __CUDACC_VER_MAJOR__ < 12 || (__CUDACC_VER_MAJOR__ == 12 && __CUDACC_VER_MINOR__ < 5)
 __launch_bounds__(block_dims_structured_nabla_interpol_inlined_naive.size)
 #else
-__maxnreg__(56)
+__maxnreg__(62)
 #endif
     run_gpu_naive_nabla4_interpolate_inlined_structured(index_type KDim,
         index_type x_dim,
