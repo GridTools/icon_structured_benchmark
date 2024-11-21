@@ -358,16 +358,17 @@ size: 16:9
 
 <div class="twocolumns">
 <div style="text-align: center;">
-  <img src="slides-images/runtimes_torus_accel_nabla4_inter_256_80.png" style="width: 133%"/>
+  <img src="slides-images/runtimes_torus_accel_nabla4_inter_256_80_v2.png" style="width: 133%"/>
 </div>
 
 <div style="margin-left: 320px;">
 
 - `structured` `separate` kernels **~10%** speed up
 - Inlining in `gpu_naive` doesn't help without extra optimizations due to overcomputations
-- `cached` approach another **~20%** speedup
+- `cached` approach in `gpu_naive` another **~20%** speedup
 - `gpu_kloop` **~10-20%** speedup compared to `gpu_naive` for `separate` kernels
 - `unstructured` `gpu_kloop` `inlined_v2v` and `structured` `gpu_kloop` `inlined` **~2x** faster
+- `cached` implementation not fastest in `gpu_kloop`
 
 </div>
 </div>
