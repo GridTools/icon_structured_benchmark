@@ -226,10 +226,10 @@ size: 16:9
 
 ## Kernel implementations
 
-- Grid structure
-  - Unstructured
+- Neighbor accesses
+  - Indirect
     - Indirect accesses via neighbor tables
-  - Structred
+  - Strided
     - Neighbor accesses via strides
 - Iteration strategies
   - `gpu_naive`
@@ -253,7 +253,7 @@ size: 16:9
   - Compute `nabla4` output for every input of `interpolate` kernel
   - More computations
   - Less writes to device memory
-- Inlined v2v (unstructured only)
+- Inlined v2v (`indirect` only)
   - Compress `v2e[e2c2v]` neighbor accesses to `v2e2c2v`
     - Read fields for 7 vertices instead of (6\*4=) 24 vertices
   - Assumes certain order of vertices in `e2c2v` and edges in `v2e`
@@ -288,7 +288,7 @@ size: 16:9
 ## Kernel implementations
 
 - `gtfn`
-  - Only `unstructured`
+  - Only `indirect`
   - Based on `GridTools C++`
   - Improved `GridTools C++`
     - `const` neighbor tables and input fields
@@ -320,14 +320,14 @@ size: 16:9
 
 ## Notes for specific kernels
 
-- `structured_gpu_{naive,kloop}_inlined_cached`: Tried 2 different implementations, number of threads same as input but then deactivate for the output some of them and number of threads same as output where each thread caclulates multiple elements. Former is better
-- `structured_*_inlined`: calculate only necessary indexes, similar to `v2e2c2v`
-- `unstructured_*_inlined_v2v`: pass `v2e2c2v` as input
-- `unstructured`: `nabla4` iterates on edges (`per-orientation` - 1 edge per thread)
-- `structured`: `nabla4` iterates on vertices (`per-vertex` - 3 edges per vertex/thread)
-- Both `structured` and `unstructured` versions operate on data with same ordering in memory
+- `strided_gpu_{naive,kloop}_inlined_cached`: Tried 2 different implementations, number of threads same as input but then deactivate for the output some of them and number of threads same as output where each thread caclulates multiple elements. Former is better
+- `strided_*_inlined`: calculate only necessary indexes, similar to `v2e2c2v`
+- `indirect_*_inlined_v2v`: pass `v2e2c2v` as input
+- `indirect`: `nabla4` iterates on edges (`per-orientation` - 1 edge per thread)
+- `strided`: `nabla4` iterates on vertices (`per-vertex` - 3 edges per vertex/thread)
+- Both `strided` and `indirect` versions operate on data with same ordering in memory
   - No SFC. Vertices are ordered per `i` and `j` coordinates and `edges` per `orientation/vertices`
-- `structured`: `e2ecv` is also computed
+- `strided`: `e2ecv` is also computed
 - Smaller grids benefit by more threads and less `k level` iterations
 - Loop in `k` is done with stride `blockDim.y/z * gridDim.y/z`
   - It would be more beneficial for kernels that read data from adjacent `k` levels to do the looping with stride `1` in each thread
@@ -363,11 +363,11 @@ size: 16:9
 
 <div style="margin-left: 320px;">
 
-- `structured` `separate` kernels **~10%** speed up
+- `strided` `separate` kernels **~10%** speed up
 - Inlining in `gpu_naive` doesn't help without extra optimizations due to overcomputations
 - `cached` approach in `gpu_naive` another **~20%** speedup
 - `gpu_kloop` **~10-20%** speedup compared to `gpu_naive` for `separate` kernels
-- `unstructured` `gpu_kloop` `inlined_v2v` and `structured` `gpu_kloop` `inlined` **~2x** faster
+- `indirect` `gpu_kloop` `inlined_v2v` and `strided` `gpu_kloop` `inlined` **~2x** faster
 - `cached` implementation not fastest in `gpu_kloop`
 
 </div>
@@ -381,8 +381,17 @@ size: 16:9
 
 --- -->
 
+<div class="twocolumns">
 <div style="text-align: center;">
-  <img src="slides-images/runtimes_torus_accel_nabla4_vertical_inter_256_80.png" style="width: 68%"/>
+  <img src="slides-images/runtimes_torus_accel_nabla4_vertical_inter_256_80_v2.png" style="width: 133%"/>
+</div>
+<div style="margin-left: 320px;">
+
+- `gpu_kloop` not always beneficial since there are no vertical fields to save to registers
+  - Only neighbors are saved in registers which are either loaded from memory or computed
+- `strided` `gpu_kloop` `inlined_cached` not better than more expensive overcomputations for other `inlined` implementations
+
+</div>
 </div>
 
 ---
@@ -395,15 +404,14 @@ size: 16:9
 
 ## Conclusions
 
-- For `separate` kernels `structured` is faster than `unstructured` by **8-10%**
+- For `separate` kernels `strided` is faster than `indirect` by **8-10%**
 - For `nabla4_interpolate` where there are vertically independent fields `gpu_kloop` is beneficial
   - For `nabla4_vertical_interpolate` where there aren't many vertically independent fields `gpu_kloop` is not necessaarily beneficial due to more register usage and lower occupancy
-- `structured` is only slightly faster than `unstructured_v2v` in `nabla4_interpolate` but much faster than `unstructured`
-  - **???** Check about `nabla4_vertical_interpolate` as well in `gpu_kloop`
-- `inlined` `unstructured` versions are always slower due to the overcomputations and more memory accesses
-  - Neighbor compression helps with that
-- Cost of less overcumputations and memory accesses in `inlined` versions is better than the synchronization penalty from `inlined_cached` in `structured` with current kernels
-- Overcomputations in `nabla4_vertical_interpolate` `inlined` implementations are not enough to hide the cost of saving data to the shared memory
+- `strided` is only slightly faster than `indirect` `inlined_v2v` in `nabla4_interpolate` but much faster than `indirect`
+  - In `nabla4_vertical_interpolate` performance is different
+    - Probably should understand it better but since `strided_inlined_cached` is not faster than `strided_inlined` maybe not worth it
+- `inlined_cached` using shared memory is not better than overcomputations/loading from memory for `inlined` version in `strided` implementations
+  - Potentially room for improvement there
 
 ---
 
@@ -411,9 +419,9 @@ size: 16:9
 
 - Add interpolation stencil with `c2v` neighbor to see implact in `inlined` versions due to overcomputations
   - `c2v` neighbor will require computing 3 vertices per cell = 3 times the computations
-  - Try `c2v2e2c2v` compressed neighbor in `unstructured` version as well
-- Try `cached` approach for `unstructured` implementation
-  - Compute border coordinates for each Thread Block (should be the same as `structured` for our grid)
+  - Try `c2v2e2c2v` compressed neighbor in `indirect` version as well
+- Try `cached` approach for `indirect` implementation
+  - Compute border coordinates for each Thread Block (should be the same as `strided` for our grid)
     - `per-vertex` ordering should be better due to smaller range of vertices/edges that need to be saved to shared memory
   - Load them to shared memory
 - Try `TMA` implementation
@@ -428,7 +436,7 @@ size: 16:9
 ## Next steps
 
 - Compile time strides
-  - `x_dim` is necessary to calculate the strides in `structured` version
+  - `x_dim` is necessary to calculate the strides in `strided` version
     - Can be given in case of JIT compilation
 - Use cache hints for loads and non temporal stores
 
