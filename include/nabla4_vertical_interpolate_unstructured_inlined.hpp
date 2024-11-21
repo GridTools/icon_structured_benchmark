@@ -93,7 +93,7 @@ constexpr block_dims get_block_dims_unstructured_nabla_interpol_inlined_kloop_ve
 
 template <>
 constexpr block_dims get_block_dims_unstructured_nabla_interpol_inlined_kloop_vertical<int>() {
-    return {128, 4, 1, 512};
+    return {32, 4, 1, 128};
 };
 
 constexpr block_dims block_dims_unstructured_nabla_interpol_inlined_kloop_vertical =
@@ -230,7 +230,7 @@ inline void nabla4_vertical_interpolate_unstructured_inlined<T>::run_gpu_kloop_h
     dim3 tblocks(block_dims_unstructured_nabla_interpol_inlined_kloop_vertical.x,
         block_dims_unstructured_nabla_interpol_inlined_kloop_vertical.y,
         block_dims_unstructured_nabla_interpol_inlined_kloop_vertical.z);
-    dim3 grid((interpolate_data.output_size + tblocks.x - 1) / tblocks.x, 1, 1);
+    dim3 grid((interpolate_data.output_size + tblocks.x - 1) / tblocks.x, 2, 1);
     run_gpu_kloop_nabla4_vertical_interpolate_inlined_unstructured<<<grid, tblocks>>>(nabla4_data.output_size,
         interpolate_data.output_size,
         nabla4_data.CellDim,
