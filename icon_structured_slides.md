@@ -345,6 +345,7 @@ size: 16:9
   - Close to the amount of edges that fit in a single GPU for ICON runs
 - 915948 edges
   - For exploration
+- Commit [979c2b9](https://github.com/GridTools/icon_structured_benchmark/commit/979c2b9b001348dbdcf97ed2bbddd2bae3e6053d)
 
 ---
 
@@ -358,7 +359,7 @@ size: 16:9
 
 <div class="twocolumns">
 <div style="text-align: center;">
-  <img src="slides-images/runtimes_torus_accel_nabla4_inter_256_80_v2.png" style="width: 133%"/>
+  <img src="slides-images/runtimes_torus_accel_nabla4_inter_256_80_v3.png" style="width: 133%"/>
 </div>
 
 <div style="margin-left: 320px;">
@@ -383,7 +384,7 @@ size: 16:9
 
 <div class="twocolumns">
 <div style="text-align: center;">
-  <img src="slides-images/runtimes_torus_accel_nabla4_vertical_inter_256_80_v2.png" style="width: 133%"/>
+  <img src="slides-images/runtimes_torus_accel_nabla4_vertical_inter_256_80_v3.png" style="width: 133%"/>
 </div>
 <div style="margin-left: 320px;">
 
