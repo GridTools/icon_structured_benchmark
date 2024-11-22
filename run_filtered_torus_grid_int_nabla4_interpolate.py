@@ -2393,6 +2393,29 @@ def run_benchmarks():
                 )
             if not args.vertical:
                 runtimes[
+                    "nabla4_interpolate_benchmark_gpu_kloop_roofline"
+                ] = icon_benchmark.nabla4_interpolate_benchmark_gpu_kloop_roofline(
+                    torus_grid.num_cells,
+                    torus_grid.num_vertices,
+                    torus_grid.num_edges,
+                    torus_grid.num_levels,
+                    torus_grid.size[E2C2VDim],
+                    grid_cartesian_dimensions[0],
+                    grid_cartesian_dimensions[1],
+                    halo,
+                    repetitions,
+                    dry_runs,
+                )
+                print(
+                    "nabla4_interpolate_benchmark_gpu_kloop_roofline median: {}".format(
+                        np.median(
+                            runtimes[
+                                "nabla4_interpolate_benchmark_gpu_kloop_roofline"
+                            ]
+                        )
+                    )
+                )
+                runtimes[
                     "nabla4_interpolate_benchmark_structured_gpu_kloop_inlined"
                 ] = icon_benchmark.nabla4_interpolate_benchmark_structured_gpu_kloop_inlined(
                     torus_grid.num_cells,
@@ -2416,6 +2439,29 @@ def run_benchmarks():
                     )
                 )
             else:
+                runtimes[
+                    "nabla4_vertical_interpolate_benchmark_gpu_kloop_roofline"
+                ] = icon_benchmark.nabla4_vertical_interpolate_benchmark_gpu_kloop_roofline(
+                    torus_grid.num_cells,
+                    torus_grid.num_vertices,
+                    torus_grid.num_edges,
+                    torus_grid.num_levels,
+                    torus_grid.size[E2C2VDim],
+                    grid_cartesian_dimensions[0],
+                    grid_cartesian_dimensions[1],
+                    halo,
+                    repetitions,
+                    dry_runs,
+                )
+                print(
+                    "nabla4_vertical_interpolate_benchmark_gpu_kloop_roofline median: {}".format(
+                        np.median(
+                            runtimes[
+                                "nabla4_vertical_interpolate_benchmark_gpu_kloop_roofline"
+                            ]
+                        )
+                    )
+                )
                 runtimes[
                     "nabla4_vertical_interpolate_benchmark_structured_gpu_kloop_inlined"
                 ] = icon_benchmark.nabla4_vertical_interpolate_benchmark_structured_gpu_kloop_inlined(
