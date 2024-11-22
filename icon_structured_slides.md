@@ -291,9 +291,9 @@ size: 16:9
   - Only `indirect`
   - Based on `GridTools C++`
   - Improved `GridTools C++`
-    - `const` neighbor tables and input fields
     - Memory loads via `__ldg`
     - `gpu_kloop` option
+    - `const` neighbor tables and input fields
     - Kudos to **Felix Thaler**
 - `CUDA`
   - Plain cuda kernels
