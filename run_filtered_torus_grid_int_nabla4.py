@@ -676,14 +676,22 @@ def parse_arguments():
         "--transformation",
         choices=["gt4py", "index"],
         default="gt4py",
-        help="Use either ToGt4PyTransformation or IndexTransformation",
-    )
-    parser.add_argument("--klevels", type=int, default=65, help="Number of k levels")
-    parser.add_argument(
-        "--repetitions", type=int, default=101, help="Number of repetitions"
+        help="Use either ToGt4PyTransformation or IndexTransformation (gt4py by default)",
     )
     parser.add_argument(
-        "--dry-run", default=False, help="Do a dry run or not", action="store_true"
+        "--klevels", type=int, default=80, help="Number of k levels (80 default)"
+    )
+    parser.add_argument(
+        "--repetitions",
+        type=int,
+        default=101,
+        help="Number of repetitions (101 default)",
+    )
+    parser.add_argument(
+        "--dry-run",
+        default=False,
+        help="Enable dry runs (not taken into runtime results) (disabled by default)",
+        action="store_true",
     )
     parser.add_argument(
         "--output", type=str, default="output", help="JSON output file name"
@@ -691,7 +699,7 @@ def parse_arguments():
     parser.add_argument(
         "--sanity-checks",
         default=False,
-        help="Do a validation with random data between structured and unstructured for the given grid",
+        help="Do a validation with random data between structured and unstructured for the given grid (disabled by default)",
         action="store_true",
     )
     parser.add_argument(
@@ -708,16 +716,19 @@ def parse_arguments():
             "gpu_naive",
         ],
         default="all_cpu",
-        help="Which backend to benchmark",
+        help="Which backend to benchmark (default all_cpu)",
     )
     parser.add_argument(
         "--e2c2v-ordering",
         choices=["per-vertex", "per-orientation"],
         default="per-vertex",
-        help="E2C2V ordering",
+        help="E2C2V ordering (per-vertex in CPU and per-orienteation in GPU by default)",
     )
     parser.add_argument(
-        "--halo", type=int, default=2, help="Halo size for structured grids"
+        "--halo",
+        type=int,
+        default=2,
+        help="Halo size for structured grids (default 2) [Shouldn't be changed]",
     )
 
     args = parser.parse_args()

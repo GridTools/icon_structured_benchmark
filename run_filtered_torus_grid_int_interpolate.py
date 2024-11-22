@@ -370,14 +370,22 @@ def parse_arguments():
         "--transformation",
         choices=["gt4py", "index"],
         default="gt4py",
-        help="Use either ToGt4PyTransformation or IndexTransformation",
-    )
-    parser.add_argument("--klevels", type=int, default=65, help="Number of k levels")
-    parser.add_argument(
-        "--repetitions", type=int, default=101, help="Number of repetitions"
+        help="Use either ToGt4PyTransformation or IndexTransformation (gt4py by default)",
     )
     parser.add_argument(
-        "--dry-run", default=False, help="Do a dry run or not", action="store_true"
+        "--klevels", type=int, default=80, help="Number of k levels (80 default)"
+    )
+    parser.add_argument(
+        "--repetitions",
+        type=int,
+        default=101,
+        help="Number of repetitions (101 default)",
+    )
+    parser.add_argument(
+        "--dry-run",
+        default=False,
+        help="Enable dry runs (not taken into runtime results) (disabled by default)",
+        action="store_true",
     )
     parser.add_argument(
         "--output", type=str, default="output", help="JSON output file name"
@@ -385,7 +393,7 @@ def parse_arguments():
     parser.add_argument(
         "--sanity-checks",
         default=False,
-        help="Do a validation with random data between structured and unstructured for the given grid",
+        help="Do a validation with random data between structured and unstructured for the given grid (disabled by default)",
         action="store_true",
     )
     parser.add_argument(
@@ -400,16 +408,19 @@ def parse_arguments():
             "gpu_naive",
         ],
         default="all_cpu",
-        help="Which backend to benchmark",
+        help="Which backend to benchmark (default all_cpu)",
     )
     parser.add_argument(
         "--e2c2v-ordering",
         choices=["per-vertex", "per-orientation"],
         default="per-vertex",
-        help="E2C2V ordering",
+        help="E2C2V ordering (per-vertex in CPU and per-orienteation in GPU by default)",
     )
     parser.add_argument(
-        "--halo", type=int, default=1, help="Halo size for structured grids"
+        "--halo",
+        type=int,
+        default=1,
+        help="Halo size for structured grids (default 1) [Shouldn't be changed]",
     )
 
     args = parser.parse_args()
@@ -492,99 +503,99 @@ def run_benchmarks():
     halo = args.halo
 
     if args.backend in ["all_cpu", "cpu_ifirst"]:
-        runtimes[
-            "interpolate_benchmark_unstructured_cpu_ifirst"
-        ] = icon_benchmark.interpolate_benchmark_unstructured_cpu_ifirst(
-            v2e_filtered,
-            torus_grid.num_vertices,
-            torus_grid.num_edges,
-            torus_grid.num_levels,
-            repetitions,
-            dry_runs,
+        runtimes["interpolate_benchmark_unstructured_cpu_ifirst"] = (
+            icon_benchmark.interpolate_benchmark_unstructured_cpu_ifirst(
+                v2e_filtered,
+                torus_grid.num_vertices,
+                torus_grid.num_edges,
+                torus_grid.num_levels,
+                repetitions,
+                dry_runs,
+            )
         )
 
-        runtimes[
-            "interpolate_benchmark_structured_cpu_ifirst"
-        ] = icon_benchmark.interpolate_benchmark_structured_cpu_ifirst(
-            torus_grid.num_vertices,
-            torus_grid.num_edges,
-            torus_grid.num_levels,
-            grid_cartesian_dimensions[0],
-            grid_cartesian_dimensions[1],
-            halo,
-            repetitions,
-            dry_runs,
+        runtimes["interpolate_benchmark_structured_cpu_ifirst"] = (
+            icon_benchmark.interpolate_benchmark_structured_cpu_ifirst(
+                torus_grid.num_vertices,
+                torus_grid.num_edges,
+                torus_grid.num_levels,
+                grid_cartesian_dimensions[0],
+                grid_cartesian_dimensions[1],
+                halo,
+                repetitions,
+                dry_runs,
+            )
         )
 
     if args.backend in ["all_cpu", "cpu_kfirst"]:
-        runtimes[
-            "interpolate_benchmark_unstructured_cpu_kfirst"
-        ] = icon_benchmark.interpolate_benchmark_unstructured_cpu_kfirst(
-            v2e_filtered,
-            torus_grid.num_vertices,
-            torus_grid.num_edges,
-            torus_grid.num_levels,
-            repetitions,
-            dry_runs,
+        runtimes["interpolate_benchmark_unstructured_cpu_kfirst"] = (
+            icon_benchmark.interpolate_benchmark_unstructured_cpu_kfirst(
+                v2e_filtered,
+                torus_grid.num_vertices,
+                torus_grid.num_edges,
+                torus_grid.num_levels,
+                repetitions,
+                dry_runs,
+            )
         )
 
-        runtimes[
-            "interpolate_benchmark_structured_cpu_kfirst"
-        ] = icon_benchmark.interpolate_benchmark_structured_cpu_kfirst(
-            torus_grid.num_vertices,
-            torus_grid.num_edges,
-            torus_grid.num_levels,
-            grid_cartesian_dimensions[0],
-            grid_cartesian_dimensions[1],
-            halo,
-            repetitions,
-            dry_runs,
+        runtimes["interpolate_benchmark_structured_cpu_kfirst"] = (
+            icon_benchmark.interpolate_benchmark_structured_cpu_kfirst(
+                torus_grid.num_vertices,
+                torus_grid.num_edges,
+                torus_grid.num_levels,
+                grid_cartesian_dimensions[0],
+                grid_cartesian_dimensions[1],
+                halo,
+                repetitions,
+                dry_runs,
+            )
         )
 
     if args.backend in ["all_gpu", "gpu_kloop"]:
-        runtimes[
-            "interpolate_benchmark_unstructured_gpu_naive"
-        ] = icon_benchmark.interpolate_benchmark_unstructured_gpu_naive(
-            v2e_filtered,
-            torus_grid.num_vertices,
-            torus_grid.num_edges,
-            torus_grid.num_levels,
-            repetitions,
-            dry_runs,
+        runtimes["interpolate_benchmark_unstructured_gpu_naive"] = (
+            icon_benchmark.interpolate_benchmark_unstructured_gpu_naive(
+                v2e_filtered,
+                torus_grid.num_vertices,
+                torus_grid.num_edges,
+                torus_grid.num_levels,
+                repetitions,
+                dry_runs,
+            )
         )
-        runtimes[
-            "interpolate_benchmark_unstructured_gpu_kloop"
-        ] = icon_benchmark.interpolate_benchmark_unstructured_gpu_kloop(
-            v2e_filtered,
-            torus_grid.num_vertices,
-            torus_grid.num_edges,
-            torus_grid.num_levels,
-            repetitions,
-            dry_runs,
+        runtimes["interpolate_benchmark_unstructured_gpu_kloop"] = (
+            icon_benchmark.interpolate_benchmark_unstructured_gpu_kloop(
+                v2e_filtered,
+                torus_grid.num_vertices,
+                torus_grid.num_edges,
+                torus_grid.num_levels,
+                repetitions,
+                dry_runs,
+            )
         )
-        runtimes[
-            "interpolate_benchmark_structured_gpu_naive"
-        ] = icon_benchmark.interpolate_benchmark_structured_gpu_naive(
-            torus_grid.num_vertices,
-            torus_grid.num_edges,
-            torus_grid.num_levels,
-            grid_cartesian_dimensions[0],
-            grid_cartesian_dimensions[1],
-            halo,
-            repetitions,
-            dry_runs,
+        runtimes["interpolate_benchmark_structured_gpu_naive"] = (
+            icon_benchmark.interpolate_benchmark_structured_gpu_naive(
+                torus_grid.num_vertices,
+                torus_grid.num_edges,
+                torus_grid.num_levels,
+                grid_cartesian_dimensions[0],
+                grid_cartesian_dimensions[1],
+                halo,
+                repetitions,
+                dry_runs,
+            )
         )
-        runtimes[
-            "interpolate_benchmark_structured_gpu_kloop"
-        ] = icon_benchmark.interpolate_benchmark_structured_gpu_kloop(
-            torus_grid.num_vertices,
-            torus_grid.num_edges,
-            torus_grid.num_levels,
-            grid_cartesian_dimensions[0],
-            grid_cartesian_dimensions[1],
-            halo,
-            repetitions,
-            dry_runs,
+        runtimes["interpolate_benchmark_structured_gpu_kloop"] = (
+            icon_benchmark.interpolate_benchmark_structured_gpu_kloop(
+                torus_grid.num_vertices,
+                torus_grid.num_edges,
+                torus_grid.num_levels,
+                grid_cartesian_dimensions[0],
+                grid_cartesian_dimensions[1],
+                halo,
+                repetitions,
+                dry_runs,
+            )
         )
 
     print_median_runtimes(runtimes)

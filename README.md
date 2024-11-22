@@ -91,47 +91,41 @@ The memory layout and the backends are divided into `cpu_ifirst`, `cpu_kfirst` a
 
 On top of these handwritten implementation there is a `gtfn` implementation as well. This one was generated automatically by `gt4py` for the `nabla4` kernel and was slightly adapted for the purposes of the benchmark framework.
 
+**For more information regarding the currently implemented experiments have a look at the [slides](https://github.com/GridTools/icon_structured_benchmark/blob/main/icon-structured-slides.pdf).**
+
 ## Installation
 
 For running the benchmarking framework with its tests there are the following dependencies:
 
-1. [serialbox](https://github.com/GridTools/serialbox)
-2. [icon4py](https://github.com/C2SM/icon4py)
-3. Other python packages in `requirements.txt`
+1. `CMake`
+2. `Boost`
+3. [icon4py](https://github.com/C2SM/icon4py)
+4. [GridTools C++](https://github.com/GridTools/gridtools)
+5. Other python packages in `requirements.txt`
 
-To install `serialbox` you can do the following:
+### Instructions
 
-```
-git clone https://github.com/GridTools/serialbox.git
-cd serialbox
-mkdir build
-pushd build
-cmake .. -DCMAKE_INSTALL_PREFIX=./install -DSERIALBOX_ENABLE_PYTHON=ON
-cmake --build . --target install
-export PYTHONPATH=$(pwd)/install/python:$PYTHONPATH
-popd
-```
+First it's helpful to have a Python virtual environment set up with Python 3.11+
 
-To install `icon4py`:
+To install `icon4py` and its dependencies:
 
 ```
 git submodule update --init --recursive -f
 pushd tests/ext/icon4py
-pip install -r requirements-dev-opt.txt # ideally in a venv (tested with Python 3.11)
+CC=$(which gcc) CXX=$(which g++) BOOST_INCLUDE_DIR=<BOOST_INSTALLATION_DIR>/include pip install -r requirements-dev-opt.txt # ideally in a venv (tested with Python 3.11)
 popd
 ```
 
-To install `icon-structured`:
+To install `icon-structured` you need to use `CMake`. `GridTools` will also be cloned in the `CMake` build directory if not found by `CMake`.
 
 Important CMake options:
 
 - `IS_GPU`: Enable GPU execution
-- `INDEX_TYPE`: Set the type of the indexes of the neighbor tables (Default is `int`
-  )
+- `INDEX_TYPE`: Set the type of the indexes of the neighbor tables (Default is `int`)
 - `CMAKE_CUDA_ARCHITECTURES`: Set the correct CUDA compute capability for the GPU being used
-- `CMAKE_CUDA_FLAGS="-diag-suppress 177 -fPIC --save-temps --verbose --generate-line-info -Xptxas=-v --expt-relaxed-constexpr"`: some extra flags useful for CUDA compilation
-- `CMAKE_CXX/CUDA_FLAGS="-DNDEBUG"`: needs to be set for CXX and CUDA compilation to avoid GridTools checks and overhead when measuring performance
-- `CMAKE_PREFIX_PATH=<GRIDTOOLS_INSTALLATION_PATH>`: useful to avoid cloning GridTools in each build folder
+- `CMAKE_CUDA_FLAGS="-diag-suppress 177 --save-temps --verbose --generate-line-info -Xptxas=-v --expt-relaxed-constexpr"`: some extra flags useful for CUDA compilation
+- `CMAKE_{CXX,CUDA}_FLAGS="-DNDEBUG"`: needs to be set for CXX and CUDA compilation to avoid GridTools checks and overhead when measuring performance
+- `CMAKE_PREFIX_PATH=<GRIDTOOLS_INSTALLATION_PATH>`: useful to avoid cloning GridTools in each build folder. It's important to install `GridTools` with the same compiler and dependencies as `icon-structured-benchmarks`.
 
 ```
 pip install -r requirements.txt
@@ -149,28 +143,24 @@ popd
 
 ### Running benchmark
 
-The benchmark driver is written in `python`.
-To run the benchmark and provide different options one can use the `run_simple_grid.py` for benchmarking the `SimpleGrid`, the `run_torus_grid.py` for the `torus` grid and `run_filtered_torus_grid.py` for the torus grid with `halo = 2` (no periodic boundaries) and other flavors of `run_filtered_torus_grid.py` based on each experiment.
-To get the available options you can run the following:
+The benchmark drivers are written in `python`.
+There are 3 different scripts for executing the different kernels implemented that can be found in the root directory of the repository.
+
+- `run_filtered_torus_grid_int_nabla4.py` is for executing all the standalone `nabla4` implementations
+- `run_filtered_torus_grid_int_inteprolate.py` is for executing all the standalone `interpolate` implementations
+- `run_filtered_torus_grid_int_nabla4_interpolate.py` is for executing all the combinations of `nabla4`, `nabla4` and `interpolate` kernels. **This is the main script for benchmarking**
 
 ```
-$ python run_simple_grid.py --help
-usage: run_simple_grid.py [-h] [--klevels KLEVELS] [--repetitions REPETITIONS] [--dry-run] grid
-
-positional arguments:
-  grid                  SimpleGrid netCDF4 file
-
-options:
-  -h, --help            show this help message and exit
-  --klevels KLEVELS     Number of k levels
-  --repetitions REPETITIONS
-                        Number of repetitions
-  --dry-run             Do a dry run or not
-
-$ python run_torus_grid.py --help  # (same as run_filtered_torus_grid.py)
-usage: run_torus_grid.py [-h] [--transformation {gt4py,index}] [--klevels KLEVELS] [--repetitions REPETITIONS] [--dry-run] [--output OUTPUT]
-                         [--sanity-checks]
-                         grid
+python3.11 run_filtered_torus_grid_int_nabla4_interpolate.py --help
+usage: run_filtered_torus_grid_int_nabla4_interpolate.py [-h] [--transformation {gt4py,index}]
+                                                         [--klevels KLEVELS]
+                                                         [--repetitions REPETITIONS] [--dry-run]
+                                                         [--output OUTPUT] [--sanity-checks]
+                                                         [--backend {all_cpu,all_gpu,gtfn_cpu,gtfn_gpu,naive,cpu_ifirst,cpu_kfirst,gpu_kloop,gpu_naive}]
+                                                         [--combination {separate,inlined,all}]
+                                                         [--e2c2v-ordering {per-vertex,per-orientation}]
+                                                         [--halo HALO] [--vertical]
+                                                         grid
 
 positional arguments:
   grid                  Torus grid netCDF4 file
@@ -178,21 +168,31 @@ positional arguments:
 options:
   -h, --help            show this help message and exit
   --transformation {gt4py,index}
-                        Use either ToGt4PyTransformation or IndexTransformation
-  --klevels KLEVELS     Number of k levels
+                        Use either ToGt4PyTransformation or IndexTransformation (gt4py by default)
+  --klevels KLEVELS     Number of k levels (80 default)
   --repetitions REPETITIONS
-                        Number of repetitions
-  --dry-run             Do a dry run or not
+                        Number of repetitions (101 default)
+  --dry-run             Enable dry runs (not taken into runtime results) (disabled by default)
   --output OUTPUT       JSON output file name
-  --sanity-checks       Do a validation with random data between structured and unstructured for the given grid
-  --backend {all,gtfn,naive,cpu_ifirst,cpu_kfirst}
-                        Which backend to benchmark
+  --sanity-checks       Do a validation with random data between structured and unstructured for the
+                        given grid (disabled by default)
+  --backend {all_cpu,all_gpu,gtfn_cpu,gtfn_gpu,naive,cpu_ifirst,cpu_kfirst,gpu_kloop,gpu_naive}
+                        Which backend to benchmark (default all_cpu)
+  --combination {separate,inlined,all}
+                        Which combination of kernels to benchmark
+  --e2c2v-ordering {per-vertex,per-orientation}
+                        E2C2V ordering (per-vertex in CPU and per-orienteation in GPU by default)
+  --halo HALO           Halo size for structured grids (default 2) [Shouldn't be changed]
+  --vertical            Use nabla4_vertical kernel instead of nabla4 (disabled by default)
 ```
+
+For examples on how to execute the python script to gather results for multiple configurations have a look at these scripts: [run_nabla4_interpolate.sh](https://github.com/GridTools/icon_structured_benchmark/blob/main/run_nabla4_interpolate.sh) and [run_nabla4_vertical_interpolate.sh](https://github.com/GridTools/icon_structured_benchmark/blob/main/run_nabla4_vertical_interpolate.sh). These scripts will gather the runtimes for all the experiments executed in `JSON` form in a certain folder set inside them.
 
 ### Plotting torus results
 
-After running `run_torus_grid.py` or `run_filtered_torus_grid.py` the runtimes for every implementation will be dumped into a JSON file named based on the `OUTPUT` argument.
+After generating the runtime data you can create plots with the median runtimes using the following scripts found on the root directory of this repository:
 
-For gathering the data one can use a script like `run_grids.sh` that does a sweep to the different torus files and `k` levels.
-After dumping all the JSON files in a directory, one can read and create plots with the acceleration of `structured` over `unstructured` and violin plots with the actual runtimes using `analysis.py` for the torus grid with periodic boundaries or the `analysis_halo.py` for the same grid without periodic boundaries (halo = 2). Other plotting scripts also exist to plot results for the different expleriments (`analysis_halo_*.py`).
-For runs with 1 output per rank, one can use `analysis_multi.py` and `analysis_multi_halo.py`.
+- `analysis_halo_gpu_nabla4_interpolate.py` for the combinations of `nabla4` and `interpolate` kernels
+- `analysis_halo_gpu_nabla4_vertical_interpolate.py` for the combinations of `nabla4-vertical` and `interpolate` kernels
+
+The run scripts and the analysis scripts use the same naming conventions to make it easy to plot the data. By setting the necessary variables inside the scripts it's possible to easily generate and plot the data.
