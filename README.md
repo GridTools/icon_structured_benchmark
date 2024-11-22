@@ -1,6 +1,6 @@
 # icon-structured
 
-Standalone benchmark that evaluates the performance of a structured grid compared to an unstructured grid using the [nabla4 kernel from icon4py](https://github.com/C2SM/icon4py/blob/main/model/atmosphere/diffusion/src/icon4py/model/atmosphere/diffusion/stencils/calculate_nabla4.py#L23) and its combination with the `mo_intp_rbf_rbf_vec_interpol_vertex kernel`[https://github.com/C2SM/icon4py/blob/main/model/common/src/icon4py/model/common/interpolation/stencils/mo_intp_rbf_rbf_vec_interpol_vertex.py#L41].
+Standalone benchmark that evaluates the performance of a structured grid compared to an unstructured grid using the [nabla4 kernel from icon4py](https://github.com/C2SM/icon4py/blob/main/model/atmosphere/diffusion/src/icon4py/model/atmosphere/diffusion/stencils/calculate_nabla4.py#L23) and its combination with the [mo_intp_rbf_rbf_vec_interpol_vertex kernel](https://github.com/C2SM/icon4py/blob/main/model/common/src/icon4py/model/common/interpolation/stencils/mo_intp_rbf_rbf_vec_interpol_vertex.py#L19).
 
 ## Benchmark description
 
