@@ -706,7 +706,7 @@ inline void nabla4_interpolate_unstructured_inlined_v2v<T>::run_gpu_kloop_helper
     constexpr dim3 tblocks(block_dims_unstructured_nabla_interpol_inlined_v2v_kloop.x,
         block_dims_unstructured_nabla_interpol_inlined_v2v_kloop.y,
         block_dims_unstructured_nabla_interpol_inlined_v2v_kloop.z);
-    dim3 grid((interpolate_data.output_size + tblocks.x - 1) / tblocks.x, 1, 1);
+    dim3 grid((interpolate_data.output_size + tblocks.x - 1) / tblocks.x, 2, 1);
     run_gpu_kloop_nabla4_interpolate_inlined_v2v_unstructured<<<grid, tblocks>>>(nabla4_data.output_size,
         interpolate_data.output_size,
         nabla4_data.CellDim,

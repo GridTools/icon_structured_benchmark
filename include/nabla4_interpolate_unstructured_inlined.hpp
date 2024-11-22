@@ -270,7 +270,7 @@ constexpr block_dims get_block_dims_unstructured_nabla_interpol_inlined_kloop<st
 
 template <>
 constexpr block_dims get_block_dims_unstructured_nabla_interpol_inlined_kloop<int>() {
-    return {64, 2, 1, 128};
+    return {32, 4, 1, 128};
 };
 
 constexpr block_dims block_dims_unstructured_nabla_interpol_inlined_kloop =
@@ -511,7 +511,7 @@ constexpr block_dims get_block_dims_unstructured_nabla_interpol_inlined_naive<st
 
 template <>
 constexpr block_dims get_block_dims_unstructured_nabla_interpol_inlined_naive<int>() {
-    return {32, 16, 1, 512};
+    return {32, 4, 1, 128};
 };
 
 constexpr block_dims block_dims_unstructured_nabla_interpol_inlined_naive =
