@@ -4,11 +4,11 @@ from analysis import (
     print_median_runtimes,
     print_confidence_interval,
     generate_violin_plots,
-    generate_violin_plots_acceleration,
+    generate_violin_plots_acceleration_roofline,
 )
 
 if __name__ == "__main__":
-    git_commit = "979c2b9"
+    git_commit = "97efbc6"
 
     backend = "gpu"
 
@@ -34,7 +34,6 @@ if __name__ == "__main__":
         index_type,
         "_vertical",
     )
-    print(runtimes_output)
 
     output_directory = (
         "results/plot_nabla4_vertical_interpolate_output_halo_{}_{}_{}{}".format(
@@ -57,6 +56,9 @@ if __name__ == "__main__":
     for torus_size, runtime_data in runtimes_output.items():
         for k in runtime_data.keys():
             runtime_data[k] = {
+                "nabla4_vertical_interpolate_benchmark_gpu_kloop_roofline": runtime_data[
+                    k
+                ]["nabla4_vertical_interpolate_benchmark_gpu_kloop_roofline"],
                 "nabla4_vertical_interpolate_benchmark_unstructured_gpu_naive_separate": runtime_data[
                     k
                 ][
@@ -114,11 +116,12 @@ if __name__ == "__main__":
                     "nabla4_vertical_interpolate_benchmark_structured_gpu_kloop_inlined_cached"
                 ],
             }
-            generate_violin_plots_acceleration(
+            generate_violin_plots_acceleration_roofline(
                 runtime_data[k],
                 k,
                 torus_size,
                 output_directory,
+                "nabla4_vertical_interpolate_benchmark_gpu_kloop_roofline",
                 "nabla4_vertical_interpolate_benchmark_unstructured_gpu_naive_separate",
                 "Nabla4 vertical and interpolate kernels",
             )

@@ -296,6 +296,89 @@ def generate_violin_plots_acceleration(
     )
 
 
+# Function to generate violin plots
+def generate_violin_plots_acceleration_roofline(
+    data,
+    k,
+    torus_name,
+    output_dir,
+    roofline_name="nabla4_interpolate_benchmark_gpu_kloop_roofline",
+    baseline_name="nabla4_interpolate_benchmark_unstructured_gpu_naive_separate",
+    kernel_name="nabla4",
+):
+    import matplotlib.pyplot as plt
+
+    torus_size = torus_name.split("_")[-1]
+    plt.figure(figsize=(10, 8))
+    plt.title(
+        f"{kernel_name} runtime for {edges_size[torus_size]} Edges with {k} K-levels"
+    )
+    plt.ylabel("Runtime (s)")
+    plt.xlabel("Implementation")
+    violin_data = []
+    labels = []
+    medians = []  # To store medians
+    baseline_median = np.median(data[baseline_name])
+    plt.axhline(baseline_median, linestyle="dotted", color="red")
+    roofline = np.median(data[roofline_name])
+    plt.axhline(roofline, linestyle="dotted", color="orange")
+    for implementation, runtimes in data.items():
+        if (
+            "cpu_ifirst" in implementation
+            or "cpu_kfirst" in implementation
+            or "gpu" in implementation
+            or "gtfn" in implementation
+        ):
+            violin_data.append(runtimes)
+            labels.append(
+                "R: " + implementation.split("benchmark_")[-1]
+                if implementation == roofline_name
+                else "B: " + implementation.split("benchmark_")[-1]
+                if implementation == baseline_name
+                else implementation.split("benchmark_")[-1]
+                .replace("unstructured", "indirect")
+                .replace("structured", "strided")
+            )
+            median_value = np.median(runtimes)
+            medians.append(median_value)  # Calculating median for each set of runtimes
+
+            percentage_diff = (median_value - baseline_median) / baseline_median * 100
+            percentage_diff_roofline = (median_value - roofline) / roofline * 100
+            plt.text(
+                len(labels),
+                median_value * 1.025,
+                f"{median_value:.6f}\nR: {percentage_diff_roofline:.2f}%"
+                if implementation == baseline_name
+                else f"{median_value:.6f}"
+                if implementation == roofline_name
+                else f"{median_value:.6f}\nB: {percentage_diff:.2f}%\nR: {percentage_diff_roofline:.2f}%",
+                ha="center",
+                va="bottom",
+                fontsize=8,
+                color="red",
+            )
+
+    plt.violinplot(violin_data)
+    plt.xticks(np.arange(1, len(labels) + 1), labels, rotation=45, ha="right")
+
+    # Plotting medians
+    plt.scatter(
+        np.arange(1, len(labels) + 1),
+        medians,
+        color="red",
+        zorder=3,
+        label="Median",
+        s=20,
+        marker="_",
+    )
+
+    plt.tight_layout()
+    plt.legend()  # Show legend with median
+    plt.savefig(
+        "{}/runtimes_torus_accel_{}_{}.png".format(output_dir, torus_size, k), dpi=400
+    )
+
+
 def filter_runtime_data(runtimes_output, unstructured_key: str, structured_key: str):
     torus_klevels_runtimes = {}  # type: ignore [var-annotated]
     for torus_file in runtimes_output.keys():
