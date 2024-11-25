@@ -107,6 +107,9 @@ NB_MODULE(icon_benchmark, m) {
     m.def("interpolate_benchmark_structured_cpu_kfirst", &interpolate_benchmark_structured_cpu_kfirst);
     m.def("interpolate_benchmark_structured_gpu_kloop", &interpolate_benchmark_structured_gpu_kloop);
     m.def("interpolate_benchmark_structured_gpu_naive", &interpolate_benchmark_structured_gpu_naive);
+    // Verts2cells
+    m.def("verts2cells_validate_unstructured_cpu_kfirst", &verts2cells_validate_unstructured_cpu_kfirst);
+    m.def("verts2cells_benchmark_unstructured_cpu_kfirst", &verts2cells_benchmark_unstructured_cpu_kfirst);
     // Nabla4 & Interpolate separate
     m.def("nabla4_interpolate_validate_unstructured_cpu_ifirst_separate",
         &nabla4_interpolate_validate_unstructured_cpu_ifirst_separate);

@@ -1266,6 +1266,52 @@ std::vector<double> interpolate_benchmark_structured_gpu_naive(std::size_t Verte
         std::make_tuple(VertexDim, EdgeDim, KDim, longitude_dim, latitude_dim, halo), repetitions, dry_runs);
 }
 
+template <backend_impl I, template <typename> typename T, typename... Args>
+std::vector<std::vector<WP_TYPE>> verts2cells_validate_gridtools(std::tuple<Args...> &&args) {
+    if constexpr (I == backend_impl::cpu_ifirst) {
+        T<storage::cpu_ifirst> benchmark_object{std::apply(
+            [](auto &&...args) { return T<storage::cpu_ifirst>{std::forward<decltype(args)>(args)...}; }, args)};
+        return run_validation<T<storage::cpu_ifirst>, cpu_ifirst>(benchmark_object);
+    } else if constexpr (I == backend_impl::cpu_kfirst) {
+        T<storage::cpu_kfirst> benchmark_object{std::apply(
+            [](auto &&...args) { return T<storage::cpu_kfirst>{std::forward<decltype(args)>(args)...}; }, args)};
+        return run_validation<T<storage::cpu_kfirst>, cpu_kfirst>(benchmark_object);
+#ifdef __CUDACC__
+    } else if constexpr (I == backend_impl::gpu_kloop) {
+        T<storage::gpu> benchmark_object{
+            std::apply([](auto &&...args) { return T<storage::gpu>{std::forward<decltype(args)>(args)...}; }, args)};
+        return run_validation<T<storage::gpu>, gpu_kloop>(benchmark_object);
+    } else if constexpr (I == backend_impl::gpu_naive) {
+        T<storage::gpu> benchmark_object{
+            std::apply([](auto &&...args) { return T<storage::gpu>{std::forward<decltype(args)>(args)...}; }, args)};
+        return run_validation<T<storage::gpu>, gpu_naive>(benchmark_object);
+#endif
+    } else {
+        throw std::runtime_error("[wrapper] Undefined backend implementation");
+    }
+}
+
+std::vector<std::vector<WP_TYPE>>
+verts2cells_validate_unstructured_cpu_kfirst(std::size_t VertexDim,
+    std::size_t CellDim,
+    std::size_t KDim,
+    std::vector<std::array<index_type, 3>> &c2v,
+    std::vector<std::vector<WP_TYPE>> &p_vert_in,
+    std::vector<std::vector<WP_TYPE>> &ptr_coeff) {
+    return verts2cells_validate_gridtools<cpu_kfirst, verts2cells_unstructured>(
+        std::make_tuple(c2v, VertexDim, CellDim, KDim, p_vert_in, ptr_coeff));
+}
+
+std::vector<double> verts2cells_benchmark_unstructured_cpu_kfirst(std::vector<std::array<index_type, 3>> &c2v,
+    std::size_t VertexDim,
+    std::size_t CellDim,
+    std::size_t KDim,
+    int repetitions,
+    int dry_runs) {
+    return benchmark_gridtools<cpu_kfirst, verts2cells_unstructured>(
+        std::make_tuple(c2v, VertexDim, CellDim, KDim), repetitions, dry_runs);
+}
+
 std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>
 interpolate_validate_structured_cpu_ifirst(std::size_t VertexDim,
     std::size_t EdgeDim,
