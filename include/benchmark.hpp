@@ -2,6 +2,7 @@
 
 #include "interpolate_structured_gridtools.hpp"
 #include "interpolate_unstructured_gridtools.hpp"
+#include "nabla4_interpolate_roofline.hpp"
 #include "nabla4_interpolate_structured_inlined.hpp"
 #include "nabla4_interpolate_structured_inlined_cached.hpp"
 #include "nabla4_interpolate_structured_separate.hpp"
@@ -15,6 +16,7 @@
 #include "nabla4_structured_torus_gridtools_halo.hpp"
 #include "nabla4_unstructured.hpp"
 #include "nabla4_unstructured_gridtools.hpp"
+#include "nabla4_vertical_interpolate_roofline.hpp"
 #include "nabla4_vertical_interpolate_structured_inlined.hpp"
 #include "nabla4_vertical_interpolate_structured_inlined_cached.hpp"
 #include "nabla4_vertical_interpolate_structured_separate.hpp"

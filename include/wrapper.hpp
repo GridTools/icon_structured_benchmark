@@ -1098,7 +1098,29 @@ std::vector<double> nabla4_vertical_interpolate_benchmark_structured_gpu_kloop_s
     int repetitions = 101,
     int dry_runs = 1);
 
+std::vector<double> nabla4_interpolate_benchmark_gpu_kloop_roofline(index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    index_type longitude_dim,
+    index_type latitude_dim,
+    index_type halo,
+    int repetitions = 101,
+    int dry_runs = 1);
+
 std::vector<double> nabla4_interpolate_benchmark_structured_gpu_kloop_inlined(index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    index_type longitude_dim,
+    index_type latitude_dim,
+    index_type halo,
+    int repetitions = 101,
+    int dry_runs = 1);
+
+std::vector<double> nabla4_vertical_interpolate_benchmark_gpu_kloop_roofline(index_type CellDim,
     index_type VertexDim,
     index_type EdgeDim,
     index_type KDim,
