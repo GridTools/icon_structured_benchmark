@@ -162,10 +162,12 @@ def filter_c2v_vector(
 def run_sanity_checks(
     filtered_e2c2v_separate,
     filtered_e2ecv_separate,
-    filtered_e2v_separate,
+    filtered_v2e_separate,
+    filtered_c2v_separate,
     filtered_e2c2v_inlined,
     filtered_e2ecv_inlined,
-    filtered_e2v_inlined,
+    filtered_v2e_inlined,
+    filtered_c2v_inlined,
     grid,
     lon_dim,
     lat_dim,
@@ -196,11 +198,12 @@ def run_sanity_checks(
         grid.num_vertices,
         (lon_dim - 2 * halo) * (lat_dim - 2 * halo) * 3,
         grid.num_levels,
-        filtered_e2v_separate,
+        filtered_v2e_separate,
         p_e_in,
         ptr_coeff_1,
         ptr_coeff_2,
     )
+
     print("Generated separated validation data")
 
     print("Generating inlined validation data")
@@ -287,7 +290,7 @@ def run_sanity_checks(
             ) = icon_benchmark.nabla4_interpolate_validate_unstructured_cpu_ifirst_separate(
                 filtered_e2c2v_separate,
                 filtered_e2ecv_separate,
-                filtered_e2v_separate,
+                filtered_v2e_separate,
                 random_validation_data_separate.CellDim,
                 random_validation_data_separate.VertexDim,
                 random_validation_data_separate.EdgeDim,
@@ -350,7 +353,7 @@ def run_sanity_checks(
             ) = icon_benchmark.nabla4_interpolate_validate_unstructured_cpu_ifirst_inlined(
                 filtered_e2c2v_inlined,
                 filtered_e2ecv_inlined,
-                filtered_e2v_inlined,
+                filtered_v2e_inlined,
                 random_validation_data_separate.CellDim,
                 random_validation_data_separate.VertexDim,
                 random_validation_data_separate.EdgeDim,
@@ -381,7 +384,7 @@ def run_sanity_checks(
             ) = icon_benchmark.nabla4_interpolate_validate_unstructured_cpu_ifirst_inlined_v2v(
                 filtered_e2c2v_inlined,
                 filtered_e2ecv_inlined,
-                filtered_e2v_inlined,
+                filtered_v2e_inlined,
                 random_validation_data_separate.CellDim,
                 random_validation_data_separate.VertexDim,
                 random_validation_data_separate.EdgeDim,
@@ -445,7 +448,7 @@ def run_sanity_checks(
             ) = icon_benchmark.nabla4_interpolate_validate_unstructured_cpu_kfirst_separate(
                 filtered_e2c2v_separate,
                 filtered_e2ecv_separate,
-                filtered_e2v_separate,
+                filtered_v2e_separate,
                 random_validation_data_separate.CellDim,
                 random_validation_data_separate.VertexDim,
                 random_validation_data_separate.EdgeDim,
@@ -508,7 +511,7 @@ def run_sanity_checks(
             ) = icon_benchmark.nabla4_interpolate_validate_unstructured_cpu_kfirst_inlined(
                 filtered_e2c2v_inlined,
                 filtered_e2ecv_inlined,
-                filtered_e2v_inlined,
+                filtered_v2e_inlined,
                 random_validation_data_separate.CellDim,
                 random_validation_data_separate.VertexDim,
                 random_validation_data_separate.EdgeDim,
@@ -539,7 +542,7 @@ def run_sanity_checks(
             ) = icon_benchmark.nabla4_interpolate_validate_unstructured_cpu_kfirst_inlined_v2v(
                 filtered_e2c2v_inlined,
                 filtered_e2ecv_inlined,
-                filtered_e2v_inlined,
+                filtered_v2e_inlined,
                 random_validation_data_separate.CellDim,
                 random_validation_data_separate.VertexDim,
                 random_validation_data_separate.EdgeDim,
@@ -603,7 +606,7 @@ def run_sanity_checks(
             ) = icon_benchmark.nabla4_interpolate_validate_unstructured_gpu_naive_separate(
                 filtered_e2c2v_separate,
                 filtered_e2ecv_separate,
-                filtered_e2v_separate,
+                filtered_v2e_separate,
                 random_validation_data_separate.CellDim,
                 random_validation_data_separate.VertexDim,
                 random_validation_data_separate.EdgeDim,
@@ -634,7 +637,7 @@ def run_sanity_checks(
             ) = icon_benchmark.nabla4_vertical_interpolate_validate_unstructured_gpu_naive_separate(
                 filtered_e2c2v_separate,
                 filtered_e2ecv_separate,
-                filtered_e2v_separate,
+                filtered_v2e_separate,
                 random_validation_data_separate.CellDim,
                 random_validation_data_separate.VertexDim,
                 random_validation_data_separate.EdgeDim,
@@ -728,7 +731,7 @@ def run_sanity_checks(
             ) = icon_benchmark.nabla4_interpolate_validate_unstructured_gpu_naive_inlined(
                 filtered_e2c2v_inlined,
                 filtered_e2ecv_inlined,
-                filtered_e2v_inlined,
+                filtered_v2e_inlined,
                 random_validation_data_separate.CellDim,
                 random_validation_data_separate.VertexDim,
                 random_validation_data_separate.EdgeDim,
@@ -759,7 +762,7 @@ def run_sanity_checks(
             ) = icon_benchmark.nabla4_vertical_interpolate_validate_unstructured_gpu_naive_inlined(
                 filtered_e2c2v_inlined,
                 filtered_e2ecv_inlined,
-                filtered_e2v_inlined,
+                filtered_v2e_inlined,
                 random_validation_data_separate.CellDim,
                 random_validation_data_separate.VertexDim,
                 random_validation_data_separate.EdgeDim,
@@ -790,7 +793,7 @@ def run_sanity_checks(
             ) = icon_benchmark.nabla4_interpolate_validate_unstructured_gpu_naive_inlined_v2v(
                 filtered_e2c2v_inlined,
                 filtered_e2ecv_inlined,
-                filtered_e2v_inlined,
+                filtered_v2e_inlined,
                 random_validation_data_separate.CellDim,
                 random_validation_data_separate.VertexDim,
                 random_validation_data_separate.EdgeDim,
@@ -821,7 +824,7 @@ def run_sanity_checks(
             ) = icon_benchmark.nabla4_vertical_interpolate_validate_unstructured_gpu_naive_inlined_v2v(
                 filtered_e2c2v_inlined,
                 filtered_e2ecv_inlined,
-                filtered_e2v_inlined,
+                filtered_v2e_inlined,
                 random_validation_data_separate.CellDim,
                 random_validation_data_separate.VertexDim,
                 random_validation_data_separate.EdgeDim,
@@ -980,7 +983,7 @@ def run_sanity_checks(
             ) = icon_benchmark.nabla4_interpolate_validate_unstructured_gpu_kloop_separate(
                 filtered_e2c2v_separate,
                 filtered_e2ecv_separate,
-                filtered_e2v_separate,
+                filtered_v2e_separate,
                 random_validation_data_separate.CellDim,
                 random_validation_data_separate.VertexDim,
                 random_validation_data_separate.EdgeDim,
@@ -1011,7 +1014,7 @@ def run_sanity_checks(
             ) = icon_benchmark.nabla4_vertical_interpolate_validate_unstructured_gpu_kloop_separate(
                 filtered_e2c2v_separate,
                 filtered_e2ecv_separate,
-                filtered_e2v_separate,
+                filtered_v2e_separate,
                 random_validation_data_separate.CellDim,
                 random_validation_data_separate.VertexDim,
                 random_validation_data_separate.EdgeDim,
@@ -1105,7 +1108,7 @@ def run_sanity_checks(
             ) = icon_benchmark.nabla4_interpolate_validate_unstructured_gpu_kloop_inlined(
                 filtered_e2c2v_inlined,
                 filtered_e2ecv_inlined,
-                filtered_e2v_inlined,
+                filtered_v2e_inlined,
                 random_validation_data_separate.CellDim,
                 random_validation_data_separate.VertexDim,
                 random_validation_data_separate.EdgeDim,
@@ -1136,7 +1139,7 @@ def run_sanity_checks(
             ) = icon_benchmark.nabla4_interpolate_validate_unstructured_gpu_kloop_inlined_cached(
                 filtered_e2c2v_inlined,
                 filtered_e2ecv_inlined,
-                filtered_e2v_inlined,
+                filtered_v2e_inlined,
                 random_validation_data_separate.CellDim,
                 random_validation_data_separate.VertexDim,
                 random_validation_data_separate.EdgeDim,
@@ -1168,7 +1171,7 @@ def run_sanity_checks(
             ) = icon_benchmark.nabla4_vertical_interpolate_validate_unstructured_gpu_kloop_inlined(
                 filtered_e2c2v_inlined,
                 filtered_e2ecv_inlined,
-                filtered_e2v_inlined,
+                filtered_v2e_inlined,
                 random_validation_data_separate.CellDim,
                 random_validation_data_separate.VertexDim,
                 random_validation_data_separate.EdgeDim,
@@ -1199,7 +1202,7 @@ def run_sanity_checks(
             ) = icon_benchmark.nabla4_interpolate_validate_unstructured_gpu_kloop_inlined_v2v(
                 filtered_e2c2v_inlined,
                 filtered_e2ecv_inlined,
-                filtered_e2v_inlined,
+                filtered_v2e_inlined,
                 random_validation_data_separate.CellDim,
                 random_validation_data_separate.VertexDim,
                 random_validation_data_separate.EdgeDim,
@@ -1230,7 +1233,7 @@ def run_sanity_checks(
             ) = icon_benchmark.nabla4_vertical_interpolate_validate_unstructured_gpu_kloop_inlined_v2v(
                 filtered_e2c2v_inlined,
                 filtered_e2ecv_inlined,
-                filtered_e2v_inlined,
+                filtered_v2e_inlined,
                 random_validation_data_separate.CellDim,
                 random_validation_data_separate.VertexDim,
                 random_validation_data_separate.EdgeDim,
@@ -1624,6 +1627,9 @@ def run_benchmarks():
         args.e2c2v_ordering,
         "separate",
     )
+    # print("Filtered v2e separate size: {}".format(filtered_v2e_separate.shape))
+    # for vertex, edges in enumerate(filtered_v2e_separate):
+    #     print("Vertex: {} Edges: {}".format(vertex, edges))
     (
         filtered_e2c2v_inlined,
         filtered_e2ecv_inlined,
@@ -1635,11 +1641,29 @@ def run_benchmarks():
         args.e2c2v_ordering,
         "inlined",
     )
+    # print("Filtered v2e inlined size: {}".format(filtered_v2e_inlined.shape))
+    # for vertex, edges in enumerate(filtered_v2e_inlined):
+    #     print("Vertex: {} Edges: {}".format(vertex, edges))
 
     original_c2v = torus_grid.get_offset_provider("C2V").table
-    filtered_c2v = filter_c2v_vector(
+    filtered_c2v_inlined = filter_c2v_vector(
         original_c2v, grid_cartesian_dimensions, args.halo + 2
     )
+    # print("Filtered C2V inlined size: {}".format(filtered_c2v_inlined.shape))
+    # for cell, vertices in enumerate(filtered_c2v_inlined):
+    #     print("Cell: {} Vertices: {}".format(cell, vertices))
+    filtered_c2v_separate = []
+    for cell, vertices in enumerate(filtered_c2v_inlined):
+        new_vertices = []
+        for vertex in vertices:
+            i = vertex % grid_cartesian_dimensions[1]
+            j = vertex // grid_cartesian_dimensions[1]
+            new_vertices.append(i - 3 + (j - 3) * (grid_cartesian_dimensions[1] - 2 * 3))
+        filtered_c2v_separate.append(new_vertices)
+    filtered_c2v_separate = np.array(filtered_c2v_separate)
+    # print("Filtered C2V separate size: {}".format(filtered_c2v_separate.shape))
+    # for cell, vertices in enumerate(filtered_c2v_separate):
+    #     print("Cell: {} Vertices: {}".format(cell, vertices))
 
     runtimes = {}
 
@@ -1650,9 +1674,11 @@ def run_benchmarks():
             filtered_e2c2v_separate,
             filtered_e2ecv_separate,
             filtered_v2e_separate,
+            filtered_c2v_separate,
             filtered_e2c2v_inlined,
             filtered_e2ecv_inlined,
             filtered_v2e_inlined,
+            filtered_c2v_inlined,
             torus_grid,
             grid_cartesian_dimensions[0],
             grid_cartesian_dimensions[1],
