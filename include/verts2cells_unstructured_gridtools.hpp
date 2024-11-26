@@ -94,6 +94,68 @@ class verts2cells_unstructured : public verts2cells_scalar<S> {
 };
 
 #if defined(__CUDACC__)
+
+template <typename S>
+constexpr block_dims get_block_dims_unstructured_verts2cells_naive() {
+    throw std::runtime_error("Undefined block dimensions for type " + S::name + " in GPU backend");
+};
+
+template <>
+constexpr block_dims get_block_dims_unstructured_verts2cells_naive<std::size_t>() {
+    // not optimized
+    return {32, 4, 1, 128};
+};
+
+template <>
+constexpr block_dims get_block_dims_unstructured_verts2cells_naive<std::int64_t>() {
+    // not optimized
+    return {32, 8, 1, 256};
+};
+
+template <>
+constexpr block_dims get_block_dims_unstructured_verts2cells_naive<std::uint32_t>() {
+    // not optimized
+    return {32, 9, 1, 288};
+};
+
+template <>
+constexpr block_dims get_block_dims_unstructured_verts2cells_naive<int>() {
+    return {32, 9, 1, 288};
+};
+
+constexpr block_dims block_dims_unstructured_verts2cells_naive = get_block_dims_unstructured_verts2cells_naive<index_type>();
+
+__global__ void __launch_bounds__(block_dims_unstructured_verts2cells_naive.size)
+    run_gpu_naive_verts2cells_unstructured(index_type CellDim,
+        index_type KDim,
+        verts2cells_unstructured<storage::gpu>::neighbors_gt_ctv_t c2v_gt_ctv,
+        verts2cells_unstructured<storage::gpu>::data_store_2d_ctv_WP_t p_vert_in_gt_ctv,
+        verts2cells_unstructured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_gt_ctv,
+        verts2cells_unstructured<storage::gpu>::data_store_2d_tv_WP_t p_cell_out_gt_tv) {
+    const auto cell_index = blockIdx.x * blockDim.x + threadIdx.x;
+    const auto k_index = blockIdx.y * blockDim.y + threadIdx.y;
+    if (cell_index >= CellDim || k_index >= KDim)
+        return;
+    p_cell_out_gt_tv(cell_index, k_index) = p_vert_in_gt_ctv(c2v_gt_ctv(cell_index, 0), k_index) * ptr_coeff_gt_ctv(cell_index, 0) +
+        p_vert_in_gt_ctv(c2v_gt_ctv(cell_index, 1), k_index) * ptr_coeff_gt_ctv(cell_index, 1) +
+        p_vert_in_gt_ctv(c2v_gt_ctv(cell_index, 2), k_index) * ptr_coeff_gt_ctv(cell_index, 2);
+};
+
+template <typename S>
+inline void verts2cells_unstructured<S>::run_gpu_naive_helper() {
+    dim3 tblocks(block_dims_unstructured_verts2cells_naive.x,
+        block_dims_unstructured_verts2cells_naive.y,
+        block_dims_unstructured_verts2cells_naive.z);
+    dim3 grid((output_size + tblocks.x - 1) / tblocks.x, (KDim + tblocks.y - 1) / tblocks.y, 1);
+    run_gpu_naive_verts2cells_unstructured<<<grid, tblocks>>>(output_size,
+        KDim,
+        c2v_gt_ctv,
+        p_vert_in_gt_ctv,
+        ptr_coeff_gt_ctv,
+        p_cell_out_gt_tv);
+    GT_CUDA_CHECK(cudaGetLastError());
+};
+
 #else
 template <typename S>
 inline void verts2cells_unstructured<S>::run_gpu_kloop_helper() {

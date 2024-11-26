@@ -1302,6 +1302,17 @@ verts2cells_validate_unstructured_cpu_kfirst(std::size_t VertexDim,
         std::make_tuple(c2v, VertexDim, CellDim, KDim, p_vert_in, ptr_coeff));
 }
 
+std::vector<std::vector<WP_TYPE>>
+verts2cells_validate_unstructured_gpu_naive(std::size_t VertexDim,
+    std::size_t CellDim,
+    std::size_t KDim,
+    std::vector<std::array<index_type, 3>> &c2v,
+    std::vector<std::vector<WP_TYPE>> &p_vert_in,
+    std::vector<std::vector<WP_TYPE>> &ptr_coeff) {
+    return verts2cells_validate_gridtools<gpu_naive, verts2cells_unstructured>(
+        std::make_tuple(c2v, VertexDim, CellDim, KDim, p_vert_in, ptr_coeff));
+}
+
 std::vector<double> verts2cells_benchmark_unstructured_cpu_kfirst(std::vector<std::array<index_type, 3>> &c2v,
     std::size_t VertexDim,
     std::size_t CellDim,
@@ -1309,6 +1320,16 @@ std::vector<double> verts2cells_benchmark_unstructured_cpu_kfirst(std::vector<st
     int repetitions,
     int dry_runs) {
     return benchmark_gridtools<cpu_kfirst, verts2cells_unstructured>(
+        std::make_tuple(c2v, VertexDim, CellDim, KDim), repetitions, dry_runs);
+}
+
+std::vector<double> verts2cells_benchmark_unstructured_gpu_naive(std::vector<std::array<index_type, 3>> &c2v,
+    std::size_t VertexDim,
+    std::size_t CellDim,
+    std::size_t KDim,
+    int repetitions,
+    int dry_runs) {
+    return benchmark_gridtools<gpu_naive, verts2cells_unstructured>(
         std::make_tuple(c2v, VertexDim, CellDim, KDim), repetitions, dry_runs);
 }
 
