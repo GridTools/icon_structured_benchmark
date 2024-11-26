@@ -93,6 +93,19 @@ def run_sanity_checks(
         )
         assert np.allclose(p_cell_out_gpu_naive, p_cell_out)
         print("unstructured gpu naive sanity check passed")
+    
+    if backend in ["all_gpu", "gpu_kloop"]:
+        print("Running unstructured gpu kloop sanity check")
+        p_cell_out_gpu_kloop = icon_benchmark.verts2cells_validate_unstructured_gpu_kloop(
+            nvertices,
+            ncells,
+            nlevels,
+            c2v,
+            p_vert_in,
+            ptr_coeff,
+        )
+        assert np.allclose(p_cell_out_gpu_kloop, p_cell_out)
+        print("unstructured gpu kloop sanity check passed")
 
     print("Sanity checks pass")
 
@@ -237,6 +250,18 @@ def run_benchmarks():
     if args.backend in ["all_gpu", "gpu_naive"]:
         runtimes["verts2cells_benchmark_unstructured_gpu_naive"] = (
             icon_benchmark.verts2cells_benchmark_unstructured_gpu_naive(
+                filtered_c2v,
+                torus_grid.num_vertices,
+                torus_grid.num_cells,
+                torus_grid.num_levels,
+                repetitions,
+                dry_runs,
+            )
+        )
+
+    if args.backend in ["all_gpu", "gpu_kloop"]:
+        runtimes["verts2cells_benchmark_unstructured_gpu_kloop"] = (
+            icon_benchmark.verts2cells_benchmark_unstructured_gpu_kloop(
                 filtered_c2v,
                 torus_grid.num_vertices,
                 torus_grid.num_cells,

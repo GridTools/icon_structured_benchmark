@@ -753,6 +753,14 @@ verts2cells_validate_unstructured_gpu_naive(std::size_t VertexDim,
     std::vector<std::vector<WP_TYPE>> &p_vert_in,
     std::vector<std::vector<WP_TYPE>> &ptr_coeff);
 
+std::vector<std::vector<WP_TYPE>>
+verts2cells_validate_unstructured_gpu_kloop(std::size_t VertexDim,
+    std::size_t CellDim,
+    std::size_t KDim,
+    std::vector<std::array<index_type, 3>> &c2v,
+    std::vector<std::vector<WP_TYPE>> &p_vert_in,
+    std::vector<std::vector<WP_TYPE>> &ptr_coeff);
+
 std::vector<double> verts2cells_benchmark_unstructured_cpu_kfirst(std::vector<std::array<index_type, 3>> &c2v,
     std::size_t VertexDim,
     std::size_t CellDim,
@@ -761,6 +769,13 @@ std::vector<double> verts2cells_benchmark_unstructured_cpu_kfirst(std::vector<st
     int dry_runs = 1);
 
 std::vector<double> verts2cells_benchmark_unstructured_gpu_naive(std::vector<std::array<index_type, 3>> &c2v,
+    std::size_t VertexDim,
+    std::size_t CellDim,
+    std::size_t KDim,
+    int repetitions = 101,
+    int dry_runs = 1);
+
+std::vector<double> verts2cells_benchmark_unstructured_gpu_kloop(std::vector<std::array<index_type, 3>> &c2v,
     std::size_t VertexDim,
     std::size_t CellDim,
     std::size_t KDim,
