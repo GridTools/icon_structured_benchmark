@@ -329,7 +329,7 @@ theoretical_runtime_stream_performance = {
                 "inlined_v2v": 0.0019472,
             },
             "structured": {
-                "separate": 0.0024139,
+                "separate": 0.0022569,
                 "inlined": 0.0019430,
             },
         },
@@ -340,7 +340,7 @@ theoretical_runtime_stream_performance = {
                 "inlined_v2v": 0.0004795,
             },
             "structured": {
-                "separate": 0.0005945,
+                "separate": 0.0005558,
                 "inlined": 0.0004785,
             },
         },
