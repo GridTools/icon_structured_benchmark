@@ -4,6 +4,7 @@ from analysis import (
     print_median_runtimes,
     print_confidence_interval,
     generate_violin_plots,
+    generate_violin_plots_acceleration,
     generate_violin_plots_acceleration_roofline,
 )
 
@@ -116,11 +117,20 @@ if __name__ == "__main__":
                     "nabla4_vertical_interpolate_benchmark_structured_gpu_kloop_inlined_cached"
                 ],
             }
+            generate_violin_plots_acceleration(
+                runtime_data[k],
+                k,
+                torus_size,
+                output_directory,
+                "nabla4_vertical_interpolate_benchmark_unstructured_gpu_naive_separate",
+                "Nabla4 vertical and interpolate kernels",
+            )
             generate_violin_plots_acceleration_roofline(
                 runtime_data[k],
                 k,
                 torus_size,
                 output_directory,
+                True,
                 "nabla4_vertical_interpolate_benchmark_gpu_kloop_roofline",
                 "nabla4_vertical_interpolate_benchmark_unstructured_gpu_naive_separate",
                 "Nabla4 vertical and interpolate kernels",

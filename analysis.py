@@ -252,7 +252,7 @@ def generate_violin_plots_acceleration(
             or "cpu_kfirst" in implementation
             or "gpu" in implementation
             or "gtfn" in implementation
-        ):
+        ) and not "roofline" in implementation:
             violin_data.append(runtimes)
             labels.append(
                 implementation.split("benchmark_")[-1]
@@ -296,12 +296,65 @@ def generate_violin_plots_acceleration(
     )
 
 
+theoretical_runtime_stream_performance = {
+    "nabla4_interpolate": {
+        "torus_100000_100000_128": {
+            "unstructured": {
+                "separate": 0.0007127,
+                "inlined": 0.0004026,
+                "inlined_v2v": 0.0003971,
+            },
+            "structured": {
+                "separate": 0.0007068,
+                "inlined": 0.0003929,
+            },
+        },
+        "torus_100000_100000_256": {
+            "unstructured": {
+                "separate": 0.0001754,
+                "inlined": 0.0000990,
+                "inlined_v2v": 0.0000976,
+            },
+            "structured": {
+                "separate": 0.0001739,
+                "inlined": 0.0000966,
+            },
+        },
+    },
+    "nabla4_vertical_interpolate": {
+        "torus_100000_100000_128": {
+            "unstructured": {
+                "separate": 0.0022628,
+                "inlined": 0.0019527,
+                "inlined_v2v": 0.0019472,
+            },
+            "structured": {
+                "separate": 0.0024139,
+                "inlined": 0.0019430,
+            },
+        },
+        "torus_100000_100000_256": {
+            "unstructured": {
+                "separate": 0.0005573,
+                "inlined": 0.0004809,
+                "inlined_v2v": 0.0004795,
+            },
+            "structured": {
+                "separate": 0.0005945,
+                "inlined": 0.0004785,
+            },
+        },
+    },
+}
+
+
 # Function to generate violin plots
 def generate_violin_plots_acceleration_roofline(
     data,
     k,
     torus_name,
     output_dir,
+    vertical=False,
     roofline_name="nabla4_interpolate_benchmark_gpu_kloop_roofline",
     baseline_name="nabla4_interpolate_benchmark_unstructured_gpu_naive_separate",
     kernel_name="nabla4",
@@ -319,9 +372,33 @@ def generate_violin_plots_acceleration_roofline(
     labels = []
     medians = []  # To store medians
     baseline_median = np.median(data[baseline_name])
-    plt.axhline(baseline_median, linestyle="dotted", color="red")
-    roofline = np.median(data[roofline_name])
-    plt.axhline(roofline, linestyle="dotted", color="orange")
+    plt.axhline(
+        baseline_median,
+        linestyle="dotted",
+        color=sns.color_palette("tab10")[0],
+        label="Baseline performance [B]",
+    )
+    i = 1
+    for structure in theoretical_runtime_stream_performance[
+        "nabla4_vertical_interpolate" if vertical else "nabla4_interpolate"
+    ][torus_name].keys():
+        for combination in theoretical_runtime_stream_performance[
+            "nabla4_vertical_interpolate" if vertical else "nabla4_interpolate"
+        ][torus_name][structure].keys():
+            optimal_performance = theoretical_runtime_stream_performance[
+                "nabla4_vertical_interpolate" if vertical else "nabla4_interpolate"
+            ][torus_name][structure][combination]
+            color = sns.color_palette("tab10")[i]
+            plt.axhline(
+                optimal_performance,
+                linestyle="--",
+                color=color,
+                label=f"{structure}_{combination} optimal [R]".replace(
+                    "unstructured", "indirect"
+                ).replace("structured", "strided"),
+            )
+            i += 1
+
     for implementation, runtimes in data.items():
         if (
             "cpu_ifirst" in implementation
@@ -331,11 +408,7 @@ def generate_violin_plots_acceleration_roofline(
         ):
             violin_data.append(runtimes)
             labels.append(
-                "R: " + implementation.split("benchmark_")[-1]
-                if implementation == roofline_name
-                else "B: " + implementation.split("benchmark_")[-1]
-                if implementation == baseline_name
-                else implementation.split("benchmark_")[-1]
+                implementation.split("benchmark_")[-1]
                 .replace("unstructured", "indirect")
                 .replace("structured", "strided")
             )
@@ -343,14 +416,27 @@ def generate_violin_plots_acceleration_roofline(
             medians.append(median_value)  # Calculating median for each set of runtimes
 
             percentage_diff = (median_value - baseline_median) / baseline_median * 100
-            percentage_diff_roofline = (median_value - roofline) / roofline * 100
+            roofline_number = theoretical_runtime_stream_performance[
+                "nabla4_vertical_interpolate"
+                if "nabla4_vertical_interpolate" in implementation
+                else "nabla4_interpolate"
+            ][torus_name][
+                "unstructured" if "unstructured" in implementation else "structured"
+            ][
+                "separate"
+                if "separate" in implementation
+                else "inlined_v2v"
+                if "v2v" in implementation
+                else "inlined"
+            ]
+            percentage_diff_roofline = (
+                (median_value - roofline_number) / roofline_number * 100
+            )
             plt.text(
                 len(labels),
                 median_value * 1.025,
                 f"{median_value:.6f}\nR: {percentage_diff_roofline:.2f}%"
-                if implementation == baseline_name
-                else f"{median_value:.6f}"
-                if implementation == roofline_name
+                if implementation == baseline_name or implementation == roofline_name
                 else f"{median_value:.6f}\nB: {percentage_diff:.2f}%\nR: {percentage_diff_roofline:.2f}%",
                 ha="center",
                 va="bottom",
@@ -375,7 +461,8 @@ def generate_violin_plots_acceleration_roofline(
     plt.tight_layout()
     plt.legend()  # Show legend with median
     plt.savefig(
-        "{}/runtimes_torus_accel_{}_{}.png".format(output_dir, torus_size, k), dpi=400
+        "{}/runtimes_torus_accel_{}_{}_roofline.png".format(output_dir, torus_size, k),
+        dpi=400,
     )
 
 
