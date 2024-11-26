@@ -150,8 +150,8 @@ def filter_c2v_vector(
             if (
                 i > halo - 1
                 and j > halo - 1
-                and i < grid_cartesian_dimensions[1] - halo - 1
-                and j < grid_cartesian_dimensions[0] - halo - 1
+                and i < grid_cartesian_dimensions[1] - halo
+                and j < grid_cartesian_dimensions[0] - halo
             ):
                 for k in range(2):
                     filtered_c2v.append(
@@ -1638,13 +1638,8 @@ def run_benchmarks():
 
     original_c2v = torus_grid.get_offset_provider("C2V").table
     filtered_c2v = filter_c2v_vector(
-        original_c2v, grid_cartesian_dimensions, args.halo + 1
+        original_c2v, grid_cartesian_dimensions, args.halo + 2
     )
-
-    print("Filtered C2V shape: {}".format(filtered_c2v.shape))
-    for i, c in enumerate(filtered_c2v):
-        print("C2V[{}] = {}".format(i, c))
-    return
 
     runtimes = {}
 
