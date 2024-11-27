@@ -140,9 +140,8 @@ def filter_edge_vector(
                     )
     return np.array(filtered_vector)
 
-def filter_c2v_vector(
-    c2v, grid_cartesian_dimensions, halo=3
-):
+
+def filter_c2v_vector(c2v, grid_cartesian_dimensions, halo=3):
     filtered_c2v = []
     print("grid_cartesian_dimensions: ", grid_cartesian_dimensions)
     for j in range(grid_cartesian_dimensions[0]):
@@ -158,6 +157,7 @@ def filter_c2v_vector(
                         c2v[(j * grid_cartesian_dimensions[1] + i) * 2 + k]
                     )
     return np.array(filtered_c2v)
+
 
 def run_sanity_checks(
     filtered_e2c2v_separate,
@@ -205,14 +205,17 @@ def run_sanity_checks(
     )
     inner_cells = (lon_dim - 2 * (halo + 2)) * (lat_dim - 2 * (halo + 2)) * 2
     assert len(filtered_c2v_separate) == inner_cells
-    ptr_c_coeff = np.random.rand(inner_cells, 3)
-    p_cell_out = icon_benchmark.verts2cells_validate_unstructured_cpu_kfirst(
+    ptr_c_coeff_1 = np.random.rand(inner_cells, 3)
+    ptr_c_coeff_2 = np.random.rand(inner_cells, 3)
+    p_cell_out_ref = icon_benchmark.verts2cells_validate_unstructured_cpu_kfirst(
         len(p_u_out_ref_separate),
         inner_cells,
         grid.num_levels,
         filtered_c2v_separate,
         p_u_out_ref_separate,
-        ptr_c_coeff,
+        p_v_out_ref_separate,
+        ptr_c_coeff_1,
+        ptr_c_coeff_2,
     )
     print("Generated separated validation data")
 
@@ -291,13 +294,10 @@ def run_sanity_checks(
         z_nabla2_e_inlined[valid_edge_indices] = z_nabla2_e_ref[valid_internal_indices]
     print("Generated inlined validation data")
 
-    if backend in ["all_gpu", "gpu_naive"]:
+    if backend in ["all_cpu", "cpu_kfirst"]:
         if combination in ["all", "separate"]:
-            print("Running unstructured gpu_naive separate sanity check")
-            (
-                p_u_out_gpu_naive_unstructured_separate,
-                p_v_out_gpu_naive_unstructured_separate,
-            ) = icon_benchmark.nabla4_interpolate_verts2cells_validate_unstructured_gpu_naive_separate(
+            print("Running unstructured cpu kfirst separate sanity check")
+            p_cell_out_unstructured_cpu_kfirst = icon_benchmark.nabla4_interpolate_verts2cells_validate_unstructured_cpu_kfirst_separate(
                 filtered_e2c2v_separate,
                 filtered_e2ecv_separate,
                 filtered_v2e_separate,
@@ -316,15 +316,67 @@ def run_sanity_checks(
                 random_validation_data_separate.inv_primal_edge_length,
                 ptr_coeff_1,
                 ptr_coeff_2,
-                ptr_c_coeff,
+                ptr_c_coeff_1,
+                ptr_c_coeff_2,
             )
-            assert np.allclose(
-                p_u_out_gpu_naive_unstructured_separate, p_u_out_ref_separate
+            assert np.allclose(p_cell_out_unstructured_cpu_kfirst, p_cell_out_ref)
+            print("unstructured cpu kfirst separate sanity check passed")
+
+    if backend in ["all_gpu", "gpu_naive"]:
+        if combination in ["all", "separate"]:
+            print("Running unstructured gpu_naive separate sanity check")
+            p_cell_out_unstructured_gpu_naive = icon_benchmark.nabla4_interpolate_verts2cells_validate_unstructured_gpu_naive_separate(
+                filtered_e2c2v_separate,
+                filtered_e2ecv_separate,
+                filtered_v2e_separate,
+                filtered_c2v_separate,
+                random_validation_data_separate.CellDim,
+                random_validation_data_separate.VertexDim,
+                random_validation_data_separate.EdgeDim,
+                random_validation_data_separate.KDim,
+                random_validation_data_separate.ECVDim,
+                np.array(random_validation_data_separate.u_vert).T,
+                np.array(random_validation_data_separate.v_vert).T,
+                random_validation_data_separate.primal_normal_vert_v1,
+                random_validation_data_separate.primal_normal_vert_v2,
+                np.array(random_validation_data_separate.z_nabla2_e).T,
+                random_validation_data_separate.inv_vert_vert_length,
+                random_validation_data_separate.inv_primal_edge_length,
+                ptr_coeff_1,
+                ptr_coeff_2,
+                ptr_c_coeff_1,
+                ptr_c_coeff_2,
             )
-            assert np.allclose(
-                p_v_out_gpu_naive_unstructured_separate, p_v_out_ref_separate
-            )
+            assert np.allclose(p_cell_out_unstructured_gpu_naive, p_cell_out_ref)
             print("unstructured gpu_naive separate sanity check passed")
+
+    if backend in ["all_gpu", "gpu_kloop"]:
+        if combination in ["all", "separate"]:
+            print("Running unstructured gpu_kloop separate sanity check")
+            p_cell_out_unstructured_gpu_kloop = icon_benchmark.nabla4_interpolate_verts2cells_validate_unstructured_gpu_kloop_separate(
+                filtered_e2c2v_separate,
+                filtered_e2ecv_separate,
+                filtered_v2e_separate,
+                filtered_c2v_separate,
+                random_validation_data_separate.CellDim,
+                random_validation_data_separate.VertexDim,
+                random_validation_data_separate.EdgeDim,
+                random_validation_data_separate.KDim,
+                random_validation_data_separate.ECVDim,
+                np.array(random_validation_data_separate.u_vert).T,
+                np.array(random_validation_data_separate.v_vert).T,
+                random_validation_data_separate.primal_normal_vert_v1,
+                random_validation_data_separate.primal_normal_vert_v2,
+                np.array(random_validation_data_separate.z_nabla2_e).T,
+                random_validation_data_separate.inv_vert_vert_length,
+                random_validation_data_separate.inv_primal_edge_length,
+                ptr_coeff_1,
+                ptr_coeff_2,
+                ptr_c_coeff_1,
+                ptr_c_coeff_2,
+            )
+            assert np.allclose(p_cell_out_unstructured_gpu_kloop, p_cell_out_ref)
+            print("unstructured gpu_kloop separate sanity check passed")
 
     print("Sanity checks pass")
 
@@ -601,7 +653,9 @@ def run_benchmarks():
         for vertex in vertices:
             i = vertex % grid_cartesian_dimensions[1]
             j = vertex // grid_cartesian_dimensions[1]
-            new_vertices.append(i - 3 + (j - 3) * (grid_cartesian_dimensions[1] - 2 * 3))
+            new_vertices.append(
+                i - 3 + (j - 3) * (grid_cartesian_dimensions[1] - 2 * 3)
+            )
         filtered_c2v_separate.append(new_vertices)
     filtered_c2v_separate = np.array(filtered_c2v_separate)
     # print("Filtered C2V separate size: {}".format(filtered_c2v_separate.shape))
@@ -653,6 +707,33 @@ def run_benchmarks():
                     np.median(
                         runtimes[
                             "nabla4_interpolate_verts2cells_benchmark_unstructured_gpu_naive_separate"
+                        ]
+                    )
+                )
+            )
+
+    if args.backend in ["all_gpu", "gpu_kloop"]:
+        if args.combination in ["all", "separate"]:
+            runtimes[
+                "nabla4_interpolate_verts2cells_benchmark_unstructured_gpu_kloop_separate"
+            ] = icon_benchmark.nabla4_interpolate_verts2cells_benchmark_unstructured_gpu_kloop_separate(
+                filtered_e2c2v_separate,
+                filtered_e2ecv_separate,
+                filtered_v2e_separate,
+                filtered_c2v_separate,
+                torus_grid.num_cells,
+                torus_grid.num_vertices,
+                torus_grid.num_edges,
+                torus_grid.num_levels,
+                torus_grid.size[E2C2VDim],
+                repetitions,
+                dry_runs,
+            )
+            print(
+                "nabla4_interpolate_verts2cells_benchmark_unstructured_gpu_kloop_separate median: {}".format(
+                    np.median(
+                        runtimes[
+                            "nabla4_interpolate_verts2cells_benchmark_unstructured_gpu_kloop_separate"
                         ]
                     )
                 )

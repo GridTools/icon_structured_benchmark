@@ -1992,6 +1992,54 @@ std::vector<double> nabla4_vertical_interpolate_benchmark_structured_gpu_kloop_i
         dry_runs);
 }
 
+std::vector<double> nabla4_interpolate_verts2cells_benchmark_unstructured_cpu_kfirst_separate(
+    const std::vector<std::array<index_type, 4>> &e2c2v,
+    const std::vector<std::array<index_type, 4>> &e2ecv,
+    const std::vector<std::array<index_type, 6>> &v2e,
+    const std::vector<std::array<index_type, 3>> &c2v,
+    index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    int repetitions,
+    int dry_runs) {
+    return benchmark_gridtools<cpu_kfirst, nabla4_interpolate_verts2cells_unstructured_separate>(
+        std::make_tuple(e2c2v, e2ecv, v2e, c2v, CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
+}
+
+std::vector<double> nabla4_interpolate_verts2cells_benchmark_unstructured_gpu_naive_separate(
+    const std::vector<std::array<index_type, 4>> &e2c2v,
+    const std::vector<std::array<index_type, 4>> &e2ecv,
+    const std::vector<std::array<index_type, 6>> &v2e,
+    const std::vector<std::array<index_type, 3>> &c2v,
+    index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    int repetitions,
+    int dry_runs) {
+    return benchmark_gridtools<gpu_naive, nabla4_interpolate_verts2cells_unstructured_separate>(
+        std::make_tuple(e2c2v, e2ecv, v2e, c2v, CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
+}
+
+std::vector<double> nabla4_interpolate_verts2cells_benchmark_unstructured_gpu_kloop_separate(
+    const std::vector<std::array<index_type, 4>> &e2c2v,
+    const std::vector<std::array<index_type, 4>> &e2ecv,
+    const std::vector<std::array<index_type, 6>> &v2e,
+    const std::vector<std::array<index_type, 3>> &c2v,
+    index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    int repetitions,
+    int dry_runs) {
+    return benchmark_gridtools<gpu_kloop, nabla4_interpolate_verts2cells_unstructured_separate>(
+        std::make_tuple(e2c2v, e2ecv, v2e, c2v, CellDim, VertexDim, EdgeDim, KDim, ECVDim), repetitions, dry_runs);
+}
+
 std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>
 nabla4_interpolate_validate_unstructured_cpu_ifirst_separate(const std::vector<std::array<index_type, 4>> &e2c2v,
     const std::vector<std::array<index_type, 4>> &e2ecv,
