@@ -27,6 +27,7 @@
 #include "nabla4_vertical_structured_torus_gridtools_halo.hpp"
 #include "nabla4_vertical_unstructured_gridtools.hpp"
 #include "timer.hpp"
+#include "verts2cells_structured_gridtools.hpp"
 #include "verts2cells_unstructured_gridtools.hpp"
 
 template <typename T, backend_impl I>

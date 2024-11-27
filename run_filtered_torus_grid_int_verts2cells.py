@@ -74,7 +74,7 @@ def run_sanity_checks(
     p_vert_v_in = np.random.rand(nvertices, nlevels)
     ptr_coeff_1 = np.random.rand(ncells, 3)
     ptr_coeff_2 = np.random.rand(ncells, 3)
-    p_cell_out = icon_benchmark.verts2cells_validate_unstructured_cpu_kfirst(
+    p_cell_out_ref = icon_benchmark.verts2cells_validate_unstructured_cpu_kfirst(
         nvertices,
         ncells,
         nlevels,
@@ -85,6 +85,25 @@ def run_sanity_checks(
         ptr_coeff_2,
     )
     print("Generated validation data")
+
+    if backend in ["all_cpu", "cpu_kfirst"]:
+        print("Running structured cpu_kfirst sanity check")
+        p_cell_out_structured_cpu_kfirst = (
+            icon_benchmark.verts2cells_validate_structured_cpu_kfirst(
+                nvertices,
+                ncells,
+                nlevels,
+                lon_dim,
+                lat_dim,
+                halo,
+                p_vert_u_in,
+                p_vert_v_in,
+                ptr_coeff_1,
+                ptr_coeff_2,
+            )
+        )
+        assert np.allclose(p_cell_out_structured_cpu_kfirst, p_cell_out_ref)
+        print("structured cpu_kfirst sanity check passed")
 
     if backend in ["all_gpu", "gpu_naive"]:
         print("Running unstructured gpu naive sanity check")
@@ -100,7 +119,7 @@ def run_sanity_checks(
                 ptr_coeff_2,
             )
         )
-        assert np.allclose(p_cell_out_gpu_naive, p_cell_out)
+        assert np.allclose(p_cell_out_gpu_naive, p_cell_out_ref)
         print("unstructured gpu naive sanity check passed")
 
     if backend in ["all_gpu", "gpu_kloop"]:
@@ -117,7 +136,7 @@ def run_sanity_checks(
                 ptr_coeff_2,
             )
         )
-        assert np.allclose(p_cell_out_gpu_kloop, p_cell_out)
+        assert np.allclose(p_cell_out_gpu_kloop, p_cell_out_ref)
         print("unstructured gpu kloop sanity check passed")
 
     print("Sanity checks pass")
@@ -257,6 +276,30 @@ def run_benchmarks():
         )
 
     runtimes = {}
+
+    if args.backend in ["all_cpu", "cpu_kfirst"]:
+        runtimes["verts2cells_benchmark_unstructured_cpu_kfirst"] = (
+            icon_benchmark.verts2cells_benchmark_unstructured_cpu_kfirst(
+                filtered_c2v,
+                torus_grid.num_vertices,
+                torus_grid.num_cells,
+                torus_grid.num_levels,
+                repetitions,
+                dry_runs,
+            )
+        )
+        runtimes["verts2cells_benchmark_structured_cpu_kfirst"] = (
+            icon_benchmark.verts2cells_benchmark_structured_cpu_kfirst(
+                torus_grid.num_vertices,
+                torus_grid.num_cells,
+                torus_grid.num_levels,
+                grid_cartesian_dimensions[0],
+                grid_cartesian_dimensions[1],
+                args.halo,
+                repetitions,
+                dry_runs,
+            )
+        )
 
     if args.backend in ["all_gpu", "gpu_naive"]:
         runtimes["verts2cells_benchmark_unstructured_gpu_naive"] = (

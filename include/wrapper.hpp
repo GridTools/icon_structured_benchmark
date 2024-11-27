@@ -751,6 +751,17 @@ std::vector<std::vector<WP_TYPE>> verts2cells_validate_unstructured_cpu_kfirst(s
     const std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
     const std::vector<std::vector<WP_TYPE>> &ptr_coeff_2);
 
+std::vector<std::vector<WP_TYPE>> verts2cells_validate_structured_cpu_kfirst(std::size_t VertexDim,
+    std::size_t CellDim,
+    std::size_t KDim,
+    index_type longitude_dim,
+    index_type latitude_dim,
+    index_type halo,
+    const std::vector<std::vector<WP_TYPE>> &p_vert_u_in,
+    const std::vector<std::vector<WP_TYPE>> &p_vert_v_in,
+    const std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
+    const std::vector<std::vector<WP_TYPE>> &ptr_coeff_2);
+
 std::vector<std::vector<WP_TYPE>> verts2cells_validate_unstructured_gpu_naive(std::size_t VertexDim,
     std::size_t CellDim,
     std::size_t KDim,
@@ -773,6 +784,15 @@ std::vector<double> verts2cells_benchmark_unstructured_cpu_kfirst(const std::vec
     std::size_t VertexDim,
     std::size_t CellDim,
     std::size_t KDim,
+    int repetitions = 101,
+    int dry_runs = 1);
+
+std::vector<double> verts2cells_benchmark_structured_cpu_kfirst(std::size_t VertexDim,
+    std::size_t CellDim,
+    std::size_t KDim,
+    index_type longitude_dim,
+    index_type latitude_dim,
+    index_type halo,
     int repetitions = 101,
     int dry_runs = 1);
 
