@@ -1342,6 +1342,28 @@ std::vector<std::vector<WP_TYPE>> verts2cells_validate_unstructured_gpu_naive(st
         std::make_tuple(c2v, VertexDim, CellDim, KDim, p_vert_u_in, p_vert_v_in, ptr_coeff_1, ptr_coeff_2));
 }
 
+std::vector<std::vector<WP_TYPE>> verts2cells_validate_structured_gpu_naive(std::size_t VertexDim,
+    std::size_t CellDim,
+    std::size_t KDim,
+    index_type longitude_dim,
+    index_type latitude_dim,
+    index_type halo,
+    const std::vector<std::vector<WP_TYPE>> &p_vert_u_in,
+    const std::vector<std::vector<WP_TYPE>> &p_vert_v_in,
+    const std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
+    const std::vector<std::vector<WP_TYPE>> &ptr_coeff_2) {
+    return verts2cells_validate_gridtools<gpu_naive, verts2cells_structured>(std::make_tuple(VertexDim,
+        CellDim,
+        KDim,
+        longitude_dim,
+        latitude_dim,
+        halo,
+        p_vert_u_in,
+        p_vert_v_in,
+        ptr_coeff_1,
+        ptr_coeff_2));
+}
+
 std::vector<std::vector<WP_TYPE>> verts2cells_validate_unstructured_gpu_kloop(std::size_t VertexDim,
     std::size_t CellDim,
     std::size_t KDim,
@@ -1406,6 +1428,18 @@ std::vector<double> verts2cells_benchmark_unstructured_gpu_naive(const std::vect
     int dry_runs) {
     return benchmark_gridtools<gpu_naive, verts2cells_unstructured>(
         std::make_tuple(c2v, VertexDim, CellDim, KDim), repetitions, dry_runs);
+}
+
+std::vector<double> verts2cells_benchmark_structured_gpu_naive(std::size_t VertexDim,
+    std::size_t CellDim,
+    std::size_t KDim,
+    index_type longitude_dim,
+    index_type latitude_dim,
+    index_type halo,
+    int repetitions,
+    int dry_runs) {
+    return benchmark_gridtools<gpu_naive, verts2cells_structured>(
+        std::make_tuple(VertexDim, CellDim, KDim, longitude_dim, latitude_dim, halo), repetitions, dry_runs);
 }
 
 std::vector<double> verts2cells_benchmark_unstructured_gpu_kloop(const std::vector<std::array<index_type, 3>> &c2v,
