@@ -193,56 +193,75 @@ constexpr block_dims get_block_dims_structured_verts2cells_kloop<std::uint32_t>(
 
 template <>
 constexpr block_dims get_block_dims_structured_verts2cells_kloop<int>() {
-    return {32, 8, 1, 256};
+    return {32, 4, 4, 512};
 };
 
 constexpr block_dims block_dims_structured_verts2cells_kloop =
     get_block_dims_structured_verts2cells_kloop<index_type>();
 
-// __global__ void __launch_bounds__(block_dims_structured_verts2cells_kloop.size)
-//     run_gpu_kloop_verts2cells_structured(index_type CellDim,
-//         index_type KDim,
-//         verts2cells_structured<storage::gpu>::neighbors_gt_ctv_t c2v_gt_ctv,
-//         verts2cells_structured<storage::gpu>::data_store_2d_ctv_WP_t p_vert_u_in_gt_ctv,
-//         verts2cells_structured<storage::gpu>::data_store_2d_ctv_WP_t p_vert_v_in_gt_ctv,
-//         verts2cells_structured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_1_gt_ctv,
-//         verts2cells_structured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_2_gt_ctv,
-//         verts2cells_structured<storage::gpu>::data_store_2d_tv_WP_t p_cell_out_gt_tv) {
-//     const auto cell_index = blockIdx.x * blockDim.x + threadIdx.x;
-//     if (cell_index >= CellDim)
-//         return;
-//     const index_type c2v[3]{c2v_gt_ctv(cell_index, 0), c2v_gt_ctv(cell_index, 1), c2v_gt_ctv(cell_index, 2)};
-//     const WP_TYPE coeff_1[3]{
-//         ptr_coeff_1_gt_ctv(cell_index, 0), ptr_coeff_1_gt_ctv(cell_index, 1), ptr_coeff_1_gt_ctv(cell_index, 2)};
-//     const WP_TYPE coeff_2[3]{
-//         ptr_coeff_2_gt_ctv(cell_index, 0), ptr_coeff_2_gt_ctv(cell_index, 1), ptr_coeff_2_gt_ctv(cell_index, 2)};
-//     for (auto k_index{blockIdx.y * blockDim.y + threadIdx.y}; k_index < KDim; k_index += gridDim.y * blockDim.y) {
-//         p_cell_out_gt_tv(cell_index, k_index) =
-//             ((p_vert_u_in_gt_ctv(c2v[0], k_index) * coeff_1[0] + p_vert_u_in_gt_ctv(c2v[1], k_index) * coeff_1[1] +
-//                  p_vert_u_in_gt_ctv(c2v[2], k_index) * coeff_1[2]) +
-//                 (p_vert_v_in_gt_ctv(c2v[0], k_index) * coeff_2[0] + p_vert_v_in_gt_ctv(c2v[1], k_index) * coeff_2[1]
-//                 +
-//                     p_vert_v_in_gt_ctv(c2v[2], k_index) * coeff_2[2])) /
-//             2;
-//     }
-// };
+__global__ void __launch_bounds__(block_dims_structured_verts2cells_kloop.size)
+    run_gpu_kloop_verts2cells_structured(index_type KDim,
+        index_type x_dim,
+        index_type y_dim,
+        index_type halo,
+        verts2cells_structured<storage::gpu>::data_store_2d_ctv_WP_t p_vert_u_in_gt_ctv,
+        verts2cells_structured<storage::gpu>::data_store_2d_ctv_WP_t p_vert_v_in_gt_ctv,
+        verts2cells_structured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_1_gt_ctv,
+        verts2cells_structured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_2_gt_ctv,
+        verts2cells_structured<storage::gpu>::data_store_2d_tv_WP_t p_cell_out_gt_tv) {
+    const auto i = blockIdx.x * blockDim.x + threadIdx.x + halo;
+    const auto j = blockIdx.y * blockDim.y + threadIdx.y + halo;
+    if (i >= x_dim - halo || j >= y_dim - halo)
+        return;
+    const index_type index_internal = i - halo + (j - halo) * (x_dim - 2 * halo);
+    const index_type cell_index_internal_upward{2 * index_internal};
+    const index_type cell_index_internal_downward{2 * index_internal + 1};
+    const std::array<index_type, 6> c2v{get_c2v_compressed(i, j, x_dim)};
+    const std::array<WP_TYPE, 6> coeff_1{ptr_coeff_1_gt_ctv(cell_index_internal_upward, 0),
+        ptr_coeff_1_gt_ctv(cell_index_internal_upward, 1),
+        ptr_coeff_1_gt_ctv(cell_index_internal_upward, 2),
+        ptr_coeff_1_gt_ctv(cell_index_internal_downward, 0),
+        ptr_coeff_1_gt_ctv(cell_index_internal_downward, 1),
+        ptr_coeff_1_gt_ctv(cell_index_internal_downward, 2)};
+    const std::array<WP_TYPE, 6> coeff_2{ptr_coeff_2_gt_ctv(cell_index_internal_upward, 0),
+        ptr_coeff_2_gt_ctv(cell_index_internal_upward, 1),
+        ptr_coeff_2_gt_ctv(cell_index_internal_upward, 2),
+        ptr_coeff_2_gt_ctv(cell_index_internal_downward, 0),
+        ptr_coeff_2_gt_ctv(cell_index_internal_downward, 1),
+        ptr_coeff_2_gt_ctv(cell_index_internal_downward, 2)};
+    for (auto k_index{blockIdx.z * blockDim.z + threadIdx.z}; k_index < KDim; k_index += gridDim.z * blockDim.z) {
+        p_cell_out_gt_tv(cell_index_internal_upward, k_index) =
+            ((p_vert_u_in_gt_ctv(c2v[0], k_index) * coeff_1[0] + p_vert_u_in_gt_ctv(c2v[1], k_index) * coeff_1[1] +
+                 p_vert_u_in_gt_ctv(c2v[2], k_index) * coeff_1[2]) +
+                (p_vert_v_in_gt_ctv(c2v[0], k_index) * coeff_2[0] + p_vert_v_in_gt_ctv(c2v[1], k_index) * coeff_2[1] +
+                    p_vert_v_in_gt_ctv(c2v[2], k_index) * coeff_2[2])) /
+            2;
+        p_cell_out_gt_tv(cell_index_internal_downward, k_index) =
+            ((p_vert_u_in_gt_ctv(c2v[3], k_index) * coeff_1[3] + p_vert_u_in_gt_ctv(c2v[4], k_index) * coeff_1[4] +
+                 p_vert_u_in_gt_ctv(c2v[5], k_index) * coeff_1[5]) +
+                (p_vert_v_in_gt_ctv(c2v[3], k_index) * coeff_2[3] + p_vert_v_in_gt_ctv(c2v[4], k_index) * coeff_2[4] +
+                    p_vert_v_in_gt_ctv(c2v[5], k_index) * coeff_2[5])) /
+            2;
+    }
+};
 
-// template <typename S>
-// inline void verts2cells_structured<S>::run_gpu_kloop_helper() {
-//     dim3 tblocks(block_dims_structured_verts2cells_kloop.x,
-//         block_dims_structured_verts2cells_kloop.y,
-//         block_dims_structured_verts2cells_kloop.z);
-//     dim3 grid((output_size + tblocks.x - 1) / tblocks.x, 1, 1);
-//     run_gpu_kloop_verts2cells_structured<<<grid, tblocks>>>(output_size,
-//         KDim,
-//         c2v_gt_ctv,
-//         p_vert_u_in_gt_ctv,
-//         p_vert_v_in_gt_ctv,
-//         ptr_coeff_1_gt_ctv,
-//         ptr_coeff_2_gt_ctv,
-//         p_cell_out_gt_tv);
-//     GT_CUDA_CHECK(cudaGetLastError());
-// };
+template <typename S>
+inline void verts2cells_structured<S>::run_gpu_kloop_helper() {
+    dim3 tblocks(block_dims_structured_verts2cells_kloop.x,
+        block_dims_structured_verts2cells_kloop.y,
+        block_dims_structured_verts2cells_kloop.z);
+    dim3 grid((x_dim + tblocks.x - 1) / tblocks.x, (y_dim + tblocks.y - 1) / tblocks.y, 1);
+    run_gpu_kloop_verts2cells_structured<<<grid, tblocks>>>(KDim,
+        x_dim,
+        y_dim,
+        halo,
+        p_vert_u_in_gt_ctv,
+        p_vert_v_in_gt_ctv,
+        ptr_coeff_1_gt_ctv,
+        ptr_coeff_2_gt_ctv,
+        p_cell_out_gt_tv);
+    GT_CUDA_CHECK(cudaGetLastError());
+};
 
 template <typename S>
 constexpr block_dims get_block_dims_structured_verts2cells_naive() {

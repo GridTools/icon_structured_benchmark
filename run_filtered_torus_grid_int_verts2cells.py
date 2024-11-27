@@ -139,6 +139,24 @@ def run_sanity_checks(
         assert np.allclose(p_cell_out_gpu_kloop, p_cell_out_ref)
         print("unstructured gpu kloop sanity check passed")
 
+        print("Running structured gpu_kloop sanity check")
+        p_cell_out_structured_gpu_kloop = (
+            icon_benchmark.verts2cells_validate_structured_gpu_kloop(
+                nvertices,
+                ncells,
+                nlevels,
+                lon_dim,
+                lat_dim,
+                halo,
+                p_vert_u_in,
+                p_vert_v_in,
+                ptr_coeff_1,
+                ptr_coeff_2,
+            )
+        )
+        assert np.allclose(p_cell_out_structured_gpu_kloop, p_cell_out_ref)
+        print("structured gpu_kloop sanity check passed")
+
     print("Sanity checks pass")
 
 
@@ -320,6 +338,18 @@ def run_benchmarks():
                 torus_grid.num_vertices,
                 torus_grid.num_cells,
                 torus_grid.num_levels,
+                repetitions,
+                dry_runs,
+            )
+        )
+        runtimes["verts2cells_benchmark_structured_gpu_kloop"] = (
+            icon_benchmark.verts2cells_benchmark_structured_gpu_kloop(
+                torus_grid.num_vertices,
+                torus_grid.num_cells,
+                torus_grid.num_levels,
+                grid_cartesian_dimensions[0],
+                grid_cartesian_dimensions[1],
+                args.halo,
                 repetitions,
                 dry_runs,
             )
