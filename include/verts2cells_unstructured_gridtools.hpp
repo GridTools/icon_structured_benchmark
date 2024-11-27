@@ -206,7 +206,7 @@ constexpr block_dims get_block_dims_unstructured_verts2cells_naive<std::uint32_t
 
 template <>
 constexpr block_dims get_block_dims_unstructured_verts2cells_naive<int>() {
-    return {32, 9, 1, 288};
+    return {32, 8, 1, 256};
 };
 
 constexpr block_dims block_dims_unstructured_verts2cells_naive =
