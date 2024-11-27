@@ -1291,37 +1291,40 @@ std::vector<std::vector<WP_TYPE>> verts2cells_validate_gridtools(std::tuple<Args
     }
 }
 
-std::vector<std::vector<WP_TYPE>>
-verts2cells_validate_unstructured_cpu_kfirst(std::size_t VertexDim,
+std::vector<std::vector<WP_TYPE>> verts2cells_validate_unstructured_cpu_kfirst(std::size_t VertexDim,
     std::size_t CellDim,
     std::size_t KDim,
     std::vector<std::array<index_type, 3>> &c2v,
-    std::vector<std::vector<WP_TYPE>> &p_vert_in,
-    std::vector<std::vector<WP_TYPE>> &ptr_coeff) {
+    const std::vector<std::vector<WP_TYPE>> &p_vert_u_in,
+    const std::vector<std::vector<WP_TYPE>> &p_vert_v_in,
+    const std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
+    const std::vector<std::vector<WP_TYPE>> &ptr_coeff_2) {
     return verts2cells_validate_gridtools<cpu_kfirst, verts2cells_unstructured>(
-        std::make_tuple(c2v, VertexDim, CellDim, KDim, p_vert_in, ptr_coeff));
+        std::make_tuple(c2v, VertexDim, CellDim, KDim, p_vert_u_in, p_vert_v_in, ptr_coeff_1, ptr_coeff_2));
 }
 
-std::vector<std::vector<WP_TYPE>>
-verts2cells_validate_unstructured_gpu_naive(std::size_t VertexDim,
+std::vector<std::vector<WP_TYPE>> verts2cells_validate_unstructured_gpu_naive(std::size_t VertexDim,
     std::size_t CellDim,
     std::size_t KDim,
     std::vector<std::array<index_type, 3>> &c2v,
-    std::vector<std::vector<WP_TYPE>> &p_vert_in,
-    std::vector<std::vector<WP_TYPE>> &ptr_coeff) {
+    const std::vector<std::vector<WP_TYPE>> &p_vert_u_in,
+    const std::vector<std::vector<WP_TYPE>> &p_vert_v_in,
+    const std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
+    const std::vector<std::vector<WP_TYPE>> &ptr_coeff_2) {
     return verts2cells_validate_gridtools<gpu_naive, verts2cells_unstructured>(
-        std::make_tuple(c2v, VertexDim, CellDim, KDim, p_vert_in, ptr_coeff));
+        std::make_tuple(c2v, VertexDim, CellDim, KDim, p_vert_u_in, p_vert_v_in, ptr_coeff_1, ptr_coeff_2));
 }
 
-std::vector<std::vector<WP_TYPE>>
-verts2cells_validate_unstructured_gpu_kloop(std::size_t VertexDim,
+std::vector<std::vector<WP_TYPE>> verts2cells_validate_unstructured_gpu_kloop(std::size_t VertexDim,
     std::size_t CellDim,
     std::size_t KDim,
     std::vector<std::array<index_type, 3>> &c2v,
-    std::vector<std::vector<WP_TYPE>> &p_vert_in,
-    std::vector<std::vector<WP_TYPE>> &ptr_coeff) {
+    const std::vector<std::vector<WP_TYPE>> &p_vert_u_in,
+    const std::vector<std::vector<WP_TYPE>> &p_vert_v_in,
+    const std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
+    const std::vector<std::vector<WP_TYPE>> &ptr_coeff_2) {
     return verts2cells_validate_gridtools<gpu_kloop, verts2cells_unstructured>(
-        std::make_tuple(c2v, VertexDim, CellDim, KDim, p_vert_in, ptr_coeff));
+        std::make_tuple(c2v, VertexDim, CellDim, KDim, p_vert_u_in, p_vert_v_in, ptr_coeff_1, ptr_coeff_2));
 }
 
 std::vector<double> verts2cells_benchmark_unstructured_cpu_kfirst(std::vector<std::array<index_type, 3>> &c2v,
@@ -2712,24 +2715,25 @@ nabla4_interpolate_validate_unstructured_gpu_kloop_inlined_cached(std::vector<st
     std::vector<WP_TYPE> &inv_primal_edge_length,
     std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
     std::vector<std::vector<WP_TYPE>> &ptr_coeff_2) {
-    return interpolate_validate_gridtools<gpu_kloop, nabla4_interpolate_unstructured_inlined_cached>(std::make_tuple(e2c2v,
-        e2ecv,
-        v2e,
-        CellDim,
-        VertexDim,
-        EdgeDim,
-        KDim,
-        ECVDim,
-        x_dim,
-        u_vert,
-        v_vert,
-        primal_normal_vert_v1,
-        primal_normal_vert_v2,
-        z_nabla2_e,
-        inv_vert_vert_length,
-        inv_primal_edge_length,
-        ptr_coeff_1,
-        ptr_coeff_2));
+    return interpolate_validate_gridtools<gpu_kloop, nabla4_interpolate_unstructured_inlined_cached>(
+        std::make_tuple(e2c2v,
+            e2ecv,
+            v2e,
+            CellDim,
+            VertexDim,
+            EdgeDim,
+            KDim,
+            ECVDim,
+            x_dim,
+            u_vert,
+            v_vert,
+            primal_normal_vert_v1,
+            primal_normal_vert_v2,
+            z_nabla2_e,
+            inv_vert_vert_length,
+            inv_primal_edge_length,
+            ptr_coeff_1,
+            ptr_coeff_2));
 }
 
 std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>

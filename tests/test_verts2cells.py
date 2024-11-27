@@ -26,23 +26,32 @@ class verts2cellsValidationData:
     num_vertices: int
     num_cells: int
     num_levels: int
-    p_vert_in: np.array
-    ptr_coeff: np.array
+    p_vert_u_in: np.array
+    p_vert_v_in: np.array
+    ptr_coeff_1: np.array
+    ptr_coeff_2: np.array
     p_cell_out: np.array
+
 
 def reference_interpolate_unstructured_cpu_ifirst(
     num_cells: int,
     num_levels: int,
     c2v: np.ndarray,
-    p_vert_in: np.array,
-    ptr_coeff: np.array,
+    p_vert_u_in: np.array,
+    p_vert_v_in: np.array,
+    ptr_coeff_1: np.array,
+    ptr_coeff_2: np.array,
 ):
     p_cell_out = np.zeros((len(c2v), num_levels))
     for i in range(len(c2v)):
         for k in range(num_levels):
             for j in range(3):
-                p_cell_out[i, k] += p_vert_in[c2v[i, j], k] * ptr_coeff[i, j]
+                p_cell_out[i, k] += (
+                    p_vert_u_in[c2v[i, j], k] * ptr_coeff_1[i, j]
+                    + p_vert_v_in[c2v[i, j], k] * ptr_coeff_2[i, j]
+                ) / 2
     return p_cell_out
+
 
 @pytest.fixture
 def small_torus_grid_kernel_input(small_torus_grid):
@@ -55,19 +64,29 @@ def small_torus_grid_kernel_input(small_torus_grid):
     interpolate_kernel_validation_data.num_cells = small_torus_grid.num_cells
     interpolate_kernel_validation_data.num_levels = small_torus_grid.num_levels
 
-    interpolate_kernel_validation_data.p_vert_in = np.random.rand(
+    interpolate_kernel_validation_data.p_vert_u_in = np.random.rand(
         small_torus_grid.num_vertices, small_torus_grid.num_levels
     )
-    interpolate_kernel_validation_data.ptr_coeff = np.random.rand(
+    interpolate_kernel_validation_data.p_vert_v_in = np.random.rand(
+        small_torus_grid.num_vertices, small_torus_grid.num_levels
+    )
+    interpolate_kernel_validation_data.ptr_coeff_1 = np.random.rand(
+        small_torus_grid.num_cells, 3
+    )
+    interpolate_kernel_validation_data.ptr_coeff_2 = np.random.rand(
         small_torus_grid.num_cells, 3
     )
 
-    interpolate_kernel_validation_data.p_cell_out = reference_interpolate_unstructured_cpu_ifirst(
-        interpolate_kernel_validation_data.num_cells,
-        interpolate_kernel_validation_data.num_levels,
-        interpolate_kernel_validation_data.c2v,
-        interpolate_kernel_validation_data.p_vert_in,
-        interpolate_kernel_validation_data.ptr_coeff,
+    interpolate_kernel_validation_data.p_cell_out = (
+        reference_interpolate_unstructured_cpu_ifirst(
+            interpolate_kernel_validation_data.num_cells,
+            interpolate_kernel_validation_data.num_levels,
+            interpolate_kernel_validation_data.c2v,
+            interpolate_kernel_validation_data.p_vert_u_in,
+            interpolate_kernel_validation_data.p_vert_v_in,
+            interpolate_kernel_validation_data.ptr_coeff_1,
+            interpolate_kernel_validation_data.ptr_coeff_2,
+        )
     )
 
     yield interpolate_kernel_validation_data
@@ -81,8 +100,10 @@ def test_validate_verts2cells_unstructured_cpu_kfirst(
         small_torus_grid_kernel_input.num_cells,
         small_torus_grid_kernel_input.num_levels,
         small_torus_grid_kernel_input.c2v,
-        small_torus_grid_kernel_input.p_vert_in,
-        small_torus_grid_kernel_input.ptr_coeff,
+        small_torus_grid_kernel_input.p_vert_u_in,
+        small_torus_grid_kernel_input.p_vert_v_in,
+        small_torus_grid_kernel_input.ptr_coeff_1,
+        small_torus_grid_kernel_input.ptr_coeff_2,
     )
 
     assert np.allclose(

@@ -737,29 +737,32 @@ std::vector<double> interpolate_benchmark_structured_gpu_naive(std::size_t Verte
     int repetitions = 101,
     int dry_runs = 1);
 
-std::vector<std::vector<WP_TYPE>>
-verts2cells_validate_unstructured_cpu_kfirst(std::size_t VertexDim,
+std::vector<std::vector<WP_TYPE>> verts2cells_validate_unstructured_cpu_kfirst(std::size_t VertexDim,
     std::size_t CellDim,
     std::size_t KDim,
     std::vector<std::array<index_type, 3>> &c2v,
-    std::vector<std::vector<WP_TYPE>> &p_vert_in,
-    std::vector<std::vector<WP_TYPE>> &ptr_coeff);
+    const std::vector<std::vector<WP_TYPE>> &p_vert_u_in,
+    const std::vector<std::vector<WP_TYPE>> &p_vert_v_in,
+    const std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
+    const std::vector<std::vector<WP_TYPE>> &ptr_coeff_2);
 
-std::vector<std::vector<WP_TYPE>>
-verts2cells_validate_unstructured_gpu_naive(std::size_t VertexDim,
+std::vector<std::vector<WP_TYPE>> verts2cells_validate_unstructured_gpu_naive(std::size_t VertexDim,
     std::size_t CellDim,
     std::size_t KDim,
     std::vector<std::array<index_type, 3>> &c2v,
-    std::vector<std::vector<WP_TYPE>> &p_vert_in,
-    std::vector<std::vector<WP_TYPE>> &ptr_coeff);
+    const std::vector<std::vector<WP_TYPE>> &p_vert_u_in,
+    const std::vector<std::vector<WP_TYPE>> &p_vert_v_in,
+    const std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
+    const std::vector<std::vector<WP_TYPE>> &ptr_coeff_2);
 
-std::vector<std::vector<WP_TYPE>>
-verts2cells_validate_unstructured_gpu_kloop(std::size_t VertexDim,
+std::vector<std::vector<WP_TYPE>> verts2cells_validate_unstructured_gpu_kloop(std::size_t VertexDim,
     std::size_t CellDim,
     std::size_t KDim,
     std::vector<std::array<index_type, 3>> &c2v,
-    std::vector<std::vector<WP_TYPE>> &p_vert_in,
-    std::vector<std::vector<WP_TYPE>> &ptr_coeff);
+    const std::vector<std::vector<WP_TYPE>> &p_vert_u_in,
+    const std::vector<std::vector<WP_TYPE>> &p_vert_v_in,
+    const std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
+    const std::vector<std::vector<WP_TYPE>> &ptr_coeff_2);
 
 std::vector<double> verts2cells_benchmark_unstructured_cpu_kfirst(std::vector<std::array<index_type, 3>> &c2v,
     std::size_t VertexDim,

@@ -65,44 +65,57 @@ def get_torus_grid(filename, num_levels, transformation, e2c2v_ordering="per-ver
     simple_grid = grid_manager.get_grid()
     return simple_grid
 
+
 def run_sanity_checks(
     c2v, nvertices, ncells, nlevels, lon_dim, lat_dim, backend="all_cpu", halo=4
 ):
     print("Generating validation data")
-    p_vert_in = np.random.rand(nvertices, nlevels)
-    ptr_coeff = np.random.rand(ncells, 3)
+    p_vert_u_in = np.random.rand(nvertices, nlevels)
+    p_vert_v_in = np.random.rand(nvertices, nlevels)
+    ptr_coeff_1 = np.random.rand(ncells, 3)
+    ptr_coeff_2 = np.random.rand(ncells, 3)
     p_cell_out = icon_benchmark.verts2cells_validate_unstructured_cpu_kfirst(
         nvertices,
         ncells,
         nlevels,
         c2v,
-        p_vert_in,
-        ptr_coeff,
+        p_vert_u_in,
+        p_vert_v_in,
+        ptr_coeff_1,
+        ptr_coeff_2,
     )
     print("Generated validation data")
 
     if backend in ["all_gpu", "gpu_naive"]:
         print("Running unstructured gpu naive sanity check")
-        p_cell_out_gpu_naive = icon_benchmark.verts2cells_validate_unstructured_gpu_naive(
-            nvertices,
-            ncells,
-            nlevels,
-            c2v,
-            p_vert_in,
-            ptr_coeff,
+        p_cell_out_gpu_naive = (
+            icon_benchmark.verts2cells_validate_unstructured_gpu_naive(
+                nvertices,
+                ncells,
+                nlevels,
+                c2v,
+                p_vert_u_in,
+                p_vert_v_in,
+                ptr_coeff_1,
+                ptr_coeff_2,
+            )
         )
         assert np.allclose(p_cell_out_gpu_naive, p_cell_out)
         print("unstructured gpu naive sanity check passed")
-    
+
     if backend in ["all_gpu", "gpu_kloop"]:
         print("Running unstructured gpu kloop sanity check")
-        p_cell_out_gpu_kloop = icon_benchmark.verts2cells_validate_unstructured_gpu_kloop(
-            nvertices,
-            ncells,
-            nlevels,
-            c2v,
-            p_vert_in,
-            ptr_coeff,
+        p_cell_out_gpu_kloop = (
+            icon_benchmark.verts2cells_validate_unstructured_gpu_kloop(
+                nvertices,
+                ncells,
+                nlevels,
+                c2v,
+                p_vert_u_in,
+                p_vert_v_in,
+                ptr_coeff_1,
+                ptr_coeff_2,
+            )
         )
         assert np.allclose(p_cell_out_gpu_kloop, p_cell_out)
         print("unstructured gpu kloop sanity check passed")
@@ -178,9 +191,8 @@ def parse_arguments():
         args.e2c2v_ordering = "per-vertex"
     return args
 
-def filter_c2v_vector(
-    c2v, grid_cartesian_dimensions, halo=3
-):
+
+def filter_c2v_vector(c2v, grid_cartesian_dimensions, halo=3):
     filtered_c2v = []
     print("grid_cartesian_dimensions: ", grid_cartesian_dimensions)
     for j in range(grid_cartesian_dimensions[0]):
@@ -196,6 +208,7 @@ def filter_c2v_vector(
                         c2v[(j * grid_cartesian_dimensions[1] + i) * 2 + k]
                     )
     return np.array(filtered_c2v)
+
 
 def run_benchmarks():
     args = parse_arguments()
@@ -229,10 +242,8 @@ def run_benchmarks():
     )
 
     original_c2v = torus_grid.get_offset_provider("C2V").table
-    filtered_c2v = filter_c2v_vector(
-        original_c2v, grid_cartesian_dimensions, args.halo
-    )
-    
+    filtered_c2v = filter_c2v_vector(original_c2v, grid_cartesian_dimensions, args.halo)
+
     if args.sanity_checks:
         run_sanity_checks(
             filtered_c2v,
