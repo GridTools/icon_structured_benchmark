@@ -7,9 +7,9 @@ struct nabla4_interpolate_unstructured_separate {
     interpolate_unstructured<T> interpolate_data;
 
   public:
-    nabla4_interpolate_unstructured_separate(std::vector<std::array<index_type, 4>> e2c2v,
-        std::vector<std::array<index_type, 4>> e2ecv,
-        std::vector<std::array<index_type, 6>> v2e,
+    nabla4_interpolate_unstructured_separate(const std::vector<std::array<index_type, 4>> &e2c2v,
+        const std::vector<std::array<index_type, 4>> &e2ecv,
+        const std::vector<std::array<index_type, 6>> &v2e,
         index_type CellDim,
         index_type VertexDim,
         index_type EdgeDim,
@@ -18,23 +18,23 @@ struct nabla4_interpolate_unstructured_separate {
         : nabla4_data(e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim),
           interpolate_data(v2e, VertexDim, EdgeDim, KDim, nabla4_data.get_output_gt()){};
 
-    nabla4_interpolate_unstructured_separate(std::vector<std::array<index_type, 4>> e2c2v,
-        std::vector<std::array<index_type, 4>> e2ecv,
-        std::vector<std::array<index_type, 6>> v2e,
+    nabla4_interpolate_unstructured_separate(const std::vector<std::array<index_type, 4>> &e2c2v,
+        const std::vector<std::array<index_type, 4>> &e2ecv,
+        const std::vector<std::array<index_type, 6>> &v2e,
         index_type CellDim,
         index_type VertexDim,
         index_type EdgeDim,
         index_type KDim,
         index_type ECVDim,
-        std::vector<std::vector<VP_TYPE>> &u_vert,
-        std::vector<std::vector<VP_TYPE>> &v_vert,
-        std::vector<WP_TYPE> &primal_normal_vert_v1,
-        std::vector<WP_TYPE> &primal_normal_vert_v2,
-        std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
-        std::vector<WP_TYPE> &inv_vert_vert_length,
-        std::vector<WP_TYPE> &inv_primal_edge_length,
-        std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
-        std::vector<std::vector<WP_TYPE>> &ptr_coeff_2)
+        const std::vector<std::vector<VP_TYPE>> &u_vert,
+        const std::vector<std::vector<VP_TYPE>> &v_vert,
+        const std::vector<WP_TYPE> &primal_normal_vert_v1,
+        const std::vector<WP_TYPE> &primal_normal_vert_v2,
+        const std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+        const std::vector<WP_TYPE> &inv_vert_vert_length,
+        const std::vector<WP_TYPE> &inv_primal_edge_length,
+        const std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
+        const std::vector<std::vector<WP_TYPE>> &ptr_coeff_2)
         : nabla4_data(e2c2v,
               e2ecv,
               CellDim,

@@ -19,9 +19,9 @@ struct nabla4_interpolate_unstructured_inlined_v2v {
     neighbors_e2ecv_gt_t v2e2ecv_gt;
     neighbors_e2ecv_gt_ctv_t v2e2ecv_gt_ctv;
 
-    nabla4_interpolate_unstructured_inlined_v2v(std::vector<std::array<index_type, 4>> e2c2v,
-        std::vector<std::array<index_type, 4>> e2ecv,
-        std::vector<std::array<index_type, 6>> v2e,
+    nabla4_interpolate_unstructured_inlined_v2v(const std::vector<std::array<index_type, 4>> &e2c2v,
+        const std::vector<std::array<index_type, 4>> &e2ecv,
+        const std::vector<std::array<index_type, 6>> &v2e,
         index_type CellDim,
         index_type VertexDim,
         index_type EdgeDim,
@@ -53,23 +53,23 @@ struct nabla4_interpolate_unstructured_inlined_v2v {
             nabla4_data(e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim),
             interpolate_data(v2e, VertexDim, EdgeDim, KDim, nabla4_data.get_output_gt()) {};
 
-    nabla4_interpolate_unstructured_inlined_v2v(std::vector<std::array<index_type, 4>> e2c2v,
-        std::vector<std::array<index_type, 4>> e2ecv,
-        std::vector<std::array<index_type, 6>> v2e,
+    nabla4_interpolate_unstructured_inlined_v2v(const std::vector<std::array<index_type, 4>> &e2c2v,
+        const std::vector<std::array<index_type, 4>> &e2ecv,
+        const std::vector<std::array<index_type, 6>> &v2e,
         index_type CellDim,
         index_type VertexDim,
         index_type EdgeDim,
         index_type KDim,
         index_type ECVDim,
-        std::vector<std::vector<VP_TYPE>> &u_vert,
-        std::vector<std::vector<VP_TYPE>> &v_vert,
-        std::vector<WP_TYPE> &primal_normal_vert_v1,
-        std::vector<WP_TYPE> &primal_normal_vert_v2,
-        std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
-        std::vector<WP_TYPE> &inv_vert_vert_length,
-        std::vector<WP_TYPE> &inv_primal_edge_length,
-        std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
-        std::vector<std::vector<WP_TYPE>> &ptr_coeff_2)
+        const std::vector<std::vector<VP_TYPE>> &u_vert,
+        const std::vector<std::vector<VP_TYPE>> &v_vert,
+        const std::vector<WP_TYPE> &primal_normal_vert_v1,
+        const std::vector<WP_TYPE> &primal_normal_vert_v2,
+        const std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+        const std::vector<WP_TYPE> &inv_vert_vert_length,
+        const std::vector<WP_TYPE> &inv_primal_edge_length,
+        const std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
+        const std::vector<std::vector<WP_TYPE>> &ptr_coeff_2)
         : v2e2c2v_gt(storage::builder<T>.template type<index_type>().dimensions(v2e.size(), 7_c).initializer([&e2c2v, &v2e](int i, int j) {
                 switch (j) {
                     case 0:

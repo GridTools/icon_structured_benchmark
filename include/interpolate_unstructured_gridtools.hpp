@@ -85,34 +85,34 @@ class interpolate_unstructured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
     neighbors_gt_t v2e_gt;
     neighbors_gt_ctv_t v2e_gt_ctv;
 
-    interpolate_unstructured(std::vector<std::array<index_type, 6>> v2e,
+    interpolate_unstructured(const std::vector<std::array<index_type, 6>> &v2e,
         std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim)
         : mo_intp_rbf_rbf_vec_interpol_vertex<S>(VertexDim, EdgeDim, KDim, v2e.size()),
         v2e_gt(storage::builder<S>.template type<index_type>().dimensions(v2e.size(), 6_c).initializer([&v2e](int i, int j) { return v2e[i][j]; }).build()),
         v2e_gt_ctv(v2e_gt->const_target_view())
     {};
 
-    interpolate_unstructured(std::vector<std::array<index_type, 6>> v2e,
+    interpolate_unstructured(const std::vector<std::array<index_type, 6>> &v2e,
         std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim, input_type p_e_in_gt)
         : mo_intp_rbf_rbf_vec_interpol_vertex<S>(VertexDim, EdgeDim, KDim, p_e_in_gt, v2e.size()),
         v2e_gt(storage::builder<S>.template type<index_type>().dimensions(v2e.size(), 6_c).initializer([&v2e](int i, int j) { return v2e[i][j]; }).build()),
         v2e_gt_ctv(v2e_gt->const_target_view())
     {};
 
-    interpolate_unstructured(std::vector<std::array<index_type, 6>> v2e,
+    interpolate_unstructured(const std::vector<std::array<index_type, 6>> &v2e,
         std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim,
-        std::vector<std::vector<WP_TYPE>> &p_e_in,
-        std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
-        std::vector<std::vector<WP_TYPE>> &ptr_coeff_2) : mo_intp_rbf_rbf_vec_interpol_vertex<S>(VertexDim, EdgeDim, KDim, v2e.size(), p_e_in, ptr_coeff_1, ptr_coeff_2),
+        const std::vector<std::vector<WP_TYPE>> &p_e_in,
+        const std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
+        const std::vector<std::vector<WP_TYPE>> &ptr_coeff_2) : mo_intp_rbf_rbf_vec_interpol_vertex<S>(VertexDim, EdgeDim, KDim, v2e.size(), p_e_in, ptr_coeff_1, ptr_coeff_2),
         v2e_gt(storage::builder<S>.template type<index_type>().dimensions(v2e.size(), 6_c).initializer([&v2e](int i, int j) { return v2e[i][j]; }).build()),
         v2e_gt_ctv(v2e_gt->const_target_view())
     {};
 
-    interpolate_unstructured(std::vector<std::array<index_type, 6>> v2e,
+    interpolate_unstructured(const std::vector<std::array<index_type, 6>> &v2e,
         std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim,
         const input_type &p_e_in,
-        std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
-        std::vector<std::vector<WP_TYPE>> &ptr_coeff_2) : mo_intp_rbf_rbf_vec_interpol_vertex<S>(VertexDim, EdgeDim, KDim, v2e.size(), p_e_in, ptr_coeff_1, ptr_coeff_2),
+        const std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
+        const std::vector<std::vector<WP_TYPE>> &ptr_coeff_2) : mo_intp_rbf_rbf_vec_interpol_vertex<S>(VertexDim, EdgeDim, KDim, v2e.size(), p_e_in, ptr_coeff_1, ptr_coeff_2),
         v2e_gt(storage::builder<S>.template type<index_type>().dimensions(v2e.size(), 6_c).initializer([&v2e](int i, int j) { return v2e[i][j]; }).build()),
         v2e_gt_ctv(v2e_gt->const_target_view())
     {};

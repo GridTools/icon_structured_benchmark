@@ -10,6 +10,7 @@
 #include "nabla4_interpolate_unstructured_inlined_cached.hpp"
 #include "nabla4_interpolate_unstructured_inlined_v2v.hpp"
 #include "nabla4_interpolate_unstructured_separate.hpp"
+#include "nabla4_interpolate_verts2cells_unstructured_separate.hpp"
 #include "nabla4_structured_simple.hpp"
 #include "nabla4_structured_torus.hpp"
 #include "nabla4_structured_torus_gridtools.hpp"
@@ -25,8 +26,8 @@
 #include "nabla4_vertical_interpolate_unstructured_separate.hpp"
 #include "nabla4_vertical_structured_torus_gridtools_halo.hpp"
 #include "nabla4_vertical_unstructured_gridtools.hpp"
-#include "verts2cells_unstructured_gridtools.hpp"
 #include "timer.hpp"
+#include "verts2cells_unstructured_gridtools.hpp"
 
 template <typename T, backend_impl I>
 std::vector<double> run_benchmark(T &benchmark_object, int repetitions, int dry_runs) {

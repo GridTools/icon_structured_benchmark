@@ -77,9 +77,9 @@ struct mo_intp_rbf_rbf_vec_interpol_vertex {
     {};
 
     mo_intp_rbf_rbf_vec_interpol_vertex(std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim, std::size_t output_size,
-        std::vector<std::vector<WP_TYPE>> p_e_in,
-        std::vector<std::vector<WP_TYPE>> ptr_coeff_1,
-        std::vector<std::vector<WP_TYPE>> ptr_coeff_2) : VertexDim(VertexDim), EdgeDim(EdgeDim), KDim(KDim), output_size(output_size),
+        const std::vector<std::vector<WP_TYPE>>& p_e_in,
+        const std::vector<std::vector<WP_TYPE>>& ptr_coeff_1,
+        const std::vector<std::vector<WP_TYPE>>& ptr_coeff_2) : VertexDim(VertexDim), EdgeDim(EdgeDim), KDim(KDim), output_size(output_size),
         p_e_in_gt(storage::builder<S>.template type<WP_TYPE>().dimensions(EdgeDim, KDim).initializer([&p_e_in](int i, int j) { return p_e_in[i][j]; }).build()),
         ptr_coeff_1_gt(storage::builder<S>.template type<WP_TYPE>().dimensions(output_size, 6_c).initializer([&ptr_coeff_1](int i, int j) { return ptr_coeff_1[i][j]; }).build()),
         ptr_coeff_2_gt(storage::builder<S>.template type<WP_TYPE>().dimensions(output_size, 6_c).initializer([&ptr_coeff_2](int i, int j) { return ptr_coeff_2[i][j]; }).build()),
@@ -94,8 +94,8 @@ struct mo_intp_rbf_rbf_vec_interpol_vertex {
 
     mo_intp_rbf_rbf_vec_interpol_vertex(std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim, std::size_t output_size,
         const data_store_2d_WP_t &p_e_in_gt,
-        std::vector<std::vector<WP_TYPE>> ptr_coeff_1,
-        std::vector<std::vector<WP_TYPE>> ptr_coeff_2) : VertexDim(VertexDim), EdgeDim(EdgeDim), KDim(KDim), output_size(output_size),
+        const std::vector<std::vector<WP_TYPE>>& ptr_coeff_1,
+        const std::vector<std::vector<WP_TYPE>>& ptr_coeff_2) : VertexDim(VertexDim), EdgeDim(EdgeDim), KDim(KDim), output_size(output_size),
         p_e_in_gt(p_e_in_gt),
         ptr_coeff_1_gt(storage::builder<S>.template type<WP_TYPE>().dimensions(output_size, 6_c).initializer([&ptr_coeff_1](int i, int j) { return ptr_coeff_1[i][j]; }).build()),
         ptr_coeff_2_gt(storage::builder<S>.template type<WP_TYPE>().dimensions(output_size, 6_c).initializer([&ptr_coeff_2](int i, int j) { return ptr_coeff_2[i][j]; }).build()),
@@ -119,4 +119,6 @@ struct mo_intp_rbf_rbf_vec_interpol_vertex {
         }
         return std::make_pair(p_u_out, p_v_out);
     }
+
+    std::pair<data_store_2d_WP_t, data_store_2d_WP_t> get_output_gt() { return std::make_pair(p_u_out_gt, p_v_out_gt); }
 };
