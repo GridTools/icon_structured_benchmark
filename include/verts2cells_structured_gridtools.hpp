@@ -195,7 +195,7 @@ constexpr block_dims get_block_dims_structured_verts2cells_kloop<std::uint32_t>(
 
 template <>
 constexpr block_dims get_block_dims_structured_verts2cells_kloop<int>() {
-    return {32, 4, 2, 256};
+    return {32, 3, 4, 384};
 };
 
 constexpr block_dims block_dims_structured_verts2cells_kloop =
@@ -298,7 +298,7 @@ constexpr block_dims get_block_dims_structured_verts2cells_naive<std::uint32_t>(
 
 template <>
 constexpr block_dims get_block_dims_structured_verts2cells_naive<int>() {
-    return {32, 4, 2, 256};
+    return {32, 1, 8, 256};
 };
 
 constexpr block_dims block_dims_structured_verts2cells_naive =
