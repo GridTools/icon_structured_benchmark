@@ -10,6 +10,7 @@
 #include "nabla4_interpolate_unstructured_inlined_cached.hpp"
 #include "nabla4_interpolate_unstructured_inlined_v2v.hpp"
 #include "nabla4_interpolate_unstructured_separate.hpp"
+#include "nabla4_interpolate_verts2cells_structured_separate.hpp"
 #include "nabla4_interpolate_verts2cells_unstructured_separate.hpp"
 #include "nabla4_structured_simple.hpp"
 #include "nabla4_structured_torus.hpp"
