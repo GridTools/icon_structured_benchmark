@@ -27,7 +27,7 @@ struct block_dims {
 };
 
 /// Random number utilities
-static RandomUniformUtils rand_utils{-1.0, 1.0};
+static RandomUniformUtils rand_utils{-10.0, 10.0};
 
 template <Data T>
 struct nabla4_data {
