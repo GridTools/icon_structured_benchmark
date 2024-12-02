@@ -143,7 +143,6 @@ def filter_edge_vector(
 
 def filter_c2v_vector(c2v, grid_cartesian_dimensions, halo=3):
     filtered_c2v = []
-    print("grid_cartesian_dimensions: ", grid_cartesian_dimensions)
     for j in range(grid_cartesian_dimensions[0]):
         for i in range(grid_cartesian_dimensions[1]):
             if (
@@ -399,6 +398,33 @@ def run_sanity_checks(
             )
             assert np.allclose(p_cell_out_structured_gpu_naive, p_cell_out_ref)
             print("structured gpu_naive separate sanity check passed")
+
+        if combination in ["all", "inlined"]:
+            print("Running unstructured gpu_naive inlined sanity check")
+            p_cell_out_unstructured_gpu_naive = icon_benchmark.nabla4_interpolate_verts2cells_validate_unstructured_gpu_naive_inlined(
+                filtered_e2c2v_inlined,
+                filtered_e2ecv_inlined,
+                filtered_v2e_inlined,
+                filtered_c2v_inlined,
+                random_validation_data_separate.CellDim,
+                random_validation_data_separate.VertexDim,
+                random_validation_data_separate.EdgeDim,
+                random_validation_data_separate.KDim,
+                random_validation_data_separate.ECVDim,
+                np.array(random_validation_data_separate.u_vert).T,
+                np.array(random_validation_data_separate.v_vert).T,
+                random_validation_data_separate.primal_normal_vert_v1,
+                random_validation_data_separate.primal_normal_vert_v2,
+                z_nabla2_e_inlined,
+                inv_vert_vert_length_inlined,
+                inv_primal_edge_length_inlined,
+                ptr_coeff_1,
+                ptr_coeff_2,
+                ptr_c_coeff_1,
+                ptr_c_coeff_2,
+            )
+            assert np.allclose(p_cell_out_unstructured_gpu_naive, p_cell_out_ref)
+            print("unstructured gpu_naive separate sanity check passed")
 
     if backend in ["all_gpu", "gpu_kloop"]:
         if combination in ["all", "separate"]:
@@ -716,14 +742,14 @@ def run_benchmarks():
     #     print("Vertex: {} Edges: {}".format(vertex, edges))
 
     original_c2v = torus_grid.get_offset_provider("C2V").table
-    filtered_c2v_inlined = filter_c2v_vector(
+    filtered_c2v_original_indexes = filter_c2v_vector(
         original_c2v, grid_cartesian_dimensions, args.halo + 2
     )
     # print("Filtered C2V inlined size: {}".format(filtered_c2v_inlined.shape))
     # for cell, vertices in enumerate(filtered_c2v_inlined):
     #     print("Cell: {} Vertices: {}".format(cell, vertices))
-    filtered_c2v_separate = []
-    for cell, vertices in enumerate(filtered_c2v_inlined):
+    filtered_c2v = []
+    for cell, vertices in enumerate(filtered_c2v_original_indexes):
         new_vertices = []
         for vertex in vertices:
             i = vertex % grid_cartesian_dimensions[1]
@@ -731,8 +757,8 @@ def run_benchmarks():
             new_vertices.append(
                 i - 3 + (j - 3) * (grid_cartesian_dimensions[1] - 2 * 3)
             )
-        filtered_c2v_separate.append(new_vertices)
-    filtered_c2v_separate = np.array(filtered_c2v_separate)
+        filtered_c2v.append(new_vertices)
+    filtered_c2v = np.array(filtered_c2v)
     # print("Filtered C2V separate size: {}".format(filtered_c2v_separate.shape))
     # for cell, vertices in enumerate(filtered_c2v_separate):
     #     print("Cell: {} Vertices: {}".format(cell, vertices))
@@ -746,11 +772,11 @@ def run_benchmarks():
             filtered_e2c2v_separate,
             filtered_e2ecv_separate,
             filtered_v2e_separate,
-            filtered_c2v_separate,
+            filtered_c2v,
             filtered_e2c2v_inlined,
             filtered_e2ecv_inlined,
             filtered_v2e_inlined,
-            filtered_c2v_inlined,
+            filtered_c2v,
             torus_grid,
             grid_cartesian_dimensions[0],
             grid_cartesian_dimensions[1],
@@ -768,7 +794,7 @@ def run_benchmarks():
                 filtered_e2c2v_separate,
                 filtered_e2ecv_separate,
                 filtered_v2e_separate,
-                filtered_c2v_separate,
+                filtered_c2v,
                 torus_grid.num_cells,
                 torus_grid.num_vertices,
                 torus_grid.num_edges,
@@ -818,7 +844,7 @@ def run_benchmarks():
                 filtered_e2c2v_separate,
                 filtered_e2ecv_separate,
                 filtered_v2e_separate,
-                filtered_c2v_separate,
+                filtered_c2v,
                 torus_grid.num_cells,
                 torus_grid.num_vertices,
                 torus_grid.num_edges,
@@ -868,7 +894,7 @@ def run_benchmarks():
                 filtered_e2c2v_separate,
                 filtered_e2ecv_separate,
                 filtered_v2e_separate,
-                filtered_c2v_separate,
+                filtered_c2v,
                 torus_grid.num_cells,
                 torus_grid.num_vertices,
                 torus_grid.num_edges,
