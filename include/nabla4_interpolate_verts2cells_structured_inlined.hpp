@@ -149,7 +149,7 @@ constexpr block_dims get_block_dims_structured_nabla_interpol_v2c_inlined_naive<
 
 template <>
 constexpr block_dims get_block_dims_structured_nabla_interpol_v2c_inlined_naive<int>() {
-    return {32, 4, 1, 128};
+    return {32, 1, 4, 128};
 };
 
 constexpr block_dims block_dims_structured_nabla_interpol_v2c_inlined_naive =
@@ -200,8 +200,8 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlin
         get_index(i + 1, j, x_dim_verts2cells),
         get_index(i, j + 1, x_dim_verts2cells),
         get_index(i + 1, j + 1, x_dim_verts2cells)};
-    const index_type i_v2e{i + halo_nabla4 + halo_interpolate};
-    const index_type j_v2e{j + halo_nabla4 + halo_interpolate};
+    const index_type i_v2e{static_cast<index_type>(i) + halo_nabla4 + halo_interpolate};
+    const index_type j_v2e{static_cast<index_type>(j) + halo_nabla4 + halo_interpolate};
     const auto v2e_upward_0{get_v2e_per_orientation(i_v2e, j_v2e, x_dim_nabla4, y_dim_nabla4)};
     const auto v2e_upward_1{get_v2e_per_orientation(i_v2e, j_v2e + 1, x_dim_nabla4, y_dim_nabla4)};
     const auto v2e_upward_2{get_v2e_per_orientation(i_v2e + 1, j_v2e, x_dim_nabla4, y_dim_nabla4)};
