@@ -1,3 +1,5 @@
+#pragma once
+
 #include <interpolate_structured_gridtools.hpp>
 #include <nabla4_structured_torus_gridtools_halo.hpp>
 
