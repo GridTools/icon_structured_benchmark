@@ -240,9 +240,9 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
         inv_primal_edge_length_gt_tv(v2e[3]),
         inv_primal_edge_length_gt_tv(v2e[4]),
         inv_primal_edge_length_gt_tv(v2e[5])};
-    const int initial_k_index{blockIdx.y * blockDim.y + threadIdx.y};
+    const auto initial_k_index{blockIdx.y * blockDim.y + threadIdx.y};
     int k_repetition{0};
-    for (int k_index{initial_k_index}; k_index < KDim && k_repetition < k_repetitions;
+    for (int k_index{static_cast<int>(initial_k_index)}; k_index < KDim && k_repetition < k_repetitions;
          k_index += gridDim.y * blockDim.y) {
         const auto shared_mem_vertex_index{(threadIdx.x + k_repetition * blockDim.x) * 6};
 #pragma unroll
