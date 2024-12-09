@@ -547,6 +547,39 @@ def run_sanity_checks(
             )
             print("unstructured gpu_kloop separate sanity check passed")
 
+            print("Running structured gpu_kloop inlined sanity check")
+            p_cell_out_structured_gpu_kloop_inlined = icon_benchmark.nabla4_interpolate_verts2cells_validate_structured_gpu_kloop_inlined(
+                random_validation_data_separate.CellDim,
+                random_validation_data_separate.VertexDim,
+                random_validation_data_separate.EdgeDim,
+                random_validation_data_separate.KDim,
+                random_validation_data_separate.ECVDim,
+                lon_dim,
+                lat_dim,
+                halo,
+                np.array(random_validation_data_separate.u_vert).T,
+                np.array(random_validation_data_separate.v_vert).T,
+                random_validation_data_separate.primal_normal_vert_v1,
+                random_validation_data_separate.primal_normal_vert_v2,
+                z_nabla2_e_inlined,
+                inv_vert_vert_length_inlined,
+                inv_primal_edge_length_inlined,
+                ptr_coeff_1,
+                ptr_coeff_2,
+                ptr_c_coeff_1,
+                ptr_c_coeff_2,
+            )
+            if not np.allclose(p_cell_out_structured_gpu_kloop_inlined, p_cell_out_ref):
+                print("structured gpu_kloop inlined sanity check failed")
+                print(
+                    "p_cell_out_structured_gpu_kloop_inlined: {}".format(
+                        p_cell_out_structured_gpu_kloop_inlined
+                    )
+                )
+                print("p_cell_out_ref: {}".format(p_cell_out_ref))
+            assert np.allclose(p_cell_out_structured_gpu_kloop_inlined, p_cell_out_ref)
+            print("structured gpu_kloop inlined sanity check passed")
+
     print("Sanity checks pass")
 
 
@@ -1074,6 +1107,29 @@ def run_benchmarks():
                     np.median(
                         runtimes[
                             "nabla4_interpolate_verts2cells_benchmark_unstructured_gpu_kloop_inlined"
+                        ]
+                    )
+                )
+            )
+            runtimes[
+                "nabla4_interpolate_verts2cells_benchmark_structured_gpu_kloop_inlined"
+            ] = icon_benchmark.nabla4_interpolate_verts2cells_benchmark_structured_gpu_kloop_inlined(
+                torus_grid.num_cells,
+                torus_grid.num_vertices,
+                torus_grid.num_edges,
+                torus_grid.num_levels,
+                torus_grid.size[E2C2VDim],
+                grid_cartesian_dimensions[0],
+                grid_cartesian_dimensions[1],
+                halo,
+                repetitions,
+                dry_runs,
+            )
+            print(
+                "nabla4_interpolate_verts2cells_benchmark_structured_gpu_kloop_inlined median: {}".format(
+                    np.median(
+                        runtimes[
+                            "nabla4_interpolate_verts2cells_benchmark_structured_gpu_kloop_inlined"
                         ]
                     )
                 )
