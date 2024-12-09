@@ -283,7 +283,7 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
         ptr_coeff_2_gt_ctv(vertex_index, 4),
         ptr_coeff_2_gt_ctv(vertex_index, 5)};
     k_repetition = 0;
-    for (int k_index{initial_k_index}; k_index < KDim && k_repetition < k_repetitions;
+    for (int k_index{static_cast<int>(initial_k_index)}; k_index < KDim && k_repetition < k_repetitions;
          k_index += gridDim.y * blockDim.y) {
         const auto shared_mem_vertex_index{(threadIdx.x + k_repetition * blockDim.x) * 6};
         const std::array<WP_TYPE, 6> z_nabla4_e2_wp{z_nabla4_e2[shared_mem_vertex_index],
