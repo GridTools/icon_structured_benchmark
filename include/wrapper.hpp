@@ -1026,6 +1026,18 @@ std::vector<double> nabla4_interpolate_benchmark_unstructured_gpu_naive_inlined_
     int repetitions = 101,
     int dry_runs = 1);
 
+std::vector<double> nabla4_interpolate_benchmark_unstructured_gpu_naive_inlined_v2v_general(
+    const std::vector<std::array<index_type, 4>> &e2c2v,
+    const std::vector<std::array<index_type, 4>> &e2ecv,
+    const std::vector<std::array<index_type, 6>> &v2e,
+    index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    int repetitions = 101,
+    int dry_runs = 1);
+
 std::vector<double> nabla4_vertical_interpolate_benchmark_unstructured_gpu_naive_inlined_v2v(
     const std::vector<std::array<index_type, 4>> &e2c2v,
     const std::vector<std::array<index_type, 4>> &e2ecv,
@@ -1100,6 +1112,18 @@ std::vector<double> nabla4_vertical_interpolate_benchmark_unstructured_gpu_kloop
     int dry_runs = 1);
 
 std::vector<double> nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined_v2v(
+    const std::vector<std::array<index_type, 4>> &e2c2v,
+    const std::vector<std::array<index_type, 4>> &e2ecv,
+    const std::vector<std::array<index_type, 6>> &v2e,
+    index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    int repetitions = 101,
+    int dry_runs = 1);
+
+std::vector<double> nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined_v2v_general(
     const std::vector<std::array<index_type, 4>> &e2c2v,
     const std::vector<std::array<index_type, 4>> &e2ecv,
     const std::vector<std::array<index_type, 6>> &v2e,
@@ -1684,6 +1708,26 @@ nabla4_interpolate_validate_unstructured_gpu_naive_inlined_v2v(const std::vector
     const std::vector<std::vector<WP_TYPE>> &ptr_coeff_2);
 
 std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>
+nabla4_interpolate_validate_unstructured_gpu_naive_inlined_v2v_general(
+    const std::vector<std::array<index_type, 4>> &e2c2v,
+    const std::vector<std::array<index_type, 4>> &e2ecv,
+    const std::vector<std::array<index_type, 6>> &v2e,
+    index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    const std::vector<std::vector<VP_TYPE>> &u_vert,
+    const std::vector<std::vector<VP_TYPE>> &v_vert,
+    const std::vector<WP_TYPE> &primal_normal_vert_v1,
+    const std::vector<WP_TYPE> &primal_normal_vert_v2,
+    const std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+    const std::vector<WP_TYPE> &inv_vert_vert_length,
+    const std::vector<WP_TYPE> &inv_primal_edge_length,
+    const std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
+    const std::vector<std::vector<WP_TYPE>> &ptr_coeff_2);
+
+std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>
 nabla4_vertical_interpolate_validate_unstructured_gpu_naive_inlined_v2v(
     const std::vector<std::array<index_type, 4>> &e2c2v,
     const std::vector<std::array<index_type, 4>> &e2ecv,
@@ -1802,6 +1846,26 @@ nabla4_vertical_interpolate_validate_unstructured_gpu_kloop_inlined(const std::v
 
 std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>
 nabla4_interpolate_validate_unstructured_gpu_kloop_inlined_v2v(const std::vector<std::array<index_type, 4>> &e2c2v,
+    const std::vector<std::array<index_type, 4>> &e2ecv,
+    const std::vector<std::array<index_type, 6>> &v2e,
+    index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    const std::vector<std::vector<VP_TYPE>> &u_vert,
+    const std::vector<std::vector<VP_TYPE>> &v_vert,
+    const std::vector<WP_TYPE> &primal_normal_vert_v1,
+    const std::vector<WP_TYPE> &primal_normal_vert_v2,
+    const std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+    const std::vector<WP_TYPE> &inv_vert_vert_length,
+    const std::vector<WP_TYPE> &inv_primal_edge_length,
+    const std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
+    const std::vector<std::vector<WP_TYPE>> &ptr_coeff_2);
+
+std::pair<std::vector<std::vector<WP_TYPE>>, std::vector<std::vector<WP_TYPE>>>
+nabla4_interpolate_validate_unstructured_gpu_kloop_inlined_v2v_general(
+    const std::vector<std::array<index_type, 4>> &e2c2v,
     const std::vector<std::array<index_type, 4>> &e2ecv,
     const std::vector<std::array<index_type, 6>> &v2e,
     index_type CellDim,

@@ -796,6 +796,37 @@ def run_sanity_checks(
             )
             print("unstructured gpu_naive inlined v2v sanity check passed")
 
+            print("Running unstructured gpu_naive inlined v2v_general sanity check")
+            (
+                p_u_out_gpu_naive_unstructured_inlined_v2v_general,
+                p_v_out_gpu_naive_unstructured_inlined_v2v_general,
+            ) = icon_benchmark.nabla4_interpolate_validate_unstructured_gpu_naive_inlined_v2v_general(
+                filtered_e2c2v_inlined,
+                filtered_e2ecv_inlined,
+                filtered_e2v_inlined,
+                random_validation_data_separate.CellDim,
+                random_validation_data_separate.VertexDim,
+                random_validation_data_separate.EdgeDim,
+                random_validation_data_separate.KDim,
+                random_validation_data_separate.ECVDim,
+                np.array(random_validation_data_separate.u_vert).T,
+                np.array(random_validation_data_separate.v_vert).T,
+                random_validation_data_separate.primal_normal_vert_v1,
+                random_validation_data_separate.primal_normal_vert_v2,
+                z_nabla2_e_inlined,
+                inv_vert_vert_length_inlined,
+                inv_primal_edge_length_inlined,
+                ptr_coeff_1,
+                ptr_coeff_2,
+            )
+            assert np.allclose(
+                p_u_out_gpu_naive_unstructured_inlined_v2v_general, p_u_out_ref_separate
+            )
+            assert np.allclose(
+                p_v_out_gpu_naive_unstructured_inlined_v2v_general, p_v_out_ref_separate
+            )
+            print("unstructured gpu_naive inlined v2v_general sanity check passed")
+
             print("Running unstructured gpu_naive vertical inlined v2v sanity check")
             (
                 p_u_out_gpu_naive_vertical_unstructured_inlined,
@@ -1204,6 +1235,37 @@ def run_sanity_checks(
                 p_v_out_gpu_kloop_unstructured_inlined, p_v_out_ref_separate
             )
             print("unstructured gpu_kloop inlined v2v sanity check passed")
+
+            print("Running unstructured gpu_kloop inlined v2v_general sanity check")
+            (
+                p_u_out_gpu_kloop_unstructured_inlined_v2v_general,
+                p_v_out_gpu_kloop_unstructured_inlined_v2v_general,
+            ) = icon_benchmark.nabla4_interpolate_validate_unstructured_gpu_kloop_inlined_v2v_general(
+                filtered_e2c2v_inlined,
+                filtered_e2ecv_inlined,
+                filtered_e2v_inlined,
+                random_validation_data_separate.CellDim,
+                random_validation_data_separate.VertexDim,
+                random_validation_data_separate.EdgeDim,
+                random_validation_data_separate.KDim,
+                random_validation_data_separate.ECVDim,
+                np.array(random_validation_data_separate.u_vert).T,
+                np.array(random_validation_data_separate.v_vert).T,
+                random_validation_data_separate.primal_normal_vert_v1,
+                random_validation_data_separate.primal_normal_vert_v2,
+                z_nabla2_e_inlined,
+                inv_vert_vert_length_inlined,
+                inv_primal_edge_length_inlined,
+                ptr_coeff_1,
+                ptr_coeff_2,
+            )
+            assert np.allclose(
+                p_u_out_gpu_kloop_unstructured_inlined_v2v_general, p_u_out_ref_separate
+            )
+            assert np.allclose(
+                p_v_out_gpu_kloop_unstructured_inlined_v2v_general, p_v_out_ref_separate
+            )
+            print("unstructured gpu_kloop inlined v2v_general sanity check passed")
 
             print("Running unstructured gpu_kloop vertical inlined v2v sanity check")
             (
@@ -2050,6 +2112,29 @@ def run_benchmarks():
                         )
                     )
                 )
+                runtimes[
+                    "nabla4_interpolate_benchmark_unstructured_gpu_naive_inlined_v2v_general"
+                ] = icon_benchmark.nabla4_interpolate_benchmark_unstructured_gpu_naive_inlined_v2v_general(
+                    filtered_e2c2v_inlined,
+                    filtered_e2ecv_inlined,
+                    filtered_v2e_inlined,
+                    torus_grid.num_cells,
+                    torus_grid.num_vertices,
+                    torus_grid.num_edges,
+                    torus_grid.num_levels,
+                    torus_grid.size[E2C2VDim],
+                    repetitions,
+                    dry_runs,
+                )
+                print(
+                    "nabla4_interpolate_benchmark_unstructured_gpu_naive_inlined_v2v_general median: {}".format(
+                        np.median(
+                            runtimes[
+                                "nabla4_interpolate_benchmark_unstructured_gpu_naive_inlined_v2v_general"
+                            ]
+                        )
+                    )
+                )
             else:
                 runtimes[
                     "nabla4_vertical_interpolate_benchmark_unstructured_gpu_naive_inlined_v2v"
@@ -2367,6 +2452,29 @@ def run_benchmarks():
                         )
                     )
                 )
+                runtimes[
+                    "nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined_v2v_general"
+                ] = icon_benchmark.nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined_v2v_general(
+                    filtered_e2c2v_inlined,
+                    filtered_e2ecv_inlined,
+                    filtered_v2e_inlined,
+                    torus_grid.num_cells,
+                    torus_grid.num_vertices,
+                    torus_grid.num_edges,
+                    torus_grid.num_levels,
+                    torus_grid.size[E2C2VDim],
+                    repetitions,
+                    dry_runs,
+                )
+                print(
+                    "nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined_v2v_general median: {}".format(
+                        np.median(
+                            runtimes[
+                                "nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined_v2v_general"
+                            ]
+                        )
+                    )
+                )
             else:
                 runtimes[
                     "nabla4_vertical_interpolate_benchmark_unstructured_gpu_kloop_inlined_v2v"
@@ -2392,26 +2500,24 @@ def run_benchmarks():
                     )
                 )
             if not args.vertical:
-                runtimes[
-                    "nabla4_interpolate_benchmark_gpu_kloop_roofline"
-                ] = icon_benchmark.nabla4_interpolate_benchmark_gpu_kloop_roofline(
-                    torus_grid.num_cells,
-                    torus_grid.num_vertices,
-                    torus_grid.num_edges,
-                    torus_grid.num_levels,
-                    torus_grid.size[E2C2VDim],
-                    grid_cartesian_dimensions[0],
-                    grid_cartesian_dimensions[1],
-                    halo,
-                    repetitions,
-                    dry_runs,
+                runtimes["nabla4_interpolate_benchmark_gpu_kloop_roofline"] = (
+                    icon_benchmark.nabla4_interpolate_benchmark_gpu_kloop_roofline(
+                        torus_grid.num_cells,
+                        torus_grid.num_vertices,
+                        torus_grid.num_edges,
+                        torus_grid.num_levels,
+                        torus_grid.size[E2C2VDim],
+                        grid_cartesian_dimensions[0],
+                        grid_cartesian_dimensions[1],
+                        halo,
+                        repetitions,
+                        dry_runs,
+                    )
                 )
                 print(
                     "nabla4_interpolate_benchmark_gpu_kloop_roofline median: {}".format(
                         np.median(
-                            runtimes[
-                                "nabla4_interpolate_benchmark_gpu_kloop_roofline"
-                            ]
+                            runtimes["nabla4_interpolate_benchmark_gpu_kloop_roofline"]
                         )
                     )
                 )
@@ -2439,19 +2545,19 @@ def run_benchmarks():
                     )
                 )
             else:
-                runtimes[
-                    "nabla4_vertical_interpolate_benchmark_gpu_kloop_roofline"
-                ] = icon_benchmark.nabla4_vertical_interpolate_benchmark_gpu_kloop_roofline(
-                    torus_grid.num_cells,
-                    torus_grid.num_vertices,
-                    torus_grid.num_edges,
-                    torus_grid.num_levels,
-                    torus_grid.size[E2C2VDim],
-                    grid_cartesian_dimensions[0],
-                    grid_cartesian_dimensions[1],
-                    halo,
-                    repetitions,
-                    dry_runs,
+                runtimes["nabla4_vertical_interpolate_benchmark_gpu_kloop_roofline"] = (
+                    icon_benchmark.nabla4_vertical_interpolate_benchmark_gpu_kloop_roofline(
+                        torus_grid.num_cells,
+                        torus_grid.num_vertices,
+                        torus_grid.num_edges,
+                        torus_grid.num_levels,
+                        torus_grid.size[E2C2VDim],
+                        grid_cartesian_dimensions[0],
+                        grid_cartesian_dimensions[1],
+                        halo,
+                        repetitions,
+                        dry_runs,
+                    )
                 )
                 print(
                     "nabla4_vertical_interpolate_benchmark_gpu_kloop_roofline median: {}".format(

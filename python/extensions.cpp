@@ -252,18 +252,26 @@ NB_MODULE(icon_benchmark, m) {
         &nabla4_interpolate_benchmark_unstructured_cpu_kfirst_inlined_v2v);
     m.def("nabla4_interpolate_validate_unstructured_gpu_naive_inlined_v2v",
         &nabla4_interpolate_validate_unstructured_gpu_naive_inlined_v2v);
+    m.def("nabla4_interpolate_validate_unstructured_gpu_naive_inlined_v2v_general",
+        &nabla4_interpolate_validate_unstructured_gpu_naive_inlined_v2v_general);
     m.def("nabla4_vertical_interpolate_validate_unstructured_gpu_naive_inlined_v2v",
         &nabla4_vertical_interpolate_validate_unstructured_gpu_naive_inlined_v2v);
     m.def("nabla4_interpolate_validate_unstructured_gpu_kloop_inlined_v2v",
         &nabla4_interpolate_validate_unstructured_gpu_kloop_inlined_v2v);
+    m.def("nabla4_interpolate_validate_unstructured_gpu_kloop_inlined_v2v_general",
+        &nabla4_interpolate_validate_unstructured_gpu_kloop_inlined_v2v_general);
     m.def("nabla4_vertical_interpolate_validate_unstructured_gpu_kloop_inlined_v2v",
         &nabla4_vertical_interpolate_validate_unstructured_gpu_kloop_inlined_v2v);
     m.def("nabla4_interpolate_benchmark_unstructured_gpu_naive_inlined_v2v",
         &nabla4_interpolate_benchmark_unstructured_gpu_naive_inlined_v2v);
+    m.def("nabla4_interpolate_benchmark_unstructured_gpu_naive_inlined_v2v_general",
+        &nabla4_interpolate_benchmark_unstructured_gpu_naive_inlined_v2v_general);
     m.def("nabla4_vertical_interpolate_benchmark_unstructured_gpu_naive_inlined_v2v",
         &nabla4_vertical_interpolate_benchmark_unstructured_gpu_naive_inlined_v2v);
     m.def("nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined_v2v",
         &nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined_v2v);
+    m.def("nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined_v2v_general",
+        &nabla4_interpolate_benchmark_unstructured_gpu_kloop_inlined_v2v_general);
     m.def("nabla4_vertical_interpolate_benchmark_unstructured_gpu_kloop_inlined_v2v",
         &nabla4_vertical_interpolate_benchmark_unstructured_gpu_kloop_inlined_v2v);
     // Nabla4 & Interpolate & verts2cells separate
