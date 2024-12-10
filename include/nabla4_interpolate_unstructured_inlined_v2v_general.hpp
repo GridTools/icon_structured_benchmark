@@ -11,9 +11,9 @@ struct nabla4_interpolate_unstructured_inlined_v2v_general {
     using neighbors_e2c2v_gt_ctv_t =
         decltype(gridtools::storage::builder<T>.dimensions(0, 7_c).template type<index_type>().build()->const_target_view());
     using neighbors_e2c2v_indexes_gt_t =
-        decltype(gridtools::storage::builder<T>.dimensions(0, 24_c).template type<index_type>().build());
+        decltype(gridtools::storage::builder<T>.dimensions(0, 24_c).template type<uint8_t>().build());
     using neighbors_e2c2v_indexes_gt_ctv_t =
-        decltype(gridtools::storage::builder<T>.dimensions(0, 24_c).template type<index_type>().build()->const_target_view());
+        decltype(gridtools::storage::builder<T>.dimensions(0, 24_c).template type<uint8_t>().build()->const_target_view());
     using neighbors_e2ecv_gt_t =
         decltype(gridtools::storage::builder<T>.dimensions(0, 24_c).template type<index_type>().build());
     using neighbors_e2ecv_gt_ctv_t =
@@ -54,7 +54,7 @@ struct nabla4_interpolate_unstructured_inlined_v2v_general {
                 }
             }).build()),
             v2e2c2v_gt_ctv(v2e2c2v_gt->const_target_view()),
-            v2e2c2v_indexes_gt(storage::builder<T>.template type<index_type>().dimensions(v2e.size(), 24_c).initializer([](int i, int j) {
+            v2e2c2v_indexes_gt(storage::builder<T>.template type<uint8_t>().dimensions(v2e.size(), 24_c).initializer([](int i, int j) {
                 switch (j) {
                     case 0:
                         return 0;
@@ -268,7 +268,7 @@ constexpr block_dims get_block_dims_unstructured_nabla_interpol_inlined_v2v_gene
 
 template <>
 constexpr block_dims get_block_dims_unstructured_nabla_interpol_inlined_v2v_general_kloop<int>() {
-    return {64, 2, 1, 128};
+    return {32, 4, 1, 128};
 };
 
 constexpr block_dims block_dims_unstructured_nabla_interpol_inlined_v2v_general_kloop =
@@ -307,7 +307,7 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
         v2e2c2v_gt_ctv(vertex_index, 4),
         v2e2c2v_gt_ctv(vertex_index, 5),
         v2e2c2v_gt_ctv(vertex_index, 6)};
-    const std::array<index_type, 24> v2e2c2v_indexes{v2e2c2v_indexes_gt_ctv(vertex_index, 0),
+    const std::array<uint8_t, 24> v2e2c2v_indexes{v2e2c2v_indexes_gt_ctv(vertex_index, 0),
         v2e2c2v_indexes_gt_ctv(vertex_index, 1),
         v2e2c2v_indexes_gt_ctv(vertex_index, 2),
         v2e2c2v_indexes_gt_ctv(vertex_index, 3),
@@ -449,7 +449,7 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
             v_vert_gt_tv(v2e2c2v[4], k_index),
             v_vert_gt_tv(v2e2c2v[5], k_index),
             v_vert_gt_tv(v2e2c2v[6], k_index)};
-#pragma unroll
+#pragma unroll 6
         for (auto i{0}; i < 6; ++i) {
             const auto edge_index = v2e[i];
             const auto E2C2V_0_index = v2e2c2v_indexes[i * 4];
