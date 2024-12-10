@@ -152,7 +152,7 @@ struct nabla4_interpolate_unstructured_inlined_v2v_general {
                 }
             }).build()),
             v2e2c2v_gt_ctv(v2e2c2v_gt->const_target_view()),
-            v2e2c2v_indexes_gt(storage::builder<T>.template type<index_type>().dimensions(v2e.size(), 24_c).initializer([](int i, int j) {
+            v2e2c2v_indexes_gt(storage::builder<T>.template type<uint8_t>().dimensions(v2e.size(), 24_c).initializer([](int i, int j) {
                 switch (j) {
                     case 0:
                         return 0;
@@ -273,6 +273,8 @@ constexpr block_dims get_block_dims_unstructured_nabla_interpol_inlined_v2v_gene
 
 constexpr block_dims block_dims_unstructured_nabla_interpol_inlined_v2v_general_kloop =
     get_block_dims_unstructured_nabla_interpol_inlined_v2v_general_kloop<index_type>();
+
+constexpr int k_repetitions_unstructured_nabla_interpol_inlined_v2v_general_kloop{3};
 
 __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined_v2v_general_kloop.size)
     run_gpu_kloop_nabla4_interpolate_inlined_v2v_general_unstructured(index_type nabla4_output_size,
@@ -434,36 +436,52 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
         ptr_coeff_2_gt_ctv(vertex_index, 4),
         ptr_coeff_2_gt_ctv(vertex_index, 5)};
     std::array<WP_TYPE, 6> z_nabla4_e2_wp;
-    for (auto k_index{blockIdx.y * blockDim.y + threadIdx.y}; k_index < KDim; k_index += gridDim.y * blockDim.y) {
-        const std::array<WP_TYPE, 7> u_vert{u_vert_gt_tv(v2e2c2v[0], k_index),
-            u_vert_gt_tv(v2e2c2v[1], k_index),
-            u_vert_gt_tv(v2e2c2v[2], k_index),
-            u_vert_gt_tv(v2e2c2v[3], k_index),
-            u_vert_gt_tv(v2e2c2v[4], k_index),
-            u_vert_gt_tv(v2e2c2v[5], k_index),
-            u_vert_gt_tv(v2e2c2v[6], k_index)};
-        const std::array<WP_TYPE, 7> v_vert{v_vert_gt_tv(v2e2c2v[0], k_index),
-            v_vert_gt_tv(v2e2c2v[1], k_index),
-            v_vert_gt_tv(v2e2c2v[2], k_index),
-            v_vert_gt_tv(v2e2c2v[3], k_index),
-            v_vert_gt_tv(v2e2c2v[4], k_index),
-            v_vert_gt_tv(v2e2c2v[5], k_index),
-            v_vert_gt_tv(v2e2c2v[6], k_index)};
+    __shared__ std::array<VP_TYPE,
+        7 * k_repetitions_unstructured_nabla_interpol_inlined_v2v_general_kloop *
+            block_dims_unstructured_nabla_interpol_inlined_v2v_general_kloop.x *
+            block_dims_unstructured_nabla_interpol_inlined_v2v_general_kloop.y>
+        u_vert;
+    __shared__ std::array<VP_TYPE,
+        7 * k_repetitions_unstructured_nabla_interpol_inlined_v2v_general_kloop *
+            block_dims_unstructured_nabla_interpol_inlined_v2v_general_kloop.x *
+            block_dims_unstructured_nabla_interpol_inlined_v2v_general_kloop.y>
+        v_vert;
+    int k_repetition{};
+    for (int k_index{static_cast<int>(blockIdx.y * blockDim.y + threadIdx.y)}; k_index < KDim;
+         k_index += gridDim.y * blockDim.y) {
+        for (int i{0}; i < 7; ++i) {
+            const auto index = (k_repetitions_unstructured_nabla_interpol_inlined_v2v_general_kloop * 7 *
+                                   (threadIdx.x + (blockDim.x * threadIdx.y))) +
+                               k_repetition * 7 + i;
+            // printf("[%d %d:%d %d:%d %d] k_index: %d i: %d index: %d k_repetition: %d\n", blockIdx.x, blockIdx.y,
+            // threadIdx.x, threadIdx.y, blockDim.x, blockDim.y, k_index, i, index, k_repetition);
+            u_vert[index] = u_vert_gt_tv(v2e2c2v[i], k_index);
+            v_vert[index] = v_vert_gt_tv(v2e2c2v[i], k_index);
+        }
+        ++k_repetition;
+    }
+    __syncthreads();
+    k_repetition = 0;
+    for (int k_index{static_cast<int>(blockIdx.y * blockDim.y + threadIdx.y)}; k_index < KDim;
+         k_index += gridDim.y * blockDim.y) {
 #pragma unroll 6
-        for (auto i{0}; i < 6; ++i) {
+        for (int i{0}; i < 6; ++i) {
             const auto edge_index = v2e[i];
             const auto E2C2V_0_index = v2e2c2v_indexes[i * 4];
             const auto E2C2V_1_index = v2e2c2v_indexes[i * 4 + 1];
             const auto E2C2V_2_index = v2e2c2v_indexes[i * 4 + 2];
             const auto E2C2V_3_index = v2e2c2v_indexes[i * 4 + 3];
-            const double nabv_tang_wp = u_vert[E2C2V_0_index] * primal_normal_vert_v1[4 * i] +
-                                        v_vert[E2C2V_0_index] * primal_normal_vert_v2[4 * i] +
-                                        u_vert[E2C2V_1_index] * primal_normal_vert_v1[4 * i + 1] +
-                                        v_vert[E2C2V_1_index] * primal_normal_vert_v2[4 * i + 1];
-            const double nabv_norm_wp = u_vert[E2C2V_2_index] * primal_normal_vert_v1[4 * i + 2] +
-                                        v_vert[E2C2V_2_index] * primal_normal_vert_v2[4 * i + 2] +
-                                        u_vert[E2C2V_3_index] * primal_normal_vert_v1[4 * i + 3] +
-                                        v_vert[E2C2V_3_index] * primal_normal_vert_v2[4 * i + 3];
+            const auto base_index = (k_repetitions_unstructured_nabla_interpol_inlined_v2v_general_kloop * 7 *
+                                        (threadIdx.x + (blockDim.x * threadIdx.y))) +
+                                    k_repetition * 7;
+            const WP_TYPE nabv_tang_wp = u_vert[base_index + E2C2V_0_index] * primal_normal_vert_v1[4 * i] +
+                                         v_vert[base_index + E2C2V_0_index] * primal_normal_vert_v2[4 * i] +
+                                         u_vert[base_index + E2C2V_1_index] * primal_normal_vert_v1[4 * i + 1] +
+                                         v_vert[base_index + E2C2V_1_index] * primal_normal_vert_v2[4 * i + 1];
+            const WP_TYPE nabv_norm_wp = u_vert[base_index + E2C2V_2_index] * primal_normal_vert_v1[4 * i + 2] +
+                                         v_vert[base_index + E2C2V_2_index] * primal_normal_vert_v2[4 * i + 2] +
+                                         u_vert[base_index + E2C2V_3_index] * primal_normal_vert_v1[4 * i + 3] +
+                                         v_vert[base_index + E2C2V_3_index] * primal_normal_vert_v2[4 * i + 3];
             const WP_TYPE z_nabla2_e = z_nabla2_e_gt_tv(edge_index, k_index);
             z_nabla4_e2_wp[i] =
                 4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e) * (inv_vert_vert_length[i] * inv_vert_vert_length[i]) +
@@ -475,6 +493,7 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
         p_v_out_gt_tv(vertex_index, k_index) = z_nabla4_e2_wp[0] * ptr_coeff_2[0] + z_nabla4_e2_wp[1] * ptr_coeff_2[1] +
                                                z_nabla4_e2_wp[2] * ptr_coeff_2[2] + z_nabla4_e2_wp[3] * ptr_coeff_2[3] +
                                                z_nabla4_e2_wp[4] * ptr_coeff_2[4] + z_nabla4_e2_wp[5] * ptr_coeff_2[5];
+        ++k_repetition;
     }
 };
 
@@ -483,7 +502,14 @@ inline void nabla4_interpolate_unstructured_inlined_v2v_general<T>::run_gpu_kloo
     constexpr dim3 tblocks(block_dims_unstructured_nabla_interpol_inlined_v2v_general_kloop.x,
         block_dims_unstructured_nabla_interpol_inlined_v2v_general_kloop.y,
         block_dims_unstructured_nabla_interpol_inlined_v2v_general_kloop.z);
-    dim3 grid((interpolate_data.output_size + tblocks.x - 1) / tblocks.x, 2, 1);
+    dim3 grid((interpolate_data.output_size + tblocks.x - 1) / tblocks.x,
+        ((interpolate_data.KDim / k_repetitions_unstructured_nabla_interpol_inlined_v2v_general_kloop) + tblocks.y -
+            1) /
+            tblocks.y,
+        1);
+    // printf("shared mem size: %d\n", 7 * k_repetitions_unstructured_nabla_interpol_inlined_v2v_general_kloop *
+    // block_dims_unstructured_nabla_interpol_inlined_v2v_general_kloop.x *
+    // block_dims_unstructured_nabla_interpol_inlined_v2v_general_kloop.y);
     run_gpu_kloop_nabla4_interpolate_inlined_v2v_general_unstructured<<<grid, tblocks>>>(nabla4_data.output_size,
         interpolate_data.output_size,
         nabla4_data.CellDim,
