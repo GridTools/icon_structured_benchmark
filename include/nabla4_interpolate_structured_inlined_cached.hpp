@@ -103,7 +103,7 @@ constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_cached_klo
 
 template <>
 constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_cached_kloop<int>() {
-    return {32, 8, 1, 256};
+    return {32, 8, 2, 512};
 };
 
 constexpr block_dims block_dims_structured_nabla_interpol_inlined_cached_kloop =
@@ -206,6 +206,7 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_c
         ptr_coeff_2_gt_ctv(vertex_index_internal, 4),
         ptr_coeff_2_gt_ctv(vertex_index_internal, 5)};
     for (auto k_index{blockIdx.z * blockDim.z + threadIdx.z}; k_index < KDim; k_index += gridDim.z * blockDim.z) {
+#pragma unroll 3
         for (auto color{0}; color < 3; ++color) {
             const auto E2C2V_0_c = E2C2V_0[color];
             const auto E2C2V_1_c = E2C2V_1[color];
