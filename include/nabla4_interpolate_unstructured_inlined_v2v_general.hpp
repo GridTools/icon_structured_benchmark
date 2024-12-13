@@ -453,8 +453,6 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
             const auto index = (k_repetitions_unstructured_nabla_interpol_inlined_v2v_general_kloop * 7 *
                                    (threadIdx.x + (blockDim.x * threadIdx.y))) +
                                k_repetition * 7 + i;
-            // printf("[%d %d:%d %d:%d %d] k_index: %d i: %d index: %d k_repetition: %d\n", blockIdx.x, blockIdx.y,
-            // threadIdx.x, threadIdx.y, blockDim.x, blockDim.y, k_index, i, index, k_repetition);
             u_vert[index] = u_vert_gt_tv(v2e2c2v[i], k_index);
             v_vert[index] = v_vert_gt_tv(v2e2c2v[i], k_index);
         }
@@ -507,9 +505,6 @@ inline void nabla4_interpolate_unstructured_inlined_v2v_general<T>::run_gpu_kloo
             1) /
             tblocks.y,
         1);
-    // printf("shared mem size: %d\n", 7 * k_repetitions_unstructured_nabla_interpol_inlined_v2v_general_kloop *
-    // block_dims_unstructured_nabla_interpol_inlined_v2v_general_kloop.x *
-    // block_dims_unstructured_nabla_interpol_inlined_v2v_general_kloop.y);
     run_gpu_kloop_nabla4_interpolate_inlined_v2v_general_unstructured<<<grid, tblocks>>>(nabla4_data.output_size,
         interpolate_data.output_size,
         nabla4_data.CellDim,
