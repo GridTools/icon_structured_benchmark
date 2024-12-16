@@ -413,13 +413,18 @@ constexpr block_dims get_block_dims_unstructured_nabla_interpol_v2c_inlined_c2v_
 
 template <>
 constexpr block_dims get_block_dims_unstructured_nabla_interpol_v2c_inlined_c2v_kloop<int>() {
-    return {32, 6, 1, 192};
+    return {32, 4, 1, 128};
 };
 
 constexpr block_dims block_dims_unstructured_nabla_interpol_v2c_inlined_c2v_kloop =
     get_block_dims_unstructured_nabla_interpol_v2c_inlined_c2v_kloop<index_type>();
 
-__global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_v2c_inlined_c2v_kloop.size)
+__global__ void
+#if __CUDACC_VER_MAJOR__ < 12 || (__CUDACC_VER_MAJOR__ == 12 && __CUDACC_VER_MINOR__ < 5)
+__launch_bounds__(block_dims_unstructured_nabla_interpol_v2c_inlined_c2v_kloop.size)
+#else
+__maxnreg__(255)
+#endif
     run_gpu_kloop_nabla4_interpolate_verts2cells_inlined_c2v_unstructured(index_type verts2cells_output_size,
         index_type CellDim,
         index_type VertexDim,
