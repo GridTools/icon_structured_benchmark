@@ -1,3 +1,5 @@
+#pragma once
+
 #include <utility>
 
 #include <interpolate_structured_gridtools.hpp>

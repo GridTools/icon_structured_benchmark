@@ -12,6 +12,7 @@
 #include "nabla4_interpolate_unstructured_inlined_v2v_general.hpp"
 #include "nabla4_interpolate_unstructured_separate.hpp"
 #include "nabla4_interpolate_verts2cells_structured_inlined.hpp"
+#include "nabla4_interpolate_verts2cells_structured_inlined_cached.hpp"
 #include "nabla4_interpolate_verts2cells_structured_separate.hpp"
 #include "nabla4_interpolate_verts2cells_unstructured_inlined.hpp"
 #include "nabla4_interpolate_verts2cells_unstructured_inlined_c2v.hpp"
