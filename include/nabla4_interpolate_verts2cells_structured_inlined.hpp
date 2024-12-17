@@ -184,13 +184,12 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlin
         verts2cells_structured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_c_coeff_1_gt_ctv,
         verts2cells_structured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_c_coeff_2_gt_ctv,
         verts2cells_structured<storage::gpu>::data_store_2d_tv_WP_t p_cell_out_gt_tv) {
-    const auto i{blockIdx.x * blockDim.x + threadIdx.x + halo_verts2cells};
-    const auto j{blockIdx.y * blockDim.y + threadIdx.y + halo_verts2cells};
+    const auto i{blockIdx.x * blockDim.x + threadIdx.x};
+    const auto j{blockIdx.y * blockDim.y + threadIdx.y};
     if (i >= x_dim_verts2cells - halo_verts2cells || j >= y_dim_verts2cells - halo_verts2cells) {
         return;
     }
-    const index_type index_internal =
-        i - halo_verts2cells + (j - halo_verts2cells) * (x_dim_verts2cells - 2 * halo_verts2cells);
+    const index_type index_internal = i + j * (x_dim_verts2cells - halo_verts2cells);
     const index_type cell_index_internal_upward{2 * index_internal};
     const index_type cell_index_internal_downward{2 * index_internal + 1};
     const std::array<index_type, 14> c2v2e2c2v_compressed{
@@ -467,14 +466,14 @@ inline void nabla4_interpolate_verts2cells_structured_inlined<T>::run_gpu_kloop_
         block_dims_structured_nabla_interpol_v2c_inlined_kloop.y,
         block_dims_structured_nabla_interpol_v2c_inlined_kloop.z);
     const index_type verts2cells_output_domain_size =
-        (verts2cells_data.x_dim - 2 * verts2cells_data.halo) * (verts2cells_data.y_dim - 2 * verts2cells_data.halo);
+        (verts2cells_data.x_dim - verts2cells_data.halo) * (verts2cells_data.y_dim - verts2cells_data.halo);
     const index_type interpolate_output_domain_size =
         (interpolate_data.x_dim - 2 * interpolate_data.halo) * (interpolate_data.y_dim - 2 * interpolate_data.halo);
     const index_type nabla4_output_domain_size =
         (nabla4_data.x_dim - 2 * nabla4_data.halo) * (nabla4_data.y_dim - 2 * nabla4_data.halo);
     const index_type outer_domain_size = nabla4_data.x_dim * nabla4_data.y_dim;
-    const index_type verts2cells_output_x_dim = verts2cells_data.x_dim - 2 * verts2cells_data.halo;
-    const index_type verts2cells_output_y_dim = verts2cells_data.y_dim - 2 * verts2cells_data.halo;
+    const index_type verts2cells_output_x_dim = verts2cells_data.x_dim - verts2cells_data.halo;
+    const index_type verts2cells_output_y_dim = verts2cells_data.y_dim - verts2cells_data.halo;
     dim3 grid((verts2cells_output_x_dim + tblocks.x - 1) / tblocks.x,
         (verts2cells_output_y_dim + tblocks.y - 1) / tblocks.y,
         1);
@@ -565,14 +564,13 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlin
         verts2cells_structured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_c_coeff_1_gt_ctv,
         verts2cells_structured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_c_coeff_2_gt_ctv,
         verts2cells_structured<storage::gpu>::data_store_2d_tv_WP_t p_cell_out_gt_tv) {
-    const auto i{blockIdx.x * blockDim.x + threadIdx.x + halo_verts2cells};
-    const auto j{blockIdx.y * blockDim.y + threadIdx.y + halo_verts2cells};
+    const auto i{blockIdx.x * blockDim.x + threadIdx.x};
+    const auto j{blockIdx.y * blockDim.y + threadIdx.y};
     const auto k_index{blockIdx.z * blockDim.z + threadIdx.z};
     if (i >= x_dim_verts2cells - halo_verts2cells || j >= y_dim_verts2cells - halo_verts2cells || k_index >= KDim) {
         return;
     }
-    const index_type index_internal =
-        i - halo_verts2cells + (j - halo_verts2cells) * (x_dim_verts2cells - 2 * halo_verts2cells);
+    const index_type index_internal = i + j * (x_dim_verts2cells - halo_verts2cells);
     const index_type cell_index_internal_upward{2 * index_internal};
     const index_type cell_index_internal_downward{2 * index_internal + 1};
     const std::array<index_type, 14> c2v2e2c2v_compressed{
@@ -989,14 +987,14 @@ inline void nabla4_interpolate_verts2cells_structured_inlined<T>::run_gpu_naive_
         block_dims_structured_nabla_interpol_v2c_inlined_naive.y,
         block_dims_structured_nabla_interpol_v2c_inlined_naive.z);
     const index_type verts2cells_output_domain_size =
-        (verts2cells_data.x_dim - 2 * verts2cells_data.halo) * (verts2cells_data.y_dim - 2 * verts2cells_data.halo);
+        (verts2cells_data.x_dim - verts2cells_data.halo) * (verts2cells_data.y_dim - verts2cells_data.halo);
     const index_type interpolate_output_domain_size =
         (interpolate_data.x_dim - 2 * interpolate_data.halo) * (interpolate_data.y_dim - 2 * interpolate_data.halo);
     const index_type nabla4_output_domain_size =
         (nabla4_data.x_dim - 2 * nabla4_data.halo) * (nabla4_data.y_dim - 2 * nabla4_data.halo);
     const index_type outer_domain_size = nabla4_data.x_dim * nabla4_data.y_dim;
-    const index_type verts2cells_output_x_dim = verts2cells_data.x_dim - 2 * verts2cells_data.halo;
-    const index_type verts2cells_output_y_dim = verts2cells_data.y_dim - 2 * verts2cells_data.halo;
+    const index_type verts2cells_output_x_dim = verts2cells_data.x_dim - verts2cells_data.halo;
+    const index_type verts2cells_output_y_dim = verts2cells_data.y_dim - verts2cells_data.halo;
     dim3 grid((verts2cells_output_x_dim + tblocks.x - 1) / tblocks.x,
         (verts2cells_output_y_dim + tblocks.y - 1) / tblocks.y,
         (verts2cells_data.KDim + tblocks.z - 1) / tblocks.z);

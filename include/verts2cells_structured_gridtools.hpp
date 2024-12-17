@@ -41,7 +41,7 @@ class verts2cells_structured : public verts2cells_vector<S> {
         index_type x_dim,
         index_type halo)
         : y_dim(y_dim), x_dim(x_dim),
-          halo(halo), verts2cells_vector<S>(VertexDim, CellDim, KDim, 2 * (y_dim - 2 * halo) * (x_dim - 2 * halo)){};
+          halo(halo), verts2cells_vector<S>(VertexDim, CellDim, KDim, 2 * (y_dim - halo) * (x_dim - halo)){};
 
     verts2cells_structured(std::size_t VertexDim,
         std::size_t CellDim,
@@ -53,7 +53,7 @@ class verts2cells_structured : public verts2cells_vector<S> {
         input_type p_vert_v_in_gt)
         : y_dim(y_dim), x_dim(x_dim), halo(halo),
           verts2cells_vector<S>(
-              VertexDim, CellDim, KDim, p_vert_u_in_gt, p_vert_v_in_gt, 2 * (y_dim - 2 * halo) * (x_dim - 2 * halo)){};
+              VertexDim, CellDim, KDim, p_vert_u_in_gt, p_vert_v_in_gt, 2 * (y_dim - halo) * (x_dim - halo)){};
 
     verts2cells_structured(std::size_t VertexDim,
         std::size_t CellDim,
@@ -68,7 +68,7 @@ class verts2cells_structured : public verts2cells_vector<S> {
         : y_dim(y_dim), x_dim(x_dim), halo(halo), verts2cells_vector<S>(VertexDim,
                                                       CellDim,
                                                       KDim,
-                                                      2 * (y_dim - 2 * halo) * (x_dim - 2 * halo),
+                                                      2 * (y_dim - halo) * (x_dim - halo),
                                                       p_vert_u_in,
                                                       p_vert_v_in,
                                                       ptr_coeff_1,
@@ -87,7 +87,7 @@ class verts2cells_structured : public verts2cells_vector<S> {
         : y_dim(y_dim), x_dim(x_dim), halo(halo), verts2cells_vector<S>(VertexDim,
                                                       CellDim,
                                                       KDim,
-                                                      2 * (y_dim - 2 * halo) * (x_dim - 2 * halo),
+                                                      2 * (y_dim - halo) * (x_dim - halo),
                                                       p_vert_u_in,
                                                       p_vert_v_in,
                                                       ptr_coeff_1,
@@ -95,14 +95,14 @@ class verts2cells_structured : public verts2cells_vector<S> {
 
   private:
     void run_cpu_kfirst() {
-        for (index_type j = halo; j < y_dim - halo; ++j) {
+        for (index_type j = 0; j < y_dim - halo; ++j) {
 #ifdef __clang__
 #pragma clang loop unroll(enable) vectorize(assume_safety) interleave(enable)
 #elif defined(__GNUC__)
 #pragma GCC ivdep
 #endif
-            for (index_type i = halo; i < x_dim - halo; ++i) {
-                const index_type index_internal = i - halo + (j - halo) * (x_dim - 2 * halo);
+            for (index_type i = 0; i < x_dim - halo; ++i) {
+                const index_type index_internal = i + j * (x_dim - halo);
                 const index_type cell_index_internal_upward{2 * index_internal};
                 const index_type cell_index_internal_downward{2 * index_internal + 1};
                 const std::array<index_type, 4> c2v_compressed{get_c2v_compressed(i, j, x_dim)};
@@ -211,11 +211,11 @@ __global__ void __launch_bounds__(block_dims_structured_verts2cells_kloop.size)
         verts2cells_structured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_1_gt_ctv,
         verts2cells_structured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_2_gt_ctv,
         verts2cells_structured<storage::gpu>::data_store_2d_tv_WP_t p_cell_out_gt_tv) {
-    const auto i = blockIdx.x * blockDim.x + threadIdx.x + halo;
-    const auto j = blockIdx.y * blockDim.y + threadIdx.y + halo;
+    const auto i = blockIdx.x * blockDim.x + threadIdx.x;
+    const auto j = blockIdx.y * blockDim.y + threadIdx.y;
     if (i >= x_dim - halo || j >= y_dim - halo)
         return;
-    const index_type index_internal = i - halo + (j - halo) * (x_dim - 2 * halo);
+    const index_type index_internal = i + j * (x_dim - halo);
     const index_type cell_index_internal_upward{2 * index_internal};
     const index_type cell_index_internal_downward{2 * index_internal + 1};
     const std::array<index_type, 4> c2v_compressed{get_c2v_compressed(i, j, x_dim)};
@@ -314,12 +314,12 @@ __global__ void __launch_bounds__(block_dims_structured_verts2cells_naive.size)
         verts2cells_structured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_1_gt_ctv,
         verts2cells_structured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_2_gt_ctv,
         verts2cells_structured<storage::gpu>::data_store_2d_tv_WP_t p_cell_out_gt_tv) {
-    const auto i = blockIdx.x * blockDim.x + threadIdx.x + halo;
-    const auto j = blockIdx.y * blockDim.y + threadIdx.y + halo;
+    const auto i = blockIdx.x * blockDim.x + threadIdx.x;
+    const auto j = blockIdx.y * blockDim.y + threadIdx.y;
     const auto k_index = blockIdx.z * blockDim.z + threadIdx.z;
     if (i >= x_dim - halo || j >= y_dim - halo || k_index >= KDim)
         return;
-    const index_type index_internal = i - halo + (j - halo) * (x_dim - 2 * halo);
+    const index_type index_internal = i + j * (x_dim - halo);
     const index_type cell_index_internal_upward{2 * index_internal};
     const index_type cell_index_internal_downward{2 * index_internal + 1};
     const std::array<index_type, 4> c2v_compressed{get_c2v_compressed(i, j, x_dim)};

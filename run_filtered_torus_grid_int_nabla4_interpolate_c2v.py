@@ -146,8 +146,8 @@ def filter_c2v_vector(c2v, grid_cartesian_dimensions, halo=3):
     for j in range(grid_cartesian_dimensions[0]):
         for i in range(grid_cartesian_dimensions[1]):
             if (
-                i > halo - 1
-                and j > halo - 1
+                i > halo - 2
+                and j > halo - 2
                 and i < grid_cartesian_dimensions[1] - halo
                 and j < grid_cartesian_dimensions[0] - halo
             ):
@@ -203,7 +203,7 @@ def run_sanity_checks(
         ptr_coeff_1,
         ptr_coeff_2,
     )
-    inner_cells = (lon_dim - 2 * (halo + 2)) * (lat_dim - 2 * (halo + 2)) * 2
+    inner_cells = (lon_dim - 2 * (halo + 1) - 1) * (lat_dim - 2 * (halo + 1) - 1) * 2
     assert len(filtered_c2v_separate) == inner_cells
     ptr_c_coeff_1 = np.random.rand(inner_cells, 3)
     ptr_c_coeff_2 = np.random.rand(inner_cells, 3)
@@ -217,6 +217,7 @@ def run_sanity_checks(
         ptr_c_coeff_1,
         ptr_c_coeff_2,
     )
+    assert len(p_cell_out_ref) == inner_cells
     print("Generated separated validation data")
 
     print("Generating inlined validation data")
