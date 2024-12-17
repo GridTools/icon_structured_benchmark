@@ -235,7 +235,7 @@ constexpr block_dims get_block_dims_structured_nabla_interpol_v2c_inlined_cached
 
 template <>
 constexpr block_dims get_block_dims_structured_nabla_interpol_v2c_inlined_cached_naive<int>() {
-    return {32, 1, 4, 128};
+    return {32, 8, 2, 512};
 };
 
 constexpr block_dims block_dims_structured_nabla_interpol_v2c_inlined_cached_naive =
@@ -268,8 +268,8 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlin
         verts2cells_structured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_c_coeff_1_gt_ctv,
         verts2cells_structured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_c_coeff_2_gt_ctv,
         verts2cells_structured<storage::gpu>::data_store_2d_tv_WP_t p_cell_out_gt_tv) {
-    const auto i{blockIdx.x * blockDim.x + threadIdx.x + halo_interpolate - 1 - blockIdx.x};
-    const auto j{blockIdx.y * blockDim.y + threadIdx.y + halo_interpolate - 1 - 2 * blockIdx.y};
+    const auto i{blockIdx.x * blockDim.x + threadIdx.x + halo_nabla4 + halo_interpolate - 1 - blockIdx.x};
+    const auto j{blockIdx.y * blockDim.y + threadIdx.y + halo_nabla4 + halo_interpolate - 1 - 2 * blockIdx.y};
     const auto k_index{blockIdx.z * blockDim.z + threadIdx.z};
     if (i >= x_dim_nabla4 - halo_interpolate || j >= y_dim_nabla4 - halo_interpolate || k_index >= KDim) {
         return;
@@ -277,9 +277,11 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlin
     extern __shared__ WP_TYPE shared_mem[];
     constexpr auto block_horizontal_dim{block_dims_structured_nabla_interpol_v2c_inlined_cached_naive.x *
                                         block_dims_structured_nabla_interpol_v2c_inlined_cached_naive.y};
-    const index_type z_nabla4_offset{5 * block_horizontal_dim * threadIdx.z};
-    const index_type p_u_out_offset{3 * block_horizontal_dim + 5 * block_horizontal_dim * threadIdx.z};
-    const index_type p_v_out_offset{4 * block_horizontal_dim + 5 * block_horizontal_dim * threadIdx.z};
+    const index_type z_nabla4_offset{static_cast<index_type>(5 * block_horizontal_dim * threadIdx.z)};
+    const index_type p_u_out_offset{
+        static_cast<index_type>(3 * block_horizontal_dim + 5 * block_horizontal_dim * threadIdx.z)};
+    const index_type p_v_out_offset{
+        static_cast<index_type>(4 * block_horizontal_dim + 5 * block_horizontal_dim * threadIdx.z)};
     const index_type i_j = j * x_dim_nabla4 + i;
     const index_type i_jp1 = (j + 1) * x_dim_nabla4 + i;
     const index_type im1_jp1 = (j + 1) * x_dim_nabla4 + i - 1;
@@ -351,7 +353,80 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlin
         const WP_TYPE z_nabla2_e = z_nabla2_e_gt_tv(edge_index + color * outer_domain_size, k_index);
         shared_mem[local_edge_index] = 4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e) * inv_vert_vert_length_sqr[color] +
                                                  (nabv_tang_wp - 2.0 * z_nabla2_e) * inv_primal_edge_length_sqr[color]);
+        printf("[%d %d %d:%d %d %d] i: %d j: %d x_dim_nabla4: %d shared_mem[%d] = %lf\n",
+            blockIdx.x,
+            blockIdx.y,
+            blockIdx.z,
+            threadIdx.x,
+            threadIdx.y,
+            threadIdx.z,
+            i,
+            j,
+            x_dim_nabla4,
+            local_edge_index,
+            shared_mem[local_edge_index]);
     };
+    __syncthreads();
+    const auto i_interpolate{blockIdx.x * blockDim.x + threadIdx.x + halo_nabla4 + halo_interpolate - blockIdx.x};
+    const auto j_interpolate{blockIdx.y * blockDim.y + threadIdx.y + halo_nabla4 + halo_interpolate - 2 * blockIdx.y};
+    if (i_interpolate >= x_dim_nabla4 - halo_interpolate || j_interpolate >= y_dim_nabla4 - halo_interpolate ||
+        threadIdx.x > blockDim.x - 2 || threadIdx.y > blockDim.y - 3 || k_index >= KDim) {
+        return;
+    }
+    const std::array<index_type, 6> v2e{
+        get_v2e_per_orientation(threadIdx.x + 1, threadIdx.y + 1, blockDim.x, blockDim.y)};
+    const index_type vertex_index_internal =
+        i_interpolate - (halo_nabla4 + halo_interpolate) +
+        (j_interpolate - (halo_nabla4 + halo_interpolate)) * (x_dim_nabla4 - 2 * (halo_nabla4 + halo_interpolate));
+    const std::array<WP_TYPE, 6> coeff_1{ptr_coeff_1_gt_ctv(vertex_index_internal, 0),
+        ptr_coeff_1_gt_ctv(vertex_index_internal, 1),
+        ptr_coeff_1_gt_ctv(vertex_index_internal, 2),
+        ptr_coeff_1_gt_ctv(vertex_index_internal, 3),
+        ptr_coeff_1_gt_ctv(vertex_index_internal, 4),
+        ptr_coeff_1_gt_ctv(vertex_index_internal, 5)};
+    const std::array<WP_TYPE, 6> coeff_2{ptr_coeff_2_gt_ctv(vertex_index_internal, 0),
+        ptr_coeff_2_gt_ctv(vertex_index_internal, 1),
+        ptr_coeff_2_gt_ctv(vertex_index_internal, 2),
+        ptr_coeff_2_gt_ctv(vertex_index_internal, 3),
+        ptr_coeff_2_gt_ctv(vertex_index_internal, 4),
+        ptr_coeff_2_gt_ctv(vertex_index_internal, 5)};
+    const auto local_vertex_index = (threadIdx.x + 1) + (threadIdx.y + 1) * blockDim.x;
+    shared_mem[local_vertex_index + p_u_out_offset] =
+        shared_mem[v2e[0] + z_nabla4_offset] * coeff_1[0] + shared_mem[v2e[1] + z_nabla4_offset] * coeff_1[1] +
+        shared_mem[v2e[2] + z_nabla4_offset] * coeff_1[2] + shared_mem[v2e[3] + z_nabla4_offset] * coeff_1[3] +
+        shared_mem[v2e[4] + z_nabla4_offset] * coeff_1[4] + shared_mem[v2e[5] + z_nabla4_offset] * coeff_1[5];
+    shared_mem[local_vertex_index + p_v_out_offset] =
+        shared_mem[v2e[0] + z_nabla4_offset] * coeff_2[0] + shared_mem[v2e[1] + z_nabla4_offset] * coeff_2[1] +
+        shared_mem[v2e[2] + z_nabla4_offset] * coeff_2[2] + shared_mem[v2e[3] + z_nabla4_offset] * coeff_2[3] +
+        shared_mem[v2e[4] + z_nabla4_offset] * coeff_2[4] + shared_mem[v2e[5] + z_nabla4_offset] * coeff_2[5];
+    printf("[%d %d %d:%d %d %d] i: %d j: %d x_dim_interpolate: %d vertex_index_internal: %d v2e: %d %d %d %d %d %d "
+           "coef1: %lf %lf %lf %lf %lf %lf shared_mem_u[%d] = %lf shared_mem_v[%d] = %lf\n",
+        blockIdx.x,
+        blockIdx.y,
+        blockIdx.z,
+        threadIdx.x,
+        threadIdx.y,
+        threadIdx.z,
+        i_interpolate,
+        j_interpolate,
+        x_dim_nabla4,
+        vertex_index_internal,
+        v2e[0],
+        v2e[1],
+        v2e[2],
+        v2e[3],
+        v2e[4],
+        v2e[5],
+        coeff_1[0],
+        coeff_1[1],
+        coeff_1[2],
+        coeff_1[3],
+        coeff_1[4],
+        coeff_1[5],
+        local_vertex_index,
+        shared_mem[local_vertex_index + p_u_out_offset],
+        local_vertex_index,
+        shared_mem[local_vertex_index + p_v_out_offset]);
     __syncthreads();
 };
 

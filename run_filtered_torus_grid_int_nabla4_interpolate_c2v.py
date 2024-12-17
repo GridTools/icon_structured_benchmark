@@ -188,6 +188,7 @@ def run_sanity_checks(
         )
     )
     p_e_in = np.array(random_validation_data_separate.z_nabla4_e2_wp).T
+    np.random.seed(10)
     ptr_coeff_1 = np.random.rand(grid.num_edges, 6)
     ptr_coeff_2 = np.random.rand(grid.num_edges, 6)
     (
