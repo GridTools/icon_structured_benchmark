@@ -280,13 +280,17 @@ __maxnreg__(80)
         return;
     }
     extern __shared__ WP_TYPE shared_mem[];
-    constexpr auto block_horizontal_dim{block_dims_structured_nabla_interpol_v2c_inlined_cached_naive.x *
-                                        block_dims_structured_nabla_interpol_v2c_inlined_cached_naive.y};
-    const index_type z_nabla4_offset{static_cast<index_type>(5 * block_horizontal_dim * threadIdx.z)};
+    constexpr auto block_horizontal_dim_nabla4{block_dims_structured_nabla_interpol_v2c_inlined_cached_naive.x *
+                                               block_dims_structured_nabla_interpol_v2c_inlined_cached_naive.y};
+    constexpr auto block_horizontal_dim_interpolate{
+        (block_dims_structured_nabla_interpol_v2c_inlined_cached_naive.x - 1) *
+        (block_dims_structured_nabla_interpol_v2c_inlined_cached_naive.y - 2)};
+    constexpr auto shared_mem_k_offset{block_horizontal_dim_nabla4 * 3 + block_horizontal_dim_interpolate * 2};
+    const index_type z_nabla4_offset{static_cast<index_type>(shared_mem_k_offset * threadIdx.z)};
     const index_type p_u_out_offset{
-        static_cast<index_type>(3 * block_horizontal_dim + 5 * block_horizontal_dim * threadIdx.z)};
-    const index_type p_v_out_offset{
-        static_cast<index_type>(4 * block_horizontal_dim + 5 * block_horizontal_dim * threadIdx.z)};
+        static_cast<index_type>(3 * block_horizontal_dim_nabla4 + shared_mem_k_offset * threadIdx.z)};
+    const index_type p_v_out_offset{static_cast<index_type>(
+        3 * block_horizontal_dim_nabla4 + block_horizontal_dim_interpolate + shared_mem_k_offset * threadIdx.z)};
     const index_type i_j = j_nabla4 * x_dim_nabla4 + i_nabla4;
     const index_type i_jp1 = (j_nabla4 + 1) * x_dim_nabla4 + i_nabla4;
     const index_type im1_jp1 = (j_nabla4 + 1) * x_dim_nabla4 + i_nabla4 - 1;
@@ -354,7 +358,7 @@ __maxnreg__(80)
                                     u_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v1_3[color] +
                                     v_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v2_3[color];
         const auto local_edge_index =
-            threadIdx.x + threadIdx.y * blockDim.x + color * block_horizontal_dim + z_nabla4_offset;
+            threadIdx.x + threadIdx.y * blockDim.x + color * block_horizontal_dim_nabla4 + z_nabla4_offset;
         const WP_TYPE z_nabla2_e = z_nabla2_e_gt_tv(edge_index + color * outer_domain_size, k_index);
         shared_mem[local_edge_index] = 4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e) * inv_vert_vert_length_sqr[color] +
                                                  (nabv_tang_wp - 2.0 * z_nabla2_e) * inv_primal_edge_length_sqr[color]);
@@ -446,7 +450,7 @@ inline void nabla4_interpolate_verts2cells_structured_inlined_cached<T>::run_gpu
     const index_type outer_domain_size = nabla4_data.x_dim * nabla4_data.y_dim;
     const index_type verts2cells_output_x_dim = verts2cells_data.x_dim - 2 * verts2cells_data.halo;
     const index_type verts2cells_output_y_dim = verts2cells_data.y_dim - 2 * verts2cells_data.halo;
-    constexpr index_type shared_mem_inner_domain = tblocks.x * tblocks.y;
+    constexpr index_type shared_mem_elements = (tblocks.x * tblocks.y) * 3 + (tblocks.x - 1) * (tblocks.y - 2) * 2;
     const index_type outer_x_dim = nabla4_data.x_dim - 2 * 2;
     const index_type outer_y_dim = nabla4_data.y_dim - 2 * 2;
     dim3 grid((outer_x_dim + (tblocks.x - 2) - 1) / (tblocks.x - 2),
@@ -454,7 +458,7 @@ inline void nabla4_interpolate_verts2cells_structured_inlined_cached<T>::run_gpu
         (verts2cells_data.KDim + tblocks.z - 1) / tblocks.z);
     run_gpu_naive_nabla4_interpolate_verts2cells_inlined_cached_structured<<<grid,
         tblocks,
-        shared_mem_inner_domain * 5 * sizeof(WP_TYPE) * tblocks.z>>>(verts2cells_data.KDim,
+        shared_mem_elements * sizeof(WP_TYPE) * tblocks.z>>>(verts2cells_data.KDim,
         verts2cells_data.x_dim,
         verts2cells_data.y_dim,
         verts2cells_data.halo,
