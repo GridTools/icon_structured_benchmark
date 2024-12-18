@@ -132,12 +132,7 @@ constexpr block_dims get_block_dims_structured_nabla_interpol_v2c_inlined_cached
 constexpr block_dims block_dims_structured_nabla_interpol_v2c_inlined_cached_kloop =
     get_block_dims_structured_nabla_interpol_v2c_inlined_cached_kloop<index_type>();
 
-__global__ void
-// #if __CUDACC_VER_MAJOR__ < 12 || (__CUDACC_VER_MAJOR__ == 12 && __CUDACC_VER_MINOR__ < 5)
-__launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlined_cached_kloop.size)
-    // #else
-    // __maxnreg__(128)
-    // #endif
+__global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlined_cached_kloop.size)
     run_gpu_kloop_nabla4_interpolate_verts2cells_inlined_cached_structured(index_type KDim,
         index_type x_dim_verts2cells,
         index_type y_dim_verts2cells,
@@ -404,8 +399,8 @@ inline void nabla4_interpolate_verts2cells_structured_inlined_cached<T>::run_gpu
     const index_type outer_domain_size = nabla4_data.x_dim * nabla4_data.y_dim;
     const index_type verts2cells_output_x_dim = verts2cells_data.x_dim - 2 * verts2cells_data.halo;
     const index_type verts2cells_output_y_dim = verts2cells_data.y_dim - 2 * verts2cells_data.halo;
-    constexpr int smemSize{49152};                                          // GH200
-    constexpr index_type shared_mem_elements = (tblocks.x * tblocks.y) * 3; // + (tblocks.x - 1) * (tblocks.y - 2) * 2;
+    constexpr int smemSize{49152}; // GH200
+    constexpr index_type shared_mem_elements = (tblocks.x * tblocks.y) * 3;
     constexpr long unsigned int k_repetitions{smemSize / (shared_mem_elements * sizeof(WP_TYPE) * tblocks.z)};
     const int KDim_ceil = std::ceil(static_cast<double>(interpolate_data.KDim) / k_repetitions);
     const index_type outer_x_dim = nabla4_data.x_dim - 2 * 2;
