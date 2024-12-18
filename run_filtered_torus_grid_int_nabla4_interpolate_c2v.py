@@ -983,6 +983,10 @@ def run_benchmarks():
             args.combination,
         )
 
+    if repetitions == 0:
+        print("Repetitions is 0, skipping benchmarks")
+        return
+
     if args.backend in ["all_cpu", "cpu_kfirst"]:
         if args.combination in ["all", "separate"]:
             runtimes[
