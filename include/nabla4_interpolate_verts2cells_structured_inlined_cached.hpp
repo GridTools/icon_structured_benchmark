@@ -126,7 +126,7 @@ constexpr block_dims get_block_dims_structured_nabla_interpol_v2c_inlined_cached
 
 template <>
 constexpr block_dims get_block_dims_structured_nabla_interpol_v2c_inlined_cached_kloop<int>() {
-    return {32, 8, 1, 256};
+    return {32, 12, 1, 384};
 };
 
 constexpr block_dims block_dims_structured_nabla_interpol_v2c_inlined_cached_kloop =
@@ -333,6 +333,78 @@ __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlined_cached_kloop.
         ptr_c_coeff_2_gt_ctv(cell_index_internal_downward, 0),
         ptr_c_coeff_2_gt_ctv(cell_index_internal_downward, 1),
         ptr_c_coeff_2_gt_ctv(cell_index_internal_downward, 2)};
+    const std::array<WP_TYPE, 36> ptr_coeff_1{ptr_coeff_1_gt_ctv(c2v_global[0], 0),
+        ptr_coeff_1_gt_ctv(c2v_global[0], 1),
+        ptr_coeff_1_gt_ctv(c2v_global[0], 2),
+        ptr_coeff_1_gt_ctv(c2v_global[0], 3),
+        ptr_coeff_1_gt_ctv(c2v_global[0], 4),
+        ptr_coeff_1_gt_ctv(c2v_global[0], 5),
+        ptr_coeff_1_gt_ctv(c2v_global[1], 0),
+        ptr_coeff_1_gt_ctv(c2v_global[1], 1),
+        ptr_coeff_1_gt_ctv(c2v_global[1], 2),
+        ptr_coeff_1_gt_ctv(c2v_global[1], 3),
+        ptr_coeff_1_gt_ctv(c2v_global[1], 4),
+        ptr_coeff_1_gt_ctv(c2v_global[1], 5),
+        ptr_coeff_1_gt_ctv(c2v_global[2], 0),
+        ptr_coeff_1_gt_ctv(c2v_global[2], 1),
+        ptr_coeff_1_gt_ctv(c2v_global[2], 2),
+        ptr_coeff_1_gt_ctv(c2v_global[2], 3),
+        ptr_coeff_1_gt_ctv(c2v_global[2], 4),
+        ptr_coeff_1_gt_ctv(c2v_global[2], 5),
+        ptr_coeff_1_gt_ctv(c2v_global[3], 0),
+        ptr_coeff_1_gt_ctv(c2v_global[3], 1),
+        ptr_coeff_1_gt_ctv(c2v_global[3], 2),
+        ptr_coeff_1_gt_ctv(c2v_global[3], 3),
+        ptr_coeff_1_gt_ctv(c2v_global[3], 4),
+        ptr_coeff_1_gt_ctv(c2v_global[3], 5),
+        ptr_coeff_1_gt_ctv(c2v_global[4], 0),
+        ptr_coeff_1_gt_ctv(c2v_global[4], 1),
+        ptr_coeff_1_gt_ctv(c2v_global[4], 2),
+        ptr_coeff_1_gt_ctv(c2v_global[4], 3),
+        ptr_coeff_1_gt_ctv(c2v_global[4], 4),
+        ptr_coeff_1_gt_ctv(c2v_global[4], 5),
+        ptr_coeff_1_gt_ctv(c2v_global[5], 0),
+        ptr_coeff_1_gt_ctv(c2v_global[5], 1),
+        ptr_coeff_1_gt_ctv(c2v_global[5], 2),
+        ptr_coeff_1_gt_ctv(c2v_global[5], 3),
+        ptr_coeff_1_gt_ctv(c2v_global[5], 4),
+        ptr_coeff_1_gt_ctv(c2v_global[5], 5)};
+    const std::array<WP_TYPE, 36> ptr_coeff_2{ptr_coeff_2_gt_ctv(c2v_global[0], 0),
+        ptr_coeff_2_gt_ctv(c2v_global[0], 1),
+        ptr_coeff_2_gt_ctv(c2v_global[0], 2),
+        ptr_coeff_2_gt_ctv(c2v_global[0], 3),
+        ptr_coeff_2_gt_ctv(c2v_global[0], 4),
+        ptr_coeff_2_gt_ctv(c2v_global[0], 5),
+        ptr_coeff_2_gt_ctv(c2v_global[1], 0),
+        ptr_coeff_2_gt_ctv(c2v_global[1], 1),
+        ptr_coeff_2_gt_ctv(c2v_global[1], 2),
+        ptr_coeff_2_gt_ctv(c2v_global[1], 3),
+        ptr_coeff_2_gt_ctv(c2v_global[1], 4),
+        ptr_coeff_2_gt_ctv(c2v_global[1], 5),
+        ptr_coeff_2_gt_ctv(c2v_global[2], 0),
+        ptr_coeff_2_gt_ctv(c2v_global[2], 1),
+        ptr_coeff_2_gt_ctv(c2v_global[2], 2),
+        ptr_coeff_2_gt_ctv(c2v_global[2], 3),
+        ptr_coeff_2_gt_ctv(c2v_global[2], 4),
+        ptr_coeff_2_gt_ctv(c2v_global[2], 5),
+        ptr_coeff_2_gt_ctv(c2v_global[3], 0),
+        ptr_coeff_2_gt_ctv(c2v_global[3], 1),
+        ptr_coeff_2_gt_ctv(c2v_global[3], 2),
+        ptr_coeff_2_gt_ctv(c2v_global[3], 3),
+        ptr_coeff_2_gt_ctv(c2v_global[3], 4),
+        ptr_coeff_2_gt_ctv(c2v_global[3], 5),
+        ptr_coeff_2_gt_ctv(c2v_global[4], 0),
+        ptr_coeff_2_gt_ctv(c2v_global[4], 1),
+        ptr_coeff_2_gt_ctv(c2v_global[4], 2),
+        ptr_coeff_2_gt_ctv(c2v_global[4], 3),
+        ptr_coeff_2_gt_ctv(c2v_global[4], 4),
+        ptr_coeff_2_gt_ctv(c2v_global[4], 5),
+        ptr_coeff_2_gt_ctv(c2v_global[5], 0),
+        ptr_coeff_2_gt_ctv(c2v_global[5], 1),
+        ptr_coeff_2_gt_ctv(c2v_global[5], 2),
+        ptr_coeff_2_gt_ctv(c2v_global[5], 3),
+        ptr_coeff_2_gt_ctv(c2v_global[5], 4),
+        ptr_coeff_2_gt_ctv(c2v_global[5], 5)};
     k_repetition = 0;
     for (auto k_index{blockIdx.z * blockDim.z + threadIdx.z}; k_repetition < k_repetitions && k_index < KDim;
          k_index += gridDim.z * blockDim.z) {
@@ -341,42 +413,32 @@ __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlined_cached_kloop.
         std::array<VP_TYPE, 6> p_v_out;
 #pragma unroll 6
         for (int vertex_index{}; vertex_index < 6; ++vertex_index) {
-            const std::array<WP_TYPE, 6> ptr_coeff_1{ptr_coeff_1_gt_ctv(c2v_global[vertex_index], 0),
-                ptr_coeff_1_gt_ctv(c2v_global[vertex_index], 1),
-                ptr_coeff_1_gt_ctv(c2v_global[vertex_index], 2),
-                ptr_coeff_1_gt_ctv(c2v_global[vertex_index], 3),
-                ptr_coeff_1_gt_ctv(c2v_global[vertex_index], 4),
-                ptr_coeff_1_gt_ctv(c2v_global[vertex_index], 5)};
-            const std::array<WP_TYPE, 6> ptr_coeff_2{ptr_coeff_2_gt_ctv(c2v_global[vertex_index], 0),
-                ptr_coeff_2_gt_ctv(c2v_global[vertex_index], 1),
-                ptr_coeff_2_gt_ctv(c2v_global[vertex_index], 2),
-                ptr_coeff_2_gt_ctv(c2v_global[vertex_index], 3),
-                ptr_coeff_2_gt_ctv(c2v_global[vertex_index], 4),
-                ptr_coeff_2_gt_ctv(c2v_global[vertex_index], 5)};
             p_u_out[vertex_index] =
-                shared_mem[z_nabla4_offset + c2v2e_shared[vertex_index * 6] + k_level_cache_offset] * ptr_coeff_1[0] +
+                shared_mem[z_nabla4_offset + c2v2e_shared[vertex_index * 6] + k_level_cache_offset] *
+                    ptr_coeff_1[vertex_index * 6] +
                 shared_mem[z_nabla4_offset + c2v2e_shared[vertex_index * 6 + 1] + k_level_cache_offset] *
-                    ptr_coeff_1[1] +
+                    ptr_coeff_1[vertex_index * 6 + 1] +
                 shared_mem[z_nabla4_offset + c2v2e_shared[vertex_index * 6 + 2] + k_level_cache_offset] *
-                    ptr_coeff_1[2] +
+                    ptr_coeff_1[vertex_index * 6 + 2] +
                 shared_mem[z_nabla4_offset + c2v2e_shared[vertex_index * 6 + 3] + k_level_cache_offset] *
-                    ptr_coeff_1[3] +
+                    ptr_coeff_1[vertex_index * 6 + 3] +
                 shared_mem[z_nabla4_offset + c2v2e_shared[vertex_index * 6 + 4] + k_level_cache_offset] *
-                    ptr_coeff_1[4] +
+                    ptr_coeff_1[vertex_index * 6 + 4] +
                 shared_mem[z_nabla4_offset + c2v2e_shared[vertex_index * 6 + 5] + k_level_cache_offset] *
-                    ptr_coeff_1[5];
+                    ptr_coeff_1[vertex_index * 6 + 5];
             p_v_out[vertex_index] =
-                shared_mem[z_nabla4_offset + c2v2e_shared[vertex_index * 6] + k_level_cache_offset] * ptr_coeff_2[0] +
+                shared_mem[z_nabla4_offset + c2v2e_shared[vertex_index * 6] + k_level_cache_offset] *
+                    ptr_coeff_2[vertex_index * 6] +
                 shared_mem[z_nabla4_offset + c2v2e_shared[vertex_index * 6 + 1] + k_level_cache_offset] *
-                    ptr_coeff_2[1] +
+                    ptr_coeff_2[vertex_index * 6 + 1] +
                 shared_mem[z_nabla4_offset + c2v2e_shared[vertex_index * 6 + 2] + k_level_cache_offset] *
-                    ptr_coeff_2[2] +
+                    ptr_coeff_2[vertex_index * 6 + 2] +
                 shared_mem[z_nabla4_offset + c2v2e_shared[vertex_index * 6 + 3] + k_level_cache_offset] *
-                    ptr_coeff_2[3] +
+                    ptr_coeff_2[vertex_index * 6 + 3] +
                 shared_mem[z_nabla4_offset + c2v2e_shared[vertex_index * 6 + 4] + k_level_cache_offset] *
-                    ptr_coeff_2[4] +
+                    ptr_coeff_2[vertex_index * 6 + 4] +
                 shared_mem[z_nabla4_offset + c2v2e_shared[vertex_index * 6 + 5] + k_level_cache_offset] *
-                    ptr_coeff_2[5];
+                    ptr_coeff_2[vertex_index * 6 + 5];
         };
         p_cell_out_gt_tv(cell_index_internal_upward, k_index) =
             (p_u_out[0] * ptr_c_coeff_1[0] + p_u_out[1] * ptr_c_coeff_1[1] + p_u_out[2] * ptr_c_coeff_1[2] +
@@ -404,8 +466,8 @@ inline void nabla4_interpolate_verts2cells_structured_inlined_cached<T>::run_gpu
     const index_type outer_domain_size = nabla4_data.x_dim * nabla4_data.y_dim;
     const index_type verts2cells_output_x_dim = verts2cells_data.x_dim - 2 * verts2cells_data.halo;
     const index_type verts2cells_output_y_dim = verts2cells_data.y_dim - 2 * verts2cells_data.halo;
-    constexpr int smemSize{49152};                                          // GH200
-    constexpr index_type shared_mem_elements = (tblocks.x * tblocks.y) * 3; // + (tblocks.x - 1) * (tblocks.y - 2) * 2;
+    constexpr int smemSize{49152}; // GH200
+    constexpr index_type shared_mem_elements = (tblocks.x * tblocks.y) * 3;
     constexpr long unsigned int k_repetitions{smemSize / (shared_mem_elements * sizeof(WP_TYPE) * tblocks.z)};
     const int KDim_ceil = std::ceil(static_cast<double>(interpolate_data.KDim) / k_repetitions);
     const index_type outer_x_dim = nabla4_data.x_dim - 2 * 2;
