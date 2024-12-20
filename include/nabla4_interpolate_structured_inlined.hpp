@@ -31,9 +31,8 @@ struct nabla4_interpolate_structured_inlined {
         index_type y_dim,
         index_type x_dim,
         index_type halo)
-        : nabla4_data(CellDim, VertexDim, EdgeDim, KDim, ECVDim, y_dim, x_dim, halo),
-          interpolate_data(
-              VertexDim, EdgeDim, KDim, y_dim - 2 * halo, x_dim - 2 * halo, 1, nabla4_data.get_output_gt()){};
+        : nabla4_data(CellDim, VertexDim, EdgeDim, KDim, ECVDim, y_dim, x_dim, 0),
+          interpolate_data(VertexDim, EdgeDim, KDim, y_dim, x_dim, halo + 1, nabla4_data.get_output_gt()){};
 
     nabla4_interpolate_structured_inlined(index_type CellDim,
         index_type VertexDim,
@@ -59,7 +58,7 @@ struct nabla4_interpolate_structured_inlined {
               ECVDim,
               y_dim,
               x_dim,
-              halo,
+              0,
               u_vert,
               v_vert,
               primal_normal_vert_v1,
@@ -70,9 +69,9 @@ struct nabla4_interpolate_structured_inlined {
           interpolate_data(VertexDim,
               EdgeDim,
               KDim,
-              y_dim - 2 * halo,
-              x_dim - 2 * halo,
-              1,
+              y_dim,
+              x_dim,
+              halo + 1,
               nabla4_data.get_output_gt(),
               ptr_coeff_1,
               ptr_coeff_2){};
@@ -397,12 +396,9 @@ constexpr block_dims block_dims_structured_nabla_interpol_inlined_kloop =
 
 __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_kloop.size)
     run_gpu_kloop_nabla4_interpolate_inlined_structured(index_type KDim,
-        index_type x_dim_interpolate,
-        index_type y_dim_interpolate,
-        index_type halo_interpolate,
-        index_type x_dim_nabla4,
-        index_type y_dim_nabla4,
-        index_type halo_nabla4,
+        index_type x_dim,
+        index_type y_dim,
+        index_type halo,
         index_type inner_domain_size,
         index_type outer_domain_size,
         nabla4_structured_torus_halo_gt<storage::gpu>::data_store_2d_ctv_VP_t u_vert_gt_tv,
@@ -416,40 +412,38 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_k
         interpolate_structured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_2_gt_ctv,
         interpolate_structured<storage::gpu>::data_store_2d_tv_WP_t p_u_out_gt_tv,
         interpolate_structured<storage::gpu>::data_store_2d_tv_WP_t p_v_out_gt_tv) {
-    const auto i{blockIdx.x * blockDim.x + threadIdx.x + halo_interpolate};
-    const auto j{blockIdx.y * blockDim.y + threadIdx.y + halo_interpolate};
+    const auto i{blockIdx.x * blockDim.x + threadIdx.x + halo};
+    const auto j{blockIdx.y * blockDim.y + threadIdx.y + halo};
     const auto k_index{blockIdx.z * blockDim.z + threadIdx.z};
-    if (i >= x_dim_interpolate - halo_interpolate || j >= y_dim_interpolate - halo_interpolate || k_index >= KDim) {
+    if (i >= x_dim - halo || j >= y_dim - halo || k_index >= KDim) {
         return;
     }
-    const std::array<index_type, 7> v2e2c2v_compressed{get_v2e2c2v(i + halo_nabla4, j + halo_nabla4, x_dim_nabla4)};
-    const std::array<index_type, 6> v2e{get_v2e_per_orientation(i, j, x_dim_interpolate, y_dim_interpolate)};
-    const std::array<index_type, 6> v2e_e2ecv{
-        get_v2e_per_orientation(i + halo_nabla4, j + halo_nabla4, x_dim_nabla4, y_dim_nabla4)};
-    const std::array<index_type, 24> v2e2ecv{v2e_e2ecv[0],
-        v2e_e2ecv[0] + outer_domain_size * 3,
-        v2e_e2ecv[0] + outer_domain_size * 6,
-        v2e_e2ecv[0] + outer_domain_size * 9,
-        v2e_e2ecv[1],
-        v2e_e2ecv[1] + outer_domain_size * 3,
-        v2e_e2ecv[1] + outer_domain_size * 6,
-        v2e_e2ecv[1] + outer_domain_size * 9,
-        v2e_e2ecv[2],
-        v2e_e2ecv[2] + outer_domain_size * 3,
-        v2e_e2ecv[2] + outer_domain_size * 6,
-        v2e_e2ecv[2] + outer_domain_size * 9,
-        v2e_e2ecv[3],
-        v2e_e2ecv[3] + outer_domain_size * 3,
-        v2e_e2ecv[3] + outer_domain_size * 6,
-        v2e_e2ecv[3] + outer_domain_size * 9,
-        v2e_e2ecv[4],
-        v2e_e2ecv[4] + outer_domain_size * 3,
-        v2e_e2ecv[4] + outer_domain_size * 6,
-        v2e_e2ecv[4] + outer_domain_size * 9,
-        v2e_e2ecv[5],
-        v2e_e2ecv[5] + outer_domain_size * 3,
-        v2e_e2ecv[5] + outer_domain_size * 6,
-        v2e_e2ecv[5] + outer_domain_size * 9};
+    const std::array<index_type, 7> v2e2c2v_compressed{get_v2e2c2v(i, j, x_dim)};
+    const std::array<index_type, 6> v2e{get_v2e_per_orientation(i, j, x_dim, y_dim)};
+    const std::array<index_type, 24> v2e2ecv{v2e[0],
+        v2e[0] + outer_domain_size * 3,
+        v2e[0] + outer_domain_size * 6,
+        v2e[0] + outer_domain_size * 9,
+        v2e[1],
+        v2e[1] + outer_domain_size * 3,
+        v2e[1] + outer_domain_size * 6,
+        v2e[1] + outer_domain_size * 9,
+        v2e[2],
+        v2e[2] + outer_domain_size * 3,
+        v2e[2] + outer_domain_size * 6,
+        v2e[2] + outer_domain_size * 9,
+        v2e[3],
+        v2e[3] + outer_domain_size * 3,
+        v2e[3] + outer_domain_size * 6,
+        v2e[3] + outer_domain_size * 9,
+        v2e[4],
+        v2e[4] + outer_domain_size * 3,
+        v2e[4] + outer_domain_size * 6,
+        v2e[4] + outer_domain_size * 9,
+        v2e[5],
+        v2e[5] + outer_domain_size * 3,
+        v2e[5] + outer_domain_size * 6,
+        v2e[5] + outer_domain_size * 9};
     const std::array<index_type, 24> v2e2c2v{v2e2c2v_compressed[0],
         v2e2c2v_compressed[1],
         v2e2c2v_compressed[2],
@@ -534,8 +528,7 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_k
         inv_primal_edge_length_gt_tv(v2e[3]),
         inv_primal_edge_length_gt_tv(v2e[4]),
         inv_primal_edge_length_gt_tv(v2e[5])};
-    const index_type vertex_index_internal =
-        i - halo_interpolate + (j - halo_interpolate) * (x_dim_interpolate - 2 * halo_interpolate);
+    const index_type vertex_index_internal = i - halo + (j - halo) * (x_dim - 2 * halo);
     const std::array<WP_TYPE, 6> ptr_coeff_1{ptr_coeff_1_gt_ctv(vertex_index_internal, 0),
         ptr_coeff_1_gt_ctv(vertex_index_internal, 1),
         ptr_coeff_1_gt_ctv(vertex_index_internal, 2),
@@ -589,7 +582,7 @@ inline void nabla4_interpolate_structured_inlined<T>::run_gpu_kloop_helper() {
         block_dims_structured_nabla_interpol_inlined_kloop.z);
     const index_type inner_domain_size =
         (interpolate_data.x_dim - 2 * interpolate_data.halo) * (interpolate_data.y_dim - 2 * interpolate_data.halo);
-    const index_type outer_domain_size = nabla4_data.x_dim * nabla4_data.y_dim;
+    const index_type outer_domain_size = interpolate_data.x_dim * interpolate_data.y_dim;
     const index_type inner_x_dim = interpolate_data.x_dim - 2 * interpolate_data.halo;
     const index_type inner_y_dim = interpolate_data.y_dim - 2 * interpolate_data.halo;
     dim3 grid((inner_x_dim + tblocks.x - 1) / tblocks.x, (inner_y_dim + tblocks.y - 1) / tblocks.y, 1);
@@ -597,9 +590,6 @@ inline void nabla4_interpolate_structured_inlined<T>::run_gpu_kloop_helper() {
         interpolate_data.x_dim,
         interpolate_data.y_dim,
         interpolate_data.halo,
-        nabla4_data.x_dim,
-        nabla4_data.y_dim,
-        nabla4_data.halo,
         inner_domain_size,
         outer_domain_size,
         nabla4_data.u_vert_gt_tv,
@@ -654,12 +644,9 @@ __launch_bounds__(block_dims_structured_nabla_interpol_inlined_naive.size)
 __maxnreg__(62)
 #endif
     run_gpu_naive_nabla4_interpolate_inlined_structured(index_type KDim,
-        index_type x_dim_interpolate,
-        index_type y_dim_interpolate,
-        index_type halo_interpolate,
-        index_type x_dim_nabla4,
-        index_type y_dim_nabla4,
-        index_type halo_nabla4,
+        index_type x_dim,
+        index_type y_dim,
+        index_type halo,
         index_type inner_domain_size,
         index_type outer_domain_size,
         nabla4_structured_torus_halo_gt<storage::gpu>::data_store_2d_ctv_VP_t u_vert_gt_tv,
@@ -673,40 +660,38 @@ __maxnreg__(62)
         interpolate_structured<storage::gpu>::data_store_2d_coef_ctv_WP_t ptr_coeff_2_gt_ctv,
         interpolate_structured<storage::gpu>::data_store_2d_tv_WP_t p_u_out_gt_tv,
         interpolate_structured<storage::gpu>::data_store_2d_tv_WP_t p_v_out_gt_tv) {
-    const auto i{blockIdx.x * blockDim.x + threadIdx.x + halo_interpolate};
-    const auto j{blockIdx.y * blockDim.y + threadIdx.y + halo_interpolate};
+    const auto i{blockIdx.x * blockDim.x + threadIdx.x + halo};
+    const auto j{blockIdx.y * blockDim.y + threadIdx.y + halo};
     const auto k_index{blockIdx.z * blockDim.z + threadIdx.z};
-    if (i >= x_dim_interpolate - halo_interpolate || j >= y_dim_interpolate - halo_interpolate || k_index >= KDim) {
+    if (i >= x_dim - halo || j >= y_dim - halo || k_index >= KDim) {
         return;
     }
-    const std::array<index_type, 7> v2e2c2v_compressed{get_v2e2c2v(i + halo_nabla4, j + halo_nabla4, x_dim_nabla4)};
-    const std::array<index_type, 6> v2e{get_v2e_per_orientation(i, j, x_dim_interpolate, y_dim_interpolate)};
-    const std::array<index_type, 6> v2e_e2ecv{
-        get_v2e_per_orientation(i + halo_nabla4, j + halo_nabla4, x_dim_nabla4, y_dim_nabla4)};
-    const std::array<index_type, 24> v2e2ecv{v2e_e2ecv[0],
-        v2e_e2ecv[0] + outer_domain_size * 3,
-        v2e_e2ecv[0] + outer_domain_size * 6,
-        v2e_e2ecv[0] + outer_domain_size * 9,
-        v2e_e2ecv[1],
-        v2e_e2ecv[1] + outer_domain_size * 3,
-        v2e_e2ecv[1] + outer_domain_size * 6,
-        v2e_e2ecv[1] + outer_domain_size * 9,
-        v2e_e2ecv[2],
-        v2e_e2ecv[2] + outer_domain_size * 3,
-        v2e_e2ecv[2] + outer_domain_size * 6,
-        v2e_e2ecv[2] + outer_domain_size * 9,
-        v2e_e2ecv[3],
-        v2e_e2ecv[3] + outer_domain_size * 3,
-        v2e_e2ecv[3] + outer_domain_size * 6,
-        v2e_e2ecv[3] + outer_domain_size * 9,
-        v2e_e2ecv[4],
-        v2e_e2ecv[4] + outer_domain_size * 3,
-        v2e_e2ecv[4] + outer_domain_size * 6,
-        v2e_e2ecv[4] + outer_domain_size * 9,
-        v2e_e2ecv[5],
-        v2e_e2ecv[5] + outer_domain_size * 3,
-        v2e_e2ecv[5] + outer_domain_size * 6,
-        v2e_e2ecv[5] + outer_domain_size * 9};
+    const std::array<index_type, 7> v2e2c2v_compressed{get_v2e2c2v(i, j, x_dim)};
+    const std::array<index_type, 6> v2e{get_v2e_per_orientation(i, j, x_dim, y_dim)};
+    const std::array<index_type, 24> v2e2ecv{v2e[0],
+        v2e[0] + outer_domain_size * 3,
+        v2e[0] + outer_domain_size * 6,
+        v2e[0] + outer_domain_size * 9,
+        v2e[1],
+        v2e[1] + outer_domain_size * 3,
+        v2e[1] + outer_domain_size * 6,
+        v2e[1] + outer_domain_size * 9,
+        v2e[2],
+        v2e[2] + outer_domain_size * 3,
+        v2e[2] + outer_domain_size * 6,
+        v2e[2] + outer_domain_size * 9,
+        v2e[3],
+        v2e[3] + outer_domain_size * 3,
+        v2e[3] + outer_domain_size * 6,
+        v2e[3] + outer_domain_size * 9,
+        v2e[4],
+        v2e[4] + outer_domain_size * 3,
+        v2e[4] + outer_domain_size * 6,
+        v2e[4] + outer_domain_size * 9,
+        v2e[5],
+        v2e[5] + outer_domain_size * 3,
+        v2e[5] + outer_domain_size * 6,
+        v2e[5] + outer_domain_size * 9};
     const std::array<index_type, 24> v2e2c2v{v2e2c2v_compressed[0],
         v2e2c2v_compressed[1],
         v2e2c2v_compressed[2],
@@ -732,8 +717,7 @@ __maxnreg__(62)
         v2e2c2v_compressed[5],
         v2e2c2v_compressed[0]};
     std::array<WP_TYPE, 6> z_nabla4_e2_wp;
-    const index_type vertex_index_internal =
-        i - halo_interpolate + (j - halo_interpolate) * (x_dim_interpolate - 2 * halo_interpolate);
+    const index_type vertex_index_internal = i - halo + (j - halo) * (x_dim - 2 * halo);
 #pragma unroll 6
     for (auto i{0}; i < 6; ++i) {
         const auto edge_index = v2e[i];
@@ -782,7 +766,7 @@ inline void nabla4_interpolate_structured_inlined<T>::run_gpu_naive_helper() {
         block_dims_structured_nabla_interpol_inlined_naive.z);
     const index_type inner_domain_size =
         (interpolate_data.x_dim - 2 * interpolate_data.halo) * (interpolate_data.y_dim - 2 * interpolate_data.halo);
-    const index_type outer_domain_size = nabla4_data.x_dim * nabla4_data.y_dim;
+    const index_type outer_domain_size = interpolate_data.x_dim * interpolate_data.y_dim;
     const index_type inner_x_dim = interpolate_data.x_dim - 2 * interpolate_data.halo;
     const index_type inner_y_dim = interpolate_data.y_dim - 2 * interpolate_data.halo;
     dim3 grid((inner_x_dim + tblocks.x - 1) / tblocks.x,
@@ -792,9 +776,6 @@ inline void nabla4_interpolate_structured_inlined<T>::run_gpu_naive_helper() {
         interpolate_data.x_dim,
         interpolate_data.y_dim,
         interpolate_data.halo,
-        nabla4_data.x_dim,
-        nabla4_data.y_dim,
-        nabla4_data.halo,
         inner_domain_size,
         outer_domain_size,
         nabla4_data.u_vert_gt_tv,
