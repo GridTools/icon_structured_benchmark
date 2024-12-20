@@ -253,8 +253,8 @@ def filter_c2v_vector(c2v, grid_cartesian_dimensions, halo=3):
     for j in range(grid_cartesian_dimensions[0]):
         for i in range(grid_cartesian_dimensions[1]):
             if (
-                i > halo - 1
-                and j > halo - 1
+                i > halo - 2
+                and j > halo - 2
                 and i < grid_cartesian_dimensions[1] - halo
                 and j < grid_cartesian_dimensions[0] - halo
             ):
@@ -310,6 +310,10 @@ def run_benchmarks():
             args.backend,
             args.halo,
         )
+
+    if repetitions == 0:
+        print("Repetitions is 0, skipping benchmarks")
+        return
 
     runtimes = {}
 

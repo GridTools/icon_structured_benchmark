@@ -41,7 +41,8 @@ class verts2cells_structured : public verts2cells_vector<S> {
         index_type x_dim,
         index_type halo)
         : y_dim(y_dim), x_dim(x_dim),
-          halo(halo), verts2cells_vector<S>(VertexDim, CellDim, KDim, 2 * (y_dim - halo) * (x_dim - halo)){};
+          halo(halo), verts2cells_vector<S>(
+                          VertexDim, CellDim, KDim, 2 * (y_dim - 2 * halo + 1) * (x_dim - 2 * halo + 1)){};
 
     verts2cells_structured(std::size_t VertexDim,
         std::size_t CellDim,
@@ -51,9 +52,12 @@ class verts2cells_structured : public verts2cells_vector<S> {
         index_type halo,
         input_type p_vert_u_in_gt,
         input_type p_vert_v_in_gt)
-        : y_dim(y_dim), x_dim(x_dim), halo(halo),
-          verts2cells_vector<S>(
-              VertexDim, CellDim, KDim, p_vert_u_in_gt, p_vert_v_in_gt, 2 * (y_dim - halo) * (x_dim - halo)){};
+        : y_dim(y_dim), x_dim(x_dim), halo(halo), verts2cells_vector<S>(VertexDim,
+                                                      CellDim,
+                                                      KDim,
+                                                      p_vert_u_in_gt,
+                                                      p_vert_v_in_gt,
+                                                      2 * (y_dim - 2 * halo + 1) * (x_dim - 2 * halo + 1)){};
 
     verts2cells_structured(std::size_t VertexDim,
         std::size_t CellDim,
@@ -68,7 +72,7 @@ class verts2cells_structured : public verts2cells_vector<S> {
         : y_dim(y_dim), x_dim(x_dim), halo(halo), verts2cells_vector<S>(VertexDim,
                                                       CellDim,
                                                       KDim,
-                                                      2 * (y_dim - halo) * (x_dim - halo),
+                                                      2 * (y_dim - 2 * halo + 1) * (x_dim - 2 * halo + 1),
                                                       p_vert_u_in,
                                                       p_vert_v_in,
                                                       ptr_coeff_1,
@@ -87,7 +91,7 @@ class verts2cells_structured : public verts2cells_vector<S> {
         : y_dim(y_dim), x_dim(x_dim), halo(halo), verts2cells_vector<S>(VertexDim,
                                                       CellDim,
                                                       KDim,
-                                                      2 * (y_dim - halo) * (x_dim - halo),
+                                                      2 * (y_dim - 2 * halo + 1) * (x_dim - 2 * halo + 1),
                                                       p_vert_u_in,
                                                       p_vert_v_in,
                                                       ptr_coeff_1,
@@ -213,12 +217,12 @@ __global__ void __launch_bounds__(block_dims_structured_verts2cells_kloop.size)
         verts2cells_structured<storage::gpu>::data_store_2d_tv_WP_t p_cell_out_gt_tv) {
     const auto i = blockIdx.x * blockDim.x + threadIdx.x;
     const auto j = blockIdx.y * blockDim.y + threadIdx.y;
-    if (i >= x_dim - halo || j >= y_dim - halo)
+    if (i + halo - 1 >= x_dim - halo || j + halo - 1 >= y_dim - halo)
         return;
-    const index_type index_internal = i + j * (x_dim - halo);
+    const index_type index_internal = i + j * (x_dim - 2 * halo + 1);
     const index_type cell_index_internal_upward{2 * index_internal};
     const index_type cell_index_internal_downward{2 * index_internal + 1};
-    const std::array<index_type, 4> c2v_compressed{get_c2v_compressed(i, j, x_dim)};
+    const std::array<index_type, 4> c2v_compressed{get_c2v_compressed(i + halo - 1, j + halo - 1, x_dim)};
     const std::array<WP_TYPE, 6> coeff_1{ptr_coeff_1_gt_ctv(cell_index_internal_upward, 0),
         ptr_coeff_1_gt_ctv(cell_index_internal_upward, 1),
         ptr_coeff_1_gt_ctv(cell_index_internal_upward, 2),
@@ -260,7 +264,8 @@ inline void verts2cells_structured<S>::run_gpu_kloop_helper() {
     dim3 tblocks(block_dims_structured_verts2cells_kloop.x,
         block_dims_structured_verts2cells_kloop.y,
         block_dims_structured_verts2cells_kloop.z);
-    dim3 grid((x_dim + tblocks.x - 1) / tblocks.x, (y_dim + tblocks.y - 1) / tblocks.y, 1);
+    dim3 grid(
+        (x_dim - 2 * halo + 1 + tblocks.x - 1) / tblocks.x, (y_dim - 2 * halo + 1 + tblocks.y - 1) / tblocks.y, 1);
     run_gpu_kloop_verts2cells_structured<<<grid, tblocks>>>(KDim,
         x_dim,
         y_dim,
@@ -317,12 +322,12 @@ __global__ void __launch_bounds__(block_dims_structured_verts2cells_naive.size)
     const auto i = blockIdx.x * blockDim.x + threadIdx.x;
     const auto j = blockIdx.y * blockDim.y + threadIdx.y;
     const auto k_index = blockIdx.z * blockDim.z + threadIdx.z;
-    if (i >= x_dim - halo || j >= y_dim - halo || k_index >= KDim)
+    if (i + halo - 1 >= x_dim - halo || j + halo - 1 >= y_dim - halo || k_index >= KDim)
         return;
-    const index_type index_internal = i + j * (x_dim - halo);
+    const index_type index_internal = i + j * (x_dim - 2 * halo + 1);
     const index_type cell_index_internal_upward{2 * index_internal};
     const index_type cell_index_internal_downward{2 * index_internal + 1};
-    const std::array<index_type, 4> c2v_compressed{get_c2v_compressed(i, j, x_dim)};
+    const std::array<index_type, 4> c2v_compressed{get_c2v_compressed(i + halo - 1, j + halo - 1, x_dim)};
     const std::array<WP_TYPE, 6> coeff_1{ptr_coeff_1_gt_ctv(cell_index_internal_upward, 0),
         ptr_coeff_1_gt_ctv(cell_index_internal_upward, 1),
         ptr_coeff_1_gt_ctv(cell_index_internal_upward, 2),
@@ -360,8 +365,9 @@ inline void verts2cells_structured<S>::run_gpu_naive_helper() {
     dim3 tblocks(block_dims_structured_verts2cells_naive.x,
         block_dims_structured_verts2cells_naive.y,
         block_dims_structured_verts2cells_naive.z);
-    dim3 grid(
-        (x_dim + tblocks.x - 1) / tblocks.x, (y_dim + tblocks.y - 1) / tblocks.y, (KDim + tblocks.z - 1) / tblocks.z);
+    dim3 grid((x_dim - 2 * halo + 1 + tblocks.x - 1) / tblocks.x,
+        (y_dim - 2 * halo + 1 + tblocks.y - 1) / tblocks.y,
+        (KDim + tblocks.z - 1) / tblocks.z);
     run_gpu_naive_verts2cells_structured<<<grid, tblocks>>>(KDim,
         x_dim,
         y_dim,
