@@ -37,15 +37,22 @@ def read_torus_results_commit(directory, torus_filenames, k_levels, commit):
 
 
 def read_torus_results_commit_backend_index_type(
-    directory, torus_filenames, k_levels, commit, backend, index_type, suffix=""
+    directory,
+    torus_filenames,
+    k_levels,
+    commit,
+    backend,
+    index_type,
+    suffix="",
+    prefix="",
 ):
     runtimes = {}
     for filename in torus_filenames:
         runtimes[filename] = {}
         for k in k_levels:
             with open(
-                "{}/{}_k{}_{}_{}_{}{}.json".format(
-                    directory, filename, k, commit, backend, index_type, suffix
+                "{}/{}{}_k{}_{}_{}_{}{}.json".format(
+                    directory, prefix, filename, k, commit, backend, index_type, suffix
                 )
             ) as f:
                 runtimes[filename][k] = json.load(f)
@@ -259,6 +266,8 @@ def generate_violin_plots_acceleration(
                 .replace("unstructured", "indirect")
                 .replace("structured", "strided")
             )
+            if "interpolate_inlined" in implementation:
+                labels[-1] = labels[-1].replace("separate", "inlined_v2v_separate")
             median_value = np.median(runtimes)
             medians.append(median_value)  # Calculating median for each set of runtimes
 
@@ -345,6 +354,30 @@ theoretical_runtime_stream_performance = {
             },
         },
     },
+    "nabla4_interpolate_verts2cells": {
+        "torus_100000_100000_128": {
+            "unstructured": {
+                "separate": 0.000929395765,
+                "inlined": 0.0005154414081,
+            },
+            "structured": {
+                "separate": 0.0009215901565,
+                "inlined": 0.0005037687647,
+                "inlined_v2v_separate": 0.0006076522199,
+            },
+        },
+        "torus_100000_100000_256": {
+            "unstructured": {
+                "separate": 0.000228158098,
+                "inlined": 0.0001263506396,
+            },
+            "structured": {
+                "separate": 0.0002262457276,
+                "inlined": 0.0001234998191,
+                "inlined_v2v_separate": 0.0001489029494,
+            },
+        },
+    },
 }
 
 
@@ -354,7 +387,7 @@ def generate_violin_plots_acceleration_roofline(
     k,
     torus_name,
     output_dir,
-    vertical=False,
+    kernel_type="nabla4_interpolate",
     roofline_name="nabla4_interpolate_benchmark_gpu_kloop_roofline",
     baseline_name="nabla4_interpolate_benchmark_unstructured_gpu_naive_separate",
     kernel_name="nabla4",
@@ -379,15 +412,15 @@ def generate_violin_plots_acceleration_roofline(
         label="Baseline performance [B]",
     )
     i = 1
-    for structure in theoretical_runtime_stream_performance[
-        "nabla4_vertical_interpolate" if vertical else "nabla4_interpolate"
-    ][torus_name].keys():
-        for combination in theoretical_runtime_stream_performance[
-            "nabla4_vertical_interpolate" if vertical else "nabla4_interpolate"
-        ][torus_name][structure].keys():
-            optimal_performance = theoretical_runtime_stream_performance[
-                "nabla4_vertical_interpolate" if vertical else "nabla4_interpolate"
-            ][torus_name][structure][combination]
+    for structure in theoretical_runtime_stream_performance[kernel_type][
+        torus_name
+    ].keys():
+        for combination in theoretical_runtime_stream_performance[kernel_type][
+            torus_name
+        ][structure].keys():
+            optimal_performance = theoretical_runtime_stream_performance[kernel_type][
+                torus_name
+            ][structure][combination]
             color = sns.color_palette("tab10")[i]
             plt.axhline(
                 optimal_performance,
@@ -412,18 +445,18 @@ def generate_violin_plots_acceleration_roofline(
                 .replace("unstructured", "indirect")
                 .replace("structured", "strided")
             )
+            if "interpolate_inlined" in implementation:
+                labels[-1] = labels[-1].replace("separate", "inlined_v2v_separate")
             median_value = np.median(runtimes)
             medians.append(median_value)  # Calculating median for each set of runtimes
 
             percentage_diff = (median_value - baseline_median) / baseline_median * 100
-            roofline_number = theoretical_runtime_stream_performance[
-                "nabla4_vertical_interpolate"
-                if "nabla4_vertical_interpolate" in implementation
-                else "nabla4_interpolate"
-            ][torus_name][
-                "unstructured" if "unstructured" in implementation else "structured"
-            ][
-                "separate"
+            roofline_number = theoretical_runtime_stream_performance[kernel_type][
+                torus_name
+            ]["unstructured" if "unstructured" in implementation else "structured"][
+                "inlined_v2v_separate"
+                if "interpolate_inlined" in implementation
+                else "separate"
                 if "separate" in implementation
                 else "inlined_v2v"
                 if "v2v" in implementation

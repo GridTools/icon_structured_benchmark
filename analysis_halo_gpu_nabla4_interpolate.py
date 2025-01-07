@@ -107,7 +107,7 @@ if __name__ == "__main__":
                 k,
                 torus_size,
                 output_directory,
-                False,
+                "nabla4_interpolate",
                 "nabla4_interpolate_benchmark_gpu_kloop_roofline",
                 "nabla4_interpolate_benchmark_unstructured_gpu_naive_separate",
                 "Nabla4 and interpolate kernels",

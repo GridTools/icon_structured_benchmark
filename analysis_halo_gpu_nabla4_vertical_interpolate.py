@@ -130,7 +130,7 @@ if __name__ == "__main__":
                 k,
                 torus_size,
                 output_directory,
-                True,
+                "nabla4_vertical_interpolate",
                 "nabla4_vertical_interpolate_benchmark_gpu_kloop_roofline",
                 "nabla4_vertical_interpolate_benchmark_unstructured_gpu_naive_separate",
                 "Nabla4 vertical and interpolate kernels",
