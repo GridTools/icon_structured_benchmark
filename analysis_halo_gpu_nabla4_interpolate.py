@@ -9,7 +9,7 @@ from analysis import (
 )
 
 if __name__ == "__main__":
-    git_commit = "97efbc6"
+    git_commit = "f961a79"
 
     backend = "gpu"
 
@@ -33,6 +33,7 @@ if __name__ == "__main__":
         git_commit,
         backend,
         index_type,
+        prefix="ni_",
     )
 
     output_directory = "results/plot_nabla4_interpolate_output_halo_{}_{}_{}{}".format(
