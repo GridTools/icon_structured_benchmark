@@ -135,17 +135,11 @@ constexpr block_dims block_dims_structured_nabla_interpol_v2c_inlined_cached_klo
 __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlined_cached_kloop.size)
     run_gpu_kloop_nabla4_interpolate_verts2cells_inlined_cached_structured(index_type KDim,
         index_type x_dim_verts2cells,
-        index_type y_dim_verts2cells,
         index_type halo_verts2cells,
-        index_type x_dim_interpolate,
-        index_type y_dim_interpolate,
         index_type halo_interpolate,
         index_type x_dim_nabla4,
         index_type y_dim_nabla4,
         index_type halo_nabla4,
-        index_type verts2cells_output_domain_size,
-        index_type interpolate_output_domain_size,
-        index_type nabla4_output_domain_size,
         index_type outer_domain_size,
         index_type k_repetitions,
         nabla4_structured_torus_halo_gt<storage::gpu>::data_store_2d_ctv_VP_t u_vert_gt_tv,
@@ -390,12 +384,6 @@ inline void nabla4_interpolate_verts2cells_structured_inlined_cached<T>::run_gpu
     constexpr dim3 tblocks(block_dims_structured_nabla_interpol_v2c_inlined_cached_kloop.x,
         block_dims_structured_nabla_interpol_v2c_inlined_cached_kloop.y,
         block_dims_structured_nabla_interpol_v2c_inlined_cached_kloop.z);
-    const index_type verts2cells_output_domain_size =
-        (verts2cells_data.x_dim - 2 * verts2cells_data.halo) * (verts2cells_data.y_dim - 2 * verts2cells_data.halo);
-    const index_type interpolate_output_domain_size =
-        (interpolate_data.x_dim - 2 * interpolate_data.halo) * (interpolate_data.y_dim - 2 * interpolate_data.halo);
-    const index_type nabla4_output_domain_size =
-        (nabla4_data.x_dim - 2 * nabla4_data.halo) * (nabla4_data.y_dim - 2 * nabla4_data.halo);
     const index_type outer_domain_size = nabla4_data.x_dim * nabla4_data.y_dim;
     const index_type verts2cells_output_x_dim = verts2cells_data.x_dim - 2 * verts2cells_data.halo;
     const index_type verts2cells_output_y_dim = verts2cells_data.y_dim - 2 * verts2cells_data.halo;
@@ -412,17 +400,11 @@ inline void nabla4_interpolate_verts2cells_structured_inlined_cached<T>::run_gpu
         tblocks,
         shared_mem_elements * sizeof(WP_TYPE) * k_repetitions * tblocks.z>>>(verts2cells_data.KDim,
         verts2cells_data.x_dim,
-        verts2cells_data.y_dim,
         verts2cells_data.halo,
-        interpolate_data.x_dim,
-        interpolate_data.y_dim,
         interpolate_data.halo,
         nabla4_data.x_dim,
         nabla4_data.y_dim,
         2,
-        verts2cells_output_domain_size,
-        interpolate_output_domain_size,
-        nabla4_output_domain_size,
         outer_domain_size,
         k_repetitions,
         nabla4_data.u_vert_gt_tv,
