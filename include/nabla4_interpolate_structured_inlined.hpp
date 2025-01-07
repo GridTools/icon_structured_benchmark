@@ -1,3 +1,5 @@
+#pragma once
+
 #include <interpolate_structured_gridtools.hpp>
 #include <nabla4_structured_torus_gridtools_halo.hpp>
 
@@ -40,15 +42,15 @@ struct nabla4_interpolate_structured_inlined {
         index_type y_dim,
         index_type x_dim,
         index_type halo,
-        std::vector<std::vector<VP_TYPE>> &u_vert,
-        std::vector<std::vector<VP_TYPE>> &v_vert,
-        std::vector<WP_TYPE> &primal_normal_vert_v1,
-        std::vector<WP_TYPE> &primal_normal_vert_v2,
-        std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
-        std::vector<WP_TYPE> &inv_vert_vert_length,
-        std::vector<WP_TYPE> &inv_primal_edge_length,
-        std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
-        std::vector<std::vector<WP_TYPE>> &ptr_coeff_2)
+        const std::vector<std::vector<VP_TYPE>> &u_vert,
+        const std::vector<std::vector<VP_TYPE>> &v_vert,
+        const std::vector<WP_TYPE> &primal_normal_vert_v1,
+        const std::vector<WP_TYPE> &primal_normal_vert_v2,
+        const std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+        const std::vector<WP_TYPE> &inv_vert_vert_length,
+        const std::vector<WP_TYPE> &inv_primal_edge_length,
+        const std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
+        const std::vector<std::vector<WP_TYPE>> &ptr_coeff_2)
         : nabla4_data(CellDim,
               VertexDim,
               EdgeDim,
@@ -75,6 +77,8 @@ struct nabla4_interpolate_structured_inlined {
               ptr_coeff_2){};
 
     auto get_output() -> decltype(interpolate_data.get_output()) { return interpolate_data.get_output(); }
+
+    auto get_output_gt() -> decltype(interpolate_data.get_output_gt()) { return interpolate_data.get_output_gt(); }
 
     void run_cpu_ifirst() {
         for (index_type k_index{}; k_index < interpolate_data.KDim; ++k_index) {
@@ -627,7 +631,7 @@ constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_naive<std:
 
 template <>
 constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_naive<int>() {
-    return {32, 8, 2, 256};
+    return {32, 8, 2, 512};
 };
 
 constexpr block_dims block_dims_structured_nabla_interpol_inlined_naive =

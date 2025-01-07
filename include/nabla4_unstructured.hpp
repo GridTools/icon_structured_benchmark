@@ -29,7 +29,7 @@ class nabla4_unstructured : private nabla4_data<T> {
   public:
     /// Constructor with all the necessary information for \c nabla4 compute
     /// kernel execution
-    nabla4_unstructured(std::vector<std::array<std::size_t, 4>> e2c2v,
+    nabla4_unstructured(const std::vector<std::array<std::size_t, 4>> &e2c2v,
         std::vector<std::array<std::size_t, 4>> e2ecv,
         std::size_t CellDim,
         std::size_t VertexDim,
@@ -39,20 +39,20 @@ class nabla4_unstructured : private nabla4_data<T> {
         : e2c2v(e2c2v), e2ecv(e2ecv), nabla4_data<T>(CellDim, VertexDim, EdgeDim, KDim, ECVDim, e2c2v.size()){};
 
     /// Constructor for validation
-    nabla4_unstructured(std::vector<std::array<std::size_t, 4>> &e2c2v,
-        std::vector<std::array<std::size_t, 4>> &e2ecv,
+    nabla4_unstructured(const std::vector<std::array<std::size_t, 4>> &e2c2v,
+        const std::vector<std::array<std::size_t, 4>> &e2ecv,
         std::size_t CellDim,
         std::size_t VertexDim,
         std::size_t EdgeDim,
         std::size_t KDim,
         std::size_t ECVDim,
-        std::vector<std::vector<VP_TYPE>> &u_vert,
-        std::vector<std::vector<VP_TYPE>> &v_vert,
-        std::vector<WP_TYPE> &primal_normal_vert_v1,
-        std::vector<WP_TYPE> &primal_normal_vert_v2,
-        std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
-        std::vector<WP_TYPE> &inv_vert_vert_length,
-        std::vector<WP_TYPE> &inv_primal_edge_length)
+        const std::vector<std::vector<VP_TYPE>> &u_vert,
+        const std::vector<std::vector<VP_TYPE>> &v_vert,
+        const std::vector<WP_TYPE> &primal_normal_vert_v1,
+        const std::vector<WP_TYPE> &primal_normal_vert_v2,
+        const std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+        const std::vector<WP_TYPE> &inv_vert_vert_length,
+        const std::vector<WP_TYPE> &inv_primal_edge_length)
         : e2c2v(e2c2v), e2ecv(e2ecv), nabla4_data<T>(CellDim,
                                           VertexDim,
                                           EdgeDim,

@@ -27,15 +27,15 @@ struct nabla4_vertical_interpolate_structured_inlined {
         index_type y_dim,
         index_type x_dim,
         index_type halo,
-        std::vector<std::vector<VP_TYPE>> &u_vert,
-        std::vector<std::vector<VP_TYPE>> &v_vert,
-        std::vector<WP_TYPE> &primal_normal_vert_v1,
-        std::vector<WP_TYPE> &primal_normal_vert_v2,
-        std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
-        std::vector<WP_TYPE> &inv_vert_vert_length,
-        std::vector<WP_TYPE> &inv_primal_edge_length,
-        std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
-        std::vector<std::vector<WP_TYPE>> &ptr_coeff_2)
+        const std::vector<std::vector<VP_TYPE>> &u_vert,
+        const std::vector<std::vector<VP_TYPE>> &v_vert,
+        const std::vector<WP_TYPE> &primal_normal_vert_v1,
+        const std::vector<WP_TYPE> &primal_normal_vert_v2,
+        const std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+        const std::vector<WP_TYPE> &inv_vert_vert_length,
+        const std::vector<WP_TYPE> &inv_primal_edge_length,
+        const std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
+        const std::vector<std::vector<WP_TYPE>> &ptr_coeff_2)
         : nabla4_data(CellDim,
               VertexDim,
               EdgeDim,
@@ -297,8 +297,7 @@ constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_naive_vert
 constexpr block_dims block_dims_structured_nabla_interpol_inlined_naive_vertical =
     get_block_dims_structured_nabla_interpol_inlined_naive_vertical<index_type>();
 
-__global__ void
-__launch_bounds__(block_dims_structured_nabla_interpol_inlined_naive_vertical.size)
+__global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_naive_vertical.size)
     run_gpu_naive_nabla4_vertical_interpolate_inlined_structured(index_type KDim,
         index_type x_dim,
         index_type y_dim,

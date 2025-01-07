@@ -27,15 +27,15 @@ struct nabla4_vertical_interpolate_roofline {
         index_type y_dim,
         index_type x_dim,
         index_type halo,
-        std::vector<std::vector<VP_TYPE>> &u_vert,
-        std::vector<std::vector<VP_TYPE>> &v_vert,
-        std::vector<WP_TYPE> &primal_normal_vert_v1,
-        std::vector<WP_TYPE> &primal_normal_vert_v2,
-        std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
-        std::vector<WP_TYPE> &inv_vert_vert_length,
-        std::vector<WP_TYPE> &inv_primal_edge_length,
-        std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
-        std::vector<std::vector<WP_TYPE>> &ptr_coeff_2)
+        const std::vector<std::vector<VP_TYPE>> &u_vert,
+        const std::vector<std::vector<VP_TYPE>> &v_vert,
+        const std::vector<WP_TYPE> &primal_normal_vert_v1,
+        const std::vector<WP_TYPE> &primal_normal_vert_v2,
+        const std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+        const std::vector<WP_TYPE> &inv_vert_vert_length,
+        const std::vector<WP_TYPE> &inv_primal_edge_length,
+        const std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
+        const std::vector<std::vector<WP_TYPE>> &ptr_coeff_2)
         : nabla4_data(CellDim,
               VertexDim,
               EdgeDim,
@@ -135,7 +135,7 @@ __global__ void __launch_bounds__(block_dims_nabla_interpol_roofline_kloop_verti
         return;
     }
     const index_type vertex_index_internal = i - halo + (j - halo) * (x_dim - 2 * halo);
-    
+
     const std::array<WP_TYPE, 6> ptr_coeff_1{ptr_coeff_1_gt_ctv(vertex_index_internal, 0),
         ptr_coeff_1_gt_ctv(vertex_index_internal, 1),
         ptr_coeff_1_gt_ctv(vertex_index_internal, 2),
@@ -150,9 +150,9 @@ __global__ void __launch_bounds__(block_dims_nabla_interpol_roofline_kloop_verti
         ptr_coeff_2_gt_ctv(vertex_index_internal, 5)};
     WP_TYPE sum{0};
 #pragma unroll 6
-        for (auto index{0}; index < 6; ++index) {
-            sum += ptr_coeff_1[index] + ptr_coeff_2[index];
-        }
+    for (auto index{0}; index < 6; ++index) {
+        sum += ptr_coeff_1[index] + ptr_coeff_2[index];
+    }
     for (auto k_index{blockIdx.z * blockDim.z + threadIdx.z}; k_index < KDim; k_index += gridDim.z * blockDim.z) {
         const std::array<WP_TYPE, 12> primal_normal_vert_v1{primal_normal_vert_v1_gt_tv(vertex_index_internal, k_index),
             primal_normal_vert_v1_gt_tv(vertex_index_internal + inner_domain_size, k_index),
@@ -181,7 +181,8 @@ __global__ void __launch_bounds__(block_dims_nabla_interpol_roofline_kloop_verti
         const std::array<WP_TYPE, 3> inv_vert_vert_length{inv_vert_vert_length_gt_tv(vertex_index_internal, k_index),
             inv_vert_vert_length_gt_tv(vertex_index_internal + inner_domain_size, k_index),
             inv_vert_vert_length_gt_tv(vertex_index_internal + 2 * inner_domain_size, k_index)};
-        const std::array<WP_TYPE, 3> inv_primal_edge_length{inv_primal_edge_length_gt_tv(vertex_index_internal, k_index),
+        const std::array<WP_TYPE, 3> inv_primal_edge_length{
+            inv_primal_edge_length_gt_tv(vertex_index_internal, k_index),
             inv_primal_edge_length_gt_tv(vertex_index_internal + inner_domain_size, k_index),
             inv_primal_edge_length_gt_tv(vertex_index_internal + 2 * inner_domain_size, k_index)};
         const auto u_vert = u_vert_gt_tv(vertex_index_internal, k_index);

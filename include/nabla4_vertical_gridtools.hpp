@@ -72,13 +72,13 @@ struct nabla4_vertical_gt_data {
         z_nabla4_e2_wp_gt_tv(z_nabla4_e2_wp_gt->target_view())
     {};
 
-    nabla4_vertical_gt_data(std::size_t CellDim, std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim, std::size_t ECVDim, std::size_t output_size, std::vector<std::vector<VP_TYPE>> &u_vert,
-        std::vector<std::vector<VP_TYPE>> &v_vert,
-        std::vector<WP_TYPE> &primal_normal_vert_v1,
-        std::vector<WP_TYPE> &primal_normal_vert_v2,
-        std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
-        std::vector<WP_TYPE> &inv_vert_vert_length,
-        std::vector<WP_TYPE> &inv_primal_edge_length)
+    nabla4_vertical_gt_data(std::size_t CellDim, std::size_t VertexDim, std::size_t EdgeDim, std::size_t KDim, std::size_t ECVDim, std::size_t output_size, const std::vector<std::vector<VP_TYPE>> &u_vert,
+        const std::vector<std::vector<VP_TYPE>> &v_vert,
+        const std::vector<WP_TYPE> &primal_normal_vert_v1,
+        const std::vector<WP_TYPE> &primal_normal_vert_v2,
+        const std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+        const std::vector<WP_TYPE> &inv_vert_vert_length,
+        const std::vector<WP_TYPE> &inv_primal_edge_length)
         : CellDim(CellDim), VertexDim(VertexDim), EdgeDim(EdgeDim), KDim(KDim), ECVDim(ECVDim), output_size(output_size),
         u_vert_gt(storage::builder<T>.template type<VP_TYPE>().dimensions(VertexDim, KDim).initializer([&u_vert](int i, int j) { return u_vert[i][j]; }).build()),
         v_vert_gt(storage::builder<T>.template type<VP_TYPE>().dimensions(VertexDim, KDim).initializer([&v_vert](int i, int j) { return v_vert[i][j]; }).build()),

@@ -26,15 +26,15 @@ struct nabla4_interpolate_roofline {
         index_type y_dim,
         index_type x_dim,
         index_type halo,
-        std::vector<std::vector<VP_TYPE>> &u_vert,
-        std::vector<std::vector<VP_TYPE>> &v_vert,
-        std::vector<WP_TYPE> &primal_normal_vert_v1,
-        std::vector<WP_TYPE> &primal_normal_vert_v2,
-        std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
-        std::vector<WP_TYPE> &inv_vert_vert_length,
-        std::vector<WP_TYPE> &inv_primal_edge_length,
-        std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
-        std::vector<std::vector<WP_TYPE>> &ptr_coeff_2)
+        const std::vector<std::vector<VP_TYPE>> &u_vert,
+        const std::vector<std::vector<VP_TYPE>> &v_vert,
+        const std::vector<WP_TYPE> &primal_normal_vert_v1,
+        const std::vector<WP_TYPE> &primal_normal_vert_v2,
+        const std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+        const std::vector<WP_TYPE> &inv_vert_vert_length,
+        const std::vector<WP_TYPE> &inv_primal_edge_length,
+        const std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
+        const std::vector<std::vector<WP_TYPE>> &ptr_coeff_2)
         : nabla4_data(CellDim,
               VertexDim,
               EdgeDim,
@@ -176,17 +176,17 @@ __global__ void __launch_bounds__(block_dims_nabla_interpol_roofline_kloop.size)
         ptr_coeff_2_gt_ctv(vertex_index_internal, 5)};
     WP_TYPE sum{0};
 #pragma unroll 3
-        for (auto color{0}; color < 3; ++color) {
-            sum += inv_vert_vert_length[color] + inv_primal_edge_length[color];
-        }
+    for (auto color{0}; color < 3; ++color) {
+        sum += inv_vert_vert_length[color] + inv_primal_edge_length[color];
+    }
 #pragma unroll 12
-        for (auto index{0}; index < 12; ++index) {
-            sum += primal_normal_vert_v1[index] + primal_normal_vert_v2[index];
-        }
+    for (auto index{0}; index < 12; ++index) {
+        sum += primal_normal_vert_v1[index] + primal_normal_vert_v2[index];
+    }
 #pragma unroll 6
-        for (auto index{0}; index < 6; ++index) {
-            sum += ptr_coeff_1[index] + ptr_coeff_2[index];
-        }
+    for (auto index{0}; index < 6; ++index) {
+        sum += ptr_coeff_1[index] + ptr_coeff_2[index];
+    }
     for (auto k_index{blockIdx.z * blockDim.z + threadIdx.z}; k_index < KDim; k_index += gridDim.z * blockDim.z) {
         const auto u_vert = u_vert_gt_tv(vertex_index_internal, k_index);
         const auto v_vert = v_vert_gt_tv(vertex_index_internal, k_index);

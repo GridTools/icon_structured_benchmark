@@ -98,8 +98,8 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
 
     /// Constructor with all the necessary information for \c nabla4 compute
     /// kernel execution
-    nabla4_unstructured_gt(std::vector<std::array<index_type, 4>> e2c2v,
-        std::vector<std::array<index_type, 4>> e2ecv,
+    nabla4_unstructured_gt(const std::vector<std::array<index_type, 4>> &e2c2v,
+        const std::vector<std::array<index_type, 4>> &e2ecv,
         index_type CellDim,
         index_type VertexDim,
         index_type EdgeDim,
@@ -111,20 +111,20 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
         e2ecv_gt_tv(e2ecv_gt->const_target_view()),
         nabla4_gt_data<T>(CellDim, VertexDim, EdgeDim, KDim, ECVDim, e2c2v.size()){};
 
-    nabla4_unstructured_gt(std::vector<std::array<index_type, 4>> e2c2v,
-        std::vector<std::array<index_type, 4>> e2ecv,
+    nabla4_unstructured_gt(const std::vector<std::array<index_type, 4>> &e2c2v,
+        const std::vector<std::array<index_type, 4>> &e2ecv,
         index_type CellDim,
         index_type VertexDim,
         index_type EdgeDim,
         index_type KDim,
         index_type ECVDim,
-        std::vector<std::vector<VP_TYPE>> &u_vert,
-        std::vector<std::vector<VP_TYPE>> &v_vert,
-        std::vector<WP_TYPE> &primal_normal_vert_v1,
-        std::vector<WP_TYPE> &primal_normal_vert_v2,
-        std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
-        std::vector<WP_TYPE> &inv_vert_vert_length,
-        std::vector<WP_TYPE> &inv_primal_edge_length)
+        const std::vector<std::vector<VP_TYPE>> &u_vert,
+        const std::vector<std::vector<VP_TYPE>> &v_vert,
+        const std::vector<WP_TYPE> &primal_normal_vert_v1,
+        const std::vector<WP_TYPE> &primal_normal_vert_v2,
+        const std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+        const std::vector<WP_TYPE> &inv_vert_vert_length,
+        const std::vector<WP_TYPE> &inv_primal_edge_length)
         : e2c2v_gt(storage::builder<T>.template type<index_type>().dimensions(e2c2v.size(), 4_c).initializer([&e2c2v](int i, int j) { return e2c2v[i][j]; }).build()),
         e2ecv_gt(storage::builder<T>.template type<index_type>().dimensions(e2ecv.size(), 4_c).initializer([&e2ecv](int i, int j) { return e2ecv[i][j]; }).build()),
         e2c2v_gt_tv(e2c2v_gt->const_target_view()),
