@@ -307,6 +307,8 @@ NB_MODULE(icon_benchmark, m) {
         &nabla4_interpolate_verts2cells_validate_structured_gpu_kloop_inlined);
     m.def("nabla4_interpolate_verts2cells_validate_structured_gpu_kloop_inlined_cached",
         &nabla4_interpolate_verts2cells_validate_structured_gpu_kloop_inlined_cached);
+    m.def("nabla4_interpolate_verts2cells_validate_structured_gpu_kloop_inlined_cached_pipeline",
+        &nabla4_interpolate_verts2cells_validate_structured_gpu_kloop_inlined_cached_pipeline);
     m.def("nabla4_interpolate_verts2cells_benchmark_unstructured_cpu_kfirst_separate",
         &nabla4_interpolate_verts2cells_benchmark_unstructured_cpu_kfirst_separate);
     m.def("nabla4_interpolate_verts2cells_benchmark_structured_cpu_kfirst_separate",
@@ -339,4 +341,6 @@ NB_MODULE(icon_benchmark, m) {
         &nabla4_interpolate_verts2cells_benchmark_structured_gpu_kloop_inlined);
     m.def("nabla4_interpolate_verts2cells_benchmark_structured_gpu_kloop_inlined_cached",
         &nabla4_interpolate_verts2cells_benchmark_structured_gpu_kloop_inlined_cached);
+    m.def("nabla4_interpolate_verts2cells_benchmark_structured_gpu_kloop_inlined_cached_pipeline",
+        &nabla4_interpolate_verts2cells_benchmark_structured_gpu_kloop_inlined_cached_pipeline);
 }
