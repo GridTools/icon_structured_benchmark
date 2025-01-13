@@ -7,9 +7,9 @@ struct nabla4_interpolate_unstructured_inlined_cached {
     interpolate_unstructured<T> interpolate_data;
     index_type x_dim;
 
-    nabla4_interpolate_unstructured_inlined_cached(std::vector<std::array<index_type, 4>> e2c2v,
-        std::vector<std::array<index_type, 4>> e2ecv,
-        std::vector<std::array<index_type, 6>> v2e,
+    nabla4_interpolate_unstructured_inlined_cached(const std::vector<std::array<index_type, 4>> &e2c2v,
+        const std::vector<std::array<index_type, 4>> &e2ecv,
+        const std::vector<std::array<index_type, 6>> &v2e,
         index_type CellDim,
         index_type VertexDim,
         index_type EdgeDim,
@@ -17,27 +17,26 @@ struct nabla4_interpolate_unstructured_inlined_cached {
         index_type ECVDim,
         index_type x_dim)
         : nabla4_data(e2c2v, e2ecv, CellDim, VertexDim, EdgeDim, KDim, ECVDim),
-          interpolate_data(v2e, VertexDim, EdgeDim, KDim, nabla4_data.get_output_gt()),
-          x_dim(x_dim) {};
+          interpolate_data(v2e, VertexDim, EdgeDim, KDim, nabla4_data.get_output_gt()), x_dim(x_dim){};
 
-    nabla4_interpolate_unstructured_inlined_cached(std::vector<std::array<index_type, 4>> e2c2v,
-        std::vector<std::array<index_type, 4>> e2ecv,
-        std::vector<std::array<index_type, 6>> v2e,
+    nabla4_interpolate_unstructured_inlined_cached(const std::vector<std::array<index_type, 4>> &e2c2v,
+        const std::vector<std::array<index_type, 4>> &e2ecv,
+        const std::vector<std::array<index_type, 6>> &v2e,
         index_type CellDim,
         index_type VertexDim,
         index_type EdgeDim,
         index_type KDim,
         index_type ECVDim,
         index_type x_dim,
-        std::vector<std::vector<VP_TYPE>> &u_vert,
-        std::vector<std::vector<VP_TYPE>> &v_vert,
-        std::vector<WP_TYPE> &primal_normal_vert_v1,
-        std::vector<WP_TYPE> &primal_normal_vert_v2,
-        std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
-        std::vector<WP_TYPE> &inv_vert_vert_length,
-        std::vector<WP_TYPE> &inv_primal_edge_length,
-        std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
-        std::vector<std::vector<WP_TYPE>> &ptr_coeff_2)
+        const std::vector<std::vector<VP_TYPE>> &u_vert,
+        const std::vector<std::vector<VP_TYPE>> &v_vert,
+        const std::vector<WP_TYPE> &primal_normal_vert_v1,
+        const std::vector<WP_TYPE> &primal_normal_vert_v2,
+        const std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+        const std::vector<WP_TYPE> &inv_vert_vert_length,
+        const std::vector<WP_TYPE> &inv_primal_edge_length,
+        const std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
+        const std::vector<std::vector<WP_TYPE>> &ptr_coeff_2)
         : nabla4_data(e2c2v,
               e2ecv,
               CellDim,
@@ -53,7 +52,7 @@ struct nabla4_interpolate_unstructured_inlined_cached {
               inv_vert_vert_length,
               inv_primal_edge_length),
           interpolate_data(v2e, VertexDim, EdgeDim, KDim, nabla4_data.get_output_gt(), ptr_coeff_1, ptr_coeff_2),
-          x_dim(x_dim) {};
+          x_dim(x_dim){};
 
     auto get_output() -> decltype(interpolate_data.get_output()) { return interpolate_data.get_output(); }
 
@@ -241,9 +240,10 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
         inv_primal_edge_length_gt_tv(v2e[3]),
         inv_primal_edge_length_gt_tv(v2e[4]),
         inv_primal_edge_length_gt_tv(v2e[5])};
-    const int initial_k_index{blockIdx.y * blockDim.y + threadIdx.y};
+    const auto initial_k_index{blockIdx.y * blockDim.y + threadIdx.y};
     int k_repetition{0};
-    for (int k_index{initial_k_index}; k_index < KDim && k_repetition < k_repetitions; k_index += gridDim.y * blockDim.y) {
+    for (int k_index{static_cast<int>(initial_k_index)}; k_index < KDim && k_repetition < k_repetitions;
+         k_index += gridDim.y * blockDim.y) {
         const auto shared_mem_vertex_index{(threadIdx.x + k_repetition * blockDim.x) * 6};
 #pragma unroll
         for (int edge_id{0}; edge_id < 6; ++edge_id) {
@@ -262,8 +262,10 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
                                         v_vert_gt_tv(E2C2V_3, k_index) * primal_normal_vert_v2[4 * edge_id + 3];
             const double z_nabla2_e = z_nabla2_e_gt_tv(edge_index, k_index);
             z_nabla4_e2[shared_mem_vertex_index + edge_id] =
-                4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e) * inv_vert_vert_length[edge_id] * inv_vert_vert_length[edge_id] +
-                        (nabv_tang_wp - 2.0 * z_nabla2_e) * inv_primal_edge_length[edge_id] * inv_primal_edge_length[edge_id]);
+                4.0 *
+                ((nabv_norm_wp - 2.0 * z_nabla2_e) * inv_vert_vert_length[edge_id] * inv_vert_vert_length[edge_id] +
+                    (nabv_tang_wp - 2.0 * z_nabla2_e) * inv_primal_edge_length[edge_id] *
+                        inv_primal_edge_length[edge_id]);
         }
         k_repetition++;
     }
@@ -281,7 +283,8 @@ __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined
         ptr_coeff_2_gt_ctv(vertex_index, 4),
         ptr_coeff_2_gt_ctv(vertex_index, 5)};
     k_repetition = 0;
-    for (int k_index{initial_k_index}; k_index < KDim && k_repetition < k_repetitions; k_index += gridDim.y * blockDim.y) {
+    for (int k_index{static_cast<int>(initial_k_index)}; k_index < KDim && k_repetition < k_repetitions;
+         k_index += gridDim.y * blockDim.y) {
         const auto shared_mem_vertex_index{(threadIdx.x + k_repetition * blockDim.x) * 6};
         const std::array<WP_TYPE, 6> z_nabla4_e2_wp{z_nabla4_e2[shared_mem_vertex_index],
             z_nabla4_e2[shared_mem_vertex_index + 1],
@@ -308,9 +311,10 @@ inline void nabla4_interpolate_unstructured_inlined_cached<T>::run_gpu_kloop_hel
     constexpr index_type shared_mem_inner_domain = tblocks.x;
     constexpr long unsigned int k_repetitions{smemSize / (shared_mem_inner_domain * 6 * sizeof(WP_TYPE) * tblocks.z)};
     const int KDim_ceil = std::ceil(static_cast<double>(interpolate_data.KDim) / k_repetitions);
-    dim3 grid((interpolate_data.output_size + tblocks.x - 1) / tblocks.x, (KDim_ceil + tblocks.y - 1) / tblocks.y , 1);
+    dim3 grid((interpolate_data.output_size + tblocks.x - 1) / tblocks.x, (KDim_ceil + tblocks.y - 1) / tblocks.y, 1);
     constexpr int shared_mem_size = shared_mem_inner_domain * 6 * sizeof(WP_TYPE) * k_repetitions * tblocks.z;
-    run_gpu_kloop_nabla4_interpolate_inlined_cached_unstructured<<<grid, tblocks, shared_mem_size>>>(nabla4_data.output_size,
+    run_gpu_kloop_nabla4_interpolate_inlined_cached_unstructured<<<grid, tblocks, shared_mem_size>>>(
+        nabla4_data.output_size,
         interpolate_data.output_size,
         nabla4_data.CellDim,
         interpolate_data.VertexDim,

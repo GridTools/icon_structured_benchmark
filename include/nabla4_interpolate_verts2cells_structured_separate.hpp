@@ -1,13 +1,17 @@
+#include <utility>
+
 #include <interpolate_structured_gridtools.hpp>
 #include <nabla4_structured_torus_gridtools_halo.hpp>
+#include <verts2cells_structured_gridtools.hpp>
 
 template <typename T>
-struct nabla4_interpolate_structured_separate {
+struct nabla4_interpolate_verts2cells_structured_separate {
     nabla4_structured_torus_halo_gt<T> nabla4_data;
     interpolate_structured<T> interpolate_data;
+    verts2cells_structured<T> verts2cells_data;
 
   public:
-    nabla4_interpolate_structured_separate(index_type CellDim,
+    nabla4_interpolate_verts2cells_structured_separate(index_type CellDim,
         index_type VertexDim,
         index_type EdgeDim,
         index_type KDim,
@@ -17,9 +21,17 @@ struct nabla4_interpolate_structured_separate {
         index_type halo)
         : nabla4_data(CellDim, VertexDim, EdgeDim, KDim, ECVDim, y_dim, x_dim, halo),
           interpolate_data(
-              VertexDim, EdgeDim, KDim, y_dim - 2 * halo, x_dim - 2 * halo, 1, nabla4_data.get_output_gt()){};
+              VertexDim, EdgeDim, KDim, y_dim - 2 * halo, x_dim - 2 * halo, 1, nabla4_data.get_output_gt()),
+          verts2cells_data(VertexDim,
+              CellDim,
+              KDim,
+              y_dim - 2 * (halo + 1),
+              x_dim - 2 * (halo + 1),
+              1,
+              std::get<0>(interpolate_data.get_output_gt()),
+              std::get<1>(interpolate_data.get_output_gt())){};
 
-    nabla4_interpolate_structured_separate(index_type CellDim,
+    nabla4_interpolate_verts2cells_structured_separate(index_type CellDim,
         index_type VertexDim,
         index_type EdgeDim,
         index_type KDim,
@@ -35,7 +47,9 @@ struct nabla4_interpolate_structured_separate {
         const std::vector<WP_TYPE> &inv_vert_vert_length,
         const std::vector<WP_TYPE> &inv_primal_edge_length,
         const std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
-        const std::vector<std::vector<WP_TYPE>> &ptr_coeff_2)
+        const std::vector<std::vector<WP_TYPE>> &ptr_coeff_2,
+        const std::vector<std::vector<WP_TYPE>> &ptr_c_coeff_1,
+        const std::vector<std::vector<WP_TYPE>> &ptr_c_coeff_2)
         : nabla4_data(CellDim,
               VertexDim,
               EdgeDim,
@@ -59,9 +73,19 @@ struct nabla4_interpolate_structured_separate {
               1,
               nabla4_data.get_output_gt(),
               ptr_coeff_1,
-              ptr_coeff_2){};
+              ptr_coeff_2),
+          verts2cells_data(VertexDim,
+              CellDim,
+              KDim,
+              y_dim - 2 * (halo + 1),
+              x_dim - 2 * (halo + 1),
+              1,
+              std::get<0>(interpolate_data.get_output_gt()),
+              std::get<1>(interpolate_data.get_output_gt()),
+              ptr_c_coeff_1,
+              ptr_c_coeff_2){};
 
-    auto get_output() -> decltype(interpolate_data.get_output()) { return interpolate_data.get_output(); }
+    auto get_output() -> decltype(verts2cells_data.get_output()) { return verts2cells_data.get_output(); }
 
     template <backend_impl I>
     inline void run() {
@@ -69,6 +93,7 @@ struct nabla4_interpolate_structured_separate {
                       I == backend_impl::gpu_kloop) {
             nabla4_data.template run<I>();
             interpolate_data.template run<I>();
+            verts2cells_data.template run<I>();
         } else {
             throw std::runtime_error("Undefined backend implementation");
         }

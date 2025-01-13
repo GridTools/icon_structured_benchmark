@@ -108,13 +108,13 @@ class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
         index_type halo,
         // std::vector<std::array<index_type, 4>> e2c2v, // 510 * 590 * 4 * 8 B = 9.6288 MB
         // std::vector<std::array<index_type, 4>> e2ecv, // 510 * 590 * 4 * 8 B = 9.6288 MB
-        std::vector<std::vector<VP_TYPE>> &u_vert,     // 510 * 590 * 3 * 65 * 8 B = 469.404 MB
-        std::vector<std::vector<VP_TYPE>> &v_vert,     // 510 * 590 * 3 * 65 * 8 B = 469.404 MB
-        std::vector<WP_TYPE> &primal_normal_vert_v1,   // 510 * 590 * 3 * 8 B = 7.2216 MB
-        std::vector<WP_TYPE> &primal_normal_vert_v2,   // 510 * 590 * 3 * 8 B = 7.2216 MB
-        std::vector<std::vector<WP_TYPE>> &z_nabla2_e, // 510 * 590 * 3 * 65 * 8 B = 469.404 MB
-        std::vector<WP_TYPE> &inv_vert_vert_length,    // 510 * 590 * 3 * 8 B = 7.2216 MB
-        std::vector<WP_TYPE> &inv_primal_edge_length)  // 510 * 590 * 3 * 8 B = 7.2216 MB
+        const std::vector<std::vector<VP_TYPE>> &u_vert,     // 510 * 590 * 3 * 65 * 8 B = 469.404 MB
+        const std::vector<std::vector<VP_TYPE>> &v_vert,     // 510 * 590 * 3 * 65 * 8 B = 469.404 MB
+        const std::vector<WP_TYPE> &primal_normal_vert_v1,   // 510 * 590 * 3 * 8 B = 7.2216 MB
+        const std::vector<WP_TYPE> &primal_normal_vert_v2,   // 510 * 590 * 3 * 8 B = 7.2216 MB
+        const std::vector<std::vector<WP_TYPE>> &z_nabla2_e, // 510 * 590 * 3 * 65 * 8 B = 469.404 MB
+        const std::vector<WP_TYPE> &inv_vert_vert_length,    // 510 * 590 * 3 * 8 B = 7.2216 MB
+        const std::vector<WP_TYPE> &inv_primal_edge_length)  // 510 * 590 * 3 * 8 B = 7.2216 MB
         : y_dim(y_dim), x_dim(x_dim), halo(halo), nabla4_gt_data<T>(CellDim,
                                                       VertexDim,
                                                       EdgeDim,

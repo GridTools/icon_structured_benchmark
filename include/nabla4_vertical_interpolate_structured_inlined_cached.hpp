@@ -26,15 +26,15 @@ struct nabla4_vertical_interpolate_structured_inlined_cached {
         index_type y_dim,
         index_type x_dim,
         index_type halo,
-        std::vector<std::vector<VP_TYPE>> &u_vert,
-        std::vector<std::vector<VP_TYPE>> &v_vert,
-        std::vector<WP_TYPE> &primal_normal_vert_v1,
-        std::vector<WP_TYPE> &primal_normal_vert_v2,
-        std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
-        std::vector<WP_TYPE> &inv_vert_vert_length,
-        std::vector<WP_TYPE> &inv_primal_edge_length,
-        std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
-        std::vector<std::vector<WP_TYPE>> &ptr_coeff_2)
+        const std::vector<std::vector<VP_TYPE>> &u_vert,
+        const std::vector<std::vector<VP_TYPE>> &v_vert,
+        const std::vector<WP_TYPE> &primal_normal_vert_v1,
+        const std::vector<WP_TYPE> &primal_normal_vert_v2,
+        const std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+        const std::vector<WP_TYPE> &inv_vert_vert_length,
+        const std::vector<WP_TYPE> &inv_primal_edge_length,
+        const std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
+        const std::vector<std::vector<WP_TYPE>> &ptr_coeff_2)
         : nabla4_data(CellDim,
               VertexDim,
               EdgeDim,
@@ -355,25 +355,28 @@ __maxnreg__(52)
             const auto E2C2V_1_c = E2C2V_1[color];
             const auto E2C2V_2_c = E2C2V_2[color];
             const auto E2C2V_3_c = E2C2V_3[color];
-            const double nabv_tang_wp = u_vert_gt_tv(E2C2V_0_c, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_0[color], k_index) +
-                                        v_vert_gt_tv(E2C2V_0_c, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_0[color], k_index) +
-                                        u_vert_gt_tv(E2C2V_1_c, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_1[color], k_index) +
-                                        v_vert_gt_tv(E2C2V_1_c, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_1[color], k_index);
-            const double nabv_norm_wp = u_vert_gt_tv(E2C2V_2_c, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_2[color], k_index) +
-                                        v_vert_gt_tv(E2C2V_2_c, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_2[color], k_index) +
-                                        u_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_3[color], k_index) +
-                                        v_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_3[color], k_index);
+            const double nabv_tang_wp =
+                u_vert_gt_tv(E2C2V_0_c, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_0[color], k_index) +
+                v_vert_gt_tv(E2C2V_0_c, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_0[color], k_index) +
+                u_vert_gt_tv(E2C2V_1_c, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_1[color], k_index) +
+                v_vert_gt_tv(E2C2V_1_c, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_1[color], k_index);
+            const double nabv_norm_wp =
+                u_vert_gt_tv(E2C2V_2_c, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_2[color], k_index) +
+                v_vert_gt_tv(E2C2V_2_c, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_2[color], k_index) +
+                u_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v1_gt_tv(E2ECV_3[color], k_index) +
+                v_vert_gt_tv(E2C2V_3_c, k_index) * primal_normal_vert_v2_gt_tv(E2ECV_3[color], k_index);
             const auto k_level_cache_offset = 3 * shared_mem_inner_domain * threadIdx.z;
             const auto local_edge_index =
                 threadIdx.x + threadIdx.y * blockDim.x + color * shared_mem_inner_domain + k_level_cache_offset;
             const WP_TYPE z_nabla2_e = z_nabla2_e_gt_tv(edge_index + color * outer_domain_size, k_index);
-            const auto inv_vert_vert_length = inv_vert_vert_length_gt_tv(edge_index + color * outer_domain_size, k_index);
-            const auto inv_primal_edge_length = inv_primal_edge_length_gt_tv(edge_index + color * outer_domain_size, k_index);
+            const auto inv_vert_vert_length =
+                inv_vert_vert_length_gt_tv(edge_index + color * outer_domain_size, k_index);
+            const auto inv_primal_edge_length =
+                inv_primal_edge_length_gt_tv(edge_index + color * outer_domain_size, k_index);
             const auto inv_vert_vert_length_sqr = inv_vert_vert_length * inv_vert_vert_length;
             const auto inv_primal_edge_length_sqr = inv_primal_edge_length * inv_primal_edge_length;
-            z_nabla4_e2[local_edge_index] =
-                4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e) * inv_vert_vert_length_sqr +
-                            (nabv_tang_wp - 2.0 * z_nabla2_e) * inv_primal_edge_length_sqr);
+            z_nabla4_e2[local_edge_index] = 4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e) * inv_vert_vert_length_sqr +
+                                                      (nabv_tang_wp - 2.0 * z_nabla2_e) * inv_primal_edge_length_sqr);
         };
     }
     __syncthreads();
@@ -398,19 +401,19 @@ __maxnreg__(52)
         ptr_coeff_2_gt_ctv(vertex_index_internal, 3),
         ptr_coeff_2_gt_ctv(vertex_index_internal, 4),
         ptr_coeff_2_gt_ctv(vertex_index_internal, 5)};
-        const auto k_level_cache_offset = 3 * shared_mem_inner_domain * threadIdx.z;
-        p_u_out_gt_tv(vertex_index_internal, k_index) = z_nabla4_e2[v2e[0] + k_level_cache_offset] * coeff_1[0] +
-                                                        z_nabla4_e2[v2e[1] + k_level_cache_offset] * coeff_1[1] +
-                                                        z_nabla4_e2[v2e[2] + k_level_cache_offset] * coeff_1[2] +
-                                                        z_nabla4_e2[v2e[3] + k_level_cache_offset] * coeff_1[3] +
-                                                        z_nabla4_e2[v2e[4] + k_level_cache_offset] * coeff_1[4] +
-                                                        z_nabla4_e2[v2e[5] + k_level_cache_offset] * coeff_1[5];
-        p_v_out_gt_tv(vertex_index_internal, k_index) = z_nabla4_e2[v2e[0] + k_level_cache_offset] * coeff_2[0] +
-                                                        z_nabla4_e2[v2e[1] + k_level_cache_offset] * coeff_2[1] +
-                                                        z_nabla4_e2[v2e[2] + k_level_cache_offset] * coeff_2[2] +
-                                                        z_nabla4_e2[v2e[3] + k_level_cache_offset] * coeff_2[3] +
-                                                        z_nabla4_e2[v2e[4] + k_level_cache_offset] * coeff_2[4] +
-                                                        z_nabla4_e2[v2e[5] + k_level_cache_offset] * coeff_2[5];
+    const auto k_level_cache_offset = 3 * shared_mem_inner_domain * threadIdx.z;
+    p_u_out_gt_tv(vertex_index_internal, k_index) = z_nabla4_e2[v2e[0] + k_level_cache_offset] * coeff_1[0] +
+                                                    z_nabla4_e2[v2e[1] + k_level_cache_offset] * coeff_1[1] +
+                                                    z_nabla4_e2[v2e[2] + k_level_cache_offset] * coeff_1[2] +
+                                                    z_nabla4_e2[v2e[3] + k_level_cache_offset] * coeff_1[3] +
+                                                    z_nabla4_e2[v2e[4] + k_level_cache_offset] * coeff_1[4] +
+                                                    z_nabla4_e2[v2e[5] + k_level_cache_offset] * coeff_1[5];
+    p_v_out_gt_tv(vertex_index_internal, k_index) = z_nabla4_e2[v2e[0] + k_level_cache_offset] * coeff_2[0] +
+                                                    z_nabla4_e2[v2e[1] + k_level_cache_offset] * coeff_2[1] +
+                                                    z_nabla4_e2[v2e[2] + k_level_cache_offset] * coeff_2[2] +
+                                                    z_nabla4_e2[v2e[3] + k_level_cache_offset] * coeff_2[3] +
+                                                    z_nabla4_e2[v2e[4] + k_level_cache_offset] * coeff_2[4] +
+                                                    z_nabla4_e2[v2e[5] + k_level_cache_offset] * coeff_2[5];
 };
 
 template <typename T>

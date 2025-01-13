@@ -128,9 +128,9 @@ class interpolate_structured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
         index_type y_dim,
         index_type x_dim,
         index_type halo,
-        std::vector<std::vector<WP_TYPE>> &p_e_in,
-        std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
-        std::vector<std::vector<WP_TYPE>> &ptr_coeff_2)
+        const std::vector<std::vector<WP_TYPE>> &p_e_in,
+        const std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
+        const std::vector<std::vector<WP_TYPE>> &ptr_coeff_2)
         : y_dim(y_dim), x_dim(x_dim), halo(halo),
           mo_intp_rbf_rbf_vec_interpol_vertex<S>(
               VertexDim, EdgeDim, KDim, (y_dim - 2 * halo) * (x_dim - 2 * halo), p_e_in, ptr_coeff_1, ptr_coeff_2){};
@@ -142,8 +142,8 @@ class interpolate_structured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
         index_type x_dim,
         index_type halo,
         const input_type &p_e_in,
-        std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
-        std::vector<std::vector<WP_TYPE>> &ptr_coeff_2)
+        const std::vector<std::vector<WP_TYPE>> &ptr_coeff_1,
+        const std::vector<std::vector<WP_TYPE>> &ptr_coeff_2)
         : y_dim(y_dim), x_dim(x_dim), halo(halo),
           mo_intp_rbf_rbf_vec_interpol_vertex<S>(
               VertexDim, EdgeDim, KDim, (y_dim - 2 * halo) * (x_dim - 2 * halo), p_e_in, ptr_coeff_1, ptr_coeff_2){};
