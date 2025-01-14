@@ -622,22 +622,21 @@ __maxnreg__(80)
         get_index(i_c2v + 1, j_c2v, blockDim.x - 1),
         get_index(i_c2v, j_c2v + 1, blockDim.x - 1),
         get_index(i_c2v + 1, j_c2v + 1, blockDim.x - 1)};
-    p_cell_out_gt_tv(cell_index_internal_upward, k_index) =
-        (shared_mem[c2v[0] + p_u_out_offset] * ptr_c_coeff_1_gt_ctv(cell_index_internal_upward, 0) +
-            shared_mem[c2v[1] + p_u_out_offset] * ptr_c_coeff_1_gt_ctv(cell_index_internal_upward, 1) +
-            shared_mem[c2v[2] + p_u_out_offset] * ptr_c_coeff_1_gt_ctv(cell_index_internal_upward, 2) +
-            shared_mem[c2v[0] + p_v_out_offset] * ptr_c_coeff_2_gt_ctv(cell_index_internal_upward, 0) +
-            shared_mem[c2v[1] + p_v_out_offset] * ptr_c_coeff_2_gt_ctv(cell_index_internal_upward, 1) +
-            shared_mem[c2v[2] + p_v_out_offset] * ptr_c_coeff_2_gt_ctv(cell_index_internal_upward, 2)) /
-        2;
-    p_cell_out_gt_tv(cell_index_internal_downward, k_index) =
-        (shared_mem[c2v[3] + p_u_out_offset] * ptr_c_coeff_1_gt_ctv(cell_index_internal_downward, 0) +
-            shared_mem[c2v[4] + p_u_out_offset] * ptr_c_coeff_1_gt_ctv(cell_index_internal_downward, 1) +
-            shared_mem[c2v[5] + p_u_out_offset] * ptr_c_coeff_1_gt_ctv(cell_index_internal_downward, 2) +
-            shared_mem[c2v[3] + p_v_out_offset] * ptr_c_coeff_2_gt_ctv(cell_index_internal_downward, 0) +
-            shared_mem[c2v[4] + p_v_out_offset] * ptr_c_coeff_2_gt_ctv(cell_index_internal_downward, 1) +
-            shared_mem[c2v[5] + p_v_out_offset] * ptr_c_coeff_2_gt_ctv(cell_index_internal_downward, 2)) /
-        2;
+    __stcs(static_cast<double2 *>(static_cast<void *>(&p_cell_out_gt_tv(cell_index_internal_upward, k_index))),
+        make_double2((shared_mem[c2v[0] + p_u_out_offset] * ptr_c_coeff_1_gt_ctv(cell_index_internal_upward, 0) +
+                         shared_mem[c2v[1] + p_u_out_offset] * ptr_c_coeff_1_gt_ctv(cell_index_internal_upward, 1) +
+                         shared_mem[c2v[2] + p_u_out_offset] * ptr_c_coeff_1_gt_ctv(cell_index_internal_upward, 2) +
+                         shared_mem[c2v[0] + p_v_out_offset] * ptr_c_coeff_2_gt_ctv(cell_index_internal_upward, 0) +
+                         shared_mem[c2v[1] + p_v_out_offset] * ptr_c_coeff_2_gt_ctv(cell_index_internal_upward, 1) +
+                         shared_mem[c2v[2] + p_v_out_offset] * ptr_c_coeff_2_gt_ctv(cell_index_internal_upward, 2)) /
+                         2,
+            (shared_mem[c2v[3] + p_u_out_offset] * ptr_c_coeff_1_gt_ctv(cell_index_internal_downward, 0) +
+                shared_mem[c2v[4] + p_u_out_offset] * ptr_c_coeff_1_gt_ctv(cell_index_internal_downward, 1) +
+                shared_mem[c2v[5] + p_u_out_offset] * ptr_c_coeff_1_gt_ctv(cell_index_internal_downward, 2) +
+                shared_mem[c2v[3] + p_v_out_offset] * ptr_c_coeff_2_gt_ctv(cell_index_internal_downward, 0) +
+                shared_mem[c2v[4] + p_v_out_offset] * ptr_c_coeff_2_gt_ctv(cell_index_internal_downward, 1) +
+                shared_mem[c2v[5] + p_v_out_offset] * ptr_c_coeff_2_gt_ctv(cell_index_internal_downward, 2)) /
+                2));
 };
 
 template <typename T>

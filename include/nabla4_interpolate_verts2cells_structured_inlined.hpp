@@ -441,22 +441,21 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlin
                 z_nabla4_e2[vertex_index * 6 + 3] * ptr_coeff_2[3] +
                 z_nabla4_e2[vertex_index * 6 + 4] * ptr_coeff_2[4] + z_nabla4_e2[vertex_index * 6 + 5] * ptr_coeff_2[5];
         }
-        p_cell_out_gt_tv(cell_index_internal_upward, k_index) =
-            (p_u_out[0] * ptr_c_coeff_1_gt_ctv(cell_index_internal_upward, 0) +
-                p_u_out[1] * ptr_c_coeff_1_gt_ctv(cell_index_internal_upward, 1) +
-                p_u_out[2] * ptr_c_coeff_1_gt_ctv(cell_index_internal_upward, 2) +
-                p_v_out[0] * ptr_c_coeff_2_gt_ctv(cell_index_internal_upward, 0) +
-                p_v_out[1] * ptr_c_coeff_2_gt_ctv(cell_index_internal_upward, 1) +
-                p_v_out[2] * ptr_c_coeff_2_gt_ctv(cell_index_internal_upward, 2)) /
-            2;
-        p_cell_out_gt_tv(cell_index_internal_downward, k_index) =
-            (p_u_out[3] * ptr_c_coeff_1_gt_ctv(cell_index_internal_downward, 0) +
-                p_u_out[4] * ptr_c_coeff_1_gt_ctv(cell_index_internal_downward, 1) +
-                p_u_out[5] * ptr_c_coeff_1_gt_ctv(cell_index_internal_downward, 2) +
-                p_v_out[3] * ptr_c_coeff_2_gt_ctv(cell_index_internal_downward, 0) +
-                p_v_out[4] * ptr_c_coeff_2_gt_ctv(cell_index_internal_downward, 1) +
-                p_v_out[5] * ptr_c_coeff_2_gt_ctv(cell_index_internal_downward, 2)) /
-            2;
+        __stcs(static_cast<double2 *>(static_cast<void *>(&p_cell_out_gt_tv(cell_index_internal_upward, k_index))),
+            make_double2((p_u_out[0] * ptr_c_coeff_1_gt_ctv(cell_index_internal_upward, 0) +
+                             p_u_out[1] * ptr_c_coeff_1_gt_ctv(cell_index_internal_upward, 1) +
+                             p_u_out[2] * ptr_c_coeff_1_gt_ctv(cell_index_internal_upward, 2) +
+                             p_v_out[0] * ptr_c_coeff_2_gt_ctv(cell_index_internal_upward, 0) +
+                             p_v_out[1] * ptr_c_coeff_2_gt_ctv(cell_index_internal_upward, 1) +
+                             p_v_out[2] * ptr_c_coeff_2_gt_ctv(cell_index_internal_upward, 2)) /
+                             2,
+                (p_u_out[3] * ptr_c_coeff_1_gt_ctv(cell_index_internal_downward, 0) +
+                    p_u_out[4] * ptr_c_coeff_1_gt_ctv(cell_index_internal_downward, 1) +
+                    p_u_out[5] * ptr_c_coeff_1_gt_ctv(cell_index_internal_downward, 2) +
+                    p_v_out[3] * ptr_c_coeff_2_gt_ctv(cell_index_internal_downward, 0) +
+                    p_v_out[4] * ptr_c_coeff_2_gt_ctv(cell_index_internal_downward, 1) +
+                    p_v_out[5] * ptr_c_coeff_2_gt_ctv(cell_index_internal_downward, 2)) /
+                    2));
     }
 };
 
@@ -963,22 +962,21 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlin
             z_nabla4_e2[vertex_index * 6 + 2] * ptr_coeff_2[2] + z_nabla4_e2[vertex_index * 6 + 3] * ptr_coeff_2[3] +
             z_nabla4_e2[vertex_index * 6 + 4] * ptr_coeff_2[4] + z_nabla4_e2[vertex_index * 6 + 5] * ptr_coeff_2[5];
     }
-    p_cell_out_gt_tv(cell_index_internal_upward, k_index) =
-        (p_u_out[0] * ptr_c_coeff_1_gt_ctv(cell_index_internal_upward, 0) +
-            p_u_out[1] * ptr_c_coeff_1_gt_ctv(cell_index_internal_upward, 1) +
-            p_u_out[2] * ptr_c_coeff_1_gt_ctv(cell_index_internal_upward, 2) +
-            p_v_out[0] * ptr_c_coeff_2_gt_ctv(cell_index_internal_upward, 0) +
-            p_v_out[1] * ptr_c_coeff_2_gt_ctv(cell_index_internal_upward, 1) +
-            p_v_out[2] * ptr_c_coeff_2_gt_ctv(cell_index_internal_upward, 2)) /
-        2;
-    p_cell_out_gt_tv(cell_index_internal_downward, k_index) =
-        (p_u_out[3] * ptr_c_coeff_1_gt_ctv(cell_index_internal_downward, 0) +
-            p_u_out[4] * ptr_c_coeff_1_gt_ctv(cell_index_internal_downward, 1) +
-            p_u_out[5] * ptr_c_coeff_1_gt_ctv(cell_index_internal_downward, 2) +
-            p_v_out[3] * ptr_c_coeff_2_gt_ctv(cell_index_internal_downward, 0) +
-            p_v_out[4] * ptr_c_coeff_2_gt_ctv(cell_index_internal_downward, 1) +
-            p_v_out[5] * ptr_c_coeff_2_gt_ctv(cell_index_internal_downward, 2)) /
-        2;
+    __stcs(static_cast<double2 *>(static_cast<void *>(&p_cell_out_gt_tv(cell_index_internal_upward, k_index))),
+        make_double2((p_u_out[0] * ptr_c_coeff_1_gt_ctv(cell_index_internal_upward, 0) +
+                         p_u_out[1] * ptr_c_coeff_1_gt_ctv(cell_index_internal_upward, 1) +
+                         p_u_out[2] * ptr_c_coeff_1_gt_ctv(cell_index_internal_upward, 2) +
+                         p_v_out[0] * ptr_c_coeff_2_gt_ctv(cell_index_internal_upward, 0) +
+                         p_v_out[1] * ptr_c_coeff_2_gt_ctv(cell_index_internal_upward, 1) +
+                         p_v_out[2] * ptr_c_coeff_2_gt_ctv(cell_index_internal_upward, 2)) /
+                         2,
+            (p_u_out[3] * ptr_c_coeff_1_gt_ctv(cell_index_internal_downward, 0) +
+                p_u_out[4] * ptr_c_coeff_1_gt_ctv(cell_index_internal_downward, 1) +
+                p_u_out[5] * ptr_c_coeff_1_gt_ctv(cell_index_internal_downward, 2) +
+                p_v_out[3] * ptr_c_coeff_2_gt_ctv(cell_index_internal_downward, 0) +
+                p_v_out[4] * ptr_c_coeff_2_gt_ctv(cell_index_internal_downward, 1) +
+                p_v_out[5] * ptr_c_coeff_2_gt_ctv(cell_index_internal_downward, 2)) /
+                2));
 };
 
 template <typename T>
