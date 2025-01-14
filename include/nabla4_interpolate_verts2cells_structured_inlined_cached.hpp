@@ -221,6 +221,10 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlin
             inv_primal_edge_length_gt_tv(edge_index + 2 * outer_domain_size)};
     const auto i_verts2cells{blockIdx.x * blockDim.x + threadIdx.x + halo_nabla4 + halo_interpolate - 2 * blockIdx.x};
     const auto j_verts2cells{blockIdx.y * blockDim.y + threadIdx.y + halo_nabla4 + halo_interpolate - 3 * blockIdx.y};
+    const bool thread_calculate_verts2cells{
+        i_verts2cells < x_dim_nabla4 - halo_interpolate - halo_verts2cells - halo_nabla4 &&
+        j_verts2cells < y_dim_nabla4 - halo_interpolate - halo_verts2cells - halo_nabla4 &&
+        threadIdx.x < blockDim.x - 2 && threadIdx.y < blockDim.y - 3};
     const index_type cell_index_internal = i_verts2cells - (halo_nabla4 + halo_interpolate) +
                                            (j_verts2cells - (halo_nabla4 + halo_interpolate)) *
                                                (x_dim_nabla4 - 2 * (halo_nabla4 + halo_interpolate) - halo_verts2cells);
@@ -311,9 +315,7 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlin
                           (nabv_tang_wp - 2.0 * z_nabla2_e) * inv_primal_edge_length_sqr[color]);
         };
         __syncthreads();
-        if (!(i_verts2cells >= x_dim_nabla4 - halo_interpolate - halo_verts2cells - halo_nabla4 ||
-                j_verts2cells >= y_dim_nabla4 - halo_interpolate - halo_verts2cells - halo_nabla4 ||
-                threadIdx.x >= blockDim.x - 2 || threadIdx.y >= blockDim.y - 3 || k_index >= KDim)) {
+        if (thread_calculate_verts2cells && k_index < KDim) {
             WP_TYPE p_u_out[6];
             WP_TYPE p_v_out[6];
 #pragma unroll 6
