@@ -244,18 +244,17 @@ __global__ void __launch_bounds__(block_dims_structured_verts2cells_kloop.size)
         const WP_TYPE p_vert_v_in_gt_ctv_1{p_vert_v_in_gt_ctv(c2v_compressed[1], k_index)};
         const WP_TYPE p_vert_v_in_gt_ctv_2{p_vert_v_in_gt_ctv(c2v_compressed[2], k_index)};
         const WP_TYPE p_vert_v_in_gt_ctv_3{p_vert_v_in_gt_ctv(c2v_compressed[3], k_index)};
-        p_cell_out_gt_tv(cell_index_internal_upward, k_index) =
-            ((p_vert_u_in_gt_ctv_0 * coeff_1[0] + p_vert_u_in_gt_ctv_2 * coeff_1[1] +
-                 p_vert_u_in_gt_ctv_1 * coeff_1[2]) +
-                (p_vert_v_in_gt_ctv_0 * coeff_2[0] + p_vert_v_in_gt_ctv_2 * coeff_2[1] +
-                    p_vert_v_in_gt_ctv_1 * coeff_2[2])) /
-            2;
-        p_cell_out_gt_tv(cell_index_internal_downward, k_index) =
-            ((p_vert_u_in_gt_ctv_1 * coeff_1[3] + p_vert_u_in_gt_ctv_2 * coeff_1[4] +
-                 p_vert_u_in_gt_ctv_3 * coeff_1[5]) +
-                (p_vert_v_in_gt_ctv_1 * coeff_2[3] + p_vert_v_in_gt_ctv_2 * coeff_2[4] +
-                    p_vert_v_in_gt_ctv_3 * coeff_2[5])) /
-            2;
+        __stcs(static_cast<double2 *>(static_cast<void *>(&p_cell_out_gt_tv(cell_index_internal_upward, k_index))),
+            make_double2(((p_vert_u_in_gt_ctv_0 * coeff_1[0] + p_vert_u_in_gt_ctv_2 * coeff_1[1] +
+                              p_vert_u_in_gt_ctv_1 * coeff_1[2]) +
+                             (p_vert_v_in_gt_ctv_0 * coeff_2[0] + p_vert_v_in_gt_ctv_2 * coeff_2[1] +
+                                 p_vert_v_in_gt_ctv_1 * coeff_2[2])) /
+                             2,
+                ((p_vert_u_in_gt_ctv_1 * coeff_1[3] + p_vert_u_in_gt_ctv_2 * coeff_1[4] +
+                     p_vert_u_in_gt_ctv_3 * coeff_1[5]) +
+                    (p_vert_v_in_gt_ctv_1 * coeff_2[3] + p_vert_v_in_gt_ctv_2 * coeff_2[4] +
+                        p_vert_v_in_gt_ctv_3 * coeff_2[5])) /
+                    2));
     }
 };
 
@@ -348,16 +347,17 @@ __global__ void __launch_bounds__(block_dims_structured_verts2cells_naive.size)
     const WP_TYPE p_vert_v_in_gt_ctv_1{p_vert_v_in_gt_ctv(c2v_compressed[1], k_index)};
     const WP_TYPE p_vert_v_in_gt_ctv_2{p_vert_v_in_gt_ctv(c2v_compressed[2], k_index)};
     const WP_TYPE p_vert_v_in_gt_ctv_3{p_vert_v_in_gt_ctv(c2v_compressed[3], k_index)};
-    p_cell_out_gt_tv(cell_index_internal_upward, k_index) =
-        ((p_vert_u_in_gt_ctv_0 * coeff_1[0] + p_vert_u_in_gt_ctv_2 * coeff_1[1] + p_vert_u_in_gt_ctv_1 * coeff_1[2]) +
-            (p_vert_v_in_gt_ctv_0 * coeff_2[0] + p_vert_v_in_gt_ctv_2 * coeff_2[1] +
-                p_vert_v_in_gt_ctv_1 * coeff_2[2])) /
-        2;
-    p_cell_out_gt_tv(cell_index_internal_downward, k_index) =
-        ((p_vert_u_in_gt_ctv_1 * coeff_1[3] + p_vert_u_in_gt_ctv_2 * coeff_1[4] + p_vert_u_in_gt_ctv_3 * coeff_1[5]) +
-            (p_vert_v_in_gt_ctv_1 * coeff_2[3] + p_vert_v_in_gt_ctv_2 * coeff_2[4] +
-                p_vert_v_in_gt_ctv_3 * coeff_2[5])) /
-        2;
+    __stcs(static_cast<double2 *>(static_cast<void *>(&p_cell_out_gt_tv(cell_index_internal_upward, k_index))),
+        make_double2(((p_vert_u_in_gt_ctv_0 * coeff_1[0] + p_vert_u_in_gt_ctv_2 * coeff_1[1] +
+                          p_vert_u_in_gt_ctv_1 * coeff_1[2]) +
+                         (p_vert_v_in_gt_ctv_0 * coeff_2[0] + p_vert_v_in_gt_ctv_2 * coeff_2[1] +
+                             p_vert_v_in_gt_ctv_1 * coeff_2[2])) /
+                         2,
+            ((p_vert_u_in_gt_ctv_1 * coeff_1[3] + p_vert_u_in_gt_ctv_2 * coeff_1[4] +
+                 p_vert_u_in_gt_ctv_3 * coeff_1[5]) +
+                (p_vert_v_in_gt_ctv_1 * coeff_2[3] + p_vert_v_in_gt_ctv_2 * coeff_2[4] +
+                    p_vert_v_in_gt_ctv_3 * coeff_2[5])) /
+                2));
 };
 
 template <typename S>
