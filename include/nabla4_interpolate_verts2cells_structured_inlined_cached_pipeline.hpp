@@ -128,7 +128,7 @@ constexpr block_dims get_block_dims_structured_nabla_interpol_v2c_inlined_cached
 
 template <>
 constexpr block_dims get_block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop<int>() {
-    return {32, 8, 1, 256};
+    return {32, 6, 1, 192};
 };
 
 constexpr block_dims block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop =
@@ -289,92 +289,91 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlin
         ptr_c_coeff_2_gt_ctv(cell_index_internal_downward, 2)};
     auto thread = cooperative_groups::this_thread();
     __shared__ WP_TYPE smem[block_horizontal_dim_nabla4 *
-                            block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.z * 9];
+                            block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.z * 27];
     auto pipeline = cuda::make_pipeline();
     constexpr auto shared_mem_offset{
         block_horizontal_dim_nabla4 * block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.z};
-    const auto shared_mem_index_offset0{threadIdx.z * blockDim.x * blockDim.y + threadIdx.x + threadIdx.y * blockDim.x};
-    const auto shared_mem_index_offset1{shared_mem_index_offset0 + shared_mem_offset};
-    const auto shared_mem_index_offset2{shared_mem_index_offset1 + shared_mem_offset};
-    const auto shared_mem_index_offset3{shared_mem_index_offset2 + shared_mem_offset};
-    const auto shared_mem_index_offset4{shared_mem_index_offset3 + shared_mem_offset};
-    const auto shared_mem_index_offset5{shared_mem_index_offset4 + shared_mem_offset};
-    const auto shared_mem_index_offset6{shared_mem_index_offset5 + shared_mem_offset};
-    const auto shared_mem_index_offset7{shared_mem_index_offset6 + shared_mem_offset};
-    const auto shared_mem_index_offset8{shared_mem_index_offset7 + shared_mem_offset};
+    const auto shared_mem_index{threadIdx.z * blockDim.x * blockDim.y + threadIdx.x + threadIdx.y * blockDim.x};
     for (auto k_index{blockIdx.z * blockDim.z + threadIdx.z}; k_index < KDim; k_index += gridDim.z * blockDim.z) {
-#pragma unroll
+        pipeline.producer_acquire();
+#pragma unroll 3
         for (auto color{0}; color < 3; ++color) {
             const auto E2C2V_0_c = E2C2V_0[color];
             const auto E2C2V_1_c = E2C2V_1[color];
             const auto E2C2V_2_c = E2C2V_2[color];
             const auto E2C2V_3_c = E2C2V_3[color];
-            pipeline.producer_acquire();
+            const auto color_offset = 9 * color * shared_mem_offset;
             cuda::memcpy_async(thread,
-                &smem[shared_mem_index_offset0],
+                &smem[shared_mem_index + 0 * shared_mem_offset + color_offset],
                 &(u_vert_gt_tv(E2C2V_0_c, k_index)),
                 cuda::aligned_size_t<8>(sizeof(WP_TYPE)),
                 pipeline);
             cuda::memcpy_async(thread,
-                &smem[shared_mem_index_offset1],
+                &smem[shared_mem_index + 1 * shared_mem_offset + color_offset],
                 &(v_vert_gt_tv(E2C2V_0_c, k_index)),
                 cuda::aligned_size_t<8>(sizeof(WP_TYPE)),
                 pipeline);
             cuda::memcpy_async(thread,
-                &smem[shared_mem_index_offset2],
+                &smem[shared_mem_index + 2 * shared_mem_offset + color_offset],
                 &(u_vert_gt_tv(E2C2V_1_c, k_index)),
                 cuda::aligned_size_t<8>(sizeof(WP_TYPE)),
                 pipeline);
             cuda::memcpy_async(thread,
-                &smem[shared_mem_index_offset3],
+                &smem[shared_mem_index + 3 * shared_mem_offset + color_offset],
                 &(v_vert_gt_tv(E2C2V_1_c, k_index)),
                 cuda::aligned_size_t<8>(sizeof(WP_TYPE)),
                 pipeline);
             cuda::memcpy_async(thread,
-                &smem[shared_mem_index_offset4],
+                &smem[shared_mem_index + 4 * shared_mem_offset + color_offset],
                 &(u_vert_gt_tv(E2C2V_2_c, k_index)),
                 cuda::aligned_size_t<8>(sizeof(WP_TYPE)),
                 pipeline);
             cuda::memcpy_async(thread,
-                &smem[shared_mem_index_offset5],
+                &smem[shared_mem_index + 5 * shared_mem_offset + color_offset],
                 &(v_vert_gt_tv(E2C2V_2_c, k_index)),
                 cuda::aligned_size_t<8>(sizeof(WP_TYPE)),
                 pipeline);
             cuda::memcpy_async(thread,
-                &smem[shared_mem_index_offset6],
+                &smem[shared_mem_index + 6 * shared_mem_offset + color_offset],
                 &(u_vert_gt_tv(E2C2V_3_c, k_index)),
                 cuda::aligned_size_t<8>(sizeof(WP_TYPE)),
                 pipeline);
             cuda::memcpy_async(thread,
-                &smem[shared_mem_index_offset7],
+                &smem[shared_mem_index + 7 * shared_mem_offset + color_offset],
                 &(v_vert_gt_tv(E2C2V_3_c, k_index)),
                 cuda::aligned_size_t<8>(sizeof(WP_TYPE)),
                 pipeline);
             const auto z_nabla2_e_ptr{&(z_nabla2_e_gt_tv(edge_index + color * outer_domain_size, k_index))};
             cuda::memcpy_async(thread,
-                &smem[shared_mem_index_offset8],
+                &smem[shared_mem_index + 8 * shared_mem_offset + color_offset],
                 z_nabla2_e_ptr,
                 cuda::aligned_size_t<8>(sizeof(WP_TYPE)),
                 pipeline);
-            pipeline.producer_commit();
-            pipeline.consumer_wait();
-            const double nabv_tang_wp = smem[shared_mem_index_offset0] * primal_normal_vert_v1_0[color] +
-                                        smem[shared_mem_index_offset1] * primal_normal_vert_v2_0[color] +
-                                        smem[shared_mem_index_offset2] * primal_normal_vert_v1_1[color] +
-                                        smem[shared_mem_index_offset3] * primal_normal_vert_v2_1[color];
-            const double nabv_norm_wp = smem[shared_mem_index_offset4] * primal_normal_vert_v1_2[color] +
-                                        smem[shared_mem_index_offset5] * primal_normal_vert_v2_2[color] +
-                                        smem[shared_mem_index_offset6] * primal_normal_vert_v1_3[color] +
-                                        smem[shared_mem_index_offset7] * primal_normal_vert_v2_3[color];
-            const WP_TYPE z_nabla2_e = smem[shared_mem_index_offset8];
+        }
+        pipeline.producer_commit();
+        pipeline.consumer_wait();
+#pragma unroll 3
+        for (auto color{0}; color < 3; ++color) {
+            const auto color_offset = 9 * color * shared_mem_offset;
+            const double nabv_tang_wp =
+                smem[shared_mem_index + 0 * shared_mem_offset + color_offset] * primal_normal_vert_v1_0[color] +
+                smem[shared_mem_index + 1 * shared_mem_offset + color_offset] * primal_normal_vert_v2_0[color] +
+                smem[shared_mem_index + 2 * shared_mem_offset + color_offset] * primal_normal_vert_v1_1[color] +
+                smem[shared_mem_index + 3 * shared_mem_offset + color_offset] * primal_normal_vert_v2_1[color];
+            const double nabv_norm_wp =
+                smem[shared_mem_index + 4 * shared_mem_offset + color_offset] * primal_normal_vert_v1_2[color] +
+                smem[shared_mem_index + 5 * shared_mem_offset + color_offset] * primal_normal_vert_v2_2[color] +
+                smem[shared_mem_index + 6 * shared_mem_offset + color_offset] * primal_normal_vert_v1_3[color] +
+                smem[shared_mem_index + 7 * shared_mem_offset + color_offset] * primal_normal_vert_v2_3[color];
+            const WP_TYPE z_nabla2_e = smem[shared_mem_index + 8 * shared_mem_offset + color_offset];
             const auto local_edge_index =
                 threadIdx.x + threadIdx.y * blockDim.x + color * block_horizontal_dim_nabla4 + z_nabla4_offset;
             z_nabla4_shared_mem[local_edge_index] =
                 4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e) * (inv_vert_vert_length[color] * inv_vert_vert_length[color]) +
                           (nabv_tang_wp - 2.0 * z_nabla2_e) *
                               (inv_primal_edge_length[color] * inv_primal_edge_length[color]));
-            pipeline.consumer_release();
-        };
+        }
+        pipeline.consumer_release();
         __syncthreads();
         if (thread_calculate_verts2cells && k_index < KDim) {
             WP_TYPE p_u_out[6];
