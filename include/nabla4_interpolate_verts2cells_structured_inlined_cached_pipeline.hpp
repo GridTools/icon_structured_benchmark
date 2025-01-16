@@ -128,7 +128,7 @@ constexpr block_dims get_block_dims_structured_nabla_interpol_v2c_inlined_cached
 
 template <>
 constexpr block_dims get_block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop<int>() {
-    return {32, 6, 1, 192};
+    return {32, 8, 1, 256};
 };
 
 constexpr block_dims block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop =
@@ -189,15 +189,6 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlin
                   blockIdx.y * (block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.y) +
                   3 * blockIdx.y - halo_nabla4
             : block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.y;
-    printf("[%d %d %d:%d %d %d] smem_x_dim_scaled: %d smem_y_dim_scaled: %d\n",
-        blockIdx.x,
-        blockIdx.y,
-        blockIdx.z,
-        threadIdx.x,
-        threadIdx.y,
-        threadIdx.z,
-        smem_x_dim_scaled,
-        smem_y_dim_scaled);
     const index_type i_j_smem = j_smem * smem_x + i_smem;
     const index_type i_jp1_smem = (j_smem + 1) * smem_x + i_smem;
     const index_type im1_jp1_smem = (j_smem + 1) * smem_x + i_smem - 1;
@@ -346,31 +337,6 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlin
                     &(u_vert_gt_tv(i_j_global_new, k_index)),
                     cuda::aligned_size_t<8>(sizeof(WP_TYPE)),
                     pipeline);
-                printf(
-                    "[%d %d %d:%d %d %d] smem_y: %d smem_x: %d y_dim_nabla4: %d x_dim_nabla4: %d smem_y_dim_scaled: %d "
-                    "smem_x_dim_scaled: %d j_new: %d i_new: %d shared_mem_index_uv: %d u_smem: %lf j_global_new: %d "
-                    "i_global_new: %d "
-                    "i_j_global_new: %d u_global: %lf\n",
-                    blockIdx.x,
-                    blockIdx.y,
-                    blockIdx.z,
-                    threadIdx.x,
-                    threadIdx.y,
-                    threadIdx.z,
-                    smem_y,
-                    smem_x,
-                    y_dim_nabla4,
-                    x_dim_nabla4,
-                    smem_y_dim_scaled,
-                    smem_x_dim_scaled,
-                    j_new,
-                    i_new,
-                    shared_mem_index_uv,
-                    u_vert_smem[shared_mem_index_uv],
-                    j_global_new,
-                    i_global_new,
-                    i_j_global_new,
-                    u_vert_gt_tv(i_j_global_new, k_index));
                 cuda::memcpy_async(thread,
                     &v_vert_smem[shared_mem_index_uv],
                     &(v_vert_gt_tv(i_j_global_new, k_index)),
@@ -379,14 +345,6 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlin
                 i_global_new += smem_x_dim_scaled;
             }
             j_global_new += smem_y_dim_scaled;
-            printf("[%d %d %d:%d %d %d] j_global_new: %d\n",
-                blockIdx.x,
-                blockIdx.y,
-                blockIdx.z,
-                threadIdx.x,
-                threadIdx.y,
-                threadIdx.z,
-                j_global_new);
         }
 #pragma unroll 3
         for (auto color{0}; color < 3; ++color) {
@@ -406,18 +364,6 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlin
             const auto E2C2V_1_c = E2C2V_1_smem[color];
             const auto E2C2V_2_c = E2C2V_2_smem[color];
             const auto E2C2V_3_c = E2C2V_3_smem[color];
-            printf("[%d %d %d:%d %d %d] color: %d E2C2V_0: %d E2C2V_1: %d E2C2V_2: %d E2C2V_3: %d\n",
-                blockIdx.x,
-                blockIdx.y,
-                blockIdx.z,
-                threadIdx.x,
-                threadIdx.y,
-                threadIdx.z,
-                color,
-                E2C2V_0_c,
-                E2C2V_1_c,
-                E2C2V_2_c,
-                E2C2V_3_c);
             const double nabv_tang_wp = u_vert_smem[E2C2V_0_c] * primal_normal_vert_v1_0[color] +
                                         v_vert_smem[E2C2V_0_c] * primal_normal_vert_v2_0[color] +
                                         u_vert_smem[E2C2V_1_c] * primal_normal_vert_v1_1[color] +
@@ -427,24 +373,6 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlin
                                         u_vert_smem[E2C2V_3_c] * primal_normal_vert_v1_3[color] +
                                         v_vert_smem[E2C2V_3_c] * primal_normal_vert_v2_3[color];
             const WP_TYPE z_nabla2_e = z_nabla2_e_smem[shared_mem_index_z_nabla2 + color * shared_mem_offset];
-            printf("[%d %d %d:%d %d %d] color: %d u_vert[0]: %lf v_vert[0]: %lf u_vert[1]: %lf v_vert[1]: %lf "
-                   "u_vert[2]: %lf v_vert[2]: %lf u_vert[3]: %lf v_vert[3]: %lf z_nabla2_e: %lf\n",
-                blockIdx.x,
-                blockIdx.y,
-                blockIdx.z,
-                threadIdx.x,
-                threadIdx.y,
-                threadIdx.z,
-                color,
-                u_vert_smem[E2C2V_0_c],
-                v_vert_smem[E2C2V_0_c],
-                u_vert_smem[E2C2V_1_c],
-                v_vert_smem[E2C2V_1_c],
-                u_vert_smem[E2C2V_2_c],
-                v_vert_smem[E2C2V_2_c],
-                u_vert_smem[E2C2V_3_c],
-                v_vert_smem[E2C2V_3_c],
-                z_nabla2_e);
             const auto local_edge_index =
                 threadIdx.x + threadIdx.y * blockDim.x + color * block_horizontal_dim_nabla4 + z_nabla4_offset;
             z_nabla4_shared_mem[local_edge_index] =
