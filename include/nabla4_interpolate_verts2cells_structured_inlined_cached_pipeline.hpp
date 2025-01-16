@@ -174,18 +174,20 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlin
     constexpr auto smem_x = block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.x + 2;
     constexpr auto smem_y = block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.y + 2;
     const auto smem_x_dim_scaled =
-        (blockIdx.x + 1) * (block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.x) -
-                    2 * blockIdx.x >=
-                x_dim_nabla4 - 2 * halo_nabla4
-            ? x_dim_nabla4 - 2 * halo_nabla4 - 2 * blockIdx.x -
-                  blockIdx.x * (block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.x)
+        (blockIdx.x + 1) * (block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.x) - 2 * blockIdx.x +
+                    halo_nabla4 >=
+                x_dim_nabla4 - halo_nabla4
+            ? x_dim_nabla4 - halo_nabla4 -
+                  blockIdx.x * (block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.x) +
+                  2 * blockIdx.x - halo_nabla4
             : block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.x;
     const auto smem_y_dim_scaled =
-        (blockIdx.y + 1) * (block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.y) -
-                    3 * blockIdx.y >=
-                y_dim_nabla4 - 2 * halo_nabla4
-            ? y_dim_nabla4 - 2 * halo_nabla4 - 3 * blockIdx.y -
-                  blockIdx.y * (block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.y)
+        (blockIdx.y + 1) * (block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.y) - 3 * blockIdx.y +
+                    halo_nabla4 >=
+                y_dim_nabla4 - halo_nabla4
+            ? y_dim_nabla4 - halo_nabla4 -
+                  blockIdx.y * (block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.y) +
+                  3 * blockIdx.y - halo_nabla4
             : block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.y;
     printf("[%d %d %d:%d %d %d] smem_x_dim_scaled: %d smem_y_dim_scaled: %d\n",
         blockIdx.x,
@@ -331,10 +333,10 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlin
         threadIdx.z * blockDim.x * blockDim.y + threadIdx.x + threadIdx.y * blockDim.x};
     for (auto k_index{blockIdx.z * blockDim.z + threadIdx.z}; k_index < KDim; k_index += gridDim.z * blockDim.z) {
         pipeline.producer_acquire();
-        int i_global_new = i_nabla4 - 1;
         int j_global_new = j_nabla4 - 1;
         for (int j_new{static_cast<int>(threadIdx.y)}; j_new < smem_y && j_global_new < y_dim_nabla4;
              j_new += smem_y_dim_scaled) {
+            int i_global_new = i_nabla4 - 1;
             for (int i_new{static_cast<int>(threadIdx.x)}; i_new < smem_x && i_global_new < x_dim_nabla4;
                  i_new += smem_x_dim_scaled) {
                 const auto shared_mem_index_uv{i_new + j_new * smem_x};
@@ -344,15 +346,23 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlin
                     &(u_vert_gt_tv(i_j_global_new, k_index)),
                     cuda::aligned_size_t<8>(sizeof(WP_TYPE)),
                     pipeline);
-                printf("[%d %d %d:%d %d %d] j_new: %d i_new: %d shared_mem_index_uv: %d u_smem: %lf j_global_new: %d "
-                       "i_global_new: %d "
-                       "i_j_global_new: %d u_global: %lf\n",
+                printf(
+                    "[%d %d %d:%d %d %d] smem_y: %d smem_x: %d y_dim_nabla4: %d x_dim_nabla4: %d smem_y_dim_scaled: %d "
+                    "smem_x_dim_scaled: %d j_new: %d i_new: %d shared_mem_index_uv: %d u_smem: %lf j_global_new: %d "
+                    "i_global_new: %d "
+                    "i_j_global_new: %d u_global: %lf\n",
                     blockIdx.x,
                     blockIdx.y,
                     blockIdx.z,
                     threadIdx.x,
                     threadIdx.y,
                     threadIdx.z,
+                    smem_y,
+                    smem_x,
+                    y_dim_nabla4,
+                    x_dim_nabla4,
+                    smem_y_dim_scaled,
+                    smem_x_dim_scaled,
                     j_new,
                     i_new,
                     shared_mem_index_uv,
@@ -369,6 +379,14 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlin
                 i_global_new += smem_x_dim_scaled;
             }
             j_global_new += smem_y_dim_scaled;
+            printf("[%d %d %d:%d %d %d] j_global_new: %d\n",
+                blockIdx.x,
+                blockIdx.y,
+                blockIdx.z,
+                threadIdx.x,
+                threadIdx.y,
+                threadIdx.z,
+                j_global_new);
         }
 #pragma unroll 3
         for (auto color{0}; color < 3; ++color) {
@@ -381,7 +399,7 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlin
         }
         pipeline.producer_commit();
         pipeline.consumer_wait();
-        // __syncthreads();
+        __syncthreads();
 #pragma unroll 3
         for (auto color{0}; color < 3; ++color) {
             const auto E2C2V_0_c = E2C2V_0_smem[color];
