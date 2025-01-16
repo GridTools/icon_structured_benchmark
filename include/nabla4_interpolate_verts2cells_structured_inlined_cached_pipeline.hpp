@@ -171,18 +171,37 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlin
     const index_type i_j = j_nabla4 * x_dim_nabla4 + i_nabla4;
     const index_type i_smem = threadIdx.x + 1;
     const index_type j_smem = threadIdx.y + 1;
-    const index_type i_j_smem =
-        j_smem * block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.x + i_smem;
-    const index_type i_jp1_smem =
-        (j_smem + 1) * block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.x + i_smem;
-    const index_type im1_jp1_smem =
-        (j_smem + 1) * block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.x + i_smem - 1;
-    const index_type ip1_j_smem =
-        j_smem * block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.x + i_smem + 1;
-    const index_type ip1_jm1_smem =
-        (j_smem - 1) * block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.x + i_smem + 1;
-    const index_type i_jm1_smem =
-        (j_smem - 1) * block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.x + i_smem;
+    constexpr auto smem_x = block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.x + 2;
+    constexpr auto smem_y = block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.y + 2;
+    const auto smem_x_dim_scaled =
+        (blockIdx.x + 1) * (block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.x) -
+                    2 * blockIdx.x >=
+                x_dim_nabla4 - 2 * halo_nabla4
+            ? x_dim_nabla4 - 2 * halo_nabla4 - 2 * blockIdx.x -
+                  blockIdx.x * (block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.x)
+            : block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.x;
+    const auto smem_y_dim_scaled =
+        (blockIdx.y + 1) * (block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.y) -
+                    3 * blockIdx.y >=
+                y_dim_nabla4 - 2 * halo_nabla4
+            ? y_dim_nabla4 - 2 * halo_nabla4 - 3 * blockIdx.y -
+                  blockIdx.y * (block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.y)
+            : block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.y;
+    printf("[%d %d %d:%d %d %d] smem_x_dim_scaled: %d smem_y_dim_scaled: %d\n",
+        blockIdx.x,
+        blockIdx.y,
+        blockIdx.z,
+        threadIdx.x,
+        threadIdx.y,
+        threadIdx.z,
+        smem_x_dim_scaled,
+        smem_y_dim_scaled);
+    const index_type i_j_smem = j_smem * smem_x + i_smem;
+    const index_type i_jp1_smem = (j_smem + 1) * smem_x + i_smem;
+    const index_type im1_jp1_smem = (j_smem + 1) * smem_x + i_smem - 1;
+    const index_type ip1_j_smem = j_smem * smem_x + i_smem + 1;
+    const index_type ip1_jm1_smem = (j_smem - 1) * smem_x + i_smem + 1;
+    const index_type i_jm1_smem = (j_smem - 1) * smem_x + i_smem;
     const index_type E2C2V_0_smem[3] = {i_j_smem, i_j_smem, i_j_smem};
     const index_type E2C2V_1_smem[3] = {i_jp1_smem, ip1_j_smem, ip1_jm1_smem};
     const index_type E2C2V_2_smem[3] = {im1_jp1_smem, i_jp1_smem, ip1_j_smem};
@@ -297,9 +316,8 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlin
         ptr_c_coeff_2_gt_ctv(cell_index_internal_downward, 1),
         ptr_c_coeff_2_gt_ctv(cell_index_internal_downward, 2)};
     auto thread = cooperative_groups::this_thread();
-    constexpr auto smem_x{block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.x + 2};
-    constexpr auto smem_y{block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.y + 2};
-    constexpr auto smem_size{smem_x * smem_y};
+    constexpr auto smem_size{(block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.x + 2) *
+                             (block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.y + 2)};
     __shared__ WP_TYPE
         u_vert_smem[smem_size * block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.z];
     __shared__ WP_TYPE
@@ -315,10 +333,10 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlin
         pipeline.producer_acquire();
         int i_global_new = i_nabla4 - 1;
         int j_global_new = j_nabla4 - 1;
-        for (int j_new{threadIdx.y}; j_new < smem_y;
-             j_new += block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.y) {
-            for (int i_new{threadIdx.x}; i_new < smem_x;
-                 i_new += block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.x) {
+        for (int j_new{static_cast<int>(threadIdx.y)}; j_new < smem_y && j_global_new < y_dim_nabla4;
+             j_new += smem_y_dim_scaled) {
+            for (int i_new{static_cast<int>(threadIdx.x)}; i_new < smem_x && i_global_new < x_dim_nabla4;
+                 i_new += smem_x_dim_scaled) {
                 const auto shared_mem_index_uv{i_new + j_new * smem_x};
                 const auto i_j_global_new{i_global_new + j_global_new * x_dim_nabla4};
                 cuda::memcpy_async(thread,
@@ -326,14 +344,31 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlin
                     &(u_vert_gt_tv(i_j_global_new, k_index)),
                     cuda::aligned_size_t<8>(sizeof(WP_TYPE)),
                     pipeline);
+                printf("[%d %d %d:%d %d %d] j_new: %d i_new: %d shared_mem_index_uv: %d u_smem: %lf j_global_new: %d "
+                       "i_global_new: %d "
+                       "i_j_global_new: %d u_global: %lf\n",
+                    blockIdx.x,
+                    blockIdx.y,
+                    blockIdx.z,
+                    threadIdx.x,
+                    threadIdx.y,
+                    threadIdx.z,
+                    j_new,
+                    i_new,
+                    shared_mem_index_uv,
+                    u_vert_smem[shared_mem_index_uv],
+                    j_global_new,
+                    i_global_new,
+                    i_j_global_new,
+                    u_vert_gt_tv(i_j_global_new, k_index));
                 cuda::memcpy_async(thread,
                     &v_vert_smem[shared_mem_index_uv],
                     &(v_vert_gt_tv(i_j_global_new, k_index)),
                     cuda::aligned_size_t<8>(sizeof(WP_TYPE)),
                     pipeline);
-                i_global_new += block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.x;
+                i_global_new += smem_x_dim_scaled;
             }
-            j_global_new += block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.y;
+            j_global_new += smem_y_dim_scaled;
         }
 #pragma unroll 3
         for (auto color{0}; color < 3; ++color) {
@@ -346,12 +381,25 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlin
         }
         pipeline.producer_commit();
         pipeline.consumer_wait();
+        // __syncthreads();
 #pragma unroll 3
         for (auto color{0}; color < 3; ++color) {
             const auto E2C2V_0_c = E2C2V_0_smem[color];
             const auto E2C2V_1_c = E2C2V_1_smem[color];
             const auto E2C2V_2_c = E2C2V_2_smem[color];
             const auto E2C2V_3_c = E2C2V_3_smem[color];
+            printf("[%d %d %d:%d %d %d] color: %d E2C2V_0: %d E2C2V_1: %d E2C2V_2: %d E2C2V_3: %d\n",
+                blockIdx.x,
+                blockIdx.y,
+                blockIdx.z,
+                threadIdx.x,
+                threadIdx.y,
+                threadIdx.z,
+                color,
+                E2C2V_0_c,
+                E2C2V_1_c,
+                E2C2V_2_c,
+                E2C2V_3_c);
             const double nabv_tang_wp = u_vert_smem[E2C2V_0_c] * primal_normal_vert_v1_0[color] +
                                         v_vert_smem[E2C2V_0_c] * primal_normal_vert_v2_0[color] +
                                         u_vert_smem[E2C2V_1_c] * primal_normal_vert_v1_1[color] +
