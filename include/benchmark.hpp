@@ -2,6 +2,7 @@
 
 #include "interpolate_structured_gridtools.hpp"
 #include "interpolate_unstructured_gridtools.hpp"
+#include "nabla4_interpolate_inlined_v2v_verts2cells_unstructured_separate.hpp"
 #include "nabla4_interpolate_inlined_verts2cells_structured_separate.hpp"
 #include "nabla4_interpolate_roofline.hpp"
 #include "nabla4_interpolate_structured_inlined.hpp"
