@@ -9,7 +9,7 @@ from analysis import (
 )
 
 if __name__ == "__main__":
-    git_commit = "9133df9"
+    git_commit = "5272141"
 
     backend = "gpu"
 
@@ -20,6 +20,7 @@ if __name__ == "__main__":
     torus_files = [
         "torus_100000_100000_256",
         "torus_100000_100000_128",
+        "torus_100000_100000_64",
     ]
 
     klevels = [80]
@@ -75,10 +76,15 @@ if __name__ == "__main__":
                 ][
                     "nabla4_interpolate_verts2cells_benchmark_unstructured_gpu_naive_inlined"
                 ],
-                "nabla4_interpolate_verts2cells_benchmark_unstructured_gpu_naive_inlined": runtime_data[
+                "nabla4_interpolate_verts2cells_benchmark_unstructured_gpu_naive_inlined_c2v": runtime_data[
                     k
                 ][
-                    "nabla4_interpolate_verts2cells_benchmark_unstructured_gpu_naive_inlined"
+                    "nabla4_interpolate_verts2cells_benchmark_unstructured_gpu_naive_inlined_c2v"
+                ],
+                "nabla4_interpolate_inlined_v2v_verts2cells_benchmark_unstructured_gpu_naive_separate": runtime_data[
+                    k
+                ][
+                    "nabla4_interpolate_inlined_v2v_verts2cells_benchmark_unstructured_gpu_naive_separate"
                 ],
                 "nabla4_interpolate_verts2cells_benchmark_structured_gpu_naive_inlined": runtime_data[
                     k
@@ -115,6 +121,11 @@ if __name__ == "__main__":
                 ][
                     "nabla4_interpolate_verts2cells_benchmark_unstructured_gpu_kloop_inlined_c2v"
                 ],
+                "nabla4_interpolate_inlined_v2v_verts2cells_benchmark_unstructured_gpu_kloop_separate": runtime_data[
+                    k
+                ][
+                    "nabla4_interpolate_inlined_v2v_verts2cells_benchmark_unstructured_gpu_kloop_separate"
+                ],
                 "nabla4_interpolate_verts2cells_benchmark_structured_gpu_kloop_inlined": runtime_data[
                     k
                 ][
@@ -129,6 +140,11 @@ if __name__ == "__main__":
                     k
                 ][
                     "nabla4_interpolate_verts2cells_benchmark_structured_gpu_kloop_inlined_cached"
+                ],
+                "nabla4_interpolate_verts2cells_benchmark_structured_gpu_kloop_inlined_cached_pipeline": runtime_data[
+                    k
+                ][
+                    "nabla4_interpolate_verts2cells_benchmark_structured_gpu_kloop_inlined_cached_pipeline"
                 ],
             }
             generate_violin_plots_acceleration(

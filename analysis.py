@@ -242,7 +242,7 @@ def generate_violin_plots_acceleration(
     import matplotlib.pyplot as plt
 
     torus_size = torus_name.split("_")[-1]
-    plt.figure(figsize=(10, 8))
+    plt.figure(figsize=(15, 12))
     plt.title(
         f"{kernel_name} runtime for {edges_size[torus_size]} Edges with {k} K-levels"
     )
@@ -355,10 +355,23 @@ theoretical_runtime_stream_performance = {
         },
     },
     "nabla4_interpolate_verts2cells": {
+        "torus_100000_100000_64": {
+            "unstructured": {
+                "separate": 0.003751356213,
+                "inlined": 0.002082004579,
+                "inlined_v2v_separate": 0.002479799192,
+            },
+            "structured": {
+                "separate": 0.003719818953,
+                "inlined": 0.002034770526,
+                "inlined_v2v_separate": 0.002454883648,
+            },
+        },
         "torus_100000_100000_128": {
             "unstructured": {
                 "separate": 0.000929395765,
                 "inlined": 0.0005154414081,
+                "inlined_v2v_separate": 0.0006138060547,
             },
             "structured": {
                 "separate": 0.0009215901565,
@@ -370,6 +383,7 @@ theoretical_runtime_stream_performance = {
             "unstructured": {
                 "separate": 0.000228158098,
                 "inlined": 0.0001263506396,
+                "inlined_v2v_separate": 0.0001504042285,
             },
             "structured": {
                 "separate": 0.0002262457276,
@@ -395,7 +409,7 @@ def generate_violin_plots_acceleration_roofline(
     import matplotlib.pyplot as plt
 
     torus_size = torus_name.split("_")[-1]
-    plt.figure(figsize=(10, 8))
+    plt.figure(figsize=(15, 12))
     plt.title(
         f"{kernel_name} runtime for {edges_size[torus_size]} Edges with {k} K-levels"
     )
