@@ -1,3 +1,5 @@
+#pragma once
+
 #include <interpolate_unstructured_gridtools.hpp>
 #include <nabla4_unstructured_gridtools.hpp>
 
@@ -110,6 +112,8 @@ struct nabla4_interpolate_unstructured_inlined_v2v {
           interpolate_data(v2e, VertexDim, EdgeDim, KDim, nabla4_data.get_output_gt(), ptr_coeff_1, ptr_coeff_2) {};
 
     auto get_output() -> decltype(interpolate_data.get_output()) { return interpolate_data.get_output(); }
+
+    auto get_output_gt() -> decltype(interpolate_data.get_output_gt()) { return interpolate_data.get_output_gt(); }
 
     void run_cpu_ifirst() {
         for (index_type k_index{}; k_index < interpolate_data.KDim; ++k_index) {
