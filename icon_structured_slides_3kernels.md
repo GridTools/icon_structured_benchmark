@@ -408,17 +408,9 @@ size: 16:9
 
 ---
 
-## Next steps
+## Next steps (probably not helpful and some complex)
 
-- Compile time strides
-  - `x_dim` is necessary to calculate the strides in `strided` version
-    - Can be given in case of JIT compilation
 - Use cache hints for loads and non temporal stores
-
----
-
-## Next steps (probably not helpful but complex)
-
 - Try `cached` approach for `indirect` implementation
   - Compute border coordinates for each Thread Block (should be the same as `strided` for our grid)
     - `per-vertex` ordering should be better due to smaller range of vertices/edges that need to be saved to shared memory
