@@ -1,11 +1,6 @@
 # Write the benchmarking functions here.
 # See "Writing benchmarks" in the asv docs for more information.
 
-import sys
-import os
-
-sys.path.append(os.path.dirname(os.getcwd()))
-
 from run_filtered_torus_grid_int_nabla4_interpolate_c2v import *  # type: ignore
 
 import numpy as np
