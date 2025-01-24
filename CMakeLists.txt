@@ -107,3 +107,8 @@ if(BUILD_SLIDES)
   add_marp_slides(icon-structured-slides icon_structured_slides.md)
   add_marp_slides(icon-structured-slides-3kernels icon_structured_slides_3kernels.md)
 endif()
+
+install(TARGETS nabla4_benchmark icon_benchmark nabla4_gtfn benchmark
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib)
