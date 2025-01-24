@@ -4,7 +4,7 @@
 import sys
 import os
 
-sys.path.append(os.getcwd())
+sys.path.append(os.path.dirname(os.getcwd()))
 
 from run_filtered_torus_grid_int_nabla4_interpolate_c2v import *  # type: ignore
 
