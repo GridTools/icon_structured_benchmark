@@ -34,7 +34,7 @@ class TimeSuite:
         self.args = args
 
         transformation = (
-            ToGt4PyTransformation()
+            ToZeroBasedIndexTransformation()
             if args.transformation == "gt4py"
             else IndexTransformation()
         )
