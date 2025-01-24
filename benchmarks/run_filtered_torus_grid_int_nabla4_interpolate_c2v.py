@@ -21,7 +21,7 @@ import netCDF4  # type: ignore [import-not-found]
 
 from json import dump
 
-from run_filtered_torus_grid_int_interpolate import (
+from .run_filtered_torus_grid_int_interpolate import (
     process_v2e_per_orientation,
     process_v2e_per_vertex,
 )
