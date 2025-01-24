@@ -6,10 +6,10 @@ from pathlib import Path
 from icon4py.model.common.grid.grid_manager import (  # type: ignore [import-not-found]
     GridManager,
     IndexTransformation,
-    ToGt4PyTransformation,
+    ToZeroBasedIndexTransformation,
 )
 
-from icon4py.model.common.grid.vertical import VerticalGridSize  # type: ignore [import-not-found]
+from icon4py.model.common.grid.vertical import VerticalGridConfig  # type: ignore [import-not-found]
 
 from icon4py.model.common.dimension import E2C2VDim  # type: ignore [import-not-found]
 
@@ -49,13 +49,13 @@ def get_torus_cartesian_dimensions(filename):
 def init_grid_manager(
     fname,
     num_levels=65,
-    transformation=ToGt4PyTransformation(),
+    transformation=ToZeroBasedIndexTransformation(),
     e2c2v_ordering="per-vertex",
 ):
     grid_manager = GridManager(
         transformation,
         fname,
-        VerticalGridSize(num_levels),
+        VerticalGridConfig(num_levels),
         True,
         e2c2v_ordering == "per-orientation",
     )
