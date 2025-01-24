@@ -68,6 +68,8 @@ class TimeSuite:
             self.filtered_e2ecv_inlined,
             self.filtered_v2e_inlined,
         ) = filter_neighbors(
+            args,
+            grid_cartesian_dimensions,
             torus_grid.get_offset_provider("E2C2V").table,
             torus_grid.get_offset_provider("E2ECV").table,
             torus_grid.get_offset_provider("V2E").table,

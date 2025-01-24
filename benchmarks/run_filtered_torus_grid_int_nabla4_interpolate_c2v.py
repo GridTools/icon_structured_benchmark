@@ -67,7 +67,7 @@ def get_torus_grid(filename, num_levels, transformation, e2c2v_ordering="per-ver
     grid_manager = init_grid_manager(
         filename, num_levels, transformation, e2c2v_ordering
     )
-    simple_grid = grid_manager.get_grid()
+    simple_grid = grid_manager.grid
     return simple_grid
 
 
