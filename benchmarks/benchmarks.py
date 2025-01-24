@@ -1,7 +1,11 @@
 # Write the benchmarking functions here.
 # See "Writing benchmarks" in the asv docs for more information.
 
-from .. import run_filtered_torus_grid_int_nabla4_interpolate_c2v  # type: ignore
+import sys
+
+sys.path.append("..")
+
+from ..run_filtered_torus_grid_int_nabla4_interpolate_c2v import *  # type: ignore
 
 import numpy as np
 
