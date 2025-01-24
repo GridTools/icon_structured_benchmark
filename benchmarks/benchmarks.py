@@ -5,7 +5,7 @@ import sys
 
 sys.path.append("..")
 
-from ..run_filtered_torus_grid_int_nabla4_interpolate_c2v import *  # type: ignore
+from run_filtered_torus_grid_int_nabla4_interpolate_c2v import *  # type: ignore
 
 import numpy as np
 
