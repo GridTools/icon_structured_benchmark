@@ -3,6 +3,8 @@
 
 from .run_filtered_torus_grid_int_nabla4_interpolate_c2v import *  # type: ignore
 
+from icon_benchmark import *  # type: ignore
+
 import numpy as np
 
 
