@@ -59,7 +59,7 @@ def init_grid_manager(
         True,
         e2c2v_ordering == "per-orientation",
     )
-    grid_manager()
+    grid_manager(None)
     return grid_manager
 
 
