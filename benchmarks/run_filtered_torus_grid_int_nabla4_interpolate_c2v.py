@@ -15,7 +15,7 @@ from icon4py.model.common.dimension import E2C2VDim  # type: ignore [import-not-
 
 import icon_benchmark  # type: ignore [import-not-found]
 
-import nabla4_gtfn  # type: ignore [import-not-found]
+# import nabla4_gtfn  # type: ignore [import-not-found]
 
 import netCDF4  # type: ignore [import-not-found]
 
