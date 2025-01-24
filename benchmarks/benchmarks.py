@@ -42,6 +42,7 @@ class TimeSuite:
         torus_grid = get_torus_grid(
             args.grid, args.klevels, transformation, args.e2c2v_ordering
         )
+        self.torus_grid = torus_grid
 
         repetitions = args.repetitions
         self.repetitions = repetitions
@@ -49,6 +50,7 @@ class TimeSuite:
         self.dry_runs = dry_runs
 
         grid_cartesian_dimensions = get_torus_cartesian_dimensions(args.grid)
+        self.grid_cartesian_dimensions = grid_cartesian_dimensions
 
         (
             self.filtered_e2c2v_separate,
@@ -94,19 +96,20 @@ class TimeSuite:
             filtered_c2v.append(new_vertices)
         self.filtered_c2v = np.array(filtered_c2v)
 
+        self.halo = args.halo
+
     def time_nabla4_interpolate_verts2cells_benchmark_unstructured_cpu_kfirst_separate(
         self,
     ):
-        icon_benchmark.nabla4_interpolate_verts2cells_benchmark_unstructured_cpu_kfirst_separate(
-            self.filtered_e2c2v_separate,
-            self.filtered_e2ecv_separate,
-            self.filtered_v2e_separate,
-            self.filtered_c2v,
+        icon_benchmark.nabla4_benchmark_structured_torus_cpu_kfirst_gridtools_halo(
             self.torus_grid.num_cells,
             self.torus_grid.num_vertices,
             self.torus_grid.num_edges,
             self.torus_grid.num_levels,
             self.torus_grid.size[E2C2VDim],
+            self.grid_cartesian_dimensions[0],
+            self.grid_cartesian_dimensions[1],
+            self.halo,
             self.repetitions,
             self.dry_runs,
         )
@@ -115,3 +118,11 @@ class TimeSuite:
 # class MemSuite:
 #     def mem_list(self):
 #         return [0] * 256
+if __name__ == "__main__":
+    functions = [
+        func for func in dir(icon_benchmark) if callable(getattr(icon_benchmark, func))
+    ]
+    print("Functions in icon_benchmark module:", functions)
+    t = TimeSuite()
+    t.setup()
+    t.time_nabla4_interpolate_verts2cells_benchmark_unstructured_cpu_kfirst_separate()
