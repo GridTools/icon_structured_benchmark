@@ -126,5 +126,6 @@ repos:
       tests/data/simple_grid/.* |
       tests/data/torus_grid/.* |
       results/output_.*/.*.json |
-      results/output_.*_multi/.*.json
+      results/output_.*_multi/.*.json |
+      asv.conf.json
       )$

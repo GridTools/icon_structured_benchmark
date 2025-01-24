@@ -158,6 +158,124 @@ def filter_c2v_vector(c2v, grid_cartesian_dimensions, halo=3):
     return np.array(filtered_c2v)
 
 
+def filter_neighbors(
+    args,
+    grid_cartesian_dimensions,
+    grid_e2c2v,
+    grid_e2ecv,
+    grid_v2e,
+    e2c2v_ordering="per-vertex",
+    combination="separate",
+):
+    filtered_e2c2v = filter_edge_vector(
+        grid_e2c2v,
+        grid_cartesian_dimensions,
+        args.e2c2v_ordering,
+        args.halo if combination == "separate" else 0,
+    )
+
+    def _get_gpu_coalesced_permuted_e2ecv():
+        orientation_permuted_e2ecv = np.zeros_like(grid_e2ecv)
+        edges_size = len(grid_e2ecv)
+        for i in range(edges_size):
+            for j in range(4):
+                orientation_permuted_e2ecv[i][j] = j * edges_size + i
+        return orientation_permuted_e2ecv
+
+    permuted_e2ecv = (
+        grid_e2ecv
+        if args.e2c2v_ordering == "per-vertex"
+        else _get_gpu_coalesced_permuted_e2ecv()
+    )
+    filtered_e2ecv = filter_edge_vector(
+        permuted_e2ecv,
+        grid_cartesian_dimensions,
+        args.e2c2v_ordering,
+        args.halo if combination == "separate" else 0,
+    )
+
+    filtered_v2e = (
+        process_v2e_per_orientation(
+            grid_v2e,
+            grid_cartesian_dimensions[1],
+            grid_cartesian_dimensions[0],
+            args.halo + 1,
+        )
+        if e2c2v_ordering == "per-orientation"
+        else process_v2e_per_vertex(
+            grid_v2e,
+            grid_cartesian_dimensions[1],
+            grid_cartesian_dimensions[0],
+            args.halo + 1,
+        )
+    )
+
+    def transform_v2e_to_nabla4_region_per_orientation(v2e, x_dim, y_dim, halo):
+        x_dim_inner = x_dim - 2 * (halo + 1)
+        y_dim_inner = y_dim - 2 * (halo + 1)
+        x_dim_nabla4 = x_dim - 2 * halo
+        y_dim_nabla4 = y_dim - 2 * halo
+        nabla4_dim = x_dim_nabla4 * y_dim_nabla4
+        transformed_v2e = np.zeros_like(v2e)
+        assert (x_dim_inner * y_dim_inner, 6) == v2e.shape
+        for i in range(x_dim_inner):
+            for j in range(y_dim_inner):
+                for k in range(6):
+                    global_vertex_i = (
+                        v2e[i + j * x_dim_inner][k] % (x_dim * y_dim)
+                    ) % x_dim
+                    global_vertex_j = (
+                        v2e[i + j * x_dim_inner][k] % (x_dim * y_dim)
+                    ) // x_dim
+                    orientation = v2e[i + j * x_dim_inner][k] // (x_dim * y_dim)
+                    nabla4_local_vertex_i = global_vertex_i - halo
+                    nabla4_local_vertex_j = global_vertex_j - halo
+                    transformed_v2e[i + j * x_dim_inner][k] = (
+                        nabla4_local_vertex_i
+                        + nabla4_local_vertex_j * x_dim_nabla4
+                        + orientation * nabla4_dim
+                    )
+        return transformed_v2e
+
+    def transform_v2e_to_nabla4_region_per_vertex(v2e, x_dim, y_dim, halo):
+        x_dim_inner = x_dim - 2 * (halo + 1)
+        y_dim_inner = y_dim - 2 * (halo + 1)
+        x_dim_nabla4 = x_dim - 2 * halo
+        y_dim_nabla4 = y_dim - 2 * halo
+        transformed_v2e = np.zeros_like(v2e)
+        assert (x_dim_inner * y_dim_inner, 6) == v2e.shape
+        for i in range(x_dim_inner):
+            for j in range(y_dim_inner):
+                for k in range(6):
+                    global_vertex_i = (v2e[i + j * x_dim_inner][k] // 3) % x_dim
+                    global_vertex_j = (v2e[i + j * x_dim_inner][k] // 3) // x_dim
+                    orientation = v2e[i + j * x_dim_inner][k] % 3
+                    nabla4_local_vertex_i = global_vertex_i - halo
+                    nabla4_local_vertex_j = global_vertex_j - halo
+                    transformed_v2e[i + j * x_dim_inner][k] = (
+                        nabla4_local_vertex_i + nabla4_local_vertex_j * x_dim_nabla4
+                    ) * 3 + orientation
+        return transformed_v2e
+
+    if combination == "separate":
+        filtered_v2e = (
+            transform_v2e_to_nabla4_region_per_orientation(
+                filtered_v2e,
+                grid_cartesian_dimensions[1],
+                grid_cartesian_dimensions[0],
+                args.halo,
+            )
+            if e2c2v_ordering == "per-orientation"
+            else transform_v2e_to_nabla4_region_per_vertex(
+                filtered_v2e,
+                grid_cartesian_dimensions[1],
+                grid_cartesian_dimensions[0],
+                args.halo,
+            )
+        )
+    return filtered_e2c2v, filtered_e2ecv, filtered_v2e
+
+
 def run_sanity_checks(
     filtered_e2c2v_separate,
     filtered_e2ecv_separate,
@@ -909,7 +1027,24 @@ def parse_arguments():
 
 
 def run_benchmarks():
-    args = parse_arguments()
+    class Args:
+        def __init__(self, **entries):
+            self.__dict__.update(entries)
+
+    args = Args(
+        grid="/Users/ioannmag/cscs_repos/cycle20/torus_100000_100000_256.nc",
+        transformation="gt4py",
+        klevels=80,
+        repetitions=101,
+        dry_run=True,
+        output="output",
+        sanity_checks=False,
+        backend="all_cpu",
+        combination="all",
+        e2c2v_ordering="per-vertex",
+        halo=2,
+        vertical=False,
+    )
 
     transformation = (
         ToGt4PyTransformation()
@@ -938,121 +1073,6 @@ def run_benchmarks():
             args.halo,
         )
     )
-
-    def filter_neighbors(
-        grid_e2c2v,
-        grid_e2ecv,
-        grid_v2e,
-        e2c2v_ordering="per-vertex",
-        combination="separate",
-    ):
-        filtered_e2c2v = filter_edge_vector(
-            grid_e2c2v,
-            grid_cartesian_dimensions,
-            args.e2c2v_ordering,
-            args.halo if combination == "separate" else 0,
-        )
-
-        def _get_gpu_coalesced_permuted_e2ecv():
-            orientation_permuted_e2ecv = np.zeros_like(grid_e2ecv)
-            edges_size = len(grid_e2ecv)
-            for i in range(edges_size):
-                for j in range(4):
-                    orientation_permuted_e2ecv[i][j] = j * edges_size + i
-            return orientation_permuted_e2ecv
-
-        permuted_e2ecv = (
-            grid_e2ecv
-            if args.e2c2v_ordering == "per-vertex"
-            else _get_gpu_coalesced_permuted_e2ecv()
-        )
-        filtered_e2ecv = filter_edge_vector(
-            permuted_e2ecv,
-            grid_cartesian_dimensions,
-            args.e2c2v_ordering,
-            args.halo if combination == "separate" else 0,
-        )
-
-        filtered_v2e = (
-            process_v2e_per_orientation(
-                grid_v2e,
-                grid_cartesian_dimensions[1],
-                grid_cartesian_dimensions[0],
-                args.halo + 1,
-            )
-            if e2c2v_ordering == "per-orientation"
-            else process_v2e_per_vertex(
-                grid_v2e,
-                grid_cartesian_dimensions[1],
-                grid_cartesian_dimensions[0],
-                args.halo + 1,
-            )
-        )
-
-        def transform_v2e_to_nabla4_region_per_orientation(v2e, x_dim, y_dim, halo):
-            x_dim_inner = x_dim - 2 * (halo + 1)
-            y_dim_inner = y_dim - 2 * (halo + 1)
-            x_dim_nabla4 = x_dim - 2 * halo
-            y_dim_nabla4 = y_dim - 2 * halo
-            nabla4_dim = x_dim_nabla4 * y_dim_nabla4
-            transformed_v2e = np.zeros_like(v2e)
-            assert (x_dim_inner * y_dim_inner, 6) == v2e.shape
-            for i in range(x_dim_inner):
-                for j in range(y_dim_inner):
-                    for k in range(6):
-                        global_vertex_i = (
-                            v2e[i + j * x_dim_inner][k] % (x_dim * y_dim)
-                        ) % x_dim
-                        global_vertex_j = (
-                            v2e[i + j * x_dim_inner][k] % (x_dim * y_dim)
-                        ) // x_dim
-                        orientation = v2e[i + j * x_dim_inner][k] // (x_dim * y_dim)
-                        nabla4_local_vertex_i = global_vertex_i - halo
-                        nabla4_local_vertex_j = global_vertex_j - halo
-                        transformed_v2e[i + j * x_dim_inner][k] = (
-                            nabla4_local_vertex_i
-                            + nabla4_local_vertex_j * x_dim_nabla4
-                            + orientation * nabla4_dim
-                        )
-            return transformed_v2e
-
-        def transform_v2e_to_nabla4_region_per_vertex(v2e, x_dim, y_dim, halo):
-            x_dim_inner = x_dim - 2 * (halo + 1)
-            y_dim_inner = y_dim - 2 * (halo + 1)
-            x_dim_nabla4 = x_dim - 2 * halo
-            y_dim_nabla4 = y_dim - 2 * halo
-            transformed_v2e = np.zeros_like(v2e)
-            assert (x_dim_inner * y_dim_inner, 6) == v2e.shape
-            for i in range(x_dim_inner):
-                for j in range(y_dim_inner):
-                    for k in range(6):
-                        global_vertex_i = (v2e[i + j * x_dim_inner][k] // 3) % x_dim
-                        global_vertex_j = (v2e[i + j * x_dim_inner][k] // 3) // x_dim
-                        orientation = v2e[i + j * x_dim_inner][k] % 3
-                        nabla4_local_vertex_i = global_vertex_i - halo
-                        nabla4_local_vertex_j = global_vertex_j - halo
-                        transformed_v2e[i + j * x_dim_inner][k] = (
-                            nabla4_local_vertex_i + nabla4_local_vertex_j * x_dim_nabla4
-                        ) * 3 + orientation
-            return transformed_v2e
-
-        if combination == "separate":
-            filtered_v2e = (
-                transform_v2e_to_nabla4_region_per_orientation(
-                    filtered_v2e,
-                    grid_cartesian_dimensions[1],
-                    grid_cartesian_dimensions[0],
-                    args.halo,
-                )
-                if e2c2v_ordering == "per-orientation"
-                else transform_v2e_to_nabla4_region_per_vertex(
-                    filtered_v2e,
-                    grid_cartesian_dimensions[1],
-                    grid_cartesian_dimensions[0],
-                    args.halo,
-                )
-            )
-        return filtered_e2c2v, filtered_e2ecv, filtered_v2e
 
     (
         filtered_e2c2v_separate,
