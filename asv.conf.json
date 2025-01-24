@@ -21,11 +21,11 @@
   // Customizable commands for building the project.
   // See asv.conf.json documentation.
   // To build the package using pyproject.toml (PEP518), uncomment the following lines
-  "build_command": [
-    "python -m pip install build",
-    "python -m build",
-    "python -mpip wheel -w {build_cache_dir} {build_dir}"
-  ],
+//   "build_command": [
+//     "python -m pip install build",
+//     "python -m build",
+//     "python -mpip wheel -w {build_cache_dir} {build_dir}"
+//   ],
   // To build the package using setuptools and a setup.py file, uncomment the following lines
   // "build_command": [
   //     "python setup.py build",
@@ -34,7 +34,7 @@
 
   // Customizable commands for installing and uninstalling the project.
   // See asv.conf.json documentation.
-  "install_command": ["in-dir={env_dir} python -mpip install {wheel_file}"],
+//   "install_command": ["python -mpip install {wheel_file}"],
   // "uninstall_command": ["return-code=any python -mpip uninstall -y {project}"],
 
   // List of branches to benchmark. If not provided, defaults to "main"
@@ -97,7 +97,7 @@
   "matrix": {
     "req": {
       "uv": [],
-      "uv+git+https://github.com/iomaganaris/icon4py.git@benchmarking_main#egg=icon4py-common[io]": []
+      "uv+git+https://github.com/iomaganaris/icon4py.git@benchmarking_main#egg=icon4py-common[io]": [],
     }
     //         "numpy": ["1.6", "1.7"],
     //         "six": ["", null],  // test with and without six installed
