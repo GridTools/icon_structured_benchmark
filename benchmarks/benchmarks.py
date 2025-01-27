@@ -3,7 +3,7 @@
 
 from .run_filtered_torus_grid_int_nabla4_interpolate_c2v import *  # type: ignore
 
-from icon_benchmark import *  # type: ignore
+import icon_benchmark  # type: ignore
 
 import numpy as np
 
@@ -13,6 +13,8 @@ class TimeSuite:
     An example benchmark that times the performance of various kinds
     of iterating over dictionaries in Python.
     """
+
+    unit = "s"
 
     def setup(self):
         class Args:
@@ -100,31 +102,45 @@ class TimeSuite:
 
         self.halo = args.halo
 
-    def time_nabla4_interpolate_verts2cells_benchmark_unstructured_cpu_kfirst_separate(
+    def track_nabla4_benchmark_structured_torus_cpu_kfirst_gridtools_halo(
         self,
     ):
-        icon_benchmark.nabla4_benchmark_structured_torus_cpu_kfirst_gridtools_halo(
-            self.torus_grid.num_cells,
-            self.torus_grid.num_vertices,
-            self.torus_grid.num_edges,
-            self.torus_grid.num_levels,
-            self.torus_grid.size[E2C2VDim],
-            self.grid_cartesian_dimensions[0],
-            self.grid_cartesian_dimensions[1],
-            self.halo,
-            self.repetitions,
-            self.dry_runs,
+        runtimes = (
+            icon_benchmark.nabla4_benchmark_structured_torus_cpu_kfirst_gridtools_halo(
+                self.torus_grid.num_cells,
+                self.torus_grid.num_vertices,
+                self.torus_grid.num_edges,
+                self.torus_grid.num_levels,
+                self.torus_grid.size[E2C2VDim],
+                self.grid_cartesian_dimensions[0],
+                self.grid_cartesian_dimensions[1],
+                self.halo,
+                self.repetitions,
+                self.dry_runs,
+            )
         )
+        # with open("/Users/ioannmag/cscs_repos/cycle23/icon_structured_benchmark/runtimes.txt", "w") as f:
+        #     for runtime in runtimes:
+        #         f.write(f"{runtime}\n")
+        #     f.write(f"Mean: {np.mean(runtimes)}\n")
+        # import pdb
+        # pdb.set_trace()
+        return np.mean(runtimes)
+
+    track_nabla4_benchmark_structured_torus_cpu_kfirst_gridtools_halo.unit = "s"  # type: ignore
 
 
 # class MemSuite:
 #     def mem_list(self):
-#         return [0] * 256
-if __name__ == "__main__":
-    functions = [
-        func for func in dir(icon_benchmark) if callable(getattr(icon_benchmark, func))
-    ]
-    print("Functions in icon_benchmark module:", functions)
-    t = TimeSuite()
-    t.setup()
-    t.time_nabla4_interpolate_verts2cells_benchmark_unstructured_cpu_kfirst_separate()
+#         return icon_benchmark.nabla4_benchmark_structured_torus_cpu_kfirst_gridtools_halo(
+#             self.torus_grid.num_cells,
+#             self.torus_grid.num_vertices,
+#             self.torus_grid.num_edges,
+#             self.torus_grid.num_levels,
+#             self.torus_grid.size[E2C2VDim],
+#             self.grid_cartesian_dimensions[0],
+#             self.grid_cartesian_dimensions[1],
+#             self.halo,
+#             1,
+#             False,
+#         )

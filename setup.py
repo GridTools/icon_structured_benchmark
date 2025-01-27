@@ -2,7 +2,7 @@ from skbuild import setup
 
 setup(
     name="icon_structured_benchmark",
-    version="0.1.0",
+    version="0.1.1",
     description="A Python package with a CMake project",
     author="Your Name",
     packages=["icon_benchmark"],  # Replace with your package name
