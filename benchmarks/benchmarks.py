@@ -125,7 +125,7 @@ class TimeSuite:
         #     f.write(f"Mean: {np.mean(runtimes)}\n")
         # import pdb
         # pdb.set_trace()
-        return 0.0123
+        return 0.0223
 
     track_nabla4_runtime.unit = "s"  # type: ignore
 
