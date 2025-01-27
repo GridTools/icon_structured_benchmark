@@ -7,6 +7,10 @@ import icon_benchmark  # type: ignore
 
 import numpy as np
 
+from .utilities import (
+    runtime,
+)  # type: ignore
+
 
 class TimeSuite:
     """
@@ -125,7 +129,7 @@ class TimeSuite:
         #     f.write(f"Mean: {np.mean(runtimes)}\n")
         # import pdb
         # pdb.set_trace()
-        return 0.0223
+        return runtime()
 
     track_nabla4_runtime.unit = "s"  # type: ignore
 
