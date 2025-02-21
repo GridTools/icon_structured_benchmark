@@ -394,13 +394,15 @@ constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_kloop<int>
 constexpr block_dims block_dims_structured_nabla_interpol_inlined_kloop =
     get_block_dims_structured_nabla_interpol_inlined_kloop<index_type>();
 
+constexpr index_type KDim_inlined{80};
+constexpr index_type x_dim{594};
+constexpr index_type y_dim{514};
+constexpr index_type halo{3};
+constexpr index_type inner_domain_size{298704};
+constexpr index_type outer_domain_size_inlined{305316};
+
 __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_kloop.size)
-    run_gpu_kloop_nabla4_interpolate_inlined_structured(index_type KDim,
-        index_type x_dim,
-        index_type y_dim,
-        index_type halo,
-        index_type inner_domain_size,
-        index_type outer_domain_size,
+    run_gpu_kloop_nabla4_interpolate_inlined_structured(
         nabla4_structured_torus_halo_gt<storage::gpu>::data_store_2d_ctv_VP_t u_vert_gt_tv,
         nabla4_structured_torus_halo_gt<storage::gpu>::data_store_2d_ctv_VP_t v_vert_gt_tv,
         nabla4_structured_torus_halo_gt<storage::gpu>::data_store_1d_ctv_WP_t primal_normal_vert_v1_gt_tv,
@@ -415,35 +417,35 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_k
     const auto i{blockIdx.x * blockDim.x + threadIdx.x + halo};
     const auto j{blockIdx.y * blockDim.y + threadIdx.y + halo};
     const auto k_index{blockIdx.z * blockDim.z + threadIdx.z};
-    if (i >= x_dim - halo || j >= y_dim - halo || k_index >= KDim) {
+    if (i >= x_dim - halo || j >= y_dim - halo || k_index >= KDim_inlined) {
         return;
     }
     const std::array<index_type, 7> v2e2c2v_compressed{get_v2e2c2v(i, j, x_dim)};
     const std::array<index_type, 6> v2e{get_v2e_per_orientation(i, j, x_dim, y_dim)};
     const std::array<index_type, 24> v2e2ecv{v2e[0],
-        v2e[0] + outer_domain_size * 3,
-        v2e[0] + outer_domain_size * 6,
-        v2e[0] + outer_domain_size * 9,
+        v2e[0] + outer_domain_size_inlined * 3,
+        v2e[0] + outer_domain_size_inlined * 6,
+        v2e[0] + outer_domain_size_inlined * 9,
         v2e[1],
-        v2e[1] + outer_domain_size * 3,
-        v2e[1] + outer_domain_size * 6,
-        v2e[1] + outer_domain_size * 9,
+        v2e[1] + outer_domain_size_inlined * 3,
+        v2e[1] + outer_domain_size_inlined * 6,
+        v2e[1] + outer_domain_size_inlined * 9,
         v2e[2],
-        v2e[2] + outer_domain_size * 3,
-        v2e[2] + outer_domain_size * 6,
-        v2e[2] + outer_domain_size * 9,
+        v2e[2] + outer_domain_size_inlined * 3,
+        v2e[2] + outer_domain_size_inlined * 6,
+        v2e[2] + outer_domain_size_inlined * 9,
         v2e[3],
-        v2e[3] + outer_domain_size * 3,
-        v2e[3] + outer_domain_size * 6,
-        v2e[3] + outer_domain_size * 9,
+        v2e[3] + outer_domain_size_inlined * 3,
+        v2e[3] + outer_domain_size_inlined * 6,
+        v2e[3] + outer_domain_size_inlined * 9,
         v2e[4],
-        v2e[4] + outer_domain_size * 3,
-        v2e[4] + outer_domain_size * 6,
-        v2e[4] + outer_domain_size * 9,
+        v2e[4] + outer_domain_size_inlined * 3,
+        v2e[4] + outer_domain_size_inlined * 6,
+        v2e[4] + outer_domain_size_inlined * 9,
         v2e[5],
-        v2e[5] + outer_domain_size * 3,
-        v2e[5] + outer_domain_size * 6,
-        v2e[5] + outer_domain_size * 9};
+        v2e[5] + outer_domain_size_inlined * 3,
+        v2e[5] + outer_domain_size_inlined * 6,
+        v2e[5] + outer_domain_size_inlined * 9};
     const std::array<index_type, 24> v2e2c2v{v2e2c2v_compressed[0],
         v2e2c2v_compressed[1],
         v2e2c2v_compressed[2],
@@ -542,7 +544,8 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_k
         ptr_coeff_2_gt_ctv(vertex_index_internal, 4),
         ptr_coeff_2_gt_ctv(vertex_index_internal, 5)};
     std::array<WP_TYPE, 6> z_nabla4_e2_wp;
-    for (auto k_index{blockIdx.z * blockDim.z + threadIdx.z}; k_index < KDim; k_index += gridDim.z * blockDim.z) {
+    for (auto k_index{blockIdx.z * blockDim.z + threadIdx.z}; k_index < KDim_inlined;
+         k_index += gridDim.z * blockDim.z) {
 #pragma unroll 6
         for (auto color{0}; color < 6; ++color) {
             const auto edge_index = v2e[color];
@@ -577,22 +580,13 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_k
 
 template <typename T>
 inline void nabla4_interpolate_structured_inlined<T>::run_gpu_kloop_helper() {
-    dim3 tblocks(block_dims_structured_nabla_interpol_inlined_kloop.x,
+    constexpr dim3 tblocks(block_dims_structured_nabla_interpol_inlined_kloop.x,
         block_dims_structured_nabla_interpol_inlined_kloop.y,
         block_dims_structured_nabla_interpol_inlined_kloop.z);
-    const index_type inner_domain_size =
-        (interpolate_data.x_dim - 2 * interpolate_data.halo) * (interpolate_data.y_dim - 2 * interpolate_data.halo);
-    const index_type outer_domain_size = interpolate_data.x_dim * interpolate_data.y_dim;
-    const index_type inner_x_dim = interpolate_data.x_dim - 2 * interpolate_data.halo;
-    const index_type inner_y_dim = interpolate_data.y_dim - 2 * interpolate_data.halo;
-    dim3 grid((inner_x_dim + tblocks.x - 1) / tblocks.x, (inner_y_dim + tblocks.y - 1) / tblocks.y, 1);
-    run_gpu_kloop_nabla4_interpolate_inlined_structured<<<grid, tblocks>>>(interpolate_data.KDim,
-        interpolate_data.x_dim,
-        interpolate_data.y_dim,
-        interpolate_data.halo,
-        inner_domain_size,
-        outer_domain_size,
-        nabla4_data.u_vert_gt_tv,
+    constexpr index_type inner_x_dim = x_dim - 2 * halo;
+    constexpr index_type inner_y_dim = y_dim - 2 * halo;
+    constexpr dim3 grid((inner_x_dim + tblocks.x - 1) / tblocks.x, (inner_y_dim + tblocks.y - 1) / tblocks.y, 1);
+    run_gpu_kloop_nabla4_interpolate_inlined_structured<<<grid, tblocks>>>(nabla4_data.u_vert_gt_tv,
         nabla4_data.v_vert_gt_tv,
         nabla4_data.primal_normal_vert_v1_gt_tv,
         nabla4_data.primal_normal_vert_v2_gt_tv,
