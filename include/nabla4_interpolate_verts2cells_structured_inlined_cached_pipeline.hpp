@@ -189,52 +189,6 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlin
                   blockIdx.y * (block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.y) +
                   3 * blockIdx.y - halo_nabla4
             : block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.y;
-    const index_type i_j_smem = j_smem * smem_x + i_smem;
-    const index_type i_jp1_smem = (j_smem + 1) * smem_x + i_smem;
-    const index_type im1_jp1_smem = (j_smem + 1) * smem_x + i_smem - 1;
-    const index_type ip1_j_smem = j_smem * smem_x + i_smem + 1;
-    const index_type ip1_jm1_smem = (j_smem - 1) * smem_x + i_smem + 1;
-    const index_type i_jm1_smem = (j_smem - 1) * smem_x + i_smem;
-    const index_type E2C2V_0_smem[3] = {i_j_smem, i_j_smem, i_j_smem};
-    const index_type E2C2V_1_smem[3] = {i_jp1_smem, ip1_j_smem, ip1_jm1_smem};
-    const index_type E2C2V_2_smem[3] = {im1_jp1_smem, i_jp1_smem, ip1_j_smem};
-    const index_type E2C2V_3_smem[3] = {ip1_j_smem, ip1_jm1_smem, i_jm1_smem};
-    const index_type E2ECV_0[3] = {i_j, i_j + outer_domain_size, i_j + 2 * outer_domain_size};
-    const index_type total_edges{3 * outer_domain_size};
-    const index_type E2ECV_1[3] = {E2ECV_0[0] + total_edges, E2ECV_0[1] + total_edges, E2ECV_0[2] + total_edges};
-    const index_type E2ECV_2[3] = {E2ECV_1[0] + total_edges, E2ECV_1[1] + total_edges, E2ECV_1[2] + total_edges};
-    const index_type E2ECV_3[3] = {E2ECV_2[0] + total_edges, E2ECV_2[1] + total_edges, E2ECV_2[2] + total_edges};
-    const index_type edge_index = i_j;
-    const WP_TYPE primal_normal_vert_v1_0[3] = {primal_normal_vert_v1_gt_tv(E2ECV_0[0]),
-        primal_normal_vert_v1_gt_tv(E2ECV_0[1]),
-        primal_normal_vert_v1_gt_tv(E2ECV_0[2])};
-    const WP_TYPE primal_normal_vert_v1_1[3] = {primal_normal_vert_v1_gt_tv(E2ECV_1[0]),
-        primal_normal_vert_v1_gt_tv(E2ECV_1[1]),
-        primal_normal_vert_v1_gt_tv(E2ECV_1[2])};
-    const WP_TYPE primal_normal_vert_v1_2[3] = {primal_normal_vert_v1_gt_tv(E2ECV_2[0]),
-        primal_normal_vert_v1_gt_tv(E2ECV_2[1]),
-        primal_normal_vert_v1_gt_tv(E2ECV_2[2])};
-    const WP_TYPE primal_normal_vert_v1_3[3] = {primal_normal_vert_v1_gt_tv(E2ECV_3[0]),
-        primal_normal_vert_v1_gt_tv(E2ECV_3[1]),
-        primal_normal_vert_v1_gt_tv(E2ECV_3[2])};
-    const WP_TYPE primal_normal_vert_v2_0[3] = {primal_normal_vert_v2_gt_tv(E2ECV_0[0]),
-        primal_normal_vert_v2_gt_tv(E2ECV_0[1]),
-        primal_normal_vert_v2_gt_tv(E2ECV_0[2])};
-    const WP_TYPE primal_normal_vert_v2_1[3] = {primal_normal_vert_v2_gt_tv(E2ECV_1[0]),
-        primal_normal_vert_v2_gt_tv(E2ECV_1[1]),
-        primal_normal_vert_v2_gt_tv(E2ECV_1[2])};
-    const WP_TYPE primal_normal_vert_v2_2[3] = {primal_normal_vert_v2_gt_tv(E2ECV_2[0]),
-        primal_normal_vert_v2_gt_tv(E2ECV_2[1]),
-        primal_normal_vert_v2_gt_tv(E2ECV_2[2])};
-    const WP_TYPE primal_normal_vert_v2_3[3] = {primal_normal_vert_v2_gt_tv(E2ECV_3[0]),
-        primal_normal_vert_v2_gt_tv(E2ECV_3[1]),
-        primal_normal_vert_v2_gt_tv(E2ECV_3[2])};
-    const WP_TYPE inv_vert_vert_length[3] = {inv_vert_vert_length_gt_tv(edge_index),
-        inv_vert_vert_length_gt_tv(edge_index + outer_domain_size),
-        inv_vert_vert_length_gt_tv(edge_index + 2 * outer_domain_size)};
-    const WP_TYPE inv_primal_edge_length[3] = {inv_primal_edge_length_gt_tv(edge_index),
-        inv_primal_edge_length_gt_tv(edge_index + outer_domain_size),
-        inv_primal_edge_length_gt_tv(edge_index + 2 * outer_domain_size)};
     const auto i_verts2cells{blockIdx.x * blockDim.x + threadIdx.x + halo_nabla4 + halo_interpolate - 2 * blockIdx.x};
     const auto j_verts2cells{blockIdx.y * blockDim.y + threadIdx.y + halo_nabla4 + halo_interpolate - 3 * blockIdx.y};
     const bool thread_calculate_verts2cells{
@@ -348,7 +302,7 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlin
         }
 #pragma unroll 3
         for (auto color{0}; color < 3; ++color) {
-            const auto z_nabla2_e_ptr{&(z_nabla2_e_gt_tv(edge_index + color * outer_domain_size, k_index))};
+            const auto z_nabla2_e_ptr{&(z_nabla2_e_gt_tv(i_j + color * outer_domain_size, k_index))};
             cuda::memcpy_async(thread,
                 &z_nabla2_e_smem[shared_mem_index_z_nabla2 + color * shared_mem_offset],
                 z_nabla2_e_ptr,
@@ -358,35 +312,401 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlin
         pipeline.producer_commit();
         pipeline.consumer_wait();
         __syncthreads();
-#pragma unroll 3
-        for (auto color{0}; color < 3; ++color) {
-            const auto E2C2V_0_c = E2C2V_0_smem[color];
-            const auto E2C2V_1_c = E2C2V_1_smem[color];
-            const auto E2C2V_2_c = E2C2V_2_smem[color];
-            const auto E2C2V_3_c = E2C2V_3_smem[color];
-            const double nabv_tang_wp = u_vert_smem[E2C2V_0_c] * primal_normal_vert_v1_0[color] +
-                                        v_vert_smem[E2C2V_0_c] * primal_normal_vert_v2_0[color] +
-                                        u_vert_smem[E2C2V_1_c] * primal_normal_vert_v1_1[color] +
-                                        v_vert_smem[E2C2V_1_c] * primal_normal_vert_v2_1[color];
-            const double nabv_norm_wp = u_vert_smem[E2C2V_2_c] * primal_normal_vert_v1_2[color] +
-                                        v_vert_smem[E2C2V_2_c] * primal_normal_vert_v2_2[color] +
-                                        u_vert_smem[E2C2V_3_c] * primal_normal_vert_v1_3[color] +
-                                        v_vert_smem[E2C2V_3_c] * primal_normal_vert_v2_3[color];
-            const WP_TYPE z_nabla2_e = z_nabla2_e_smem[shared_mem_index_z_nabla2 + color * shared_mem_offset];
-            const auto local_edge_index =
-                threadIdx.x + threadIdx.y * blockDim.x + color * block_horizontal_dim_nabla4 + z_nabla4_offset;
-            z_nabla4_shared_mem[local_edge_index] =
-                4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e) * (inv_vert_vert_length[color] * inv_vert_vert_length[color]) +
-                          (nabv_tang_wp - 2.0 * z_nabla2_e) *
-                              (inv_primal_edge_length[color] * inv_primal_edge_length[color]));
-        }
-        pipeline.consumer_release();
-        __syncthreads();
+        // #pragma unroll 3
+        //         for (auto color{0}; color < 3; ++color) {
+        //             const auto E2C2V_0_c = E2C2V_0_smem[color];
+        //             const auto E2C2V_1_c = E2C2V_1_smem[color];
+        //             const auto E2C2V_2_c = E2C2V_2_smem[color];
+        //             const auto E2C2V_3_c = E2C2V_3_smem[color];
+        //             const double nabv_tang_wp = u_vert_smem[E2C2V_0_c] * primal_normal_vert_v1_0[color] +
+        //                                         v_vert_smem[E2C2V_0_c] * primal_normal_vert_v2_0[color] +
+        //                                         u_vert_smem[E2C2V_1_c] * primal_normal_vert_v1_1[color] +
+        //                                         v_vert_smem[E2C2V_1_c] * primal_normal_vert_v2_1[color];
+        //             const double nabv_norm_wp = u_vert_smem[E2C2V_2_c] * primal_normal_vert_v1_2[color] +
+        //                                         v_vert_smem[E2C2V_2_c] * primal_normal_vert_v2_2[color] +
+        //                                         u_vert_smem[E2C2V_3_c] * primal_normal_vert_v1_3[color] +
+        //                                         v_vert_smem[E2C2V_3_c] * primal_normal_vert_v2_3[color];
+        //             const WP_TYPE z_nabla2_e = z_nabla2_e_smem[shared_mem_index_z_nabla2 + color *
+        //             shared_mem_offset]; const auto local_edge_index =
+        //                 threadIdx.x + threadIdx.y * blockDim.x + color * block_horizontal_dim_nabla4 +
+        //                 z_nabla4_offset;
+        //             z_nabla4_shared_mem[local_edge_index] =
+        //                 4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e) * (inv_vert_vert_length[color] *
+        //                 inv_vert_vert_length[color]) +
+        //                           (nabv_tang_wp - 2.0 * z_nabla2_e) *
+        //                               (inv_primal_edge_length[color] * inv_primal_edge_length[color]));
+        //         }
         if (thread_calculate_verts2cells && k_index < KDim) {
             WP_TYPE p_u_out[6];
             WP_TYPE p_v_out[6];
+            const std::array<index_type, 7> v2e2c2v_upward_0_compressed{get_v2e2c2v(i_smem, j_smem, smem_x)};
+            const std::array<index_type, 7> v2e2c2v_upward_1_compressed{get_v2e2c2v(i_smem + 1, j_smem, smem_x)};
+            const std::array<index_type, 7> v2e2c2v_upward_2_compressed{get_v2e2c2v(i_smem, j_smem + 1, smem_x)};
+            const std::array<index_type, 7> v2e2c2v_downward_2_compressed{get_v2e2c2v(i_smem + 1, j_smem + 1, smem_x)};
+            const std::array<index_type, 14> c2v2e2c2v_compressed{get_c2v2e2c2v_compressed(i_smem, j_smem, smem_x)};
+            const index_type e2c2v[144]{c2v2e2c2v_compressed[3], // 0 // upward
+                c2v2e2c2v_compressed[4],
+                c2v2e2c2v_compressed[7],
+                c2v2e2c2v_compressed[0],
+                c2v2e2c2v_compressed[4], // 1
+                c2v2e2c2v_compressed[5],
+                c2v2e2c2v_compressed[8],
+                c2v2e2c2v_compressed[1],
+                c2v2e2c2v_compressed[0], // 2
+                c2v2e2c2v_compressed[4],
+                c2v2e2c2v_compressed[3],
+                c2v2e2c2v_compressed[1],
+                c2v2e2c2v_compressed[4], // 3
+                c2v2e2c2v_compressed[8],
+                c2v2e2c2v_compressed[7],
+                c2v2e2c2v_compressed[5],
+                c2v2e2c2v_compressed[4], // 4
+                c2v2e2c2v_compressed[1],
+                c2v2e2c2v_compressed[5],
+                c2v2e2c2v_compressed[0],
+                c2v2e2c2v_compressed[7], // 5
+                c2v2e2c2v_compressed[4],
+                c2v2e2c2v_compressed[8],
+                c2v2e2c2v_compressed[3],
+                c2v2e2c2v_compressed[7], // 0
+                c2v2e2c2v_compressed[8],
+                c2v2e2c2v_compressed[11],
+                c2v2e2c2v_compressed[4],
+                c2v2e2c2v_compressed[8], // 1
+                c2v2e2c2v_compressed[9],
+                c2v2e2c2v_compressed[12],
+                c2v2e2c2v_compressed[5],
+                c2v2e2c2v_compressed[4], // 2
+                c2v2e2c2v_compressed[8],
+                c2v2e2c2v_compressed[7],
+                c2v2e2c2v_compressed[5],
+                c2v2e2c2v_compressed[8], // 3
+                c2v2e2c2v_compressed[12],
+                c2v2e2c2v_compressed[11],
+                c2v2e2c2v_compressed[9],
+                c2v2e2c2v_compressed[8], // 4
+                c2v2e2c2v_compressed[5],
+                c2v2e2c2v_compressed[9],
+                c2v2e2c2v_compressed[4],
+                c2v2e2c2v_compressed[11], // 5
+                c2v2e2c2v_compressed[8],
+                c2v2e2c2v_compressed[12],
+                c2v2e2c2v_compressed[7],
+                c2v2e2c2v_compressed[4], // 0
+                c2v2e2c2v_compressed[5],
+                c2v2e2c2v_compressed[8],
+                c2v2e2c2v_compressed[1],
+                c2v2e2c2v_compressed[5], // 1
+                c2v2e2c2v_compressed[6],
+                c2v2e2c2v_compressed[9],
+                c2v2e2c2v_compressed[2],
+                c2v2e2c2v_compressed[1], // 2
+                c2v2e2c2v_compressed[5],
+                c2v2e2c2v_compressed[4],
+                c2v2e2c2v_compressed[2],
+                c2v2e2c2v_compressed[5], // 3
+                c2v2e2c2v_compressed[9],
+                c2v2e2c2v_compressed[8],
+                c2v2e2c2v_compressed[6],
+                c2v2e2c2v_compressed[5], // 4
+                c2v2e2c2v_compressed[2],
+                c2v2e2c2v_compressed[6],
+                c2v2e2c2v_compressed[1],
+                c2v2e2c2v_compressed[8], // 5
+                c2v2e2c2v_compressed[5],
+                c2v2e2c2v_compressed[9],
+                c2v2e2c2v_compressed[4],
+                c2v2e2c2v_compressed[4], // 0 // downward
+                c2v2e2c2v_compressed[5],
+                c2v2e2c2v_compressed[8],
+                c2v2e2c2v_compressed[1],
+                c2v2e2c2v_compressed[5], // 1
+                c2v2e2c2v_compressed[6],
+                c2v2e2c2v_compressed[9],
+                c2v2e2c2v_compressed[2],
+                c2v2e2c2v_compressed[1], // 2
+                c2v2e2c2v_compressed[5],
+                c2v2e2c2v_compressed[4],
+                c2v2e2c2v_compressed[2],
+                c2v2e2c2v_compressed[5], // 3
+                c2v2e2c2v_compressed[9],
+                c2v2e2c2v_compressed[8],
+                c2v2e2c2v_compressed[6],
+                c2v2e2c2v_compressed[5], // 4
+                c2v2e2c2v_compressed[2],
+                c2v2e2c2v_compressed[6],
+                c2v2e2c2v_compressed[1],
+                c2v2e2c2v_compressed[8], // 5
+                c2v2e2c2v_compressed[5],
+                c2v2e2c2v_compressed[9],
+                c2v2e2c2v_compressed[4],
+                c2v2e2c2v_compressed[7], // 0
+                c2v2e2c2v_compressed[8],
+                c2v2e2c2v_compressed[11],
+                c2v2e2c2v_compressed[4],
+                c2v2e2c2v_compressed[8], // 1
+                c2v2e2c2v_compressed[9],
+                c2v2e2c2v_compressed[12],
+                c2v2e2c2v_compressed[5],
+                c2v2e2c2v_compressed[4], // 2
+                c2v2e2c2v_compressed[8],
+                c2v2e2c2v_compressed[7],
+                c2v2e2c2v_compressed[5],
+                c2v2e2c2v_compressed[8], // 3
+                c2v2e2c2v_compressed[12],
+                c2v2e2c2v_compressed[11],
+                c2v2e2c2v_compressed[9],
+                c2v2e2c2v_compressed[8], // 4
+                c2v2e2c2v_compressed[5],
+                c2v2e2c2v_compressed[9],
+                c2v2e2c2v_compressed[4],
+                c2v2e2c2v_compressed[11], // 5
+                c2v2e2c2v_compressed[8],
+                c2v2e2c2v_compressed[12],
+                c2v2e2c2v_compressed[7],
+                c2v2e2c2v_compressed[8], // 0
+                c2v2e2c2v_compressed[9],
+                c2v2e2c2v_compressed[12],
+                c2v2e2c2v_compressed[5],
+                c2v2e2c2v_compressed[9], // 1
+                c2v2e2c2v_compressed[10],
+                c2v2e2c2v_compressed[13],
+                c2v2e2c2v_compressed[6],
+                c2v2e2c2v_compressed[5], // 2
+                c2v2e2c2v_compressed[9],
+                c2v2e2c2v_compressed[8],
+                c2v2e2c2v_compressed[6],
+                c2v2e2c2v_compressed[9], // 3
+                c2v2e2c2v_compressed[13],
+                c2v2e2c2v_compressed[12],
+                c2v2e2c2v_compressed[10],
+                c2v2e2c2v_compressed[9], // 4
+                c2v2e2c2v_compressed[6],
+                c2v2e2c2v_compressed[10],
+                c2v2e2c2v_compressed[5],
+                c2v2e2c2v_compressed[12], // 5
+                c2v2e2c2v_compressed[9],
+                c2v2e2c2v_compressed[13],
+                c2v2e2c2v_compressed[8]};
+            const index_type i_v2e{static_cast<index_type>(i_nabla4) + halo_interpolate};
+            const index_type j_v2e{static_cast<index_type>(j_nabla4) + halo_interpolate};
+            const auto v2e_upward_0{get_v2e_per_orientation(i_v2e, j_v2e, x_dim_nabla4, y_dim_nabla4)};
+            const auto v2e_upward_1{get_v2e_per_orientation(i_v2e, j_v2e + 1, x_dim_nabla4, y_dim_nabla4)};
+            const auto v2e_upward_2{get_v2e_per_orientation(i_v2e + 1, j_v2e, x_dim_nabla4, y_dim_nabla4)};
+            const auto v2e_downward_2{get_v2e_per_orientation(i_v2e + 1, j_v2e + 1, x_dim_nabla4, y_dim_nabla4)};
+            const std::array<index_type, 36> c2v2e{v2e_upward_0[0], // upward
+                v2e_upward_0[1],
+                v2e_upward_0[2],
+                v2e_upward_0[3],
+                v2e_upward_0[4],
+                v2e_upward_0[5],
+                v2e_upward_1[0],
+                v2e_upward_1[1],
+                v2e_upward_1[2],
+                v2e_upward_1[3],
+                v2e_upward_1[4],
+                v2e_upward_1[5],
+                v2e_upward_2[0],
+                v2e_upward_2[1],
+                v2e_upward_2[2],
+                v2e_upward_2[3],
+                v2e_upward_2[4],
+                v2e_upward_2[5],
+                v2e_upward_2[0], // downward
+                v2e_upward_2[1],
+                v2e_upward_2[2],
+                v2e_upward_2[3],
+                v2e_upward_2[4],
+                v2e_upward_2[5],
+                v2e_upward_1[0],
+                v2e_upward_1[1],
+                v2e_upward_1[2],
+                v2e_upward_1[3],
+                v2e_upward_1[4],
+                v2e_upward_1[5],
+                v2e_downward_2[0],
+                v2e_downward_2[1],
+                v2e_downward_2[2],
+                v2e_downward_2[3],
+                v2e_downward_2[4],
+                v2e_downward_2[5]};
+            const std::array<index_type, 144> c2v2e2ecv{c2v2e[0], // 0 // upward
+                c2v2e[0] + outer_domain_size * 3,
+                c2v2e[0] + outer_domain_size * 6,
+                c2v2e[0] + outer_domain_size * 9,
+                c2v2e[1],
+                c2v2e[1] + outer_domain_size * 3,
+                c2v2e[1] + outer_domain_size * 6,
+                c2v2e[1] + outer_domain_size * 9,
+                c2v2e[2],
+                c2v2e[2] + outer_domain_size * 3,
+                c2v2e[2] + outer_domain_size * 6,
+                c2v2e[2] + outer_domain_size * 9,
+                c2v2e[3],
+                c2v2e[3] + outer_domain_size * 3,
+                c2v2e[3] + outer_domain_size * 6,
+                c2v2e[3] + outer_domain_size * 9,
+                c2v2e[4],
+                c2v2e[4] + outer_domain_size * 3,
+                c2v2e[4] + outer_domain_size * 6,
+                c2v2e[4] + outer_domain_size * 9,
+                c2v2e[5],
+                c2v2e[5] + outer_domain_size * 3,
+                c2v2e[5] + outer_domain_size * 6,
+                c2v2e[5] + outer_domain_size * 9,
+                c2v2e[6],
+                c2v2e[6] + outer_domain_size * 3,
+                c2v2e[6] + outer_domain_size * 6,
+                c2v2e[6] + outer_domain_size * 9,
+                c2v2e[7],
+                c2v2e[7] + outer_domain_size * 3,
+                c2v2e[7] + outer_domain_size * 6,
+                c2v2e[7] + outer_domain_size * 9,
+                c2v2e[8],
+                c2v2e[8] + outer_domain_size * 3,
+                c2v2e[8] + outer_domain_size * 6,
+                c2v2e[8] + outer_domain_size * 9,
+                c2v2e[9],
+                c2v2e[9] + outer_domain_size * 3,
+                c2v2e[9] + outer_domain_size * 6,
+                c2v2e[9] + outer_domain_size * 9,
+                c2v2e[10],
+                c2v2e[10] + outer_domain_size * 3,
+                c2v2e[10] + outer_domain_size * 6,
+                c2v2e[10] + outer_domain_size * 9,
+                c2v2e[11],
+                c2v2e[11] + outer_domain_size * 3,
+                c2v2e[11] + outer_domain_size * 6,
+                c2v2e[11] + outer_domain_size * 9,
+                c2v2e[12],
+                c2v2e[12] + outer_domain_size * 3,
+                c2v2e[12] + outer_domain_size * 6,
+                c2v2e[12] + outer_domain_size * 9,
+                c2v2e[13],
+                c2v2e[13] + outer_domain_size * 3,
+                c2v2e[13] + outer_domain_size * 6,
+                c2v2e[13] + outer_domain_size * 9,
+                c2v2e[14],
+                c2v2e[14] + outer_domain_size * 3,
+                c2v2e[14] + outer_domain_size * 6,
+                c2v2e[14] + outer_domain_size * 9,
+                c2v2e[15],
+                c2v2e[15] + outer_domain_size * 3,
+                c2v2e[15] + outer_domain_size * 6,
+                c2v2e[15] + outer_domain_size * 9,
+                c2v2e[16],
+                c2v2e[16] + outer_domain_size * 3,
+                c2v2e[16] + outer_domain_size * 6,
+                c2v2e[16] + outer_domain_size * 9,
+                c2v2e[17],
+                c2v2e[17] + outer_domain_size * 3,
+                c2v2e[17] + outer_domain_size * 6,
+                c2v2e[17] + outer_domain_size * 9,
+                c2v2e[18],
+                c2v2e[18] + outer_domain_size * 3,
+                c2v2e[18] + outer_domain_size * 6,
+                c2v2e[18] + outer_domain_size * 9,
+                c2v2e[19],
+                c2v2e[19] + outer_domain_size * 3,
+                c2v2e[19] + outer_domain_size * 6,
+                c2v2e[19] + outer_domain_size * 9,
+                c2v2e[20],
+                c2v2e[20] + outer_domain_size * 3,
+                c2v2e[20] + outer_domain_size * 6,
+                c2v2e[20] + outer_domain_size * 9,
+                c2v2e[21],
+                c2v2e[21] + outer_domain_size * 3,
+                c2v2e[21] + outer_domain_size * 6,
+                c2v2e[21] + outer_domain_size * 9,
+                c2v2e[22],
+                c2v2e[22] + outer_domain_size * 3,
+                c2v2e[22] + outer_domain_size * 6,
+                c2v2e[22] + outer_domain_size * 9,
+                c2v2e[23],
+                c2v2e[23] + outer_domain_size * 3,
+                c2v2e[23] + outer_domain_size * 6,
+                c2v2e[23] + outer_domain_size * 9,
+                c2v2e[24],
+                c2v2e[24] + outer_domain_size * 3,
+                c2v2e[24] + outer_domain_size * 6,
+                c2v2e[24] + outer_domain_size * 9,
+                c2v2e[25],
+                c2v2e[25] + outer_domain_size * 3,
+                c2v2e[25] + outer_domain_size * 6,
+                c2v2e[25] + outer_domain_size * 9,
+                c2v2e[26],
+                c2v2e[26] + outer_domain_size * 3,
+                c2v2e[26] + outer_domain_size * 6,
+                c2v2e[26] + outer_domain_size * 9,
+                c2v2e[27],
+                c2v2e[27] + outer_domain_size * 3,
+                c2v2e[27] + outer_domain_size * 6,
+                c2v2e[27] + outer_domain_size * 9,
+                c2v2e[28],
+                c2v2e[28] + outer_domain_size * 3,
+                c2v2e[28] + outer_domain_size * 6,
+                c2v2e[28] + outer_domain_size * 9,
+                c2v2e[29],
+                c2v2e[29] + outer_domain_size * 3,
+                c2v2e[29] + outer_domain_size * 6,
+                c2v2e[29] + outer_domain_size * 9,
+                c2v2e[30],
+                c2v2e[30] + outer_domain_size * 3,
+                c2v2e[30] + outer_domain_size * 6,
+                c2v2e[30] + outer_domain_size * 9,
+                c2v2e[31],
+                c2v2e[31] + outer_domain_size * 3,
+                c2v2e[31] + outer_domain_size * 6,
+                c2v2e[31] + outer_domain_size * 9,
+                c2v2e[32],
+                c2v2e[32] + outer_domain_size * 3,
+                c2v2e[32] + outer_domain_size * 6,
+                c2v2e[32] + outer_domain_size * 9,
+                c2v2e[33],
+                c2v2e[33] + outer_domain_size * 3,
+                c2v2e[33] + outer_domain_size * 6,
+                c2v2e[33] + outer_domain_size * 9,
+                c2v2e[34],
+                c2v2e[34] + outer_domain_size * 3,
+                c2v2e[34] + outer_domain_size * 6,
+                c2v2e[34] + outer_domain_size * 9,
+                c2v2e[35],
+                c2v2e[35] + outer_domain_size * 3,
+                c2v2e[35] + outer_domain_size * 6,
+                c2v2e[35] + outer_domain_size * 9};
+            std::array<WP_TYPE, 36> z_nabla4;
 #pragma unroll 6
             for (int vertex_index{}; vertex_index < 6; ++vertex_index) {
+#pragma unroll 6
+                for (int edge_index{}; edge_index < 6; ++edge_index) {
+                    const double nabv_tang_wp =
+                        u_vert_smem[e2c2v[4 * edge_index + 4 * 6 * vertex_index]] *
+                            primal_normal_vert_v1_gt_tv(c2v2e2ecv[vertex_index * 6 + edge_index * 4]) +
+                        v_vert_smem[e2c2v[4 * edge_index + 4 * 6 * vertex_index]] *
+                            primal_normal_vert_v2_gt_tv(c2v2e2ecv[vertex_index * 6 + edge_index * 4]) +
+                        u_vert_smem[e2c2v[1 + 4 * edge_index + 4 * 6 * vertex_index]] *
+                            primal_normal_vert_v1_gt_tv(c2v2e2ecv[vertex_index * 6 + edge_index * 4 + 1]) +
+                        v_vert_smem[e2c2v[1 + 4 * edge_index + 4 * 6 * vertex_index]] *
+                            primal_normal_vert_v2_gt_tv(c2v2e2ecv[vertex_index * 6 + edge_index * 4 + 1]);
+                    const double nabv_norm_wp =
+                        u_vert_smem[e2c2v[2 + 4 * edge_index + 4 * 6 * vertex_index]] *
+                            primal_normal_vert_v1_gt_tv(c2v2e2ecv[vertex_index * 6 + edge_index * 4 + 2]) +
+                        v_vert_smem[e2c2v[2 + 4 * edge_index + 4 * 6 * vertex_index]] *
+                            primal_normal_vert_v2_gt_tv(c2v2e2ecv[vertex_index * 6 + edge_index * 4 + 2]) +
+                        u_vert_smem[e2c2v[3 + 4 * edge_index + 4 * 6 * vertex_index]] *
+                            primal_normal_vert_v1_gt_tv(c2v2e2ecv[vertex_index * 6 + edge_index * 4 + 3]) +
+                        v_vert_smem[e2c2v[3 + 4 * edge_index + 4 * 6 * vertex_index]] *
+                            primal_normal_vert_v2_gt_tv(c2v2e2ecv[vertex_index * 4 * 6 + edge_index * 4 + 3]);
+                    const index_type edge_id{c2v2e[edge_index + vertex_index * 6]};
+                    const WP_TYPE z_nabla2_e = z_nabla2_e_gt_tv(edge_id, k_index);
+                    const WP_TYPE inv_vert_vert_length = inv_vert_vert_length_gt_tv(edge_id);
+                    const WP_TYPE inv_vert_vert_length_sqr = inv_vert_vert_length * inv_vert_vert_length;
+                    const WP_TYPE inv_primal_edge_length = inv_primal_edge_length_gt_tv(edge_id);
+                    const WP_TYPE inv_primal_edge_length_sqr = inv_primal_edge_length * inv_primal_edge_length;
+                    z_nabla4[edge_index + 6 * vertex_index] =
+                        4.0 * ((nabv_norm_wp - 2.0 * z_nabla2_e) * inv_vert_vert_length_sqr +
+                                  (nabv_tang_wp - 2.0 * z_nabla2_e) * inv_primal_edge_length_sqr);
+                }
                 const std::array<WP_TYPE, 6> ptr_coeff_1{ptr_coeff_1_gt_ctv(c2v_global[vertex_index], 0),
                     ptr_coeff_1_gt_ctv(c2v_global[vertex_index], 1),
                     ptr_coeff_1_gt_ctv(c2v_global[vertex_index], 2),
@@ -400,19 +720,13 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlin
                     ptr_coeff_2_gt_ctv(c2v_global[vertex_index], 4),
                     ptr_coeff_2_gt_ctv(c2v_global[vertex_index], 5)};
                 p_u_out[vertex_index] =
-                    z_nabla4_shared_mem[z_nabla4_offset + c2v2e_shared[vertex_index * 6]] * ptr_coeff_1[0] +
-                    z_nabla4_shared_mem[z_nabla4_offset + c2v2e_shared[vertex_index * 6 + 1]] * ptr_coeff_1[1] +
-                    z_nabla4_shared_mem[z_nabla4_offset + c2v2e_shared[vertex_index * 6 + 2]] * ptr_coeff_1[2] +
-                    z_nabla4_shared_mem[z_nabla4_offset + c2v2e_shared[vertex_index * 6 + 3]] * ptr_coeff_1[3] +
-                    z_nabla4_shared_mem[z_nabla4_offset + c2v2e_shared[vertex_index * 6 + 4]] * ptr_coeff_1[4] +
-                    z_nabla4_shared_mem[z_nabla4_offset + c2v2e_shared[vertex_index * 6 + 5]] * ptr_coeff_1[5];
+                    z_nabla4[vertex_index * 6] * ptr_coeff_1[0] + z_nabla4[vertex_index * 6 + 1] * ptr_coeff_1[1] +
+                    z_nabla4[vertex_index * 6 + 2] * ptr_coeff_1[2] + z_nabla4[vertex_index * 6 + 3] * ptr_coeff_1[3] +
+                    z_nabla4[vertex_index * 6 + 4] * ptr_coeff_1[4] + z_nabla4[vertex_index * 6 + 5] * ptr_coeff_1[5];
                 p_v_out[vertex_index] =
-                    z_nabla4_shared_mem[z_nabla4_offset + c2v2e_shared[vertex_index * 6]] * ptr_coeff_2[0] +
-                    z_nabla4_shared_mem[z_nabla4_offset + c2v2e_shared[vertex_index * 6 + 1]] * ptr_coeff_2[1] +
-                    z_nabla4_shared_mem[z_nabla4_offset + c2v2e_shared[vertex_index * 6 + 2]] * ptr_coeff_2[2] +
-                    z_nabla4_shared_mem[z_nabla4_offset + c2v2e_shared[vertex_index * 6 + 3]] * ptr_coeff_2[3] +
-                    z_nabla4_shared_mem[z_nabla4_offset + c2v2e_shared[vertex_index * 6 + 4]] * ptr_coeff_2[4] +
-                    z_nabla4_shared_mem[z_nabla4_offset + c2v2e_shared[vertex_index * 6 + 5]] * ptr_coeff_2[5];
+                    z_nabla4[vertex_index * 6] * ptr_coeff_2[0] + z_nabla4[vertex_index * 6 + 1] * ptr_coeff_2[1] +
+                    z_nabla4[vertex_index * 6 + 2] * ptr_coeff_2[2] + z_nabla4[vertex_index * 6 + 3] * ptr_coeff_2[3] +
+                    z_nabla4[vertex_index * 6 + 4] * ptr_coeff_2[4] + z_nabla4[vertex_index * 6 + 5] * ptr_coeff_2[5];
             };
             __stcs(static_cast<double2 *>(static_cast<void *>(&p_cell_out_gt_tv(cell_index_internal_upward, k_index))),
                 make_double2(
@@ -423,6 +737,7 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlin
                         p_v_out[3] * ptr_c_coeff_2[3] + p_v_out[4] * ptr_c_coeff_2[4] + p_v_out[5] * ptr_c_coeff_2[5]) /
                         2));
         }
+        pipeline.consumer_release();
         __syncthreads();
     }
 };
