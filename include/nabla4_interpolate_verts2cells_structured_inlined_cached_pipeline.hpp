@@ -164,7 +164,7 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlin
         return;
     }
     constexpr auto block_horizontal_dim_nabla4{
-        (block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.x + 2) *
+        (block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.x + 2 + 2) *
         block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.y};
     constexpr auto shared_mem_k_offset{block_horizontal_dim_nabla4 * 3};
     __shared__ WP_TYPE z_nabla4_shared_mem[shared_mem_k_offset *
@@ -311,7 +311,7 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlin
         ptr_c_coeff_2_gt_ctv(cell_index_internal_downward, 1),
         ptr_c_coeff_2_gt_ctv(cell_index_internal_downward, 2)};
     auto thread = cooperative_groups::this_thread();
-    constexpr auto smem_size{(block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.x + 2) *
+    constexpr auto smem_size{(block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.x + 2 + 2) *
                              (block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.y + 2)};
     const auto shared_mem_allignment_offset = (i_nabla4_start_of_threadblock - 1) % 2 == 0 ? 0 : 1;
     __shared__ WP_TYPE
@@ -336,31 +336,33 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlin
                      i_new += smem_x_dim_scaled) {
                     const auto shared_mem_index_uv{i_new + j_new * smem_x};
                     const auto i_j_global_new{i_global_new + j_global_new * x_dim_nabla4};
-                    printf("[%d %d %d:%d %d %d] &(u_vert_gt_tv(%d, %d)) = %p\n",
-                        threadIdx.x,
-                        threadIdx.y,
-                        threadIdx.z,
-                        blockIdx.x,
-                        blockIdx.y,
-                        blockIdx.z,
-                        i_j_global_new,
-                        k_index,
-                        &(u_vert_gt_tv(i_j_global_new, k_index)));
+                    if ((reinterpret_cast<uintptr_t>(&(u_vert_gt_tv(i_j_global_new, k_index))) % 16) != 0)
+                        printf("[%d %d %d:%d %d %d] &(u_vert_gt_tv(%d, %d)) = %p\n",
+                            threadIdx.x,
+                            threadIdx.y,
+                            threadIdx.z,
+                            blockIdx.x,
+                            blockIdx.y,
+                            blockIdx.z,
+                            i_j_global_new,
+                            k_index,
+                            &(u_vert_gt_tv(i_j_global_new, k_index)));
                     cuda::memcpy_async(thread,
                         &u_vert_smem[shared_mem_index_uv],
                         &(u_vert_gt_tv(i_j_global_new, k_index)),
                         cuda::aligned_size_t<16>(sizeof(WP_TYPE2)),
                         pipeline);
-                    printf("[%d %d %d:%d %d %d] &(v_vert_gt_tv(%d, %d)) = %p\n",
-                        threadIdx.x,
-                        threadIdx.y,
-                        threadIdx.z,
-                        blockIdx.x,
-                        blockIdx.y,
-                        blockIdx.z,
-                        i_j_global_new,
-                        k_index,
-                        &(v_vert_gt_tv(i_j_global_new, k_index)));
+                    if ((reinterpret_cast<uintptr_t>(&(v_vert_gt_tv(i_j_global_new, k_index))) % 16) != 0)
+                        printf("[%d %d %d:%d %d %d] &(v_vert_gt_tv(%d, %d)) = %p\n",
+                            threadIdx.x,
+                            threadIdx.y,
+                            threadIdx.z,
+                            blockIdx.x,
+                            blockIdx.y,
+                            blockIdx.z,
+                            i_j_global_new,
+                            k_index,
+                            &(v_vert_gt_tv(i_j_global_new, k_index)));
                     cuda::memcpy_async(thread,
                         &v_vert_smem[shared_mem_index_uv],
                         &(v_vert_gt_tv(i_j_global_new, k_index)),
@@ -373,18 +375,18 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlin
             }
 #pragma unroll 3
             for (auto color{0}; color < 3; ++color) {
-                const auto z_nabla2_e_ptr{&(
-                    z_nabla2_e_gt_tv(edge_index - shared_mem_allignment_offset + color * outer_domain_size, k_index))};
-                printf("[%d %d %d:%d %d %d] &(z_nabla2_e_gt_tv(%d, %d)) = %p\n",
-                    threadIdx.x,
-                    threadIdx.y,
-                    threadIdx.z,
-                    blockIdx.x,
-                    blockIdx.y,
-                    blockIdx.z,
-                    edge_index + color * outer_domain_size,
-                    k_index,
-                    z_nabla2_e_ptr);
+                const auto z_nabla2_e_ptr{&(z_nabla2_e_gt_tv(edge_index + color * outer_domain_size, k_index))};
+                if ((reinterpret_cast<uintptr_t>(z_nabla2_e_ptr) % 16) != 0)
+                    printf("[%d %d %d:%d %d %d] &(z_nabla2_e_gt_tv(%d, %d)) = %p\n",
+                        threadIdx.x,
+                        threadIdx.y,
+                        threadIdx.z,
+                        blockIdx.x,
+                        blockIdx.y,
+                        blockIdx.z,
+                        edge_index + color * outer_domain_size,
+                        k_index,
+                        z_nabla2_e_ptr);
                 cuda::memcpy_async(thread,
                     &z_nabla2_e_smem[shared_mem_index_z_nabla2 + color * shared_mem_offset],
                     z_nabla2_e_ptr,
