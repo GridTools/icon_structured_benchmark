@@ -135,7 +135,12 @@ constexpr block_dims get_block_dims_structured_nabla_interpol_v2c_inlined_cached
 constexpr block_dims block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop =
     get_block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop<index_type>();
 
-__global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.size)
+__global__ void
+#if __CUDACC_VER_MAJOR__ < 12 || (__CUDACC_VER_MAJOR__ == 12 && __CUDACC_VER_MINOR__ < 5)
+__launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.size)
+#else
+__maxnreg__(210)
+#endif
     run_gpu_kloop_nabla4_interpolate_verts2cells_inlined_cached_pipeline_structured(index_type KDim,
         index_type x_dim_verts2cells,
         index_type halo_verts2cells,
