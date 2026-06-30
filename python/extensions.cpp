@@ -67,6 +67,10 @@ NB_MODULE(icon_benchmark, m) {
         &nabla4_benchmark_structured_torus_gpu_kloop_gridtools_halo);
     m.def("nabla4_vertical_benchmark_structured_torus_gpu_kloop_gridtools_halo",
         &nabla4_vertical_benchmark_structured_torus_gpu_kloop_gridtools_halo);
+    m.def("nabla4_benchmark_structured_torus_gpu_kloop_cutile_halo",
+        &nabla4_benchmark_structured_torus_gpu_kloop_cutile_halo);
+    m.def("nabla4_benchmark_structured_torus_gpu_naive_cutile_halo",
+        &nabla4_benchmark_structured_torus_gpu_naive_cutile_halo);
     m.def("nabla4_benchmark_structured_torus_gpu_naive_gridtools_halo",
         &nabla4_benchmark_structured_torus_gpu_naive_gridtools_halo);
     m.def("nabla4_vertical_benchmark_structured_torus_gpu_naive_gridtools_halo",
@@ -86,6 +90,10 @@ NB_MODULE(icon_benchmark, m) {
         &nabla4_validate_structured_torus_gpu_kloop_gridtools_halo);
     m.def("nabla4_vertical_validate_structured_torus_gpu_kloop_gridtools_halo",
         &nabla4_vertical_validate_structured_torus_gpu_kloop_gridtools_halo);
+    m.def("nabla4_validate_structured_torus_gpu_kloop_cutile_halo",
+        &nabla4_validate_structured_torus_gpu_kloop_cutile_halo);
+    m.def("nabla4_validate_structured_torus_gpu_naive_cutile_halo",
+        &nabla4_validate_structured_torus_gpu_naive_cutile_halo);
     m.def("nabla4_validate_structured_torus_gpu_naive_gridtools_halo",
         &nabla4_validate_structured_torus_gpu_naive_gridtools_halo);
     m.def("nabla4_vertical_validate_structured_torus_gpu_naive_gridtools_halo",

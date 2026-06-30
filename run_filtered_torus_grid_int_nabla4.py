@@ -3,13 +3,12 @@ import numpy as np
 from os import path
 from pathlib import Path
 
-from icon4py.model.common.grid.grid_manager import (  # type: ignore [import-not-found]
-    GridManager,
-    IndexTransformation,
-    ToGt4PyTransformation,
+from icon4py.model.common.grid.grid_manager import GridManager  # type: ignore [import-not-found]
+from icon4py.model.common.grid.vertical import VerticalGridConfig  # type: ignore [import-not-found]
+from icon4py.model.common.grid.gridfile import (  # type: ignore [import-not-found]
+    NoTransformation,
+    ToZeroBasedIndexTransformation,
 )
-
-from icon4py.model.common.grid.vertical import VerticalGridSize  # type: ignore [import-not-found]
 
 from icon4py.model.common.dimension import E2C2VDim  # type: ignore [import-not-found]
 
@@ -44,26 +43,20 @@ def get_torus_cartesian_dimensions(filename):
 def init_grid_manager(
     fname,
     num_levels=65,
-    transformation=ToGt4PyTransformation(),
-    e2c2v_ordering="per-vertex",
+    transformation=ToZeroBasedIndexTransformation(),
 ):
     grid_manager = GridManager(
-        transformation,
-        fname,
-        VerticalGridSize(num_levels),
-        True,
-        e2c2v_ordering == "per-orientation",
+        grid_file=fname,
+        config=VerticalGridConfig(num_levels=num_levels),
+        offset_transformation=transformation,
     )
-    grid_manager()
+    grid_manager(allocator=None, keep_skip_values=True)
     return grid_manager
 
 
 def get_torus_grid(filename, num_levels, transformation, e2c2v_ordering="per-vertex"):
-    grid_manager = init_grid_manager(
-        filename, num_levels, transformation, e2c2v_ordering
-    )
-    simple_grid = grid_manager.get_grid()
-    return simple_grid
+    grid_manager = init_grid_manager(filename, num_levels, transformation)
+    return grid_manager.grid
 
 
 def filter_edge_vector(
@@ -614,6 +607,32 @@ def run_sanity_checks(
         )
         print("structured gpu kloop vertical sanity check passed")
 
+        print("Running structured gpu kloop cutile sanity check")
+        z_nabla4_e2_comp_structured_torus_gpu_kloop_cutile_halo = (
+            icon_benchmark.nabla4_validate_structured_torus_gpu_kloop_cutile_halo(
+                random_validation_data.CellDim,
+                random_validation_data.VertexDim,
+                random_validation_data.EdgeDim,
+                random_validation_data.KDim,
+                random_validation_data.ECVDim,
+                lon_dim,
+                lat_dim,
+                halo,
+                np.array(random_validation_data.u_vert).T,
+                np.array(random_validation_data.v_vert).T,
+                random_validation_data.primal_normal_vert_v1,
+                random_validation_data.primal_normal_vert_v2,
+                np.array(random_validation_data.z_nabla2_e).T,
+                random_validation_data.inv_vert_vert_length,
+                random_validation_data.inv_primal_edge_length,
+            )
+        )
+        assert np.allclose(
+            z_nabla4_e2_comp_structured_torus_gpu_kloop_cutile_halo,
+            random_validation_data.z_nabla4_e2_wp,
+        )
+        print("structured gpu kloop cutile sanity check passed")
+
     if backend in ["all_gpu", "gpu_naive"]:
         print("Running structured gpu_naive sanity check")
         z_nabla4_e2_comp_structured_torus_gpu_naive_gridtools_halo = (
@@ -664,6 +683,31 @@ def run_sanity_checks(
             random_validation_data.z_nabla4_e2_wp,
         )
         print("structured gpu_naive vertical sanity check passed")
+        print("Running structured gpu naive cutile sanity check")
+        z_nabla4_e2_comp_structured_torus_gpu_naive_cutile_halo = (
+            icon_benchmark.nabla4_validate_structured_torus_gpu_naive_cutile_halo(
+                random_validation_data.CellDim,
+                random_validation_data.VertexDim,
+                random_validation_data.EdgeDim,
+                random_validation_data.KDim,
+                random_validation_data.ECVDim,
+                lon_dim,
+                lat_dim,
+                halo,
+                np.array(random_validation_data.u_vert).T,
+                np.array(random_validation_data.v_vert).T,
+                random_validation_data.primal_normal_vert_v1,
+                random_validation_data.primal_normal_vert_v2,
+                np.array(random_validation_data.z_nabla2_e).T,
+                random_validation_data.inv_vert_vert_length,
+                random_validation_data.inv_primal_edge_length,
+            )
+        )
+        assert np.allclose(
+            z_nabla4_e2_comp_structured_torus_gpu_naive_cutile_halo,
+            random_validation_data.z_nabla4_e2_wp,
+        )
+        print("structured gpu naive cutile sanity check passed")
 
     print("Sanity checks pass")
 
@@ -676,7 +720,7 @@ def parse_arguments():
         "--transformation",
         choices=["gt4py", "index"],
         default="gt4py",
-        help="Use either ToGt4PyTransformation or IndexTransformation (gt4py by default)",
+        help="Use either ToZeroBasedIndexTransformation or NoTransformation (gt4py by default)",
     )
     parser.add_argument(
         "--klevels", type=int, default=80, help="Number of k levels (80 default)"
@@ -743,9 +787,9 @@ def run_benchmarks():
     args = parse_arguments()
 
     transformation = (
-        ToGt4PyTransformation()
+        ToZeroBasedIndexTransformation()
         if args.transformation == "gt4py"
-        else IndexTransformation()
+        else NoTransformation()
     )
 
     torus_grid = get_torus_grid(
@@ -758,24 +802,29 @@ def run_benchmarks():
     grid_cartesian_dimensions = get_torus_cartesian_dimensions(args.grid)
 
     filtered_e2c2v = filter_edge_vector(
-        torus_grid.get_offset_provider("E2C2V").table,
+        torus_grid.get_connectivity("E2C2V").ndarray,
         grid_cartesian_dimensions,
         args.e2c2v_ordering,
         args.halo,
     )
 
+    original_e2c2v = torus_grid.get_connectivity("E2C2V").ndarray
+    e2ecv = []
+    for i in range(len(original_e2c2v)):
+        e2ecv.append(original_e2c2v[i])
+
     def _get_gpu_coalesced_permuted_e2ecv():
         orientation_permuted_e2ecv = np.zeros_like(
-            torus_grid.get_offset_provider("E2ECV").table
+            e2ecv
         )
-        edges_size = len(torus_grid.get_offset_provider("E2ECV").table)
+        edges_size = len(torus_grid.get_connectivity("E2C2V").ndarray)
         for i in range(edges_size):
             for j in range(4):
                 orientation_permuted_e2ecv[i][j] = j * edges_size + i
         return orientation_permuted_e2ecv
 
     permuted_e2ecv = (
-        torus_grid.get_offset_provider("E2ECV").table
+        e2ecv
         if args.e2c2v_ordering == "per-vertex"
         else _get_gpu_coalesced_permuted_e2ecv()
     )
@@ -978,6 +1027,20 @@ def run_benchmarks():
             repetitions,
             dry_runs,
         )
+        runtimes["nabla4_benchmark_structured_torus_gpu_kloop_cutile_halo"] = (
+            icon_benchmark.nabla4_benchmark_structured_torus_gpu_kloop_cutile_halo(
+                torus_grid.num_cells,
+                torus_grid.num_vertices,
+                torus_grid.num_edges,
+                torus_grid.num_levels,
+                torus_grid.size[E2C2VDim],
+                grid_cartesian_dimensions[0],
+                grid_cartesian_dimensions[1],
+                halo,
+                repetitions,
+                dry_runs,
+            )
+        )
 
     if args.backend in ["all_gpu", "gpu_naive"]:
         runtimes["nabla4_benchmark_unstructured_gpu_naive_gridtools"] = (
@@ -1033,6 +1096,20 @@ def run_benchmarks():
             halo,
             repetitions,
             dry_runs,
+        )
+        runtimes["nabla4_benchmark_structured_torus_gpu_naive_cutile_halo"] = (
+            icon_benchmark.nabla4_benchmark_structured_torus_gpu_naive_cutile_halo(
+                torus_grid.num_cells,
+                torus_grid.num_vertices,
+                torus_grid.num_edges,
+                torus_grid.num_levels,
+                torus_grid.size[E2C2VDim],
+                grid_cartesian_dimensions[0],
+                grid_cartesian_dimensions[1],
+                halo,
+                repetitions,
+                dry_runs,
+            )
         )
 
     print_median_runtimes(runtimes)
