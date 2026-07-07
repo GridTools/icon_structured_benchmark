@@ -2,3 +2,4 @@ nanobind
 pandas
 seaborn
 # cupy
+-e ./tests/ext/icon4py
