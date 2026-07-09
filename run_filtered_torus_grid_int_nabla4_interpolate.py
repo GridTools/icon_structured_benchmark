@@ -3,13 +3,12 @@ import numpy as np
 from os import path
 from pathlib import Path
 
-from icon4py.model.common.grid.grid_manager import (  # type: ignore [import-not-found]
-    GridManager,
-    IndexTransformation,
-    ToGt4PyTransformation,
+from icon4py.model.common.grid.grid_manager import GridManager  # type: ignore [import-not-found]
+from icon4py.model.common.grid.vertical import VerticalGridConfig  # type: ignore [import-not-found]
+from icon4py.model.common.grid.gridfile import (  # type: ignore [import-not-found]
+    NoTransformation,
+    ToZeroBasedIndexTransformation,
 )
-
-from icon4py.model.common.grid.vertical import VerticalGridSize  # type: ignore [import-not-found]
 
 from icon4py.model.common.dimension import E2C2VDim  # type: ignore [import-not-found]
 
@@ -49,26 +48,20 @@ def get_torus_cartesian_dimensions(filename):
 def init_grid_manager(
     fname,
     num_levels=65,
-    transformation=ToGt4PyTransformation(),
-    e2c2v_ordering="per-vertex",
+    transformation=ToZeroBasedIndexTransformation(),
 ):
     grid_manager = GridManager(
-        transformation,
-        fname,
-        VerticalGridSize(num_levels),
-        True,
-        e2c2v_ordering == "per-orientation",
+        grid_file=fname,
+        config=VerticalGridConfig(num_levels=num_levels),
+        offset_transformation=transformation,
     )
-    grid_manager()
+    grid_manager(allocator=None, keep_skip_values=True)
     return grid_manager
 
 
 def get_torus_grid(filename, num_levels, transformation, e2c2v_ordering="per-vertex"):
-    grid_manager = init_grid_manager(
-        filename, num_levels, transformation, e2c2v_ordering
-    )
-    simple_grid = grid_manager.get_grid()
-    return simple_grid
+    grid_manager = init_grid_manager(filename, num_levels, transformation)
+    return grid_manager.grid
 
 
 def filter_edge_vector(
@@ -1436,7 +1429,7 @@ def parse_arguments():
         "--transformation",
         choices=["gt4py", "index"],
         default="gt4py",
-        help="Use either ToGt4PyTransformation or IndexTransformation (gt4py by default)",
+        help="Use either ToZeroBasedIndexTransformation or NoTransformation (gt4py by default)",
     )
     parser.add_argument(
         "--klevels", type=int, default=80, help="Number of k levels (80 default)"
@@ -1516,9 +1509,9 @@ def run_benchmarks():
     args = parse_arguments()
 
     transformation = (
-        ToGt4PyTransformation()
+        ToZeroBasedIndexTransformation()
         if args.transformation == "gt4py"
-        else IndexTransformation()
+        else NoTransformation()
     )
 
     torus_grid = get_torus_grid(
@@ -1658,14 +1651,19 @@ def run_benchmarks():
             )
         return filtered_e2c2v, filtered_e2ecv, filtered_v2e
 
+    original_e2c2v = torus_grid.get_connectivity("E2C2V").ndarray
+    e2ecv = []
+    for i in range(len(original_e2c2v)):
+        e2ecv.append(original_e2c2v[i])
+
     (
         filtered_e2c2v_separate,
         filtered_e2ecv_separate,
         filtered_v2e_separate,
     ) = filter_neighbors(
-        torus_grid.get_offset_provider("E2C2V").table,
-        torus_grid.get_offset_provider("E2ECV").table,
-        torus_grid.get_offset_provider("V2E").table,
+        original_e2c2v,
+        e2ecv,
+        torus_grid.get_connectivity("V2E").ndarray,
         args.e2c2v_ordering,
         "separate",
     )
@@ -1674,9 +1672,9 @@ def run_benchmarks():
         filtered_e2ecv_inlined,
         filtered_v2e_inlined,
     ) = filter_neighbors(
-        torus_grid.get_offset_provider("E2C2V").table,
-        torus_grid.get_offset_provider("E2ECV").table,
-        torus_grid.get_offset_provider("V2E").table,
+        original_e2c2v,
+        e2ecv,
+        torus_grid.get_connectivity("V2E").ndarray,
         args.e2c2v_ordering,
         "inlined",
     )
