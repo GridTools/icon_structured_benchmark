@@ -31,7 +31,7 @@ struct nabla4_interpolate_structured_inlined {
         index_type y_dim,
         index_type x_dim,
         index_type halo)
-        : nabla4_data(CellDim, VertexDim, EdgeDim, KDim, ECVDim, y_dim, x_dim, 0),
+        : nabla4_data(CellDim, VertexDim, EdgeDim, KDim, ECVDim, y_dim, x_dim, halo),
           interpolate_data(VertexDim, EdgeDim, KDim, y_dim, x_dim, halo + 1, nabla4_data.get_output_gt()){};
 
     nabla4_interpolate_structured_inlined(index_type CellDim,
@@ -58,7 +58,7 @@ struct nabla4_interpolate_structured_inlined {
               ECVDim,
               y_dim,
               x_dim,
-              0,
+              halo,
               u_vert,
               v_vert,
               primal_normal_vert_v1,
@@ -418,32 +418,50 @@ __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_k
     if (i >= x_dim - halo || j >= y_dim - halo || k_index >= KDim) {
         return;
     }
+    // NOTE: `halo` here is interpolate_data's halo, which is always (real nabla4 halo + 1) --
+    // see the constructor wiring in nabla4_interpolate_structured_inlined. nabla4_data itself
+    // is now built with the REAL halo (not the old hardcoded 0), so its z_nabla2_e_gt /
+    // inv_vert_vert_length_gt / inv_primal_edge_length_gt storage is COMPACT-sized
+    // ((x_dim-2*halo_real)*(y_dim-2*halo_real)*3), while primal_normal_vert_v1/v2_gt stay
+    // FULL-sized (EdgeDim*ECVDim, EdgeDim = x_dim*y_dim*3) and are addressed via the same
+    // color-block global numbering nabla4_structured_torus_halo_gt's own GPU kernel uses
+    // (E2ECV_s = color*(x_dim*y_dim) + flat(i,j) + s*edge_dim_full). Two separate `v2e`
+    // computations are needed: one in nabla4's compact frame (shifted by halo_real, sized to
+    // the inner grid) for z_nabla2_e/inv_* access, one in the full frame for the ECV/
+    // primal_normal_vert base (get_v2e_per_orientation is a pure offset formula, so calling it
+    // with different origin/dims yields the correctly-scoped index either way).
+    const auto halo_real = halo - 1;
+    const auto x_dim_inner = x_dim - 2 * halo_real;
+    const auto y_dim_inner = y_dim - 2 * halo_real;
+    const auto edge_dim_full = x_dim * y_dim * 3;
     const std::array<index_type, 7> v2e2c2v_compressed{get_v2e2c2v(i, j, x_dim)};
-    const std::array<index_type, 6> v2e{get_v2e_per_orientation(i, j, x_dim, y_dim)};
-    const std::array<index_type, 24> v2e2ecv{v2e[0],
-        v2e[0] + outer_domain_size * 3,
-        v2e[0] + outer_domain_size * 6,
-        v2e[0] + outer_domain_size * 9,
-        v2e[1],
-        v2e[1] + outer_domain_size * 3,
-        v2e[1] + outer_domain_size * 6,
-        v2e[1] + outer_domain_size * 9,
-        v2e[2],
-        v2e[2] + outer_domain_size * 3,
-        v2e[2] + outer_domain_size * 6,
-        v2e[2] + outer_domain_size * 9,
-        v2e[3],
-        v2e[3] + outer_domain_size * 3,
-        v2e[3] + outer_domain_size * 6,
-        v2e[3] + outer_domain_size * 9,
-        v2e[4],
-        v2e[4] + outer_domain_size * 3,
-        v2e[4] + outer_domain_size * 6,
-        v2e[4] + outer_domain_size * 9,
-        v2e[5],
-        v2e[5] + outer_domain_size * 3,
-        v2e[5] + outer_domain_size * 6,
-        v2e[5] + outer_domain_size * 9};
+    const std::array<index_type, 6> v2e{
+        get_v2e_per_orientation(i - halo_real, j - halo_real, x_dim_inner, y_dim_inner)};
+    const std::array<index_type, 6> v2e_full{get_v2e_per_orientation(i, j, x_dim, y_dim)};
+    const std::array<index_type, 24> v2e2ecv{v2e_full[0],
+        v2e_full[0] + edge_dim_full,
+        v2e_full[0] + edge_dim_full * 2,
+        v2e_full[0] + edge_dim_full * 3,
+        v2e_full[1],
+        v2e_full[1] + edge_dim_full,
+        v2e_full[1] + edge_dim_full * 2,
+        v2e_full[1] + edge_dim_full * 3,
+        v2e_full[2],
+        v2e_full[2] + edge_dim_full,
+        v2e_full[2] + edge_dim_full * 2,
+        v2e_full[2] + edge_dim_full * 3,
+        v2e_full[3],
+        v2e_full[3] + edge_dim_full,
+        v2e_full[3] + edge_dim_full * 2,
+        v2e_full[3] + edge_dim_full * 3,
+        v2e_full[4],
+        v2e_full[4] + edge_dim_full,
+        v2e_full[4] + edge_dim_full * 2,
+        v2e_full[4] + edge_dim_full * 3,
+        v2e_full[5],
+        v2e_full[5] + edge_dim_full,
+        v2e_full[5] + edge_dim_full * 2,
+        v2e_full[5] + edge_dim_full * 3};
     const std::array<index_type, 24> v2e2c2v{v2e2c2v_compressed[0],
         v2e2c2v_compressed[1],
         v2e2c2v_compressed[2],
@@ -637,11 +655,14 @@ constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_naive<int>
 constexpr block_dims block_dims_structured_nabla_interpol_inlined_naive =
     get_block_dims_structured_nabla_interpol_inlined_naive<index_type>();
 
+#ifndef NABLA4_NAIVE_MAXNREG
+#define NABLA4_NAIVE_MAXNREG 64
+#endif
 __global__ void
 #if __CUDACC_VER_MAJOR__ < 12 || (__CUDACC_VER_MAJOR__ == 12 && __CUDACC_VER_MINOR__ < 5)
 __launch_bounds__(block_dims_structured_nabla_interpol_inlined_naive.size)
 #else
-__maxnreg__(62)
+__maxnreg__(NABLA4_NAIVE_MAXNREG)
 #endif
     run_gpu_naive_nabla4_interpolate_inlined_structured(index_type KDim,
         index_type x_dim,
@@ -666,32 +687,41 @@ __maxnreg__(62)
     if (i >= x_dim - halo || j >= y_dim - halo || k_index >= KDim) {
         return;
     }
+    // See the analogous block in run_gpu_kloop_nabla4_interpolate_inlined_structured for the
+    // full rationale: nabla4_data's z_nabla2_e_gt/inv_*_gt are COMPACT-sized (real halo), while
+    // primal_normal_vert_v1/v2_gt stay FULL-sized -- two separate v2e computations are needed.
+    const auto halo_real = halo - 1;
+    const auto x_dim_inner = x_dim - 2 * halo_real;
+    const auto y_dim_inner = y_dim - 2 * halo_real;
+    const auto edge_dim_full = x_dim * y_dim * 3;
     const std::array<index_type, 7> v2e2c2v_compressed{get_v2e2c2v(i, j, x_dim)};
-    const std::array<index_type, 6> v2e{get_v2e_per_orientation(i, j, x_dim, y_dim)};
-    const std::array<index_type, 24> v2e2ecv{v2e[0],
-        v2e[0] + outer_domain_size * 3,
-        v2e[0] + outer_domain_size * 6,
-        v2e[0] + outer_domain_size * 9,
-        v2e[1],
-        v2e[1] + outer_domain_size * 3,
-        v2e[1] + outer_domain_size * 6,
-        v2e[1] + outer_domain_size * 9,
-        v2e[2],
-        v2e[2] + outer_domain_size * 3,
-        v2e[2] + outer_domain_size * 6,
-        v2e[2] + outer_domain_size * 9,
-        v2e[3],
-        v2e[3] + outer_domain_size * 3,
-        v2e[3] + outer_domain_size * 6,
-        v2e[3] + outer_domain_size * 9,
-        v2e[4],
-        v2e[4] + outer_domain_size * 3,
-        v2e[4] + outer_domain_size * 6,
-        v2e[4] + outer_domain_size * 9,
-        v2e[5],
-        v2e[5] + outer_domain_size * 3,
-        v2e[5] + outer_domain_size * 6,
-        v2e[5] + outer_domain_size * 9};
+    const std::array<index_type, 6> v2e{
+        get_v2e_per_orientation(i - halo_real, j - halo_real, x_dim_inner, y_dim_inner)};
+    const std::array<index_type, 6> v2e_full{get_v2e_per_orientation(i, j, x_dim, y_dim)};
+    const std::array<index_type, 24> v2e2ecv{v2e_full[0],
+        v2e_full[0] + edge_dim_full,
+        v2e_full[0] + edge_dim_full * 2,
+        v2e_full[0] + edge_dim_full * 3,
+        v2e_full[1],
+        v2e_full[1] + edge_dim_full,
+        v2e_full[1] + edge_dim_full * 2,
+        v2e_full[1] + edge_dim_full * 3,
+        v2e_full[2],
+        v2e_full[2] + edge_dim_full,
+        v2e_full[2] + edge_dim_full * 2,
+        v2e_full[2] + edge_dim_full * 3,
+        v2e_full[3],
+        v2e_full[3] + edge_dim_full,
+        v2e_full[3] + edge_dim_full * 2,
+        v2e_full[3] + edge_dim_full * 3,
+        v2e_full[4],
+        v2e_full[4] + edge_dim_full,
+        v2e_full[4] + edge_dim_full * 2,
+        v2e_full[4] + edge_dim_full * 3,
+        v2e_full[5],
+        v2e_full[5] + edge_dim_full,
+        v2e_full[5] + edge_dim_full * 2,
+        v2e_full[5] + edge_dim_full * 3};
     const std::array<index_type, 24> v2e2c2v{v2e2c2v_compressed[0],
         v2e2c2v_compressed[1],
         v2e2c2v_compressed[2],
