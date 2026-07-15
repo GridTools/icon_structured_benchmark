@@ -177,6 +177,25 @@ def generate_filtered_e2c2v(
     return np.array(filtered_e2c2v, dtype=np.int32)
 
 
+def generate_original_e2ecv(original_e2c2v, e2c2v_ordering="per-vertex"):
+    if original_e2c2v.ndim != 2 or original_e2c2v.shape[1] != 4:
+        raise ValueError(
+            "Expected original_e2c2v with shape (n_edges, 4), got {}".format(
+                original_e2c2v.shape
+            )
+        )
+
+    n_edges = original_e2c2v.shape[0]
+    linear = np.arange(n_edges * 4, dtype=original_e2c2v.dtype)
+
+    if e2c2v_ordering == "per-vertex":
+        return linear.reshape(n_edges, 4)
+    if e2c2v_ordering == "per-orientation":
+        return linear.reshape(4, n_edges).T
+
+    raise ValueError("Invalid e2c2v_ordering: {}".format(e2c2v_ordering))
+
+
 def compare_ndarrays(a, b):
     same = True
     if a.shape != b.shape:
@@ -868,21 +887,9 @@ def run_benchmarks():
         )
 
     original_e2c2v = torus_grid.get_connectivity("E2C2V").ndarray
-    original_e2ecv = np.zeros_like(original_e2c2v)
-    if args.e2c2v_ordering == "per-vertex":
-        counter = 0
-        for i in range(len(original_e2c2v)):
-            for j in range(4):
-                original_e2ecv[i][j] = counter
-                counter += 1
-    elif args.e2c2v_ordering == "per-orientation":
-        counter = 0
-        for j in range(4):
-            for i in range(len(original_e2c2v)):
-                original_e2ecv[i][j] = counter
-                counter += 1
+    generated_e2ecv = generate_original_e2ecv(original_e2c2v, args.e2c2v_ordering)
     filtered_e2ecv = filter_edge_vector(
-        original_e2ecv, grid_cartesian_dimensions, args.e2c2v_ordering, args.halo
+        generated_e2ecv, grid_cartesian_dimensions, args.e2c2v_ordering, args.halo
     )
 
     print(
