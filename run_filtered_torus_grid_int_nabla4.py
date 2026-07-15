@@ -3,8 +3,6 @@ import numpy as np
 from os import path
 from pathlib import Path
 
-from icon4py.model.common.grid.grid_manager import GridManager  # type: ignore [import-not-found]
-from icon4py.model.common.grid.vertical import VerticalGridConfig  # type: ignore [import-not-found]
 from icon4py.model.common.grid.gridfile import (  # type: ignore [import-not-found]
     NoTransformation,
     ToZeroBasedIndexTransformation,
@@ -16,203 +14,16 @@ import icon_benchmark  # type: ignore [import-not-found]
 
 import nabla4_gtfn  # type: ignore [import-not-found]
 
-import netCDF4  # type: ignore [import-not-found]
-
 from json import dump
-
-
-def print_median_runtimes(runtimes):
-    for key in runtimes.keys():
-        values = runtimes[key]
-        print(
-            "{} median runtime: {}".format(
-                key,
-                np.median(values),
-            )
-        )
-
-
-def get_torus_cartesian_dimensions(filename):
-    nc = netCDF4.Dataset(filename, mode="r")
-    sorted_y_coordinates = np.sort(nc["cartesian_y_vertices"][:])
-    longitude_dimension = np.count_nonzero(sorted_y_coordinates == 0.0)
-    latitude_dimension = int(len(sorted_y_coordinates) / longitude_dimension)
-    return (longitude_dimension, latitude_dimension)
-
-
-def init_grid_manager(
-    fname,
-    num_levels=65,
-    transformation=ToZeroBasedIndexTransformation(),
-):
-    grid_manager = GridManager(
-        grid_file=fname,
-        config=VerticalGridConfig(num_levels=num_levels),
-        offset_transformation=transformation,
-        apply_torus_permutation=True
-    )
-    grid_manager(allocator=None, keep_skip_values=True)
-    return grid_manager
-
-
-def get_torus_grid(filename, num_levels, transformation, e2c2v_ordering="per-vertex"):
-    grid_manager = init_grid_manager(filename, num_levels, transformation)
-    return grid_manager.grid
-
-
-def filter_edge_vector(
-    vector, grid_cartesian_dimensions, e2c2v_ordering="per-vertex", halo=2
-):
-    filtered_vector = []
-    if e2c2v_ordering == "per-vertex":
-        for i in range(grid_cartesian_dimensions[0]):
-            for j in range(grid_cartesian_dimensions[1]):
-                if (
-                    i > halo - 1
-                    and j > halo - 1
-                    and i < grid_cartesian_dimensions[0] - halo
-                    and j < grid_cartesian_dimensions[1] - halo
-                ):
-                    filtered_vector.append(
-                        vector[(i * grid_cartesian_dimensions[1] + j) * 3]
-                    )
-                    filtered_vector.append(
-                        vector[(i * grid_cartesian_dimensions[1] + j) * 3 + 1]
-                    )
-                    filtered_vector.append(
-                        vector[(i * grid_cartesian_dimensions[1] + j) * 3 + 2]
-                    )
-    else:
-        for i in range(grid_cartesian_dimensions[0]):
-            for j in range(grid_cartesian_dimensions[1]):
-                if (
-                    i > halo - 1
-                    and j > halo - 1
-                    and i < grid_cartesian_dimensions[0] - halo
-                    and j < grid_cartesian_dimensions[1] - halo
-                ):
-                    filtered_vector.append(
-                        vector[(i * grid_cartesian_dimensions[1] + j)]
-                    )
-        for i in range(grid_cartesian_dimensions[0]):
-            for j in range(grid_cartesian_dimensions[1]):
-                if (
-                    i > halo - 1
-                    and j > halo - 1
-                    and i < grid_cartesian_dimensions[0] - halo
-                    and j < grid_cartesian_dimensions[1] - halo
-                ):
-                    filtered_vector.append(
-                        vector[
-                            (i * grid_cartesian_dimensions[1] + j)
-                            + grid_cartesian_dimensions[0]
-                            * grid_cartesian_dimensions[1]
-                        ]
-                    )
-        for i in range(grid_cartesian_dimensions[0]):
-            for j in range(grid_cartesian_dimensions[1]):
-                if (
-                    i > halo - 1
-                    and j > halo - 1
-                    and i < grid_cartesian_dimensions[0] - halo
-                    and j < grid_cartesian_dimensions[1] - halo
-                ):
-                    filtered_vector.append(
-                        vector[
-                            (i * grid_cartesian_dimensions[1] + j)
-                            + (
-                                grid_cartesian_dimensions[0]
-                                * grid_cartesian_dimensions[1]
-                            )
-                            * 2
-                        ]
-                    )
-    return np.array(filtered_vector)
-
-
-def generate_filtered_e2c2v(
-    grid_cartesian_dimensions, e2c2v_ordering="per-vertex", halo=2
-):
-    x_dim = grid_cartesian_dimensions[1]
-    y_dim = grid_cartesian_dimensions[0]
-    print("Generating filtered e2c2v with x_dim: {} y_dim: {} halo: {}".format(
-        x_dim, y_dim, halo
-    ))
-
-    if e2c2v_ordering == "per-vertex":
-        filtered_e2c2v = []
-        for j in range(y_dim):
-            for i in range(x_dim):
-                if i > halo - 1 and j > halo - 1 and i < x_dim - halo and j < y_dim - halo:
-                    i_j = j * x_dim + i
-                    i_jp1 = (j + 1) * x_dim + i
-                    ip1_j = j * x_dim + i + 1
-                    i_jm1 = (j - 1) * x_dim + i
-                    ip1_jm1 = (j - 1) * x_dim + i + 1
-                    im1_jp1 = (j + 1) * x_dim + i - 1
-
-                    filtered_e2c2v.append([i_j, i_jp1, im1_jp1, ip1_j])
-                    filtered_e2c2v.append([i_j, ip1_j, i_jp1, ip1_jm1])
-                    filtered_e2c2v.append([i_j, ip1_jm1, ip1_j, i_jm1])
-    else:
-        orientation_0 = []
-        orientation_1 = []
-        orientation_2 = []
-        for j in range(y_dim):
-            for i in range(x_dim):
-                if i > halo - 1 and j > halo - 1 and i < x_dim - halo and j < y_dim - halo:
-                    i_j = j * x_dim + i
-                    i_jp1 = (j + 1) * x_dim + i
-                    ip1_j = j * x_dim + i + 1
-                    i_jm1 = (j - 1) * x_dim + i
-                    ip1_jm1 = (j - 1) * x_dim + i + 1
-                    im1_jp1 = (j + 1) * x_dim + i - 1
-
-                    orientation_0.append([i_j, i_jp1, im1_jp1, ip1_j])
-                    orientation_1.append([i_j, ip1_j, i_jp1, ip1_jm1])
-                    orientation_2.append([i_j, ip1_jm1, ip1_j, i_jm1])
-
-        filtered_e2c2v = orientation_0 + orientation_1 + orientation_2
-
-    return np.array(filtered_e2c2v, dtype=np.int32)
-
-
-def generate_original_e2ecv(original_e2c2v, e2c2v_ordering="per-vertex"):
-    if original_e2c2v.ndim != 2 or original_e2c2v.shape[1] != 4:
-        raise ValueError(
-            "Expected original_e2c2v with shape (n_edges, 4), got {}".format(
-                original_e2c2v.shape
-            )
-        )
-
-    n_edges = original_e2c2v.shape[0]
-    linear = np.arange(n_edges * 4, dtype=original_e2c2v.dtype)
-
-    if e2c2v_ordering == "per-vertex":
-        return linear.reshape(n_edges, 4)
-    if e2c2v_ordering == "per-orientation":
-        return linear.reshape(4, n_edges).T
-
-    raise ValueError("Invalid e2c2v_ordering: {}".format(e2c2v_ordering))
-
-
-def compare_ndarrays(a, b):
-    same = True
-    if a.shape != b.shape:
-        same = False
-
-    for i in range(a.shape[0]):
-        for j in range(a.shape[1]):
-            if not np.isclose(a[i][j], b[i][j]):
-                print(
-                    "Difference at index ({}, {}) is {}".format(i, j, a[i][j] - b[i][j])
-                )
-                same = False
-    if not same:
-        print("Arrays are not the same")
-        import sys
-
-        sys.exit(1)
+from run_filtered_torus_grid_int_common import (
+    compare_ndarrays,
+    filter_edge_vector,
+    generate_filtered_e2c2v,
+    generate_original_e2ecv,
+    get_torus_cartesian_dimensions,
+    get_torus_grid,
+    print_median_runtimes,
+)
 
 
 def run_gtfn(repetitions, dry_runs, e2c2v, e2ecv, nabla4_data, grid, backend):
@@ -860,7 +671,11 @@ def run_benchmarks():
     )
 
     torus_grid = get_torus_grid(
-        args.grid, args.klevels, transformation, args.e2c2v_ordering
+        args.grid,
+        args.klevels,
+        transformation,
+        args.e2c2v_ordering,
+        apply_torus_permutation=True,
     )
 
     repetitions = args.repetitions
