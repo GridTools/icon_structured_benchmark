@@ -49,6 +49,7 @@ def init_grid_manager(
         grid_file=fname,
         config=VerticalGridConfig(num_levels=num_levels),
         offset_transformation=transformation,
+        apply_torus_permutation=True
     )
     grid_manager(allocator=None, keep_skip_values=True)
     return grid_manager
@@ -127,6 +128,53 @@ def filter_edge_vector(
                         ]
                     )
     return np.array(filtered_vector)
+
+
+def generate_filtered_e2c2v(
+    grid_cartesian_dimensions, e2c2v_ordering="per-vertex", halo=2
+):
+    x_dim = grid_cartesian_dimensions[1]
+    y_dim = grid_cartesian_dimensions[0]
+    print("Generating filtered e2c2v with x_dim: {} y_dim: {} halo: {}".format(
+        x_dim, y_dim, halo
+    ))
+
+    if e2c2v_ordering == "per-vertex":
+        filtered_e2c2v = []
+        for j in range(y_dim):
+            for i in range(x_dim):
+                if i > halo - 1 and j > halo - 1 and i < x_dim - halo and j < y_dim - halo:
+                    i_j = j * x_dim + i
+                    i_jp1 = (j + 1) * x_dim + i
+                    ip1_j = j * x_dim + i + 1
+                    i_jm1 = (j - 1) * x_dim + i
+                    ip1_jm1 = (j - 1) * x_dim + i + 1
+                    im1_jp1 = (j + 1) * x_dim + i - 1
+
+                    filtered_e2c2v.append([i_j, i_jp1, im1_jp1, ip1_j])
+                    filtered_e2c2v.append([i_j, ip1_j, i_jp1, ip1_jm1])
+                    filtered_e2c2v.append([i_j, ip1_jm1, ip1_j, i_jm1])
+    else:
+        orientation_0 = []
+        orientation_1 = []
+        orientation_2 = []
+        for j in range(y_dim):
+            for i in range(x_dim):
+                if i > halo - 1 and j > halo - 1 and i < x_dim - halo and j < y_dim - halo:
+                    i_j = j * x_dim + i
+                    i_jp1 = (j + 1) * x_dim + i
+                    ip1_j = j * x_dim + i + 1
+                    i_jm1 = (j - 1) * x_dim + i
+                    ip1_jm1 = (j - 1) * x_dim + i + 1
+                    im1_jp1 = (j + 1) * x_dim + i - 1
+
+                    orientation_0.append([i_j, i_jp1, im1_jp1, ip1_j])
+                    orientation_1.append([i_j, ip1_j, i_jp1, ip1_jm1])
+                    orientation_2.append([i_j, ip1_jm1, ip1_j, i_jm1])
+
+        filtered_e2c2v = orientation_0 + orientation_1 + orientation_2
+
+    return np.array(filtered_e2c2v, dtype=np.int32)
 
 
 def compare_ndarrays(a, b):
@@ -801,38 +849,28 @@ def run_benchmarks():
 
     grid_cartesian_dimensions = get_torus_cartesian_dimensions(args.grid)
 
-    filtered_e2c2v = filter_edge_vector(
-        torus_grid.get_connectivity("E2C2V").ndarray,
+    filtered_e2c2v = generate_filtered_e2c2v(
         grid_cartesian_dimensions,
         args.e2c2v_ordering,
         args.halo,
     )
 
     original_e2c2v = torus_grid.get_connectivity("E2C2V").ndarray
-    e2ecv = []
-    for i in range(len(original_e2c2v)):
-        e2ecv.append(original_e2c2v[i])
-
-    def _get_gpu_coalesced_permuted_e2ecv():
-        orientation_permuted_e2ecv = np.zeros_like(
-            e2ecv
-        )
-        edges_size = len(torus_grid.get_connectivity("E2C2V").ndarray)
-        for i in range(edges_size):
+    original_e2ecv = np.zeros_like(original_e2c2v)
+    if args.e2c2v_ordering == "per-vertex":
+        counter = 0
+        for i in range(len(original_e2c2v)):
             for j in range(4):
-                orientation_permuted_e2ecv[i][j] = j * edges_size + i
-        return orientation_permuted_e2ecv
-
-    permuted_e2ecv = (
-        e2ecv
-        if args.e2c2v_ordering == "per-vertex"
-        else _get_gpu_coalesced_permuted_e2ecv()
-    )
+                original_e2ecv[i][j] = counter
+                counter += 1
+    elif args.e2c2v_ordering == "per-orientation":
+        counter = 0
+        for j in range(4):
+            for i in range(len(original_e2c2v)):
+                original_e2ecv[i][j] = counter
+                counter += 1
     filtered_e2ecv = filter_edge_vector(
-        permuted_e2ecv,
-        grid_cartesian_dimensions,
-        args.e2c2v_ordering,
-        args.halo,
+        original_e2ecv, grid_cartesian_dimensions, args.e2c2v_ordering, args.halo
     )
 
     print(
