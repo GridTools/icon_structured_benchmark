@@ -849,11 +849,23 @@ def run_benchmarks():
 
     grid_cartesian_dimensions = get_torus_cartesian_dimensions(args.grid)
 
-    filtered_e2c2v = generate_filtered_e2c2v(
+    generated_e2c2v = generate_filtered_e2c2v(
         grid_cartesian_dimensions,
         args.e2c2v_ordering,
         args.halo,
     )
+
+    filtered_e2c2v = filter_edge_vector(
+        torus_grid.get_connectivity("E2C2V").ndarray,
+        grid_cartesian_dimensions,
+        args.e2c2v_ordering,
+        args.halo,
+    )
+
+    if not np.array_equal(generated_e2c2v, filtered_e2c2v):
+        raise ValueError(
+            "Generated e2c2v and filtered e2c2v are not equal. Please check the filtering logic."
+        )
 
     original_e2c2v = torus_grid.get_connectivity("E2C2V").ndarray
     original_e2ecv = np.zeros_like(original_e2c2v)
