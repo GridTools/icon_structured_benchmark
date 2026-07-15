@@ -3,22 +3,30 @@ import numpy as np
 
 from icon4py.model.common.grid.grid_manager import (  # type: ignore [import-not-found]
     GridManager,
-    IndexTransformation,
-    ToGt4PyTransformation,
+)
+from icon4py.model.common.grid.gridfile import (  # type: ignore [import-not-found]
+    ToZeroBasedIndexTransformation,
 )
 
-from icon4py.model.common.grid.vertical import VerticalGridSize  # type: ignore [import-not-found]
+from icon4py.model.common.grid.vertical import VerticalGridConfig  # type: ignore [import-not-found]
 
 
 def import_grid(filename, indexing):
-    def init_grid_manager(fname, num_levels=10, transformation=ToGt4PyTransformation()):
-        grid_manager = GridManager(transformation, fname, VerticalGridSize(num_levels))
-        grid_manager()
+    def init_grid_manager(
+        fname,
+        num_levels=10,
+        transformation=ToZeroBasedIndexTransformation(),
+    ):
+        grid_manager = GridManager(
+            grid_file=fname,
+            config=VerticalGridConfig(num_levels=num_levels),
+            offset_transformation=transformation,
+        )
+        grid_manager(allocator=None, keep_skip_values=True)
         return grid_manager
 
     grid_manager = init_grid_manager(filename, 10, indexing)
-    grid_manager()
-    grid = grid_manager.get_grid()
+    grid = grid_manager.grid
     return grid
 
 
