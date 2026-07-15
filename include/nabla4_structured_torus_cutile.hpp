@@ -12,6 +12,10 @@ extern void run_cutile_nabla4_structured_launcher(
     index_type x_dim,
     index_type y_dim,
     index_type halo,
+    index_type u_vert_k_stride,
+    index_type v_vert_k_stride,
+    index_type z_nabla2_e_k_stride,
+    index_type z_nabla4_e2_wp_k_stride,
     const VP_TYPE* __restrict__ u_vert_ptr,
     const VP_TYPE* __restrict__ v_vert_ptr,
     const WP_TYPE* __restrict__ primal_normal_vert_v1_ptr,
@@ -157,6 +161,18 @@ inline void nabla4_structured_torus_cutile_halo<T>::run_gpu_naive_helper() {
     const auto* inv_primal_edge_length_ptr = inv_primal_edge_length_gt->get_const_target_ptr();
     auto* z_nabla4_e2_wp_ptr = z_nabla4_e2_wp_gt->get_target_ptr();
 
+    const auto u_vert_native_strides = u_vert_gt->native_strides();
+    const auto v_vert_native_strides = v_vert_gt->native_strides();
+    const auto z_nabla2_e_native_strides = z_nabla2_e_gt->native_strides();
+    const auto z_nabla4_e2_wp_native_strides = z_nabla4_e2_wp_gt->native_strides();
+
+    const index_type u_vert_k_stride = static_cast<index_type>(tuple_util::host_device::get<1>(u_vert_native_strides));
+    const index_type v_vert_k_stride = static_cast<index_type>(tuple_util::host_device::get<1>(v_vert_native_strides));
+    const index_type z_nabla2_e_k_stride =
+        static_cast<index_type>(tuple_util::host_device::get<1>(z_nabla2_e_native_strides));
+    const index_type z_nabla4_e2_wp_k_stride =
+        static_cast<index_type>(tuple_util::host_device::get<1>(z_nabla4_e2_wp_native_strides));
+
     // validate_gpu_pointer_or_throw(u_vert_ptr, "u_vert");
     // validate_gpu_pointer_or_throw(v_vert_ptr, "v_vert");
     // validate_gpu_pointer_or_throw(primal_normal_vert_v1_ptr, "primal_normal_vert_v1");
@@ -171,6 +187,10 @@ inline void nabla4_structured_torus_cutile_halo<T>::run_gpu_naive_helper() {
         x_dim,
         y_dim,
         halo,
+        u_vert_k_stride,
+        v_vert_k_stride,
+        z_nabla2_e_k_stride,
+        z_nabla4_e2_wp_k_stride,
         u_vert_ptr,
         v_vert_ptr,
         primal_normal_vert_v1_ptr,
