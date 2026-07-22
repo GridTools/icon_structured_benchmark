@@ -14,10 +14,13 @@ using namespace ct::literals;
 // keep them in sync if you retune them.
 // ---------------------------------------------------------------------------
 constexpr int TILE_I = 32;
-constexpr int TILE_J = 8;
+constexpr int TILE_J = 2;
+constexpr int TILE_K = 2;
 
-using vp_tile_t = ct::tile<VP_TYPE, ct::shape<TILE_J, TILE_I>>;
-using wp_tile_t = ct::tile<WP_TYPE, ct::shape<TILE_J, TILE_I>>;
+using vp3D_tile_t = ct::tile<VP_TYPE, ct::shape<TILE_K, TILE_J, TILE_I>>;
+using wp3D_tile_t = ct::tile<WP_TYPE, ct::shape<TILE_K, TILE_J, TILE_I>>;
+using vp2D_tile_t = ct::tile<VP_TYPE, ct::shape<TILE_J, TILE_I>>;
+using wp2D_tile_t = ct::tile<WP_TYPE, ct::shape<TILE_J, TILE_I>>;
 
 // ---------------------------------------------------------------------------
 // All six E2C2V neighbor offsets used by the reference kernel reduce to a
@@ -38,9 +41,10 @@ using wp_tile_t = ct::tile<WP_TYPE, ct::shape<TILE_J, TILE_I>>;
 // the stride (the original bug) reads every row after the first from the
 // wrong offset.
 // ---------------------------------------------------------------------------
-__tile__ vp_tile_t load_vertex_tile(const VP_TYPE* __restrict__ base_ptr,
+__tile__ vp3D_tile_t load_vertex_tile(const VP_TYPE* __restrict__ base_ptr,
     index_type y_dim,
     index_type x_dim,
+    index_type KDim,
     index_type halo,
     index_type k_stride,
     index_type k,
@@ -48,17 +52,17 @@ __tile__ vp_tile_t load_vertex_tile(const VP_TYPE* __restrict__ base_ptr,
     index_type di,
     int bi,
     int bj) {
-    const VP_TYPE* k_slice = base_ptr + k * k_stride;
-    const VP_TYPE* shifted = k_slice + (halo + dj) * x_dim + (halo + di);
+    // const VP_TYPE* k_slice = base_ptr + k * k_stride;
+    const VP_TYPE* shifted = base_ptr + (halo + dj) * x_dim + (halo + di);
     const index_type valid_j = y_dim - halo - dj;
     const index_type valid_i = x_dim - halo - di;
 
     // Fix: pass the true row pitch (x_dim) as an explicit stride via
     // layout_strided_mapping, instead of letting {valid_j, valid_i} double
     // as the (densely-packed) layout, as ct::layout_right would assume.
-    ct::layout_strided_mapping mapping{ct::extents{valid_j, valid_i}, ct::extents{x_dim, index_type{1}}};
-    auto view = ct::partition_view{ct::tensor_span{shifted, mapping}, ct::shape<TILE_J, TILE_I>{}};
-    return view.load_masked(bj, bi);
+    ct::layout_strided_mapping mapping{ct::extents{KDim, valid_j, valid_i}, ct::extents{k_stride, x_dim, index_type{1}}};
+    auto view = ct::partition_view{ct::tensor_span{shifted, mapping}, ct::shape<TILE_K, TILE_J, TILE_I>{}};
+    return view.load_masked(k, bj, bi);
 }
 
 // primal_normal_vert_v1 / v2 are 1-D (no K dependence) fields flattened as
@@ -69,7 +73,7 @@ __tile__ vp_tile_t load_vertex_tile(const VP_TYPE* __restrict__ base_ptr,
 //
 // Same pitch issue as load_vertex_tile: the buffer's true row pitch is
 // x_dim, not (x_dim - halo). Explicit stride required.
-__tile__ wp_tile_t load_pnv_tile(const WP_TYPE* __restrict__ base_ptr,
+__tile__ wp2D_tile_t load_pnv_tile(const WP_TYPE* __restrict__ base_ptr,
     index_type y_dim,
     index_type x_dim,
     index_type halo,
@@ -94,7 +98,7 @@ __tile__ wp_tile_t load_pnv_tile(const WP_TYPE* __restrict__ base_ptr,
 // halo), flattened as [color][j_inner][i_inner]. Here the true row pitch
 // genuinely IS x_dim_inner, matching the extent passed in, so the
 // dense-layout (implicit-stride) form is correct as-is -- no change needed.
-__tile__ wp_tile_t load_edge_len_tile(const WP_TYPE* __restrict__ base_ptr,
+__tile__ wp2D_tile_t load_edge_len_tile(const WP_TYPE* __restrict__ base_ptr,
     index_type y_dim_inner,
     index_type x_dim_inner,
     index_type inner_grid_size,
@@ -108,37 +112,42 @@ __tile__ wp_tile_t load_edge_len_tile(const WP_TYPE* __restrict__ base_ptr,
 
 // z_nabla2_e: interior-only, K-dependent, flattened as [k][color][j_inner][i_inner].
 // Pitch == extent here too -- unaffected by the bug.
-__tile__ wp_tile_t load_z_nabla2e_tile(const WP_TYPE* __restrict__ base_ptr,
+__tile__ wp3D_tile_t load_z_nabla2e_tile(const WP_TYPE* __restrict__ base_ptr,
     index_type y_dim_inner,
     index_type x_dim_inner,
+    index_type KDim,
     index_type inner_grid_size,
     index_type k_stride,
     index_type k,
     index_type color,
     int bi,
     int bj) {
-    const WP_TYPE* slice = base_ptr + k * k_stride + color * inner_grid_size;
-    auto view = ct::partition_view{ct::tensor_span{slice, ct::extents{y_dim_inner, x_dim_inner}}, ct::shape<TILE_J, TILE_I>{}};
-    return view.load_masked(bj, bi);
+    const WP_TYPE* slice = base_ptr + color * inner_grid_size;
+    ct::layout_strided_mapping mapping{ct::extents{KDim, y_dim_inner, x_dim_inner}, ct::extents{k_stride, x_dim_inner, index_type{1}}};
+    auto view = ct::partition_view{ct::tensor_span{slice, mapping}, ct::shape<TILE_K, TILE_J, TILE_I>{}};
+    return view.load_masked(k, bj, bi);
 }
 
 // z_nabla4_e2: same [k][color][j_inner][i_inner] layout as z_nabla2_e, VP_TYPE output.
 // Pitch == extent here too -- unaffected by the bug.
 __tile__ void store_z_nabla4e2_tile(VP_TYPE* __restrict__ base_ptr,
+    index_type KDim,
     index_type y_dim_inner,
     index_type x_dim_inner,
     index_type inner_grid_size,
     index_type k_stride,
     index_type k,
     index_type color,
-    const vp_tile_t& value,
+    const vp3D_tile_t& value,
     int bi,
     int bj) {
-    VP_TYPE* slice = base_ptr + k * k_stride + color * inner_grid_size;
-    auto view = ct::partition_view{ct::tensor_span{slice, ct::extents{y_dim_inner, x_dim_inner}}, ct::shape<TILE_J, TILE_I>{}};
-    view.store_masked(value, bj, bi);
+    VP_TYPE* slice = base_ptr + color * inner_grid_size;
+    ct::layout_strided_mapping mapping{ct::extents{KDim, y_dim_inner, x_dim_inner}, ct::extents{k_stride, x_dim_inner, index_type{1}}};
+    auto view = ct::partition_view{ct::tensor_span{slice, mapping}, ct::shape<TILE_K, TILE_J, TILE_I>{}};
+    view.store_masked(value, k, bj, bi);
 }
 
+[[ cutile::hint(900,  occupancy=8) ]]
 __tile_global__ void run_cutile_nabla4_structured(index_type KDim,
     index_type x_dim,
     index_type x_dim_inner,
@@ -178,19 +187,19 @@ __tile_global__ void run_cutile_nabla4_structured(index_type KDim,
 
     // --- The six structurally-shifted vertex tiles, loaded once and reused
     // across all three colors (see the offset table in the header comment). ---
-    auto u_i_j = ct::element_cast<double>(load_vertex_tile(u_vert_ptr, y_dim, x_dim, halo, u_vert_k_stride, k, 0, 0, bi, bj));
-    auto u_i_jp1 = ct::element_cast<double>(load_vertex_tile(u_vert_ptr, y_dim, x_dim, halo, u_vert_k_stride, k, 1, 0, bi, bj));
-    auto u_im1_jp1 = ct::element_cast<double>(load_vertex_tile(u_vert_ptr, y_dim, x_dim, halo, u_vert_k_stride, k, 1, -1, bi, bj));
-    auto u_ip1_j = ct::element_cast<double>(load_vertex_tile(u_vert_ptr, y_dim, x_dim, halo, u_vert_k_stride, k, 0, 1, bi, bj));
-    auto u_ip1_jm1 = ct::element_cast<double>(load_vertex_tile(u_vert_ptr, y_dim, x_dim, halo, u_vert_k_stride, k, -1, 1, bi, bj));
-    auto u_i_jm1 = ct::element_cast<double>(load_vertex_tile(u_vert_ptr, y_dim, x_dim, halo, u_vert_k_stride, k, -1, 0, bi, bj));
+    auto u_i_j = ct::element_cast<double>(load_vertex_tile(u_vert_ptr, y_dim, x_dim, KDim, halo, u_vert_k_stride, k, 0, 0, bi, bj));
+    auto u_i_jp1 = ct::element_cast<double>(load_vertex_tile(u_vert_ptr, y_dim, x_dim, KDim, halo, u_vert_k_stride, k, 1, 0, bi, bj));
+    auto u_im1_jp1 = ct::element_cast<double>(load_vertex_tile(u_vert_ptr, y_dim, x_dim, KDim, halo, u_vert_k_stride, k, 1, -1, bi, bj));
+    auto u_ip1_j = ct::element_cast<double>(load_vertex_tile(u_vert_ptr, y_dim, x_dim, KDim, halo, u_vert_k_stride, k, 0, 1, bi, bj));
+    auto u_ip1_jm1 = ct::element_cast<double>(load_vertex_tile(u_vert_ptr, y_dim, x_dim, KDim, halo, u_vert_k_stride, k, -1, 1, bi, bj));
+    auto u_i_jm1 = ct::element_cast<double>(load_vertex_tile(u_vert_ptr, y_dim, x_dim, KDim, halo, u_vert_k_stride, k, -1, 0, bi, bj));
 
-    auto v_i_j = ct::element_cast<double>(load_vertex_tile(v_vert_ptr, y_dim, x_dim, halo, v_vert_k_stride, k, 0, 0, bi, bj));
-    auto v_i_jp1 = ct::element_cast<double>(load_vertex_tile(v_vert_ptr, y_dim, x_dim, halo, v_vert_k_stride, k, 1, 0, bi, bj));
-    auto v_im1_jp1 = ct::element_cast<double>(load_vertex_tile(v_vert_ptr, y_dim, x_dim, halo, v_vert_k_stride, k, 1, -1, bi, bj));
-    auto v_ip1_j = ct::element_cast<double>(load_vertex_tile(v_vert_ptr, y_dim, x_dim, halo, v_vert_k_stride, k, 0, 1, bi, bj));
-    auto v_ip1_jm1 = ct::element_cast<double>(load_vertex_tile(v_vert_ptr, y_dim, x_dim, halo, v_vert_k_stride, k, -1, 1, bi, bj));
-    auto v_i_jm1 = ct::element_cast<double>(load_vertex_tile(v_vert_ptr, y_dim, x_dim, halo, v_vert_k_stride, k, -1, 0, bi, bj));
+    auto v_i_j = ct::element_cast<double>(load_vertex_tile(v_vert_ptr, y_dim, x_dim, KDim, halo, v_vert_k_stride, k, 0, 0, bi, bj));
+    auto v_i_jp1 = ct::element_cast<double>(load_vertex_tile(v_vert_ptr, y_dim, x_dim, KDim, halo, v_vert_k_stride, k, 1, 0, bi, bj));
+    auto v_im1_jp1 = ct::element_cast<double>(load_vertex_tile(v_vert_ptr, y_dim, x_dim, KDim, halo, v_vert_k_stride, k, 1, -1, bi, bj));
+    auto v_ip1_j = ct::element_cast<double>(load_vertex_tile(v_vert_ptr, y_dim, x_dim, KDim, halo, v_vert_k_stride, k, 0, 1, bi, bj));
+    auto v_ip1_jm1 = ct::element_cast<double>(load_vertex_tile(v_vert_ptr, y_dim, x_dim, KDim, halo, v_vert_k_stride, k, -1, 1, bi, bj));
+    auto v_i_jm1 = ct::element_cast<double>(load_vertex_tile(v_vert_ptr, y_dim, x_dim, KDim, halo, v_vert_k_stride, k, -1, 0, bi, bj));
 
     // --- inv_vert_vert_length^2 / inv_primal_edge_length^2, one tile per color. ---
     auto ivv0 = load_edge_len_tile(inv_vert_vert_length_ptr, y_dim_inner, x_dim_inner, inner_grid_size, 0, bi, bj);
@@ -208,9 +217,9 @@ __tile_global__ void run_cutile_nabla4_structured(index_type KDim,
     ipe2 = ipe2 * ipe2;
 
     // z_nabla2_e, one tile per color.
-    auto z2e0 = ct::element_cast<double>(load_z_nabla2e_tile(z_nabla2_e_ptr, y_dim_inner, x_dim_inner, inner_grid_size, z_nabla2_e_k_stride, k, 0, bi, bj));
-    auto z2e1 = ct::element_cast<double>(load_z_nabla2e_tile(z_nabla2_e_ptr, y_dim_inner, x_dim_inner, inner_grid_size, z_nabla2_e_k_stride, k, 1, bi, bj));
-    auto z2e2 = ct::element_cast<double>(load_z_nabla2e_tile(z_nabla2_e_ptr, y_dim_inner, x_dim_inner, inner_grid_size, z_nabla2_e_k_stride, k, 2, bi, bj));
+    auto z2e0 = ct::element_cast<double>(load_z_nabla2e_tile(z_nabla2_e_ptr, y_dim_inner, x_dim_inner, KDim, inner_grid_size, z_nabla2_e_k_stride, k, 0, bi, bj));
+    auto z2e1 = ct::element_cast<double>(load_z_nabla2e_tile(z_nabla2_e_ptr, y_dim_inner, x_dim_inner, KDim, inner_grid_size, z_nabla2_e_k_stride, k, 1, bi, bj));
+    auto z2e2 = ct::element_cast<double>(load_z_nabla2e_tile(z_nabla2_e_ptr, y_dim_inner, x_dim_inner, KDim, inner_grid_size, z_nabla2_e_k_stride, k, 2, bi, bj));
 
     // =====================================================================
     // color 0: E2C2V = {i_j, i_jp1, im1_jp1, ip1_j}
@@ -229,7 +238,7 @@ __tile_global__ void run_cutile_nabla4_structured(index_type KDim,
         auto nabv_tang = u_i_j * pnv1_0 + v_i_j * pnv2_0 + u_i_jp1 * pnv1_1 + v_i_jp1 * pnv2_1;
         auto nabv_norm = u_im1_jp1 * pnv1_2 + v_im1_jp1 * pnv2_2 + u_ip1_j * pnv1_3 + v_ip1_j * pnv2_3;
         auto result = 4.0 * ((nabv_norm - 2.0 * z2e0) * ivv0 + (nabv_tang - 2.0 * z2e0) * ipe0);
-        store_z_nabla4e2_tile(z_nabla4_e2_wp_ptr, y_dim_inner, x_dim_inner, inner_grid_size, z_nabla4_e2_wp_k_stride, k, color, ct::element_cast<VP_TYPE>(result), bi, bj);
+        store_z_nabla4e2_tile(z_nabla4_e2_wp_ptr, KDim, y_dim_inner, x_dim_inner, inner_grid_size, z_nabla4_e2_wp_k_stride, k, color, ct::element_cast<VP_TYPE>(result), bi, bj);
     }
 
     // =====================================================================
@@ -250,7 +259,7 @@ __tile_global__ void run_cutile_nabla4_structured(index_type KDim,
         auto nabv_norm = u_i_jp1 * pnv1_2 + v_i_jp1 * pnv2_2 + u_ip1_jm1 * pnv1_3 + v_ip1_jm1 * pnv2_3;
 
         auto result = 4.0 * ((nabv_norm - 2.0 * z2e1) * ivv1 + (nabv_tang - 2.0 * z2e1) * ipe1);
-        store_z_nabla4e2_tile(z_nabla4_e2_wp_ptr, y_dim_inner, x_dim_inner, inner_grid_size, z_nabla4_e2_wp_k_stride, k, color, ct::element_cast<VP_TYPE>(result), bi, bj);
+        store_z_nabla4e2_tile(z_nabla4_e2_wp_ptr, KDim, y_dim_inner, x_dim_inner, inner_grid_size, z_nabla4_e2_wp_k_stride, k, color, ct::element_cast<VP_TYPE>(result), bi, bj);
     }
 
     // =====================================================================
@@ -271,7 +280,7 @@ __tile_global__ void run_cutile_nabla4_structured(index_type KDim,
         auto nabv_norm = u_ip1_j * pnv1_2 + v_ip1_j * pnv2_2 + u_i_jm1 * pnv1_3 + v_i_jm1 * pnv2_3;
 
         auto result = 4.0 * ((nabv_norm - 2.0 * z2e2) * ivv2 + (nabv_tang - 2.0 * z2e2) * ipe2);
-        store_z_nabla4e2_tile(z_nabla4_e2_wp_ptr, y_dim_inner, x_dim_inner, inner_grid_size, z_nabla4_e2_wp_k_stride, k, color, ct::element_cast<VP_TYPE>(result), bi, bj);
+        store_z_nabla4e2_tile(z_nabla4_e2_wp_ptr, KDim, y_dim_inner, x_dim_inner, inner_grid_size, z_nabla4_e2_wp_k_stride, k, color, ct::element_cast<VP_TYPE>(result), bi, bj);
     }
 }
 
@@ -295,7 +304,7 @@ void run_cutile_nabla4_structured_launcher(index_type KDim,
     const index_type y_dim_inner = y_dim - 2 * halo;
     dim3 grid((x_dim_inner + TILE_I - 1) / TILE_I,
         (y_dim_inner + TILE_J - 1) / TILE_J,
-        KDim);
+        (KDim + TILE_K - 1) / TILE_K);
     const index_type inner_grid_size = x_dim_inner * y_dim_inner;
     run_cutile_nabla4_structured<<<grid, 1>>>(KDim,
         x_dim,
