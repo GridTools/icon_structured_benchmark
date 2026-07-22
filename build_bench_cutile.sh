@@ -19,8 +19,10 @@ export PYTHONPATH=$(pwd)/build_cutile:$PYTHONPATH
 SANITY_GRID="torus_100000_100000_1024.nc"
 BENCHMARK_GRID="torus_100000_100000_128.nc"
 
-# python run_filtered_torus_grid_int_nabla4.py ${SANITY_GRID} --backend gpu_naive --sanity-checks --repetitions 1
+IMPLEMENTATION="all_gpu"
 
-python run_filtered_torus_grid_int_nabla4.py ${BENCHMARK_GRID} --backend gpu_naive --dry-run
+# python run_filtered_torus_grid_int_nabla4.py ${SANITY_GRID} --backend "${IMPLEMENTATION}" --sanity-checks --repetitions 1
 
-# ncu --set full -f --import-source yes -o icon_structured_$(echo "${BENCHMARK_GRID##*_}" | sed 's/\.nc$//') python run_filtered_torus_grid_int_nabla4.py ${BENCHMARK_GRID} --backend gpu_naive --repetitions 1
+python run_filtered_torus_grid_int_nabla4.py ${BENCHMARK_GRID} --backend "${IMPLEMENTATION}" --dry-run
+
+ncu --set full -f --import-source yes -o icon_structured_$(echo "${BENCHMARK_GRID##*_}" | sed 's/\.nc$//')_${IMPLEMENTATION} python run_filtered_torus_grid_int_nabla4.py ${BENCHMARK_GRID} --backend "${IMPLEMENTATION}" --repetitions 1
