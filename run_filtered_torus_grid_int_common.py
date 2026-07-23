@@ -122,44 +122,166 @@ def filter_edge_vector(
     return np.array(filtered_vector)
 
 
+def _get_e2c2v_vertices_north_edge(
+    longitude_dim, latitude_dim, longitude, latitude
+):
+    """Return E2C2V diamond vertices for the "north" edge of a vertex.
+
+    Matches ``nabla4_structured_torus::get_e2c2v_vertices_north_edge``.
+    Vertex id layout: vertex = longitude * latitude_dim + latitude.
+    """
+    x_dim = latitude_dim
+    y_dim = longitude_dim
+    parent = longitude * x_dim + latitude
+    lat_p1 = (latitude + 1) % x_dim
+    lat_m1 = (x_dim + latitude - 1) % x_dim
+    lon_p1 = (longitude + 1) % y_dim
+    lon_pstride_lat_p1 = (
+        (((latitude == x_dim - 1) * (x_dim // 2)) + longitude) % y_dim
+    ) * x_dim + lat_p1
+    far_vertex = (
+        (
+            ((latitude == 0) * ((2 * y_dim - x_dim) // 2))
+            + longitude
+            + 1
+        )
+        % y_dim
+    ) * x_dim + lat_m1
+    return [
+        parent,
+        lon_p1 * x_dim + latitude,
+        far_vertex,
+        lon_pstride_lat_p1,
+    ]
+
+
+def _get_e2c2v_vertices_east_edge(
+    longitude_dim, latitude_dim, longitude, latitude
+):
+    """Return E2C2V diamond vertices for the "east" edge of a vertex.
+
+    Matches ``nabla4_structured_torus::get_e2c2v_vertices_east_edge``.
+    """
+    x_dim = latitude_dim
+    y_dim = longitude_dim
+    parent = longitude * x_dim + latitude
+    lat_p1 = (latitude + 1) % x_dim
+    lon_p1 = (longitude + 1) % y_dim
+    lon_pstride_lat_p1 = (
+        (((latitude == x_dim - 1) * (x_dim // 2)) + longitude) % y_dim
+    ) * x_dim + lat_p1
+    lon_mstride_lat_p1 = (
+        (
+            ((latitude == x_dim - 1) * (x_dim // 2))
+            + y_dim
+            + longitude
+            - 1
+        )
+        % y_dim
+    ) * x_dim + lat_p1
+    return [
+        parent,
+        lon_pstride_lat_p1,
+        lon_p1 * x_dim + latitude,
+        lon_mstride_lat_p1,
+    ]
+
+
+def _get_e2c2v_vertices_southeast_edge(
+    longitude_dim, latitude_dim, longitude, latitude
+):
+    """Return E2C2V diamond vertices for the "southeast" edge of a vertex.
+
+    Matches ``nabla4_structured_torus::get_e2c2v_vertices_southeast_edge``.
+    """
+    x_dim = latitude_dim
+    y_dim = longitude_dim
+    parent = longitude * x_dim + latitude
+    lat_p1 = (latitude + 1) % x_dim
+    lon_m1 = (y_dim + longitude - 1) % y_dim
+    lon_pstride_lat_p1 = (
+        (((latitude == x_dim - 1) * (x_dim // 2)) + longitude) % y_dim
+    ) * x_dim + lat_p1
+    lon_mstride_lat_p1 = (
+        (
+            ((latitude == x_dim - 1) * (x_dim // 2))
+            + y_dim
+            + longitude
+            - 1
+        )
+        % y_dim
+    ) * x_dim + lat_p1
+    return [
+        parent,
+        lon_mstride_lat_p1,
+        lon_pstride_lat_p1,
+        lon_m1 * x_dim + latitude,
+    ]
+
+
 def generate_filtered_e2c2v(
     grid_cartesian_dimensions, e2c2v_ordering="per-vertex", halo=2
 ):
-    x_dim = grid_cartesian_dimensions[1]
-    y_dim = grid_cartesian_dimensions[0]
+    """Generate E2C2V connectivity matching the structured torus implementation.
+
+    The structured implementation in ``nabla4_structured_torus.hpp`` is the
+    source of truth for vertex/edge/cell organization.  This generator
+    reproduces the same diamond-vertex connectivities, optionally restricted to
+    the interior region defined by ``halo``.
+    """
+    latitude_dim = grid_cartesian_dimensions[1]
+    longitude_dim = grid_cartesian_dimensions[0]
+
+    def _is_internal(latitude, longitude):
+        return (
+            latitude > halo - 1
+            and longitude > halo - 1
+            and latitude < latitude_dim - halo
+            and longitude < longitude_dim - halo
+        )
 
     if e2c2v_ordering == "per-vertex":
         filtered_e2c2v = []
-        for j in range(y_dim):
-            for i in range(x_dim):
-                if i > halo - 1 and j > halo - 1 and i < x_dim - halo and j < y_dim - halo:
-                    i_j = j * x_dim + i
-                    i_jp1 = (j + 1) * x_dim + i
-                    ip1_j = j * x_dim + i + 1
-                    i_jm1 = (j - 1) * x_dim + i
-                    ip1_jm1 = (j - 1) * x_dim + i + 1
-                    im1_jp1 = (j + 1) * x_dim + i - 1
-
-                    filtered_e2c2v.append([i_j, i_jp1, im1_jp1, ip1_j])
-                    filtered_e2c2v.append([i_j, ip1_j, i_jp1, ip1_jm1])
-                    filtered_e2c2v.append([i_j, ip1_jm1, ip1_j, i_jm1])
+        for longitude in range(longitude_dim):
+            for latitude in range(latitude_dim):
+                if _is_internal(latitude, longitude):
+                    filtered_e2c2v.append(
+                        _get_e2c2v_vertices_north_edge(
+                            longitude_dim, latitude_dim, longitude, latitude
+                        )
+                    )
+                    filtered_e2c2v.append(
+                        _get_e2c2v_vertices_east_edge(
+                            longitude_dim, latitude_dim, longitude, latitude
+                        )
+                    )
+                    filtered_e2c2v.append(
+                        _get_e2c2v_vertices_southeast_edge(
+                            longitude_dim, latitude_dim, longitude, latitude
+                        )
+                    )
     else:
         orientation_0 = []
         orientation_1 = []
         orientation_2 = []
-        for j in range(y_dim):
-            for i in range(x_dim):
-                if i > halo - 1 and j > halo - 1 and i < x_dim - halo and j < y_dim - halo:
-                    i_j = j * x_dim + i
-                    i_jp1 = (j + 1) * x_dim + i
-                    ip1_j = j * x_dim + i + 1
-                    i_jm1 = (j - 1) * x_dim + i
-                    ip1_jm1 = (j - 1) * x_dim + i + 1
-                    im1_jp1 = (j + 1) * x_dim + i - 1
-
-                    orientation_0.append([i_j, i_jp1, im1_jp1, ip1_j])
-                    orientation_1.append([i_j, ip1_j, i_jp1, ip1_jm1])
-                    orientation_2.append([i_j, ip1_jm1, ip1_j, i_jm1])
+        for longitude in range(longitude_dim):
+            for latitude in range(latitude_dim):
+                if _is_internal(latitude, longitude):
+                    orientation_0.append(
+                        _get_e2c2v_vertices_north_edge(
+                            longitude_dim, latitude_dim, longitude, latitude
+                        )
+                    )
+                    orientation_1.append(
+                        _get_e2c2v_vertices_east_edge(
+                            longitude_dim, latitude_dim, longitude, latitude
+                        )
+                    )
+                    orientation_2.append(
+                        _get_e2c2v_vertices_southeast_edge(
+                            longitude_dim, latitude_dim, longitude, latitude
+                        )
+                    )
 
         filtered_e2c2v = orientation_0 + orientation_1 + orientation_2
 
@@ -207,6 +329,7 @@ def generate_v2e(x_dim, y_dim, internal_halo=1):
 
 
 def filter_v2e_per_orientation(v2e_table, x_dim, y_dim):
+    v2e_table = np.array(v2e_table, copy=True)
     e2e_table = []
     for i in range(x_dim * y_dim):
         e2e_table.append(i * 3)
@@ -272,6 +395,7 @@ def process_v2e_per_orientation(v2e_table, x_dim, y_dim, halo=1):
 
 
 def filter_v2e_per_vertex(v2e_table, x_dim, y_dim):
+    v2e_table = np.array(v2e_table, copy=True)
     e2e_table = []
     for i in range(x_dim * y_dim):
         e2e_table.append(i * 3)
