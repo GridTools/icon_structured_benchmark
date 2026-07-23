@@ -71,21 +71,21 @@ std::vector<double> benchmark_gridtools(std::tuple<Args...> &&args, int repetiti
 template <backend_impl I, template <typename> typename T, typename... Args>
 std::vector<std::vector<VP_TYPE>> nabla4_validate_gridtools(std::tuple<Args...> &&args) {
     if constexpr (I == backend_impl::cpu_ifirst) {
-        T<storage::cpu_ifirst> benchmark_object{std::apply(
-            [](auto &&...args) { return T<storage::cpu_ifirst>{std::forward<decltype(args)>(args)...}; }, args)};
+        T<storage::cpu_ifirst> benchmark_object{
+            std::make_from_tuple<T<storage::cpu_ifirst>>(std::forward<decltype(args)>(args))};
         return run_validation<T<storage::cpu_ifirst>, cpu_ifirst>(benchmark_object);
     } else if constexpr (I == backend_impl::cpu_kfirst) {
-        T<storage::cpu_kfirst> benchmark_object{std::apply(
-            [](auto &&...args) { return T<storage::cpu_kfirst>{std::forward<decltype(args)>(args)...}; }, args)};
+        T<storage::cpu_kfirst> benchmark_object{
+            std::make_from_tuple<T<storage::cpu_kfirst>>(std::forward<decltype(args)>(args))};
         return run_validation<T<storage::cpu_kfirst>, cpu_kfirst>(benchmark_object);
 #ifdef __CUDACC__
     } else if constexpr (I == backend_impl::gpu_kloop) {
         T<storage::gpu> benchmark_object{
-            std::apply([](auto &&...args) { return T<storage::gpu>{std::forward<decltype(args)>(args)...}; }, args)};
+            std::make_from_tuple<T<storage::gpu>>(std::forward<decltype(args)>(args))};
         return run_validation<T<storage::gpu>, gpu_kloop>(benchmark_object);
     } else if constexpr (I == backend_impl::gpu_naive) {
         T<storage::gpu> benchmark_object{
-            std::apply([](auto &&...args) { return T<storage::gpu>{std::forward<decltype(args)>(args)...}; }, args)};
+            std::make_from_tuple<T<storage::gpu>>(std::forward<decltype(args)>(args))};
         return run_validation<T<storage::gpu>, gpu_naive>(benchmark_object);
 #endif
     } else {
