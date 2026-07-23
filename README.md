@@ -105,15 +105,16 @@ For running the benchmarking framework with its tests there are the following de
 
 ### Instructions
 
-First it's helpful to have a Python virtual environment set up with Python 3.11+
+First it's helpful to have a Python virtual environment set up with Python 3.11+.
 
-To install `icon4py` and its dependencies:
+`icon_structured_benchmark` has some Python dependencies to run the Python benchmark and validation scripts as well as the plotting scripts.
+Those are defined in the `requirements.txt` file in the root directory of the repository.
+By installing the requirements in the following way, `icon4py` from the submodules is also installed.
 
 ```
-git submodule update --init --recursive -f
-pushd tests/ext/icon4py
-CC=$(which gcc) CXX=$(which g++) BOOST_INCLUDE_DIR=<BOOST_INSTALLATION_DIR>/include pip install -r requirements-dev-opt.txt # ideally in a venv (tested with Python 3.11)
-popd
+python -m venv venv_isb
+source venv_isb/bin/activate
+pip install -r requirements.txt
 ```
 
 To install `icon-structured` you need to use `CMake`. `GridTools` will also be cloned in the `CMake` build directory if not found by `CMake`.
