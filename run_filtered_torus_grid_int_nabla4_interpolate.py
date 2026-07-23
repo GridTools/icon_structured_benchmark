@@ -1453,21 +1453,11 @@ def run_benchmarks():
                 f"Generated e2c2v and filtered e2c2v are not equal for combination: {combination}. Please check the filtering logic."
             )
 
-        def _get_gpu_coalesced_permuted_e2ecv():
-            orientation_permuted_e2ecv = np.zeros_like(grid_e2ecv)
-            edges_size = len(grid_e2ecv)
-            for i in range(edges_size):
-                for j in range(4):
-                    orientation_permuted_e2ecv[i][j] = j * edges_size + i
-            return orientation_permuted_e2ecv
-
-        permuted_e2ecv = (
-            grid_e2ecv
-            if args.e2c2v_ordering == "per-vertex"
-            else _get_gpu_coalesced_permuted_e2ecv()
-        )
+        # generate_original_e2ecv already produces the per-orientation layout
+        # that the structured GPU kernels expect (slot * n_edges + color * n_vertices + vertex),
+        # so no extra permutation is needed.
         filtered_e2ecv = filter_edge_vector(
-            permuted_e2ecv,
+            grid_e2ecv,
             grid_cartesian_dimensions,
             args.e2c2v_ordering,
             args.halo if combination == "separate" else 0,
