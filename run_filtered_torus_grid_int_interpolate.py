@@ -3,13 +3,10 @@ import numpy as np
 from os import path
 from pathlib import Path
 
-from icon4py.model.common.grid.grid_manager import (  # type: ignore [import-not-found]
-    GridManager,
-    IndexTransformation,
-    ToGt4PyTransformation,
+from icon4py.model.common.grid.gridfile import (  # type: ignore [import-not-found]
+    NoTransformation,
+    ToZeroBasedIndexTransformation,
 )
-
-from icon4py.model.common.grid.vertical import VerticalGridSize  # type: ignore [import-not-found]
 
 from icon4py.model.common.dimension import E2C2VDim  # type: ignore [import-not-found]
 
@@ -17,193 +14,16 @@ import icon_benchmark  # type: ignore [import-not-found]
 
 import nabla4_gtfn  # type: ignore [import-not-found]
 
-import netCDF4  # type: ignore [import-not-found]
-
 from json import dump
-
-
-def print_median_runtimes(runtimes):
-    for key in runtimes.keys():
-        values = runtimes[key]
-        print(
-            "{} median runtime: {}".format(
-                key,
-                np.median(values),
-            )
-        )
-
-
-def get_torus_cartesian_dimensions(filename):
-    nc = netCDF4.Dataset(filename, mode="r")
-    sorted_y_coordinates = np.sort(nc["cartesian_y_vertices"][:])
-    longitude_dimension = np.count_nonzero(sorted_y_coordinates == 0.0)
-    latitude_dimension = int(len(sorted_y_coordinates) / longitude_dimension)
-    return (longitude_dimension, latitude_dimension)
-
-
-def init_grid_manager(
-    fname,
-    num_levels=65,
-    transformation=ToGt4PyTransformation(),
-    e2c2v_ordering="per-vertex",
-):
-    grid_manager = GridManager(
-        transformation,
-        fname,
-        VerticalGridSize(num_levels),
-        True,
-        e2c2v_ordering == "per-orientation",
-    )
-    grid_manager()
-    return grid_manager
-
-
-def get_torus_grid(filename, num_levels, transformation, e2c2v_ordering="per-vertex"):
-    grid_manager = init_grid_manager(
-        filename, num_levels, transformation, e2c2v_ordering
-    )
-    simple_grid = grid_manager.get_grid()
-    return simple_grid
-
-
-def generate_v2e(x_dim, y_dim, internal_halo=1):
-    y_dim_internal = y_dim - 2 * internal_halo
-    x_dim_internal = x_dim - 2 * internal_halo
-    v2e = np.zeros((y_dim_internal * x_dim_internal, 6), dtype=np.int32)
-    for i in range(internal_halo, x_dim - internal_halo):
-        for j in range(internal_halo, y_dim - internal_halo):
-            i_internal = i - internal_halo
-            j_internal = j - internal_halo
-            i_j = i + j * x_dim
-            i_jm1 = i + (j - 1) * x_dim
-            v2e[j_internal * x_dim_internal + i_internal][0] = (x_dim * y_dim) + i_j - 1
-            v2e[j_internal * x_dim_internal + i_internal][1] = (x_dim * y_dim) + i_j
-            v2e[j_internal * x_dim_internal + i_internal][2] = i_jm1
-            v2e[j_internal * x_dim_internal + i_internal][3] = i_j
-            v2e[j_internal * x_dim_internal + i_internal][4] = 2 * (x_dim * y_dim) + i_j
-            v2e[j_internal * x_dim_internal + i_internal][5] = (
-                2 * (x_dim * y_dim) + i_j + x_dim - 1
-            )
-    return v2e
-
-
-def filter_v2e_per_orientation(v2e_table, x_dim, y_dim):
-    e2e_table = []
-    for i in range(x_dim * y_dim):
-        e2e_table.append(i * 3)
-        e2e_table.append(i * 3 + 1)
-        e2e_table.append(
-            i * 3 + 3 * x_dim + 2
-            if i * 3 + 2 + 3 * x_dim < x_dim * y_dim * 3
-            else i * 3 + 3 * x_dim + 2 - x_dim * y_dim * 3
-        )
-
-    for edges in v2e_table:
-        for edge_id in range(6):
-            edges[edge_id] = e2e_table[edges[edge_id]]
-
-    e2e_table_orientation_sorting = []
-    for i in range(0, x_dim * y_dim * 3):
-        e2e_table_orientation_sorting.append(i // 3 + (i % 3) * x_dim * y_dim)
-
-    for edges in v2e_table:
-        for edge_id in range(6):
-            edges[edge_id] = e2e_table_orientation_sorting[edges[edge_id]]
-    return v2e_table
-
-
-def halo_filter(v2e_table, halo, x_dim, y_dim):
-    filtered_v2e_table = []
-    for i in range(x_dim):
-        for j in range(y_dim):
-            if i >= halo and i < x_dim - halo and j >= halo and j < y_dim - halo:
-                vertex_id = i + j * x_dim
-                filtered_v2e_table.append(v2e_table[vertex_id])
-    filtered_v2e_table = np.array(filtered_v2e_table)
-    assert filtered_v2e_table.shape == ((x_dim - 2 * halo) * (y_dim - 2 * halo), 6)
-    return filtered_v2e_table
-
-
-def transpose_ij(v2e_table, x_dim, y_dim):
-    transposed_v2e_table = []
-    for j in range(y_dim):
-        for i in range(x_dim):
-            vertex_id = i * y_dim + j
-            transposed_v2e_table.append(v2e_table[vertex_id])
-    transposed_v2e_table = np.array(transposed_v2e_table)
-    assert transposed_v2e_table.shape == (x_dim * y_dim, 6)
-    return transposed_v2e_table
-
-
-def process_v2e_per_orientation(v2e_table, x_dim, y_dim, halo=1):
-    return transpose_ij(
-        halo_filter(
-            filter_v2e_per_orientation(
-                v2e_table,
-                x_dim,
-                y_dim,
-            ),
-            halo,
-            x_dim,
-            y_dim,
-        ),
-        x_dim - 2 * halo,
-        y_dim - 2 * halo,
-    )
-
-
-def filter_v2e_per_vertex(v2e_table, x_dim, y_dim):
-    e2e_table = []
-    for i in range(x_dim * y_dim):
-        e2e_table.append(i * 3)
-        e2e_table.append(i * 3 + 1)
-        e2e_table.append(
-            i * 3 + 3 * x_dim + 2
-            if i * 3 + 2 + 3 * x_dim < x_dim * y_dim * 3
-            else i * 3 + 3 * x_dim + 2 - x_dim * y_dim * 3
-        )
-
-    for edges in v2e_table:
-        for edge_id in range(6):
-            edges[edge_id] = e2e_table[edges[edge_id]]
-
-    return v2e_table
-
-
-def process_v2e_per_vertex(v2e_table, x_dim, y_dim, halo=1):
-    return transpose_ij(
-        halo_filter(
-            filter_v2e_per_vertex(
-                v2e_table,
-                x_dim,
-                y_dim,
-            ),
-            halo,
-            x_dim,
-            y_dim,
-        ),
-        x_dim - 2 * halo,
-        y_dim - 2 * halo,
-    )
-
-
-def compare_ndarrays(a, b):
-    same = True
-    if a.shape != b.shape:
-        same = False
-
-    for i in range(a.shape[0]):
-        for j in range(a.shape[1]):
-            if not np.isclose(a[i][j], b[i][j]):
-                print(
-                    "Difference at index ({}, {}) is {}".format(i, j, a[i][j] - b[i][j])
-                )
-                same = False
-    if not same:
-        print("Arrays are not the same")
-        import sys
-
-        sys.exit(1)
+from run_filtered_torus_grid_int_common import (
+    compare_ndarrays,
+    generate_v2e,
+    get_torus_cartesian_dimensions,
+    get_torus_grid,
+    print_median_runtimes,
+    process_v2e_per_orientation,
+    process_v2e_per_vertex,
+)
 
 
 def run_sanity_checks(
@@ -370,7 +190,7 @@ def parse_arguments():
         "--transformation",
         choices=["gt4py", "index"],
         default="gt4py",
-        help="Use either ToGt4PyTransformation or IndexTransformation (gt4py by default)",
+        help="Use either ToZeroBasedIndexTransformation or NoTransformation (gt4py by default)",
     )
     parser.add_argument(
         "--klevels", type=int, default=80, help="Number of k levels (80 default)"
@@ -435,9 +255,9 @@ def run_benchmarks():
     args = parse_arguments()
 
     transformation = (
-        ToGt4PyTransformation()
+        ToZeroBasedIndexTransformation()
         if args.transformation == "gt4py"
-        else IndexTransformation()
+        else NoTransformation()
     )
 
     torus_grid = get_torus_grid(
@@ -464,14 +284,14 @@ def run_benchmarks():
 
     v2e_filtered = (
         process_v2e_per_orientation(
-            torus_grid.get_offset_provider("V2E").table,
+            torus_grid.get_connectivity("V2E").ndarray,
             grid_cartesian_dimensions[1],
             grid_cartesian_dimensions[0],
             args.halo,
         )
         if args.e2c2v_ordering == "per-orientation"
         else process_v2e_per_vertex(
-            torus_grid.get_offset_provider("V2E").table,
+            torus_grid.get_connectivity("V2E").ndarray,
             grid_cartesian_dimensions[1],
             grid_cartesian_dimensions[0],
             args.halo,

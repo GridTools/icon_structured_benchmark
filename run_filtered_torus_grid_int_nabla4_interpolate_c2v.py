@@ -3,13 +3,10 @@ import numpy as np
 from os import path
 from pathlib import Path
 
-from icon4py.model.common.grid.grid_manager import (  # type: ignore [import-not-found]
-    GridManager,
-    IndexTransformation,
-    ToGt4PyTransformation,
+from icon4py.model.common.grid.gridfile import (  # type: ignore [import-not-found]
+    NoTransformation,
+    ToZeroBasedIndexTransformation,
 )
-
-from icon4py.model.common.grid.vertical import VerticalGridSize  # type: ignore [import-not-found]
 
 from icon4py.model.common.dimension import E2C2VDim  # type: ignore [import-not-found]
 
@@ -17,145 +14,19 @@ import icon_benchmark  # type: ignore [import-not-found]
 
 import nabla4_gtfn  # type: ignore [import-not-found]
 
-import netCDF4  # type: ignore [import-not-found]
-
 from json import dump
 
-from run_filtered_torus_grid_int_interpolate import (
+from run_filtered_torus_grid_int_common import (
+    filter_c2v_vector,
+    filter_edge_vector,
+    generate_filtered_e2c2v,
+    generate_original_e2ecv,
+    get_torus_cartesian_dimensions,
+    get_torus_grid,
+    print_median_runtimes,
     process_v2e_per_orientation,
     process_v2e_per_vertex,
 )
-
-
-def print_median_runtimes(runtimes):
-    for key in runtimes.keys():
-        values = runtimes[key]
-        print(
-            "{} median runtime: {}".format(
-                key,
-                np.median(values),
-            )
-        )
-
-
-def get_torus_cartesian_dimensions(filename):
-    nc = netCDF4.Dataset(filename, mode="r")
-    sorted_y_coordinates = np.sort(nc["cartesian_y_vertices"][:])
-    longitude_dimension = np.count_nonzero(sorted_y_coordinates == 0.0)
-    latitude_dimension = int(len(sorted_y_coordinates) / longitude_dimension)
-    return (longitude_dimension, latitude_dimension)
-
-
-def init_grid_manager(
-    fname,
-    num_levels=65,
-    transformation=ToGt4PyTransformation(),
-    e2c2v_ordering="per-vertex",
-):
-    grid_manager = GridManager(
-        transformation,
-        fname,
-        VerticalGridSize(num_levels),
-        True,
-        e2c2v_ordering == "per-orientation",
-    )
-    grid_manager()
-    return grid_manager
-
-
-def get_torus_grid(filename, num_levels, transformation, e2c2v_ordering="per-vertex"):
-    grid_manager = init_grid_manager(
-        filename, num_levels, transformation, e2c2v_ordering
-    )
-    simple_grid = grid_manager.get_grid()
-    return simple_grid
-
-
-def filter_edge_vector(
-    vector, grid_cartesian_dimensions, e2c2v_ordering="per-vertex", halo=2
-):
-    filtered_vector = []
-    if e2c2v_ordering == "per-vertex":
-        for i in range(grid_cartesian_dimensions[0]):
-            for j in range(grid_cartesian_dimensions[1]):
-                if (
-                    i > halo - 1
-                    and j > halo - 1
-                    and i < grid_cartesian_dimensions[0] - halo
-                    and j < grid_cartesian_dimensions[1] - halo
-                ):
-                    filtered_vector.append(
-                        vector[(i * grid_cartesian_dimensions[1] + j) * 3]
-                    )
-                    filtered_vector.append(
-                        vector[(i * grid_cartesian_dimensions[1] + j) * 3 + 1]
-                    )
-                    filtered_vector.append(
-                        vector[(i * grid_cartesian_dimensions[1] + j) * 3 + 2]
-                    )
-    else:
-        for i in range(grid_cartesian_dimensions[0]):
-            for j in range(grid_cartesian_dimensions[1]):
-                if (
-                    i > halo - 1
-                    and j > halo - 1
-                    and i < grid_cartesian_dimensions[0] - halo
-                    and j < grid_cartesian_dimensions[1] - halo
-                ):
-                    filtered_vector.append(
-                        vector[(i * grid_cartesian_dimensions[1] + j)]
-                    )
-        for i in range(grid_cartesian_dimensions[0]):
-            for j in range(grid_cartesian_dimensions[1]):
-                if (
-                    i > halo - 1
-                    and j > halo - 1
-                    and i < grid_cartesian_dimensions[0] - halo
-                    and j < grid_cartesian_dimensions[1] - halo
-                ):
-                    filtered_vector.append(
-                        vector[
-                            (i * grid_cartesian_dimensions[1] + j)
-                            + grid_cartesian_dimensions[0]
-                            * grid_cartesian_dimensions[1]
-                        ]
-                    )
-        for i in range(grid_cartesian_dimensions[0]):
-            for j in range(grid_cartesian_dimensions[1]):
-                if (
-                    i > halo - 1
-                    and j > halo - 1
-                    and i < grid_cartesian_dimensions[0] - halo
-                    and j < grid_cartesian_dimensions[1] - halo
-                ):
-                    filtered_vector.append(
-                        vector[
-                            (i * grid_cartesian_dimensions[1] + j)
-                            + (
-                                grid_cartesian_dimensions[0]
-                                * grid_cartesian_dimensions[1]
-                            )
-                            * 2
-                        ]
-                    )
-    return np.array(filtered_vector)
-
-
-def filter_c2v_vector(c2v, grid_cartesian_dimensions, halo=3):
-    filtered_c2v = []
-    for j in range(grid_cartesian_dimensions[0]):
-        for i in range(grid_cartesian_dimensions[1]):
-            if (
-                i > halo - 2
-                and j > halo - 2
-                and i < grid_cartesian_dimensions[1] - halo
-                and j < grid_cartesian_dimensions[0] - halo
-            ):
-                for k in range(2):
-                    filtered_c2v.append(
-                        c2v[(j * grid_cartesian_dimensions[1] + i) * 2 + k]
-                    )
-    return np.array(filtered_c2v)
 
 
 def run_sanity_checks(
@@ -832,7 +703,7 @@ def parse_arguments():
         "--transformation",
         choices=["gt4py", "index"],
         default="gt4py",
-        help="Use either ToGt4PyTransformation or IndexTransformation (gt4py by default)",
+        help="Use either ToZeroBasedIndexTransformation or NoTransformation (gt4py by default)",
     )
     parser.add_argument(
         "--klevels", type=int, default=80, help="Number of k levels (80 default)"
@@ -912,13 +783,13 @@ def run_benchmarks():
     args = parse_arguments()
 
     transformation = (
-        ToGt4PyTransformation()
+        ToZeroBasedIndexTransformation()
         if args.transformation == "gt4py"
-        else IndexTransformation()
+        else NoTransformation()
     )
 
     torus_grid = get_torus_grid(
-        args.grid, args.klevels, transformation, args.e2c2v_ordering
+        args.grid, args.klevels, transformation, args.e2c2v_ordering, True
     )
 
     repetitions = args.repetitions
@@ -946,28 +817,27 @@ def run_benchmarks():
         e2c2v_ordering="per-vertex",
         combination="separate",
     ):
+        generated_e2c2v = generate_filtered_e2c2v(
+            grid_cartesian_dimensions,
+            args.e2c2v_ordering,
+            args.halo if combination == "separate" else 0,
+        )
         filtered_e2c2v = filter_edge_vector(
             grid_e2c2v,
             grid_cartesian_dimensions,
             args.e2c2v_ordering,
             args.halo if combination == "separate" else 0,
         )
+        if not np.array_equal(generated_e2c2v, filtered_e2c2v):
+            raise ValueError(
+                "Generated e2c2v and filtered e2c2v are not equal. Please check the filtering logic."
+            )
 
-        def _get_gpu_coalesced_permuted_e2ecv():
-            orientation_permuted_e2ecv = np.zeros_like(grid_e2ecv)
-            edges_size = len(grid_e2ecv)
-            for i in range(edges_size):
-                for j in range(4):
-                    orientation_permuted_e2ecv[i][j] = j * edges_size + i
-            return orientation_permuted_e2ecv
-
-        permuted_e2ecv = (
-            grid_e2ecv
-            if args.e2c2v_ordering == "per-vertex"
-            else _get_gpu_coalesced_permuted_e2ecv()
-        )
+        # generate_original_e2ecv already produces the per-orientation layout
+        # that the structured GPU kernels expect (slot * n_edges + color * n_vertices + vertex),
+        # so no extra permutation is needed.
         filtered_e2ecv = filter_edge_vector(
-            permuted_e2ecv,
+            grid_e2ecv,
             grid_cartesian_dimensions,
             args.e2c2v_ordering,
             args.halo if combination == "separate" else 0,
@@ -1054,14 +924,17 @@ def run_benchmarks():
             )
         return filtered_e2c2v, filtered_e2ecv, filtered_v2e
 
+    original_e2c2v = torus_grid.get_connectivity("E2C2V").ndarray
+    e2ecv = generate_original_e2ecv(original_e2c2v, args.e2c2v_ordering)
+
     (
         filtered_e2c2v_separate,
         filtered_e2ecv_separate,
         filtered_v2e_separate,
     ) = filter_neighbors(
-        torus_grid.get_offset_provider("E2C2V").table,
-        torus_grid.get_offset_provider("E2ECV").table,
-        torus_grid.get_offset_provider("V2E").table,
+        original_e2c2v,
+        e2ecv,
+        torus_grid.get_connectivity("V2E").ndarray,
         args.e2c2v_ordering,
         "separate",
     )
@@ -1073,9 +946,9 @@ def run_benchmarks():
         filtered_e2ecv_inlined,
         filtered_v2e_inlined,
     ) = filter_neighbors(
-        torus_grid.get_offset_provider("E2C2V").table,
-        torus_grid.get_offset_provider("E2ECV").table,
-        torus_grid.get_offset_provider("V2E").table,
+        original_e2c2v,
+        e2ecv,
+        torus_grid.get_connectivity("V2E").ndarray,
         args.e2c2v_ordering,
         "inlined",
     )
@@ -1083,7 +956,7 @@ def run_benchmarks():
     # for vertex, edges in enumerate(filtered_v2e_inlined):
     #     print("Vertex: {} Edges: {}".format(vertex, edges))
 
-    original_c2v = torus_grid.get_offset_provider("C2V").table
+    original_c2v = torus_grid.get_connectivity("C2V").ndarray
     filtered_c2v_original_indexes = filter_c2v_vector(
         original_c2v, grid_cartesian_dimensions, args.halo + 2
     )

@@ -1,9 +1,6 @@
 import argparse
-from os import path
-import numpy as np
-
-from icon4py.model.common.grid.grid_manager import (  # type: ignore [import-not-found]
-    ToGt4PyTransformation,
+from icon4py.model.common.grid.gridfile import (  # type: ignore [import-not-found]
+    ToZeroBasedIndexTransformation,
 )
 
 from plotting import plot_torus  # type: ignore [import-not-found]
@@ -24,7 +21,7 @@ def parse_arguments():
 args = parse_arguments()
 grid_file = args.grid
 
-grid = import_grid(grid_file, ToGt4PyTransformation())
+grid = import_grid(grid_file, ToZeroBasedIndexTransformation())
 
 vertice_coords = get_vertices_coordinates(grid_file)
 
@@ -34,5 +31,5 @@ print_torus_file_information(grid_file)
 
 plot_torus(
     vertice_coords,
-    grid.get_offset_provider("E2V").table,
+    grid.get_connectivity("E2V").ndarray,
 )

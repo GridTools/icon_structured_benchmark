@@ -71,21 +71,21 @@ std::vector<double> benchmark_gridtools(std::tuple<Args...> &&args, int repetiti
 template <backend_impl I, template <typename> typename T, typename... Args>
 std::vector<std::vector<VP_TYPE>> nabla4_validate_gridtools(std::tuple<Args...> &&args) {
     if constexpr (I == backend_impl::cpu_ifirst) {
-        T<storage::cpu_ifirst> benchmark_object{std::apply(
-            [](auto &&...args) { return T<storage::cpu_ifirst>{std::forward<decltype(args)>(args)...}; }, args)};
+        T<storage::cpu_ifirst> benchmark_object{
+            std::make_from_tuple<T<storage::cpu_ifirst>>(std::forward<decltype(args)>(args))};
         return run_validation<T<storage::cpu_ifirst>, cpu_ifirst>(benchmark_object);
     } else if constexpr (I == backend_impl::cpu_kfirst) {
-        T<storage::cpu_kfirst> benchmark_object{std::apply(
-            [](auto &&...args) { return T<storage::cpu_kfirst>{std::forward<decltype(args)>(args)...}; }, args)};
+        T<storage::cpu_kfirst> benchmark_object{
+            std::make_from_tuple<T<storage::cpu_kfirst>>(std::forward<decltype(args)>(args))};
         return run_validation<T<storage::cpu_kfirst>, cpu_kfirst>(benchmark_object);
 #ifdef __CUDACC__
     } else if constexpr (I == backend_impl::gpu_kloop) {
         T<storage::gpu> benchmark_object{
-            std::apply([](auto &&...args) { return T<storage::gpu>{std::forward<decltype(args)>(args)...}; }, args)};
+            std::make_from_tuple<T<storage::gpu>>(std::forward<decltype(args)>(args))};
         return run_validation<T<storage::gpu>, gpu_kloop>(benchmark_object);
     } else if constexpr (I == backend_impl::gpu_naive) {
         T<storage::gpu> benchmark_object{
-            std::apply([](auto &&...args) { return T<storage::gpu>{std::forward<decltype(args)>(args)...}; }, args)};
+            std::make_from_tuple<T<storage::gpu>>(std::forward<decltype(args)>(args))};
         return run_validation<T<storage::gpu>, gpu_naive>(benchmark_object);
 #endif
     } else {
@@ -735,6 +735,38 @@ std::vector<double> nabla4_vertical_benchmark_structured_torus_gpu_kloop_gridtoo
         dry_runs);
 }
 
+std::vector<double> nabla4_benchmark_structured_torus_gpu_kloop_cutile_halo(index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    index_type longitude_dim,
+    index_type latitude_dim,
+    index_type halo,
+    int repetitions,
+    int dry_runs) {
+    return benchmark_gridtools<gpu_kloop, nabla4_structured_torus_cutile_halo>(
+        std::make_tuple(CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, halo),
+        repetitions,
+        dry_runs);
+}
+
+std::vector<double> nabla4_benchmark_structured_torus_gpu_naive_cutile_halo(index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    index_type longitude_dim,
+    index_type latitude_dim,
+    index_type halo,
+    int repetitions,
+    int dry_runs) {
+    return benchmark_gridtools<gpu_naive, nabla4_structured_torus_cutile_halo>(
+        std::make_tuple(CellDim, VertexDim, EdgeDim, KDim, ECVDim, longitude_dim, latitude_dim, halo),
+        repetitions,
+        dry_runs);
+}
+
 std::vector<double> nabla4_benchmark_structured_torus_gpu_naive_gridtools_halo(index_type CellDim,
     index_type VertexDim,
     index_type EdgeDim,
@@ -1029,6 +1061,70 @@ std::vector<std::vector<VP_TYPE>> nabla4_vertical_validate_structured_torus_gpu_
     const std::vector<WP_TYPE> &inv_vert_vert_length,
     const std::vector<WP_TYPE> &inv_primal_edge_length) {
     return nabla4_validate_gridtools<gpu_kloop, nabla4_vertical_structured_torus_halo_gt>(std::make_tuple(CellDim,
+        VertexDim,
+        EdgeDim,
+        KDim,
+        ECVDim,
+        longitude_dim,
+        latitude_dim,
+        halo,
+        u_vert,
+        v_vert,
+        primal_normal_vert_v1,
+        primal_normal_vert_v2,
+        z_nabla2_e,
+        inv_vert_vert_length,
+        inv_primal_edge_length));
+}
+
+std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_gpu_kloop_cutile_halo(index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    index_type longitude_dim,
+    index_type latitude_dim,
+    index_type halo,
+    const std::vector<std::vector<VP_TYPE>> &u_vert,
+    const std::vector<std::vector<VP_TYPE>> &v_vert,
+    const std::vector<WP_TYPE> &primal_normal_vert_v1,
+    const std::vector<WP_TYPE> &primal_normal_vert_v2,
+    const std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+    const std::vector<WP_TYPE> &inv_vert_vert_length,
+    const std::vector<WP_TYPE> &inv_primal_edge_length) {
+    return nabla4_validate_gridtools<gpu_kloop, nabla4_structured_torus_cutile_halo>(std::make_tuple(CellDim,
+        VertexDim,
+        EdgeDim,
+        KDim,
+        ECVDim,
+        longitude_dim,
+        latitude_dim,
+        halo,
+        u_vert,
+        v_vert,
+        primal_normal_vert_v1,
+        primal_normal_vert_v2,
+        z_nabla2_e,
+        inv_vert_vert_length,
+        inv_primal_edge_length));
+}
+
+std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_gpu_naive_cutile_halo(index_type CellDim,
+    index_type VertexDim,
+    index_type EdgeDim,
+    index_type KDim,
+    index_type ECVDim,
+    index_type longitude_dim,
+    index_type latitude_dim,
+    index_type halo,
+    const std::vector<std::vector<VP_TYPE>> &u_vert,
+    const std::vector<std::vector<VP_TYPE>> &v_vert,
+    const std::vector<WP_TYPE> &primal_normal_vert_v1,
+    const std::vector<WP_TYPE> &primal_normal_vert_v2,
+    const std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
+    const std::vector<WP_TYPE> &inv_vert_vert_length,
+    const std::vector<WP_TYPE> &inv_primal_edge_length) {
+    return nabla4_validate_gridtools<gpu_naive, nabla4_structured_torus_cutile_halo>(std::make_tuple(CellDim,
         VertexDim,
         EdgeDim,
         KDim,

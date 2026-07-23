@@ -1,3 +1,5 @@
+import subprocess
+
 from analysis import (
     read_torus_results_commit_backend_index_type,
     create_output_directory,
@@ -9,7 +11,9 @@ from analysis import (
 )
 
 if __name__ == "__main__":
-    git_commit = "5272141"
+    git_commit = subprocess.check_output(
+        ["git", "rev-parse", "--short", "HEAD"], text=True
+    ).strip()
 
     backend = "gpu"
 
@@ -19,8 +23,8 @@ if __name__ == "__main__":
 
     torus_files = [
         "torus_100000_100000_256",
-        "torus_100000_100000_128",
-        "torus_100000_100000_64",
+        # "torus_100000_100000_128",
+        # "torus_100000_100000_64",
     ]
 
     klevels = [80]
