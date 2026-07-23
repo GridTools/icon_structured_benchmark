@@ -1124,7 +1124,7 @@ std::vector<std::vector<VP_TYPE>> nabla4_validate_structured_torus_gpu_naive_cut
     const std::vector<std::vector<WP_TYPE>> &z_nabla2_e,
     const std::vector<WP_TYPE> &inv_vert_vert_length,
     const std::vector<WP_TYPE> &inv_primal_edge_length) {
-    nabla4_validate_gridtools<gpu_naive, nabla4_structured_torus_cutile_halo>(std::make_tuple(CellDim,
+    return nabla4_validate_gridtools<gpu_naive, nabla4_structured_torus_cutile_halo>(std::make_tuple(CellDim,
         VertexDim,
         EdgeDim,
         KDim,

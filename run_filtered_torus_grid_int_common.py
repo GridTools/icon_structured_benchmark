@@ -82,6 +82,9 @@ def filter_edge_vector(
                         vector[(i * grid_cartesian_dimensions[1] + j) * 3 + 2]
                     )
     else:
+        # The input vector is laid out per-vertex: for each vertex the three
+        # edges appear as (north, east, southeast).  When extracting a single
+        # orientation we must therefore index by vertex_id * 3 + color.
         for i in range(grid_cartesian_dimensions[0]):
             for j in range(grid_cartesian_dimensions[1]):
                 if (
@@ -90,7 +93,7 @@ def filter_edge_vector(
                     and i < grid_cartesian_dimensions[0] - halo
                     and j < grid_cartesian_dimensions[1] - halo
                 ):
-                    filtered_vector.append(vector[(i * grid_cartesian_dimensions[1] + j)])
+                    filtered_vector.append(vector[(i * grid_cartesian_dimensions[1] + j) * 3])
         for i in range(grid_cartesian_dimensions[0]):
             for j in range(grid_cartesian_dimensions[1]):
                 if (
@@ -101,8 +104,7 @@ def filter_edge_vector(
                 ):
                     filtered_vector.append(
                         vector[
-                            (i * grid_cartesian_dimensions[1] + j)
-                            + grid_cartesian_dimensions[0] * grid_cartesian_dimensions[1]
+                            (i * grid_cartesian_dimensions[1] + j) * 3 + 1
                         ]
                     )
         for i in range(grid_cartesian_dimensions[0]):
@@ -115,8 +117,7 @@ def filter_edge_vector(
                 ):
                     filtered_vector.append(
                         vector[
-                            (i * grid_cartesian_dimensions[1] + j)
-                            + (grid_cartesian_dimensions[0] * grid_cartesian_dimensions[1]) * 2
+                            (i * grid_cartesian_dimensions[1] + j) * 3 + 2
                         ]
                     )
     return np.array(filtered_vector)
@@ -297,12 +298,23 @@ def generate_original_e2ecv(original_e2c2v, e2c2v_ordering="per-vertex"):
         )
 
     n_edges = original_e2c2v.shape[0]
+    n_vertices = n_edges // 3
     linear = np.arange(n_edges * 4, dtype=original_e2c2v.dtype)
 
     if e2c2v_ordering == "per-vertex":
         return linear.reshape(n_edges, 4)
     if e2c2v_ordering == "per-orientation":
-        return linear.reshape(4, n_edges).T
+        # The structured GPU kernels lay out primal_normal_vert_v1/v2 as
+        # [slot][color][vertex], i.e. index = slot * n_edges + color * n_vertices + vertex.
+        # Build E2ECV so that the reference unstructured kernel indexes the same
+        # flat array element for every (edge, slot) as the structured kernels do.
+        e2ecv = np.empty((n_edges, 4), dtype=original_e2c2v.dtype)
+        for edge in range(n_edges):
+            color = edge % 3
+            vertex = edge // 3
+            for slot in range(4):
+                e2ecv[edge, slot] = slot * n_edges + color * n_vertices + vertex
+        return e2ecv
 
     raise ValueError("Invalid e2c2v_ordering: {}".format(e2c2v_ordering))
 
