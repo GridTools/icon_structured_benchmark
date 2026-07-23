@@ -303,6 +303,7 @@ def generate_violin_plots_acceleration(
     plt.savefig(
         "{}/runtimes_torus_accel_{}_{}.png".format(output_dir, torus_size, k), dpi=400
     )
+    print(f"Saved violin plot for {torus_name} with k={k} to {output_dir}/runtimes_torus_accel_{torus_size}_{k}.png")
 
 
 theoretical_runtime_stream_performance = {
@@ -511,6 +512,7 @@ def generate_violin_plots_acceleration_roofline(
         "{}/runtimes_torus_accel_{}_{}_roofline.png".format(output_dir, torus_size, k),
         dpi=400,
     )
+    print(f"Saved violin plot for {torus_name} with k={k} to {output_dir}/runtimes_torus_accel_{torus_size}_{k}_roofline.png")
 
 
 def filter_runtime_data(runtimes_output, unstructured_key: str, structured_key: str):

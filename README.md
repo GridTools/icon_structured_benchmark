@@ -142,6 +142,10 @@ popd
 
 ## Instructions to run benchmark and plot results
 
+### TL;DR
+
+See `build_bench_all.sh` on how to run and plot everything
+
 ### Running benchmark
 
 The benchmark drivers are written in `python`.
