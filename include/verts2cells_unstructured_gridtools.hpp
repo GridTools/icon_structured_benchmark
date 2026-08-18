@@ -137,7 +137,7 @@ constexpr block_dims get_block_dims_unstructured_verts2cells_kloop<int>() {
 constexpr block_dims block_dims_unstructured_verts2cells_kloop =
     get_block_dims_unstructured_verts2cells_kloop<index_type>();
 
-__global__ void __launch_bounds__(block_dims_unstructured_verts2cells_kloop.size)
+static __global__ void __launch_bounds__(block_dims_unstructured_verts2cells_kloop.size)
     run_gpu_kloop_verts2cells_unstructured(index_type CellDim,
         index_type KDim,
         verts2cells_unstructured<storage::gpu>::neighbors_gt_ctv_t c2v_gt_ctv,
@@ -212,7 +212,7 @@ constexpr block_dims get_block_dims_unstructured_verts2cells_naive<int>() {
 constexpr block_dims block_dims_unstructured_verts2cells_naive =
     get_block_dims_unstructured_verts2cells_naive<index_type>();
 
-__global__ void __launch_bounds__(block_dims_unstructured_verts2cells_naive.size)
+static __global__ void __launch_bounds__(block_dims_unstructured_verts2cells_naive.size)
     run_gpu_naive_verts2cells_unstructured(index_type CellDim,
         index_type KDim,
         verts2cells_unstructured<storage::gpu>::neighbors_gt_ctv_t c2v_gt_ctv,

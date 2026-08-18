@@ -109,7 +109,7 @@ constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_cached_klo
 constexpr block_dims block_dims_structured_nabla_interpol_inlined_cached_kloop_vertical =
     get_block_dims_structured_nabla_interpol_inlined_cached_kloop_vertical<index_type>();
 
-__global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_cached_kloop_vertical.size)
+static __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_cached_kloop_vertical.size)
     run_gpu_kloop_nabla4_vertical_interpolate_inlined_cached_structured(index_type KDim,
         index_type x_dim,
         index_type y_dim,
@@ -303,7 +303,7 @@ constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_cached_nai
 constexpr block_dims block_dims_structured_nabla_interpol_inlined_cached_naive_vertical =
     get_block_dims_structured_nabla_interpol_inlined_cached_naive_vertical<index_type>();
 
-__global__ void
+static __global__ void
 #if __CUDACC_VER_MAJOR__ < 12 || (__CUDACC_VER_MAJOR__ == 12 && __CUDACC_VER_MINOR__ < 5)
 __launch_bounds__(block_dims_structured_nabla_interpol_inlined_cached_naive_vertical.size)
 #else
