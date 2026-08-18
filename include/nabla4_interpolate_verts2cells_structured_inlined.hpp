@@ -157,7 +157,7 @@ constexpr block_dims get_block_dims_structured_nabla_interpol_v2c_inlined_kloop<
 constexpr block_dims block_dims_structured_nabla_interpol_v2c_inlined_kloop =
     get_block_dims_structured_nabla_interpol_v2c_inlined_kloop<index_type>();
 
-__global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlined_kloop.size)
+static __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlined_kloop.size)
     run_gpu_kloop_nabla4_interpolate_verts2cells_inlined_structured(index_type KDim,
         index_type x_dim_verts2cells,
         index_type y_dim_verts2cells,
@@ -536,7 +536,7 @@ constexpr block_dims get_block_dims_structured_nabla_interpol_v2c_inlined_naive<
 constexpr block_dims block_dims_structured_nabla_interpol_v2c_inlined_naive =
     get_block_dims_structured_nabla_interpol_v2c_inlined_naive<index_type>();
 
-__global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlined_naive.size)
+static __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlined_naive.size)
     run_gpu_naive_nabla4_interpolate_verts2cells_inlined_structured(index_type KDim,
         index_type x_dim_verts2cells,
         index_type y_dim_verts2cells,

@@ -394,7 +394,7 @@ constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_kloop<int>
 constexpr block_dims block_dims_structured_nabla_interpol_inlined_kloop =
     get_block_dims_structured_nabla_interpol_inlined_kloop<index_type>();
 
-__global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_kloop.size)
+static __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_inlined_kloop.size)
     run_gpu_kloop_nabla4_interpolate_inlined_structured(index_type KDim,
         index_type x_dim,
         index_type y_dim,
@@ -637,7 +637,7 @@ constexpr block_dims get_block_dims_structured_nabla_interpol_inlined_naive<int>
 constexpr block_dims block_dims_structured_nabla_interpol_inlined_naive =
     get_block_dims_structured_nabla_interpol_inlined_naive<index_type>();
 
-__global__ void
+static __global__ void
 #if __CUDACC_VER_MAJOR__ < 12 || (__CUDACC_VER_MAJOR__ == 12 && __CUDACC_VER_MINOR__ < 5)
 __launch_bounds__(block_dims_structured_nabla_interpol_inlined_naive.size)
 #else

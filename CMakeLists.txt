@@ -42,7 +42,24 @@ else()
   message(STATUS "Using GridTools from ${GridTools_DIR}")
 endif()
 
-add_library(benchmark src/wrapper.cpp)
+set(BENCHMARK_SOURCES
+    src/wrapper_nabla4_unstructured.cpp
+    src/wrapper_nabla4_structured.cpp
+    src/wrapper_interpolate_verts2cells.cpp
+    src/wrapper_nabla4_interpolate_separate.cpp
+    src/wrapper_nabla4_interpolate_inlined.cpp
+    src/wrapper_nabla4_interpolate_inlined_v2v.cpp
+    src/wrapper_nabla4_interpolate_inlined_v2v_general.cpp
+    src/wrapper_nabla4_interpolate_inlined_cached.cpp
+    src/wrapper_nabla4_interpolate_roofline.cpp
+    src/wrapper_nabla4_interpolate_verts2cells_separate.cpp
+    src/wrapper_nabla4_interpolate_verts2cells_inlined.cpp
+    src/wrapper_nabla4_interpolate_verts2cells_inlined_v2v.cpp
+    src/wrapper_nabla4_interpolate_verts2cells_inlined_c2v.cpp
+    src/wrapper_nabla4_interpolate_verts2cells_inlined_cached.cpp
+    src/wrapper_nabla4_interpolate_verts2cells_inlined_cached_pipeline.cpp
+)
+add_library(benchmark ${BENCHMARK_SOURCES})
 set_property(TARGET benchmark PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_include_directories(benchmark PRIVATE include GridTools)
 target_link_libraries(benchmark PUBLIC GridTools::gridtools GridTools::stencil_naive GridTools::storage_cpu_ifirst GridTools::storage_cpu_kfirst)
@@ -64,7 +81,7 @@ endif()
 
 if(IS_GPU)
   target_link_libraries(benchmark PUBLIC GridTools::storage_gpu)
-  set_source_files_properties(src/wrapper.cpp PROPERTIES LANGUAGE CUDA)
+  set_source_files_properties(${BENCHMARK_SOURCES} PROPERTIES LANGUAGE CUDA)
 endif()
 add_executable(nabla4_benchmark src/main.cpp)
 target_link_libraries(nabla4_benchmark PRIVATE benchmark)

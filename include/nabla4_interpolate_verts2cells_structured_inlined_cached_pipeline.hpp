@@ -134,7 +134,7 @@ constexpr block_dims get_block_dims_structured_nabla_interpol_v2c_inlined_cached
 constexpr block_dims block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop =
     get_block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop<index_type>();
 
-__global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.size)
+static __global__ void __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlined_cached_pipeline_kloop.size)
     run_gpu_kloop_nabla4_interpolate_verts2cells_inlined_cached_pipeline_structured(index_type KDim,
         index_type x_dim_verts2cells,
         index_type halo_verts2cells,

@@ -100,7 +100,7 @@ constexpr block_dims get_block_dims_unstructured_nabla_interpol_inlined_cached_k
 constexpr block_dims block_dims_unstructured_nabla_interpol_inlined_cached_kloop =
     get_block_dims_unstructured_nabla_interpol_inlined_cached_kloop<index_type>();
 
-__global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined_cached_kloop.size)
+static __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_inlined_cached_kloop.size)
     run_gpu_kloop_nabla4_interpolate_inlined_cached_unstructured(index_type nabla4_output_size,
         index_type interpolate_output_size,
         index_type CellDim,

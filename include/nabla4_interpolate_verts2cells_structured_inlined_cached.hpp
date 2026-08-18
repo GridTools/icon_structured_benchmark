@@ -132,7 +132,7 @@ constexpr block_dims get_block_dims_structured_nabla_interpol_v2c_inlined_cached
 constexpr block_dims block_dims_structured_nabla_interpol_v2c_inlined_cached_kloop =
     get_block_dims_structured_nabla_interpol_v2c_inlined_cached_kloop<index_type>();
 
-__global__ void
+static __global__ void
 #if __CUDACC_VER_MAJOR__ < 12 || (__CUDACC_VER_MAJOR__ == 12 && __CUDACC_VER_MINOR__ < 5)
 __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlined_cached_kloop.size)
 #else
@@ -445,7 +445,7 @@ constexpr block_dims get_block_dims_structured_nabla_interpol_v2c_inlined_cached
 constexpr block_dims block_dims_structured_nabla_interpol_v2c_inlined_cached_naive =
     get_block_dims_structured_nabla_interpol_v2c_inlined_cached_naive<index_type>();
 
-__global__ void
+static __global__ void
 #if __CUDACC_VER_MAJOR__ < 12 || (__CUDACC_VER_MAJOR__ == 12 && __CUDACC_VER_MINOR__ < 5)
 __launch_bounds__(block_dims_structured_nabla_interpol_v2c_inlined_cached_naive.size)
 #else

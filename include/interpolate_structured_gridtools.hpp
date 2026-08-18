@@ -249,7 +249,7 @@ class interpolate_structured : public mo_intp_rbf_rbf_vec_interpol_vertex<S> {
 };
 
 #if defined(__CUDACC__)
-__global__ void __launch_bounds__(block_dims_structured_interpol_kloop.size)
+static __global__ void __launch_bounds__(block_dims_structured_interpol_kloop.size)
     run_gpu_kloop_interpol_structured(index_type KDim,
         index_type x_dim,
         index_type y_dim,
@@ -306,7 +306,7 @@ inline void interpolate_structured<S>::run_gpu_kloop_helper() {
     GT_CUDA_CHECK(cudaGetLastError());
 };
 
-__global__ void __launch_bounds__(block_dims_structured_interpol_naive.size)
+static __global__ void __launch_bounds__(block_dims_structured_interpol_naive.size)
     run_gpu_naive_interpol_structured(index_type KDim,
         index_type x_dim,
         index_type y_dim,

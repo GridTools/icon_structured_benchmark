@@ -119,7 +119,7 @@ constexpr block_dims get_block_dims_unstructured_nabla_interpol_v2c_inlined_kloo
 constexpr block_dims block_dims_unstructured_nabla_interpol_v2c_inlined_kloop =
     get_block_dims_unstructured_nabla_interpol_v2c_inlined_kloop<index_type>();
 
-__global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_v2c_inlined_kloop.size)
+static __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_v2c_inlined_kloop.size)
     run_gpu_kloop_nabla4_interpolate_verts2cells_inlined_unstructured(index_type verts2cells_output_size,
         index_type CellDim,
         index_type VertexDim,
@@ -633,7 +633,7 @@ constexpr block_dims get_block_dims_unstructured_nabla_interpol_v2c_inlined_naiv
 constexpr block_dims block_dims_unstructured_nabla_interpol_v2c_inlined_naive =
     get_block_dims_unstructured_nabla_interpol_v2c_inlined_naive<index_type>();
 
-__global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_v2c_inlined_naive.size)
+static __global__ void __launch_bounds__(block_dims_unstructured_nabla_interpol_v2c_inlined_naive.size)
     run_gpu_naive_nabla4_interpolate_verts2cells_inlined_unstructured(index_type verts2cells_output_size,
         index_type CellDim,
         index_type VertexDim,

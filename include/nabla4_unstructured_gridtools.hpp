@@ -231,7 +231,7 @@ class nabla4_unstructured_gt : public nabla4_gt_data<T> {
 };
 
 #if defined(__CUDACC__)
-__global__ void __launch_bounds__(block_dims_unstructured_kloop.size, 2)
+static __global__ void __launch_bounds__(block_dims_unstructured_kloop.size, 2)
     run_gpu_kloop_nabla4_unstructured(index_type EdgeDim,
         index_type KDim,
         nabla4_unstructured_gt<storage::gpu>::neighbors_gt_ctv_t e2c2v_gt_tv,
@@ -303,7 +303,7 @@ inline void nabla4_unstructured_gt<T>::run_gpu_kloop_helper() {
     GT_CUDA_CHECK(cudaGetLastError());
 };
 
-__global__ void __launch_bounds__(block_dims_unstructured_naive.size)
+static __global__ void __launch_bounds__(block_dims_unstructured_naive.size)
     run_gpu_naive_nabla4_unstructured(index_type EdgeDim,
         index_type KDim,
         nabla4_unstructured_gt<storage::gpu>::neighbors_gt_ctv_t e2c2v_gt_tv,
