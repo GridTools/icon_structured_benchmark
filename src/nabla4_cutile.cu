@@ -13,9 +13,9 @@ using namespace ct::literals;
 // These are the SAME values the launcher below uses to size the grid, so
 // keep them in sync if you retune them.
 // ---------------------------------------------------------------------------
-constexpr int TILE_I = 32;
+constexpr int TILE_I = 64;
 constexpr int TILE_J = 2;
-constexpr int TILE_K = 2;
+constexpr int TILE_K = 1;
 
 // K_LOOP_LEN is orthogonal to TILE_K above: it belongs to the kloop kernel
 // further down, where the K axis is NOT part of the tile shape (TILE_K == 1
