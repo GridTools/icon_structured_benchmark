@@ -74,6 +74,9 @@ if __name__ == "__main__":
                 "nabla4_benchmark_unstructured_gpu_kloop_gridtools": runtime_data[k][
                     "nabla4_benchmark_unstructured_gpu_kloop_gridtools"
                 ],
+                "nabla4_benchmark_unstructured_gpu_kloop_cutile": runtime_data[k][
+                    "nabla4_benchmark_unstructured_gpu_kloop_cutile"
+                ],
                 "nabla4_benchmark_structured_torus_gpu_kloop_gridtools_halo": runtime_data[k][
                     "nabla4_benchmark_structured_torus_gpu_kloop_gridtools_halo"
                 ],
@@ -82,6 +85,9 @@ if __name__ == "__main__":
                 ],
                 "nabla4_benchmark_unstructured_gpu_naive_gridtools": runtime_data[k][
                     "nabla4_benchmark_unstructured_gpu_naive_gridtools"
+                ],
+                "nabla4_benchmark_unstructured_gpu_naive_cutile": runtime_data[k][
+                    "nabla4_benchmark_unstructured_gpu_naive_cutile"
                 ],
                 "nabla4_benchmark_structured_torus_gpu_naive_gridtools_halo": runtime_data[k][
                     "nabla4_benchmark_structured_torus_gpu_naive_gridtools_halo"

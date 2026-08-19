@@ -427,7 +427,7 @@ __tile__ void store_z_nabla4e2_tile_kloop(VP_TYPE* __restrict__ base_ptr,
     view.store_masked(value, bj, bi);
 }
 
-[[ cutile::hint(900, occupancy=8, num_cta_in_cga=1) ]]
+[[ cutile::hint(900, occupancy=4, num_cta_in_cga=1) ]]
 __tile_global__ void run_cutile_nabla4_structured_kloop(index_type KDim,
     index_type x_dim,
     index_type x_dim_inner,
