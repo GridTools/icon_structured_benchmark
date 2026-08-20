@@ -1,5 +1,7 @@
 nanobind
 pandas
 seaborn
-# cupy
--e ./tests/ext/icon4py
+cupy-cuda13x
+-e ./tests/ext/icon4py/model/common
+xarray
+netcdf4

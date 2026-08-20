@@ -242,7 +242,7 @@ class nabla4_structured_torus_halo_gt : public nabla4_gt_data<T> {
 };
 
 #if defined(__CUDACC__)
-__global__ void __launch_bounds__(block_dims_structured_kloop.size) run_gpu_kloop_nabla4_structured(index_type KDim,
+static __global__ void __launch_bounds__(block_dims_structured_kloop.size) run_gpu_kloop_nabla4_structured(index_type KDim,
     index_type x_dim,
     index_type x_dim_inner,
     index_type y_dim,
@@ -370,7 +370,7 @@ inline void nabla4_structured_torus_halo_gt<T>::run_gpu_kloop_helper() {
     GT_CUDA_CHECK(cudaGetLastError());
 };
 
-__global__ void __launch_bounds__(block_dims_structured_naive.size) run_gpu_naive_nabla4_structured(index_type KDim,
+static __global__ void __launch_bounds__(block_dims_structured_naive.size) run_gpu_naive_nabla4_structured(index_type KDim,
     index_type x_dim,
     index_type x_dim_inner,
     index_type y_dim,

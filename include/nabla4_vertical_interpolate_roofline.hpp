@@ -110,7 +110,7 @@ constexpr block_dims get_block_dims_nabla_interpol_roofline_kloop_vertical<int>(
 constexpr block_dims block_dims_nabla_interpol_roofline_kloop_vertical =
     get_block_dims_nabla_interpol_roofline_kloop_vertical<index_type>();
 
-__global__ void __launch_bounds__(block_dims_nabla_interpol_roofline_kloop_vertical.size)
+static __global__ void __launch_bounds__(block_dims_nabla_interpol_roofline_kloop_vertical.size)
     run_gpu_kloop_nabla4_vertical_interpolate_roofline(index_type KDim,
         index_type x_dim,
         index_type y_dim,
