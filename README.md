@@ -1,6 +1,6 @@
 # icon-structured
 
-Standalone benchmark that evaluates the performance of a structured grid compared to an unstructured grid using the [nabla4 kernel from icon4py](https://github.com/C2SM/icon4py/blob/main/model/atmosphere/diffusion/src/icon4py/model/atmosphere/diffusion/stencils/calculate_nabla4.py#L23) and its combination with the [mo_intp_rbf_rbf_vec_interpol_vertex kernel](https://github.com/C2SM/icon4py/blob/main/model/common/src/icon4py/model/common/interpolation/stencils/mo_intp_rbf_rbf_vec_interpol_vertex.py#L19).
+Standalone benchmark that evaluates the performance of a structured grid compared to an unstructured grid using the [nabla4 kernel from icon4py](https://github.com/C2SM/icon4py/blob/main/model/atmosphere/diffusion/src/icon4py/model/atmosphere/diffusion/stencils/calculate_nabla4.py#L23) and its combination with the [mo_intp_rbf_rbf_vec_interpol_vertex kernel](https://github.com/C2SM/icon4py/blob/main/model/common/src/icon4py/model/common/interpolation/stencils/mo_intp_rbf_rbf_vec_interpol_vertex.py#L19) and [an artificial interpolation kernel with a `c2v` access](https://github.com/GridTools/icon_structured_benchmark/blob/main/tests/test_verts2cells.py#L36).
 
 ## Benchmark description
 
@@ -112,8 +112,8 @@ Those are defined in the `requirements.txt` file in the root directory of the re
 By installing the requirements in the following way, `icon4py` from the submodules is also installed.
 
 ```
-python -m venv venv_isb
-source venv_isb/bin/activate
+python -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 

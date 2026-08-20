@@ -13,6 +13,10 @@
 # python -m venv .venv
 # pip install -r requirements.txt
 
+# Download necessary torus grids using the links below:
+# torus_100000_100000_256.nc: https://polybox.ethz.ch/index.php/s/BnGUygPcApKycAv
+# torus_100000_100000_1024.nc: https://polybox.ethz.ch/index.php/s/JDYRnEc9Ww64Btr
+
 source .venv/bin/activate
 
 BUILD_DIR="build_all_gpu"
