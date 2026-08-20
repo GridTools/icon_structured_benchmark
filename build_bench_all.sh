@@ -60,7 +60,7 @@ for IMPLEMENTATION in ${IMPLEMENTATIONS}; do
     echo "###### Running nabla4 interpolate verts2cells benchmarks on grid: ${BENCHMARK_GRID} ######"
     mkdir -p results/nabla4_interpolate_verts2cells_output_${GIT_COMMIT}_gpu_int_${IMPLEMENTATION}
     python run_filtered_torus_grid_int_nabla4_interpolate_c2v.py ${BENCHMARK_GRID} --backend "${IMPLEMENTATION}" --dry-run --output results/nabla4_interpolate_verts2cells_output_${GIT_COMMIT}_gpu_int_${IMPLEMENTATION}/niv_${TORUS_FILENAME}_k80_${GIT_COMMIT}_gpu_int
-    python analysis_halo_gpu_nabla4_interpolate_c2v.py
+    python analysis_halo_gpu_nabla4_interpolate_verts2cells.py
     echo "###### Running nabla4 interpolate verts2cells benchmarks done ######"
 
     echo "###### Running ncu profiling for nabla4 on grid: ${BENCHMARK_GRID} ######"

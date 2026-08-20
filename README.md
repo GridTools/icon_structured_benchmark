@@ -91,6 +91,8 @@ The memory layout and the backends are divided into `cpu_ifirst`, `cpu_kfirst` a
 
 On top of these handwritten implementation there is a `gtfn` implementation as well. This one was generated automatically by `gt4py` for the `nabla4` kernel and was slightly adapted for the purposes of the benchmark framework.
 
+There is also a `cuTile` implementation of the standalone `nabla4` kernel (`src/nabla4_cutile.cu` for `structured_torus` and `src/nabla4_unstructured_cutile.cu` for `unstructured`), written using NVIDIA's tile-based CUDA programming model. It is run automatically alongside the `gridtools`-based `gpu_naive`/`gpu_kloop` implementations whenever `run_filtered_torus_grid_int_nabla4.py` is executed with `--backend all_gpu`, `gpu_naive` or `gpu_kloop`. It currently only targets the standalone `nabla4` kernel and is not yet combined with `interpolate` or the `c2v` kernel. Building it requires `nvcc` > 13.3 (see `IS_GPU` below and `build_bench_all.sh`).
+
 **For more information regarding the currently implemented experiments have a look at the [slides](https://github.com/GridTools/icon_structured_benchmark/blob/main/icon-structured-slides.pdf).**
 
 ## Installation
@@ -149,11 +151,13 @@ See `build_bench_all.sh` on how to run and plot everything
 ### Running benchmark
 
 The benchmark drivers are written in `python`.
-There are 3 different scripts for executing the different kernels implemented that can be found in the root directory of the repository.
+There are 5 different scripts for executing the different kernels implemented that can be found in the root directory of the repository.
 
-- `run_filtered_torus_grid_int_nabla4.py` is for executing all the standalone `nabla4` implementations
-- `run_filtered_torus_grid_int_inteprolate.py` is for executing all the standalone `interpolate` implementations
-- `run_filtered_torus_grid_int_nabla4_interpolate.py` is for executing all the combinations of `nabla4`, `nabla4` and `interpolate` kernels. **This is the main script for benchmarking**
+- `run_filtered_torus_grid_int_nabla4.py` is for executing all the standalone `nabla4` implementations (including the `gtfn` and `cuTile` backends)
+- `run_filtered_torus_grid_int_interpolate.py` is for executing all the standalone `interpolate` implementations
+- `run_filtered_torus_grid_int_verts2cells.py` is for executing all the standalone `c2v`/`verts2cells` implementations
+- `run_filtered_torus_grid_int_nabla4_interpolate.py` is for executing all the combinations of `nabla4` and `interpolate` kernels
+- `run_filtered_torus_grid_int_nabla4_interpolate_c2v.py` is for executing all the combinations of `nabla4`, `interpolate` and the `c2v` kernel
 
 ```
 python3.11 run_filtered_torus_grid_int_nabla4_interpolate.py --help
@@ -191,13 +195,16 @@ options:
   --vertical            Use nabla4_vertical kernel instead of nabla4 (disabled by default)
 ```
 
-For examples on how to execute the python script to gather results for multiple configurations have a look at these scripts: [run_nabla4_interpolate.sh](https://github.com/GridTools/icon_structured_benchmark/blob/main/run_nabla4_interpolate.sh) and [run_nabla4_vertical_interpolate.sh](https://github.com/GridTools/icon_structured_benchmark/blob/main/run_nabla4_vertical_interpolate.sh). These scripts will gather the runtimes for all the experiments executed in `JSON` form in a certain folder set inside them.
+For an example of how to run all backends and combinations end-to-end (build, sanity checks, benchmark and `ncu` profiling) have a look at [build_bench_all.sh](https://github.com/GridTools/icon_structured_benchmark/blob/main/build_bench_all.sh), which is a SLURM batch script gathering the runtimes for all the experiments executed in `JSON` form under `results/`.
 
 ### Plotting torus results
 
 After generating the runtime data you can create plots with the median runtimes using the following scripts found on the root directory of this repository:
 
+- `analysis_halo_gpu_nabla4.py` for the standalone `nabla4` kernel (including `gtfn` and `cuTile`)
+- `analysis_halo_gpu_interpolate.py` for the standalone `interpolate` kernel
 - `analysis_halo_gpu_nabla4_interpolate.py` for the combinations of `nabla4` and `interpolate` kernels
+- `analysis_halo_gpu_nabla4_interpolate_verts2cells.py` for the combinations of `nabla4`, `interpolate` and the `c2v` kernel
 - `analysis_halo_gpu_nabla4_vertical_interpolate.py` for the combinations of `nabla4-vertical` and `interpolate` kernels
 
 The run scripts and the analysis scripts use the same naming conventions to make it easy to plot the data. By setting the necessary variables inside the scripts it's possible to easily generate and plot the data.
