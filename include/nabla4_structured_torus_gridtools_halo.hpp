@@ -58,7 +58,7 @@ constexpr block_dims get_block_dims_structured_naive<std::uint32_t>() {
 
 template <>
 constexpr block_dims get_block_dims_structured_naive<int>() {
-    return {32, 2, 4, 672};
+    return {64, 2, 1, 336};
 };
 
 constexpr block_dims block_dims_structured_naive = get_block_dims_structured_naive<index_type>();
