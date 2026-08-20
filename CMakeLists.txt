@@ -99,7 +99,7 @@ if(IS_GPU)
   target_compile_definitions(nabla4_gtfn PRIVATE IS_GPU)
   target_link_libraries(nabla4_gtfn PUBLIC GridTools::storage_gpu)
   set_source_files_properties(python/nabla4_gtfn_bindings.cpp PROPERTIES LANGUAGE CUDA)
-  add_library(nabla4_cutile STATIC src/nabla4_cutile.cu)
+  add_library(nabla4_cutile STATIC src/nabla4_cutile.cu src/nabla4_unstructured_cutile.cu)
   target_include_directories(nabla4_cutile PRIVATE include GridTools)
   target_link_libraries(nabla4_cutile PUBLIC GridTools::storage_gpu)
   target_compile_options(nabla4_cutile PRIVATE
